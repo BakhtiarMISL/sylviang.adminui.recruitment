@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest, HttpErrorResponse, HttpResponse } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { Observable, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { ToastService } from '../services/misc/toast.service';
+import { AuthService } from '../services/auth/auth.service';
 import { DISABLE_TOAST, SHOW_SUCCESS_TOAST } from '../constants/http-context';
 
 interface ToastEntry {
@@ -18,7 +20,11 @@ const TOAST_DEBOUNCE_MS = 5000;
 export class ErrorHandlerInterceptor implements HttpInterceptor {
   private _recentToasts = new Map<string, ToastEntry>();
 
-  constructor(private toastService: ToastService) {}
+  constructor(
+    private toastService: ToastService,
+    private authService: AuthService,
+    private router: Router,
+  ) {}
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     return next.handle(request).pipe(
@@ -57,6 +63,10 @@ export class ErrorHandlerInterceptor implements HttpInterceptor {
     const disableToast = request.context.get(DISABLE_TOAST);
 
     if (error.status === 401 || error.status === 403) {
+      if (error.status === 401 && !this._isAuthLoginRequest(request)) {
+        this.authService.logout();
+        this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
+      }
       return throwError(() => error);
     }
 
@@ -89,6 +99,10 @@ export class ErrorHandlerInterceptor implements HttpInterceptor {
       503: { summary: 'Service Unavailable', detail: 'The server is under maintenance. Please try again later.' },
     };
     return statusMessages[statusCode] || null;
+  }
+
+  private _isAuthLoginRequest(request: HttpRequest<any>): boolean {
+    return request.url.includes('/auth/login');
   }
 
   private _isApiResponseBody(body: unknown): body is { hasError: boolean; decentMessage: string } {
