@@ -1,3 +1,5 @@
+import { UserRoleEnum } from '@core/enums/user-role.enum';
+
 export interface IMenuItem {
   key?: string;
   title: string;
@@ -9,4 +11,5 @@ export interface IMenuItem {
   expanded?: boolean;
   order?: number;
   divider?: boolean;
+  roles?: UserRoleEnum[];
 }

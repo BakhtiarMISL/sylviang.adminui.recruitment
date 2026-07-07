@@ -7,3 +7,4 @@ export const fallbackEnabled = true;
 
 export const BASE_URL_Attendance = `${Base_URL}/attendance`;
 export const BASE_URL_Payroll = `${Base_URL}/payroll`;
+export const BASE_URL_Recruitment = `${Base_URL}/recruitment`;

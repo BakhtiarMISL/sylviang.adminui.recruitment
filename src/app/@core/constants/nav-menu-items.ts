@@ -1,4 +1,5 @@
 import { IMenuItem } from '../interfaces/menuResponse.interface';
+import { UserRoleEnum } from '../enums/user-role.enum';
 
 export const webSidebarMenuItems: IMenuItem[] = [
   {
@@ -6,11 +7,13 @@ export const webSidebarMenuItems: IMenuItem[] = [
     title: 'Dashboard',
     active: false,
     icon: 'fa-solid fa-chart-line',
+    roles: [UserRoleEnum.Admin, UserRoleEnum.HR],
   },
   {
     title: 'Attendance',
     active: false,
     icon: 'fa-solid fa-clock',
+    roles: [UserRoleEnum.Admin, UserRoleEnum.HR],
     subItems: [
       {
         href: '/attendance/shift-list',
@@ -24,6 +27,7 @@ export const webSidebarMenuItems: IMenuItem[] = [
     title: 'Payroll',
     active: false,
     icon: 'fa-solid fa-money-bill-wave',
+    roles: [UserRoleEnum.Admin, UserRoleEnum.HR],
     subItems: [
       {
         href: '/payroll/payroll-head-list',
