@@ -37,4 +37,18 @@ export const webSidebarMenuItems: IMenuItem[] = [
       },
     ],
   },
+  {
+    title: 'Recruitment',
+    active: false,
+    icon: 'fa-solid fa-briefcase',
+    roles: [UserRoleEnum.Admin, UserRoleEnum.HR],
+    subItems: [
+      {
+        href: '/job-vacancy/job-vacancy-list',
+        title: 'Job Vacancies',
+        active: false,
+        icon: 'fa-solid fa-list',
+      },
+    ],
+  },
 ];
