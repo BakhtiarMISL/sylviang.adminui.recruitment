@@ -55,6 +55,7 @@ describe('JobVacancyService', () => {
       numberOfPositions: 1,
       employmentType: EmploymentTypeEnum.FullTime,
       circularType: CircularTypeEnum.Both,
+      hiringPipelineId: 1,
     };
 
     service.addJobVacancy(request).subscribe();
@@ -74,6 +75,7 @@ describe('JobVacancyService', () => {
       employmentType: EmploymentTypeEnum.FullTime,
       circularType: CircularTypeEnum.Both,
       status: JobStatusEnum.Open,
+      hiringPipelineId: 1,
     };
 
     service.updateJobVacancy(5, request).subscribe();

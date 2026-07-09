@@ -4,9 +4,11 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { AutoCompleteCompleteEvent } from 'primeng/autocomplete';
 import { IJobVacancyAttachmentResponse } from '@app/@core/interfaces/recruitment-management/job-vacancy-attachment.interface';
 import { IJobVacancyCreateRequest, IJobVacancyResponse, IJobVacancyUpdateRequest } from '@app/@core/interfaces/recruitment-management/job-vacancy.interface';
+import { IHiringPipelineLookupResponse } from '@app/@core/interfaces/recruitment-management/hiring-pipeline.interface';
 import { BreadcrumbService } from '@app/@core/services';
 import { JobVacancyAttachmentService } from '@app/@core/services/recruitment/job-vacancy/job-vacancy-attachment.service';
 import { JobVacancyService } from '@app/@core/services/recruitment/job-vacancy/job-vacancy.service';
+import { HiringPipelineService } from '@app/@core/services/recruitment/hiring-pipeline/hiring-pipeline.service';
 import { JobStatusEnum } from '@app/@core/enums/recruitment.enum';
 import { DateTimeUtility } from '@app/@core/utils/date-time.utility';
 import { Base_URL } from '@env/environment';
@@ -23,6 +25,7 @@ export class ManageJobVacancyComponent implements OnInit {
     private fb: FormBuilder,
     private jobVacancyService: JobVacancyService,
     private jobVacancyAttachmentService: JobVacancyAttachmentService,
+    private hiringPipelineService: HiringPipelineService,
     private route: ActivatedRoute,
     private breadcrumbService: BreadcrumbService,
     private router: Router,
@@ -40,6 +43,7 @@ export class ManageJobVacancyComponent implements OnInit {
   jobStatusOptions = JobStatusOptions;
   currencyOptions = CurrencyOptions;
   currencySuggestions: string[] = [];
+  hiringPipelineOptions: IHiringPipelineLookupResponse[] = [];
 
   // Attachments
   attachments: IJobVacancyAttachmentResponse[] = [];
@@ -61,6 +65,7 @@ export class ManageJobVacancyComponent implements OnInit {
 
   ngOnInit(): void {
     this.initForm();
+    this.loadHiringPipelineOptions();
 
     this.route.paramMap.subscribe((params) => {
       const idParam = params.get('id');
@@ -75,6 +80,17 @@ export class ManageJobVacancyComponent implements OnInit {
         this.attachments = [];
       }
       this.setBreadcrumbs();
+    });
+  }
+
+  private loadHiringPipelineOptions(): void {
+    this.hiringPipelineService.getActiveLookup().subscribe({
+      next: (response) => {
+        this.hiringPipelineOptions = !response.hasError && response.content ? response.content : [];
+      },
+      error: () => {
+        this.hiringPipelineOptions = [];
+      },
     });
   }
 
@@ -126,6 +142,7 @@ export class ManageJobVacancyComponent implements OnInit {
       siteId: [null, [Validators.required]],
       departmentId: [null],
       designationId: [null],
+      hiringPipelineId: [null, [Validators.required]],
       title: [null, [Validators.required, Validators.maxLength(200), this.noWhitespaceOnly.bind(this)]],
       description: [null],
       requirements: [null],
@@ -260,6 +277,7 @@ export class ManageJobVacancyComponent implements OnInit {
       siteId: 'Site',
       departmentId: 'Department',
       designationId: 'Designation',
+      hiringPipelineId: 'Hiring Pipeline',
       title: 'Title',
       description: 'Description',
       requirements: 'Requirements',

@@ -26,6 +26,10 @@ const routes: Routes = [
       path: 'internal-jobs',
       loadChildren: () => import('./internal-job-board/internal-job-board.module').then((m) => m.InternalJobBoardModule),
     },
+    {
+      path: 'hiring-pipeline',
+      loadChildren: () => import('./hiring-pipeline-management/hiring-pipeline-management.module').then((m) => m.HiringPipelineManagementModule),
+    },
   ]),
 ];
 

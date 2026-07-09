@@ -28,6 +28,28 @@
       </p-floatlabel>
     </div>
 
+    <!-- Hiring Pipeline -->
+    <div>
+      <p-floatlabel variant="in">
+        <p-select
+          inputId="hiringPipelineId"
+          [options]="hiringPipelineOptions"
+          [appendTo]="'body'"
+          [autoDisplayFirst]="false"
+          optionLabel="name"
+          optionValue="hiringPipelineId"
+          formControlName="hiringPipelineId"
+          class="w-full"
+          [class.ng-invalid]="hasError('hiringPipelineId')"
+          [class.ng-dirty]="hasError('hiringPipelineId')"
+          (onBlur)="f['hiringPipelineId'].markAsTouched()"
+          (onChange)="f['hiringPipelineId'].markAsTouched()"
+        ></p-select>
+        <label for="hiringPipelineId">Hiring Pipeline *</label>
+      </p-floatlabel>
+      <div *ngIf="hasError('hiringPipelineId')" class="invalid">{{ getErrorMessage('hiringPipelineId') }}</div>
+    </div>
+
     <!-- Title -->
     <div>
       <p-floatlabel variant="in">

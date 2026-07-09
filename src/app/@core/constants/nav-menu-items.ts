@@ -49,6 +49,12 @@ export const webSidebarMenuItems: IMenuItem[] = [
         active: false,
         icon: 'fa-solid fa-list',
       },
+      {
+        href: '/hiring-pipeline/hiring-pipeline-list',
+        title: 'Hiring Pipelines',
+        active: false,
+        icon: 'fa-solid fa-diagram-project',
+      },
     ],
   },
   {
