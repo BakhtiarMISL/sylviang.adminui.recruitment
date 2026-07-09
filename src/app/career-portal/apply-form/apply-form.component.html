@@ -1,0 +1,52 @@
+<div *ngIf="submitted" class="rounded-md bg-green-50 p-4 text-green-800">
+  <p class="font-medium">Application submitted successfully!</p>
+  <p class="mt-1 text-sm" *ngIf="submitResult">Reference: application #{{ submitResult.jobApplicationId }}</p>
+  <p class="mt-2 text-sm text-green-700">We have received your application. Please keep your reference number for your records.</p>
+</div>
+
+<form *ngIf="!submitted" [formGroup]="applyForm" (ngSubmit)="onSubmit()" class="space-y-4">
+  <div>
+    <p-floatlabel variant="in">
+      <input pInputText inputId="candidateName" formControlName="candidateName" class="w-full" [class.ng-invalid]="hasError('candidateName')" [class.ng-dirty]="hasError('candidateName')" (blur)="f['candidateName'].markAsTouched()" />
+      <label for="candidateName">Full Name *</label>
+    </p-floatlabel>
+    <div *ngIf="hasError('candidateName')" class="invalid">{{ getErrorMessage('candidateName') }}</div>
+  </div>
+
+  <div>
+    <p-floatlabel variant="in">
+      <input pInputText inputId="candidateEmail" formControlName="candidateEmail" class="w-full" [class.ng-invalid]="hasError('candidateEmail')" [class.ng-dirty]="hasError('candidateEmail')" (blur)="f['candidateEmail'].markAsTouched()" />
+      <label for="candidateEmail">Email *</label>
+    </p-floatlabel>
+    <div *ngIf="hasError('candidateEmail')" class="invalid">{{ getErrorMessage('candidateEmail') }}</div>
+  </div>
+
+  <div>
+    <p-floatlabel variant="in">
+      <input pInputText inputId="candidatePhone" formControlName="candidatePhone" class="w-full" />
+      <label for="candidatePhone">Phone</label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel variant="in">
+      <textarea pInputText inputId="coverLetter" formControlName="coverLetter" class="w-full" rows="4"></textarea>
+      <label for="coverLetter">Cover Letter</label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <label for="resume" class="mb-1 block text-sm text-gray-700">Resume (PDF, DOC, DOCX, max 10MB) *</label>
+    <input type="file" id="resume" accept=".pdf,.doc,.docx" (change)="onFileSelected($event)" />
+    <div *ngIf="fileError" class="invalid">{{ fileError }}</div>
+  </div>
+
+  <div *ngIf="submitError" class="invalid">{{ submitError }}</div>
+
+  <div>
+    <button pButton type="submit" [disabled]="submitting">
+      <i class="fa fa-paper-plane"></i>
+      <span>{{ submitting ? 'Submitting...' : 'Submit Application' }}</span>
+    </button>
+  </div>
+</form>

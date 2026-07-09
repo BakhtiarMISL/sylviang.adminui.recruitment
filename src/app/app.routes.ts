@@ -7,6 +7,10 @@ export const routes: Routes = [
     loadChildren: () => import('./auth/auth.module').then((m) => m.AuthModule),
   },
   {
+    path: 'careers',
+    loadChildren: () => import('./career-portal/career-portal.module').then((m) => m.CareerPortalModule),
+  },
+  {
     path: '',
     canActivate: [AuthGuard],
     loadChildren: () => import('./pages/pages.module').then((m) => m.PagesModule),

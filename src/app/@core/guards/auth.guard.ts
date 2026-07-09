@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { CanActivate, Router, UrlTree } from '@angular/router';
+import { CanActivate, Router, RouterStateSnapshot, UrlTree } from '@angular/router';
 import { AuthService } from '@core/services/auth/auth.service';
 
 @Injectable({
@@ -11,11 +11,24 @@ export class AuthGuard implements CanActivate {
     private router: Router,
   ) {}
 
-  canActivate(): boolean | UrlTree {
-    if (this.authService.isAuthenticated()) {
+  canActivate(_route?: unknown, state?: RouterStateSnapshot): boolean | UrlTree {
+    const authed = this.authService.isAuthenticated();
+    console.log('[DEBUG] AuthGuard.canActivate, isAuthenticated =', authed, 'state?.url =', state?.url, 'router.url =', this.router.url, 'token =', this.authService.getToken());
+
+    if (authed) {
       return true;
     }
 
-    return this.router.createUrlTree(['/login'], { queryParams: { returnUrl: this.router.url } });
+    const attemptedUrl = state?.url ?? this.router.url;
+
+    // A bare root visit (no login, no deep link) sends anonymous visitors to the
+    // public career portal instead of forcing a login form in their face.
+    if (attemptedUrl === '/') {
+      console.log('[DEBUG] AuthGuard redirecting to /careers');
+      return this.router.createUrlTree(['/careers']);
+    }
+
+    console.log('[DEBUG] AuthGuard redirecting to /login, attemptedUrl =', attemptedUrl);
+    return this.router.createUrlTree(['/login'], { queryParams: { returnUrl: attemptedUrl } });
   }
 }

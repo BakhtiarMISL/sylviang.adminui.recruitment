@@ -27,14 +27,24 @@ describe('AuthGuard', () => {
     expect(guard.canActivate()).toBeTrue();
   });
 
-  it('should redirect to /login with a returnUrl when not authenticated', () => {
+  it('should redirect to /login with a returnUrl when not authenticated on a deep link', () => {
     authServiceSpy.isAuthenticated.and.returnValue(false);
     spyOnProperty(router, 'url', 'get').and.returnValue('/dashboard');
 
-    const result = guard.canActivate() as UrlTree;
+    const result = guard.canActivate(null, { url: '/dashboard' } as any) as UrlTree;
 
     expect(result instanceof UrlTree).toBeTrue();
     expect(result.toString()).toContain('/login');
     expect(result.toString()).toContain('returnUrl');
+  });
+
+  it('should redirect to /careers (not /login) when not authenticated on the bare root URL', () => {
+    authServiceSpy.isAuthenticated.and.returnValue(false);
+
+    const result = guard.canActivate(null, { url: '/' } as any) as UrlTree;
+
+    expect(result instanceof UrlTree).toBeTrue();
+    expect(result.toString()).toContain('/careers');
+    expect(result.toString()).not.toContain('/login');
   });
 });

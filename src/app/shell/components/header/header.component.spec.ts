@@ -40,10 +40,10 @@ describe('HeaderComponent', () => {
     expect(component.displayName).toBe('User');
   });
 
-  it('logout() should clear the session and navigate to /login', () => {
+  it('logout() should clear the session and navigate to / (root, where AuthGuard sends anonymous visitors to /careers)', () => {
     component.logout();
 
     expect(authServiceSpy.logout).toHaveBeenCalled();
-    expect(routerSpy.navigateByUrl).toHaveBeenCalledWith('/login');
+    expect(routerSpy.navigateByUrl).toHaveBeenCalledWith('/');
   });
 });

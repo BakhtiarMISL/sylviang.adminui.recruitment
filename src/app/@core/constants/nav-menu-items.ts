@@ -51,4 +51,10 @@ export const webSidebarMenuItems: IMenuItem[] = [
       },
     ],
   },
+  {
+    href: '/internal-jobs/job-list',
+    title: 'Internal Job Board',
+    active: false,
+    icon: 'fa-solid fa-building',
+  },
 ];

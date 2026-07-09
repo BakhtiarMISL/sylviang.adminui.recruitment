@@ -16,7 +16,7 @@ export class MenuService {
   public user$ = new BehaviorSubject<any>(null).asObservable();
 
   constructor(private readonly _authService: AuthService) {
-    this.loadFallbackMenu();
+    this._authService.user$.subscribe(() => this.loadFallbackMenu());
   }
 
   private loadFallbackMenu(): void {
@@ -43,6 +43,7 @@ export class MenuService {
   }
 
   refreshMenu(): Observable<IMenuItem[]> {
+    this.loadFallbackMenu();
     return of(this.menuSubject.value);
   }
 

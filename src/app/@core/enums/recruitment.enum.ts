@@ -28,3 +28,8 @@ export enum EducationLevelEnum {
   Master = 'Master',
   Doctorate = 'Doctorate',
 }
+
+export enum ApplicationSourceEnum {
+  External = 'External',
+  Internal = 'Internal',
+}
