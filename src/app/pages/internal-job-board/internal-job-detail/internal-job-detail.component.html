@@ -1,0 +1,70 @@
+<section class="page-container">
+  <button pButton severity="secondary" type="button" [routerLink]="['/internal-jobs/job-list']" class="mb-4">
+    <i class="fa fa-arrow-left"></i>
+    <span>Back to Job Board</span>
+  </button>
+
+  <div *ngIf="loading" class="space-y-3">
+    <p-skeleton height="2rem" width="60%"></p-skeleton>
+    <p-skeleton height="10rem"></p-skeleton>
+  </div>
+
+  <div *ngIf="!loading && notFound" class="not-found">
+    <div>
+      <i class="fa fa-magnifying-glass-minus"></i>
+      <p>This job posting is not available.</p>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && jobPosting" class="space-y-6">
+    <div class="form-container">
+      <div class="sm:col-span-2">
+        <h3 class="form-section-header">{{ jobPosting.title }}</h3>
+        <p class="text-sm text-neutral">{{ jobPosting.jobPostingCode }}</p>
+      </div>
+
+      <div class="sm:col-span-2 flex flex-wrap gap-x-6 gap-y-1 text-sm text-neutral">
+        <span *ngIf="jobPosting.location"><i class="fa fa-location-dot mr-1"></i>{{ jobPosting.location }}</span>
+        <span><i class="fa fa-briefcase mr-1"></i>{{ formatEnumLabel(jobPosting.employmentType) }}</span>
+        <span *ngIf="jobPosting.closingDate"><i class="fa fa-calendar mr-1"></i>Closes {{ jobPosting.closingDate | date: 'dd-MMM-yyyy' }}</span>
+      </div>
+
+      <div class="sm:col-span-2" *ngIf="jobPosting.description">
+        <h4 class="font-medium">Description</h4>
+        <p class="whitespace-pre-line text-sm">{{ jobPosting.description }}</p>
+      </div>
+
+      <div class="sm:col-span-2" *ngIf="jobPosting.requirements">
+        <h4 class="font-medium">Requirements</h4>
+        <p class="whitespace-pre-line text-sm">{{ jobPosting.requirements }}</p>
+      </div>
+
+      <!-- Eligibility Summary -->
+      <div class="sm:col-span-2">
+        <h4 class="font-medium">Eligibility</h4>
+        <ul *ngIf="hasEligibilityInfo" class="list-inside list-disc space-y-1 text-sm">
+          <li *ngIf="jobPosting.minAge != null || jobPosting.maxAge != null">
+            Age:
+            <span *ngIf="jobPosting.minAge != null && jobPosting.maxAge != null">{{ jobPosting.minAge }} - {{ jobPosting.maxAge }} years</span>
+            <span *ngIf="jobPosting.minAge != null && jobPosting.maxAge == null">{{ jobPosting.minAge }}+ years</span>
+            <span *ngIf="jobPosting.minAge == null && jobPosting.maxAge != null">Up to {{ jobPosting.maxAge }} years</span>
+          </li>
+          <li *ngIf="jobPosting.minEducationLevel">Minimum Education: {{ formatEnumLabel(jobPosting.minEducationLevel) }}</li>
+          <li *ngIf="jobPosting.minExperienceYears != null">Minimum Experience: {{ jobPosting.minExperienceYears }} year{{ jobPosting.minExperienceYears === 1 ? '' : 's' }}</li>
+          <li *ngIf="jobPosting.requiredDistrict">Required District: {{ jobPosting.requiredDistrict }}</li>
+        </ul>
+        <p *ngIf="!hasEligibilityInfo" class="text-sm text-neutral">No specific eligibility requirements.</p>
+      </div>
+
+      <!-- Fee info -->
+      <div class="sm:col-span-2 text-sm" *ngIf="jobPosting.applicationFeeAmount">An application fee of {{ jobPosting.applicationFeeAmount }} {{ jobPosting.applicationFeeCurrency }} applies.</div>
+    </div>
+
+    <div class="form-container">
+      <div class="sm:col-span-2">
+        <h3 class="form-section-header">Apply for this position</h3>
+        <app-internal-apply-form [jobPostingId]="jobPosting.jobPostingId"></app-internal-apply-form>
+      </div>
+    </div>
+  </div>
+</section>
