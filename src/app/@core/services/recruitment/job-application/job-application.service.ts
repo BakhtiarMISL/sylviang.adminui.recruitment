@@ -10,6 +10,7 @@ import {
   IJobApplicationListItem,
   IJobApplicationStatusUpdateRequest,
 } from '@core/interfaces/recruitment-management/job-application.interface';
+import { IJobApplicationSubmitResponse } from '@core/interfaces/recruitment-management/career-portal.interface';
 import { BASE_URL_Recruitment } from '@env/environment';
 
 @Injectable({
@@ -38,5 +39,24 @@ export class JobApplicationService {
 
   bulkUpdateStatus(request: IJobApplicationBulkStatusUpdateRequest) {
     return this.httpClient.patch<ApiResponse<IJobApplicationBulkStatusUpdateResponse>>(`${this.API_URL}/bulk-status`, request);
+  }
+
+  /** HR applies on a candidate's behalf (US-034) - multipart, same shape as the career-portal apply flow. */
+  applyOnBehalf(request: {
+    jobPostingId: number;
+    candidateName: string;
+    candidateEmail: string;
+    candidatePhone?: string;
+    coverLetter?: string;
+    resume: File;
+  }) {
+    const formData = new FormData();
+    formData.append('jobPostingId', String(request.jobPostingId));
+    formData.append('candidateName', request.candidateName);
+    formData.append('candidateEmail', request.candidateEmail);
+    if (request.candidatePhone) formData.append('candidatePhone', request.candidatePhone);
+    if (request.coverLetter) formData.append('coverLetter', request.coverLetter);
+    formData.append('resume', request.resume, request.resume.name);
+    return this.httpClient.post<ApiResponse<IJobApplicationSubmitResponse>>(`${this.API_URL}/apply-on-behalf`, formData);
   }
 }

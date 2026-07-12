@@ -32,6 +32,7 @@ export enum EducationLevelEnum {
 export enum ApplicationSourceEnum {
   External = 'External',
   Internal = 'Internal',
+  Admin = 'Admin',
 }
 
 export enum ApplicationStatusEnum {

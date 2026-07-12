@@ -4,6 +4,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { SharedModule } from '@app/shared/shared.module';
 import { TranslateModule } from '@ngx-translate/core';
+import { AutoCompleteModule } from 'primeng/autocomplete';
 import { ButtonModule } from 'primeng/button';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DatePickerModule } from 'primeng/datepicker';
@@ -17,9 +18,10 @@ import { TooltipModule } from 'primeng/tooltip';
 import { ApplicationTrackingRoutingModule } from './application-tracking-routing.module';
 import { AtsDashboardComponent } from './ats-dashboard/ats-dashboard.component';
 import { ApplicationDetailComponent } from './application-detail/application-detail.component';
+import { ApplyOnBehalfComponent } from './apply-on-behalf/apply-on-behalf.component';
 
 @NgModule({
-  declarations: [AtsDashboardComponent, ApplicationDetailComponent],
+  declarations: [AtsDashboardComponent, ApplicationDetailComponent, ApplyOnBehalfComponent],
   imports: [
     ReactiveFormsModule,
     FormsModule,
@@ -28,6 +30,7 @@ import { ApplicationDetailComponent } from './application-detail/application-det
     ApplicationTrackingRoutingModule,
     RouterModule,
     TranslateModule,
+    AutoCompleteModule,
     ConfirmDialogModule,
     TableModule,
     InputTextModule,
