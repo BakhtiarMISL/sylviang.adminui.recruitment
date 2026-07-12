@@ -1,0 +1,216 @@
+<section class="page-container">
+  <div class="flex justify-between items-center">
+    <div></div>
+    <button [routerLink]="['/applications/apply-on-behalf']" pButton>
+      <i class="fa fa-user-plus"></i>
+      <span>Apply on Behalf</span>
+    </button>
+  </div>
+
+  <div class="filter-bar">
+    <p-floatlabel variant="in">
+      <p-select
+        inputId="filterJobPostingId"
+        [options]="jobPostings"
+        [(ngModel)]="filterJobPostingId"
+        optionLabel="title"
+        optionValue="jobPostingId"
+        [appendTo]="'body'"
+        [autoDisplayFirst]="false"
+        [showClear]="true"
+        class="w-full"
+      ></p-select>
+      <label for="filterJobPostingId">Job Posting</label>
+    </p-floatlabel>
+
+    <p-floatlabel variant="in">
+      <p-select
+        inputId="filterStatus"
+        [options]="statusOptions"
+        [(ngModel)]="filterStatus"
+        optionLabel="label"
+        optionValue="value"
+        [appendTo]="'body'"
+        [autoDisplayFirst]="false"
+        [showClear]="true"
+        class="w-full"
+      ></p-select>
+      <label for="filterStatus">Status</label>
+    </p-floatlabel>
+
+    <p-floatlabel variant="in">
+      <p-select
+        inputId="filterSource"
+        [options]="sourceOptions"
+        [(ngModel)]="filterSource"
+        optionLabel="label"
+        optionValue="value"
+        [appendTo]="'body'"
+        [autoDisplayFirst]="false"
+        [showClear]="true"
+        class="w-full"
+      ></p-select>
+      <label for="filterSource">Source / Candidate Type</label>
+    </p-floatlabel>
+
+    <p-floatlabel variant="in">
+      <p-datepicker inputId="filterDateFrom" [(ngModel)]="filterDateFrom" dateFormat="dd-M-yy" [showIcon]="true"></p-datepicker>
+      <label for="filterDateFrom">Applied From</label>
+    </p-floatlabel>
+
+    <p-floatlabel variant="in">
+      <p-datepicker inputId="filterDateTo" [(ngModel)]="filterDateTo" dateFormat="dd-M-yy" [showIcon]="true"></p-datepicker>
+      <label for="filterDateTo">Applied To</label>
+    </p-floatlabel>
+
+    <button pButton (click)="applyFilters()">
+      <i class="fa fa-filter"></i>
+      <span>Apply Filters</span>
+    </button>
+
+    <button severity="secondary" pButton (click)="resetFilters()">
+      <i class="fa fa-times"></i>
+      <span>Reset</span>
+    </button>
+  </div>
+
+  <div class="bulk-action-bar" *ngIf="selectedApplications.length > 0">
+    <p-floatlabel variant="in">
+      <p-select
+        inputId="bulkToStatus"
+        [options]="bulkStatusOptions"
+        [(ngModel)]="bulkToStatus"
+        (ngModelChange)="onBulkStatusChange($event)"
+        optionLabel="label"
+        optionValue="value"
+        [appendTo]="'body'"
+        [autoDisplayFirst]="false"
+        class="w-full"
+      ></p-select>
+      <label for="bulkToStatus">Move Selected To</label>
+    </p-floatlabel>
+
+    <p-floatlabel variant="in" *ngIf="bulkRequiresReason()">
+      <p-select
+        inputId="bulkReasonId"
+        [options]="bulkReasonOptions"
+        [(ngModel)]="bulkReasonId"
+        optionLabel="label"
+        optionValue="applicationStatusReasonId"
+        [appendTo]="'body'"
+        [autoDisplayFirst]="false"
+        class="w-full"
+      ></p-select>
+      <label for="bulkReasonId">Reason *</label>
+    </p-floatlabel>
+
+    <p-floatlabel variant="in">
+      <input type="text" pInputText id="bulkNote" class="w-full" [(ngModel)]="bulkNote" name="bulkNote" />
+      <label for="bulkNote">Note (optional)</label>
+    </p-floatlabel>
+
+    <button pButton [disabled]="!canApplyBulk() || bulkApplying" (click)="applyBulkStatus($event)">
+      <i class="fa fa-check"></i>
+      <span>Apply to {{ selectedApplications.length }} Selected</span>
+    </button>
+  </div>
+
+  <div class="table-container">
+    <div class="table-title-container">
+      <h3 class="table-title">
+        ATS Dashboard
+        <span class="table-title-info" *ngIf="totalRecords > 0">
+          ({{ totalRecords }} total{{ selectedApplications.length > 0 ? ', ' + selectedApplications.length + ' selected' : '' }})
+        </span>
+      </h3>
+    </div>
+
+    <div class="transition-all duration-500 ease-in-out">
+      <p-table
+        #dt
+        [value]="loading ? skeletonItems : applications"
+        [(selection)]="selectedApplications"
+        (selectionChange)="onSelectionChange($event)"
+        dataKey="jobApplicationId"
+        (onSort)="onSort($event)"
+        [paginator]="true"
+        [rows]="rows"
+        [first]="(currentPage - 1) * rows"
+        [rowsPerPageOptions]="UI_CONFIG.pageSizeOptions"
+        [totalRecords]="totalRecords"
+        (onPage)="onPageChange($event)"
+        [lazy]="true"
+        [loading]="false"
+        scrollHeight="flex"
+        [responsiveLayout]="'scroll'"
+        selectionMode="multiple"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} applications"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="width: 3rem"><p-tableHeaderCheckbox></p-tableHeaderCheckbox></th>
+            @for (col of columns; track col.field) {
+              <th [pSortableColumn]="col.sortable !== false ? col.field : null" [style.width]="col.width" class="group">
+                <div class="flex items-center gap-2">
+                  {{ col.label }}
+                  @if (col.sortable !== false) {
+                    <span
+                      class="transition-opacity duration-150"
+                      [ngClass]="{
+                        'opacity-100': sortedColumn === col.field,
+                        'opacity-0 group-hover:opacity-100': sortedColumn !== col.field,
+                      }"
+                    >
+                      <p-sortIcon [field]="col.field"></p-sortIcon>
+                    </span>
+                  }
+                </div>
+              </th>
+            }
+            <th style="width: 6rem">Actions</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-application>
+          @if (loading) {
+            <tr>
+              <td><p-skeleton width="1rem" height="1rem"></p-skeleton></td>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+              <td><p-skeleton width="3rem" height="1rem"></p-skeleton></td>
+            </tr>
+          } @else {
+            <tr>
+              <td><p-tableCheckbox [value]="application"></p-tableCheckbox></td>
+              <td>{{ application.candidateName }}</td>
+              <td>{{ application.jobPostingTitle || '-' }}</td>
+              <td>{{ formatEnumLabel(application.source) }}</td>
+              <td>{{ application.appliedDate ? (application.appliedDate | date: 'dd-MMM-yyyy') : '-' }}</td>
+              <td><span class="status-badge">{{ formatEnumLabel(application.applicationStatus) }}</span></td>
+              <td>
+                <button (click)="openDetail(application)" class="text-primary">
+                  <i class="fa fa-eye"></i>
+                </button>
+              </td>
+            </tr>
+          }
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="7" class="not-found">
+              <div>
+                <i class="fa fa-magnifying-glass-minus"></i>
+                <p>No applications found</p>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+</section>

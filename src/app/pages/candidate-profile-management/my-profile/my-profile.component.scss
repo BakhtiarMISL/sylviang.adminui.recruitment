@@ -1,0 +1,22 @@
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.profile-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.profile-header-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.profile-header-subtitle {
+  font-size: 0.8rem;
+  color: var(--p-text-muted-color, #6b7280);
+}

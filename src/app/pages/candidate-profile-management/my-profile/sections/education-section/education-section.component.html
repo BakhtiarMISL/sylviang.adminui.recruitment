@@ -1,0 +1,100 @@
+<div class="form-container">
+  <div class="sm:col-span-2" *ngIf="loading">Loading education...</div>
+
+  <div class="sm:col-span-2 text-sm text-neutral" *ngIf="!loading && items.length === 0">No education entries added yet.</div>
+
+  <div class="sm:col-span-2" *ngIf="!loading">
+    <div class="list-row" *ngFor="let item of items">
+      <div>
+        <strong>{{ item.degreeTitle }}</strong> — {{ item.institution }} ({{ item.passingYear }}, {{ item.result }})
+      </div>
+      <div class="list-row-actions">
+        <button pButton severity="secondary" type="button" (click)="startEdit(item)">
+          <i class="fas fa-edit"></i>
+        </button>
+        <button pButton severity="danger" type="button" (click)="delete(item)">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="sm:col-span-2" *ngIf="prefillSuggestions.length > 0">
+    <p class="text-sm text-neutral">Suggested from your resume — review before adding:</p>
+    <div class="list-row" *ngFor="let suggestion of prefillSuggestions; let i = index">
+      <div>{{ suggestion.degreeTitle }}<span *ngIf="suggestion.passingYear"> ({{ suggestion.passingYear }})</span></div>
+      <div class="list-row-actions">
+        <button pButton severity="secondary" type="button" (click)="useSuggestion(suggestion, i)">Use</button>
+        <button pButton severity="danger" type="button" (click)="dismissSuggestion(i)">Dismiss</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="sm:col-span-2" *ngIf="!showForm">
+    <button pButton severity="secondary" type="button" (click)="startAdd()">
+      <i class="fas fa-plus"></i>
+      <span>Add Education</span>
+    </button>
+  </div>
+</div>
+
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-container" *ngIf="showForm">
+  <div>
+    <p-floatlabel variant="in">
+      <input pInputText inputId="degreeTitle" formControlName="degreeTitle" maxlength="200" class="w-full" [class.ng-invalid]="hasError('degreeTitle')" [class.ng-dirty]="hasError('degreeTitle')" (blur)="f['degreeTitle'].markAsTouched()" />
+      <label for="degreeTitle">Degree Title *</label>
+    </p-floatlabel>
+    <div *ngIf="hasError('degreeTitle')" class="invalid">{{ getErrorMessage('degreeTitle') }}</div>
+  </div>
+
+  <div>
+    <p-floatlabel variant="in">
+      <input pInputText inputId="institution" formControlName="institution" maxlength="200" class="w-full" [class.ng-invalid]="hasError('institution')" [class.ng-dirty]="hasError('institution')" (blur)="f['institution'].markAsTouched()" />
+      <label for="institution">Institution *</label>
+    </p-floatlabel>
+    <div *ngIf="hasError('institution')" class="invalid">{{ getErrorMessage('institution') }}</div>
+  </div>
+
+  <div>
+    <p-floatlabel variant="in">
+      <p-select inputId="educationLevel" [options]="educationLevelOptions" [appendTo]="'body'" [autoDisplayFirst]="false" optionLabel="label" optionValue="value" formControlName="educationLevel" class="w-full"></p-select>
+      <label for="educationLevel">Education Level</label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel variant="in">
+      <p-inputnumber inputId="passingYear" formControlName="passingYear" class="w-full" [useGrouping]="false" [class.ng-invalid]="hasError('passingYear')" [class.ng-dirty]="hasError('passingYear')" (onBlur)="f['passingYear'].markAsTouched()"></p-inputnumber>
+      <label for="passingYear">Passing Year *</label>
+    </p-floatlabel>
+    <div *ngIf="hasError('passingYear')" class="invalid">{{ getErrorMessage('passingYear') }}</div>
+  </div>
+
+  <div>
+    <p-floatlabel variant="in">
+      <input pInputText inputId="result" formControlName="result" maxlength="50" class="w-full" [class.ng-invalid]="hasError('result')" [class.ng-dirty]="hasError('result')" (blur)="f['result'].markAsTouched()" />
+      <label for="result">Result *</label>
+    </p-floatlabel>
+    <div *ngIf="hasError('result')" class="invalid">{{ getErrorMessage('result') }}</div>
+  </div>
+
+  <div>
+    <p-floatlabel variant="in">
+      <input pInputText inputId="majorSubject" formControlName="majorSubject" maxlength="200" class="w-full" [class.ng-invalid]="hasError('majorSubject')" [class.ng-dirty]="hasError('majorSubject')" (blur)="f['majorSubject'].markAsTouched()" />
+      <label for="majorSubject">Major Subject</label>
+    </p-floatlabel>
+    <div *ngIf="hasError('majorSubject')" class="invalid">{{ getErrorMessage('majorSubject') }}</div>
+  </div>
+
+  <div *ngIf="saveError" class="invalid sm:col-span-2">{{ saveError }}</div>
+
+  <div class="sm:col-span-2 flex gap-3">
+    <button pButton type="submit" [disabled]="saving">
+      <i class="fas fa-save"></i>
+      <span>{{ saving ? 'Saving...' : 'Save' }}</span>
+    </button>
+    <button pButton severity="secondary" type="button" (click)="cancel()">
+      <span>Cancel</span>
+    </button>
+  </div>
+</form>

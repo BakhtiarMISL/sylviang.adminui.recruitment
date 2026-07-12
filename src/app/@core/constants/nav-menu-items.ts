@@ -1,4 +1,5 @@
 import { IMenuItem } from '../interfaces/menuResponse.interface';
+import { UserRoleEnum } from '../enums/user-role.enum';
 
 export const webSidebarMenuItems: IMenuItem[] = [
   {
@@ -6,31 +7,57 @@ export const webSidebarMenuItems: IMenuItem[] = [
     title: 'Dashboard',
     active: false,
     icon: 'fa-solid fa-chart-line',
+    roles: [UserRoleEnum.Admin, UserRoleEnum.HR],
   },
   {
-    title: 'Attendance',
+    title: 'Recruitment',
     active: false,
-    icon: 'fa-solid fa-clock',
+    icon: 'fa-solid fa-briefcase',
+    roles: [UserRoleEnum.Admin, UserRoleEnum.HR],
     subItems: [
       {
-        href: '/attendance/shift-list',
-        title: 'Shift List',
-        active: false,
-        icon: 'fa-solid fa-random',
-      },
-    ],
-  },
-  {
-    title: 'Payroll',
-    active: false,
-    icon: 'fa-solid fa-money-bill-wave',
-    subItems: [
-      {
-        href: '/payroll/payroll-head-list',
-        title: 'Payroll Head',
+        href: '/job-vacancy/job-vacancy-list',
+        title: 'Job Vacancies',
         active: false,
         icon: 'fa-solid fa-list',
       },
+      {
+        href: '/hiring-pipeline/hiring-pipeline-list',
+        title: 'Hiring Pipelines',
+        active: false,
+        icon: 'fa-solid fa-diagram-project',
+      },
+      {
+        href: '/candidates',
+        title: 'Candidates',
+        active: false,
+        icon: 'fa-solid fa-users',
+      },
+      {
+        href: '/applications',
+        title: 'ATS Dashboard',
+        active: false,
+        icon: 'fa-solid fa-list-check',
+      },
     ],
+  },
+  {
+    href: '/internal-jobs/job-list',
+    title: 'Internal Job Board',
+    active: false,
+    icon: 'fa-solid fa-building',
+  },
+  {
+    href: '/candidate-profile',
+    title: 'My Profile',
+    active: false,
+    icon: 'fa-solid fa-id-card',
+    roles: [UserRoleEnum.Candidate],
+  },
+  {
+    href: '/account-settings',
+    title: 'Account Settings',
+    active: false,
+    icon: 'fa-solid fa-user-gear',
   },
 ];

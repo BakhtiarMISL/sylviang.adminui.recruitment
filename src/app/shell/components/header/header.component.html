@@ -56,5 +56,17 @@
   <!-- Right side controls -->
   <div class="flex items-center space-x-4">
     <app-theme-toggle></app-theme-toggle>
+
+    <span class="text-sm font-medium text-dark dark:text-borderLight hidden sm:inline">{{ displayName }}</span>
+
+    <button
+      (click)="logout()"
+      class="h-8 flex items-center gap-1.5 text-sm text-black dark:text-borderLight hover:text-primary dark:hover:text-primary duration-300"
+      aria-label="Log out"
+      title="Log out"
+    >
+      <i class="fas fa-right-from-bracket"></i>
+      <span class="hidden sm:inline">Log out</span>
+    </button>
   </div>
 </header>

@@ -1,0 +1,106 @@
+<div class="form-container">
+  <div class="sm:col-span-2" *ngIf="loading">Loading certifications...</div>
+
+  <div class="sm:col-span-2 text-sm text-neutral" *ngIf="!loading && items.length === 0">No certifications added yet.</div>
+
+  <div class="sm:col-span-2" *ngIf="!loading">
+    <div class="list-row" *ngFor="let item of items">
+      <div>
+        <strong>{{ item.certificationName }}</strong>
+        <span *ngIf="item.issuingOrganization"> — {{ item.issuingOrganization }}</span>
+        <a *ngIf="item.certificateFilePath" [href]="getCertificateDownloadUrl(item)" target="_blank" rel="noopener noreferrer" class="text-primary ml-2">
+          <i class="fa fa-paperclip"></i>
+        </a>
+      </div>
+      <div class="list-row-actions">
+        <button pButton severity="secondary" type="button" (click)="startEdit(item)">
+          <i class="fas fa-edit"></i>
+        </button>
+        <button pButton severity="danger" type="button" (click)="delete(item)">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="sm:col-span-2" *ngIf="!showForm">
+    <button pButton severity="secondary" type="button" (click)="startAdd()">
+      <i class="fas fa-plus"></i>
+      <span>Add Certification</span>
+    </button>
+  </div>
+</div>
+
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-container" *ngIf="showForm">
+  <div>
+    <p-floatlabel variant="in">
+      <input
+        pInputText
+        inputId="certificationName"
+        formControlName="certificationName"
+        maxlength="200"
+        class="w-full"
+        [class.ng-invalid]="hasError('certificationName')"
+        [class.ng-dirty]="hasError('certificationName')"
+        (blur)="f['certificationName'].markAsTouched()"
+      />
+      <label for="certificationName">Certification Name *</label>
+    </p-floatlabel>
+    <div *ngIf="hasError('certificationName')" class="invalid">{{ getErrorMessage('certificationName') }}</div>
+  </div>
+
+  <div>
+    <p-floatlabel variant="in">
+      <input pInputText inputId="issuingOrganization" formControlName="issuingOrganization" maxlength="200" class="w-full" [class.ng-invalid]="hasError('issuingOrganization')" [class.ng-dirty]="hasError('issuingOrganization')" (blur)="f['issuingOrganization'].markAsTouched()" />
+      <label for="issuingOrganization">Issuing Organization</label>
+    </p-floatlabel>
+    <div *ngIf="hasError('issuingOrganization')" class="invalid">{{ getErrorMessage('issuingOrganization') }}</div>
+  </div>
+
+  <div>
+    <p-floatlabel variant="in">
+      <p-datepicker inputId="issueDate" formControlName="issueDate" dateFormat="dd-M-yy" [showIcon]="true" styleClass="w-full"></p-datepicker>
+      <label for="issueDate">Issue Date</label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel variant="in">
+      <p-datepicker inputId="expiryDate" formControlName="expiryDate" dateFormat="dd-M-yy" [showIcon]="true" styleClass="w-full"></p-datepicker>
+      <label for="expiryDate">Expiry Date</label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel variant="in">
+      <input pInputText inputId="credentialId" formControlName="credentialId" maxlength="100" class="w-full" [class.ng-invalid]="hasError('credentialId')" [class.ng-dirty]="hasError('credentialId')" (blur)="f['credentialId'].markAsTouched()" />
+      <label for="credentialId">Credential ID</label>
+    </p-floatlabel>
+    <div *ngIf="hasError('credentialId')" class="invalid">{{ getErrorMessage('credentialId') }}</div>
+  </div>
+
+  <div class="sm:col-span-2">
+    <label for="certificationFile" class="upload-dropzone">
+      <i class="fas fa-file-arrow-up"></i>
+      <span class="upload-dropzone-text">
+        <strong>{{ selectedFile?.name || 'Click to upload the certificate' }}</strong>
+        <small>PDF, DOC or DOCX</small>
+      </span>
+    </label>
+    <input id="certificationFile" type="file" (change)="onFileSelected($event)" accept=".pdf,.doc,.docx" class="sr-only" />
+  </div>
+  <div *ngIf="fileError" class="invalid sm:col-span-2">{{ fileError }}</div>
+
+  <div *ngIf="getFormErrorMessage()" class="invalid sm:col-span-2">{{ getFormErrorMessage() }}</div>
+  <div *ngIf="saveError" class="invalid sm:col-span-2">{{ saveError }}</div>
+
+  <div class="sm:col-span-2 flex gap-3">
+    <button pButton type="submit" [disabled]="saving">
+      <i class="fas fa-save"></i>
+      <span>{{ saving ? 'Saving...' : 'Save' }}</span>
+    </button>
+    <button pButton severity="secondary" type="button" (click)="cancel()">
+      <span>Cancel</span>
+    </button>
+  </div>
+</form>
