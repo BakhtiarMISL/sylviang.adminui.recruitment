@@ -33,3 +33,15 @@ export enum ApplicationSourceEnum {
   External = 'External',
   Internal = 'Internal',
 }
+
+export enum ApplicationStatusEnum {
+  Applied = 'Applied',
+  Screening = 'Screening',
+  Shortlisted = 'Shortlisted',
+  InterviewScheduled = 'InterviewScheduled',
+  Interviewed = 'Interviewed',
+  Offered = 'Offered',
+  Hired = 'Hired',
+  Rejected = 'Rejected',
+  Withdrawn = 'Withdrawn',
+}

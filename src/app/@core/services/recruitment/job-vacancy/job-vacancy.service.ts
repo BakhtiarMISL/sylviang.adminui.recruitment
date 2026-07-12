@@ -17,6 +17,11 @@ export class JobVacancyService {
     return this.httpClient.get<ApiResponse<PaginatedResponse<IJobVacancyResponse[]>>>(`${this.API_URL}/paged`, { params });
   }
 
+  /** All job postings (unpaginated) - used to populate the ATS dashboard's "Job Posting" filter. */
+  getAllJobVacancies() {
+    return this.httpClient.get<ApiResponse<IJobVacancyResponse[]>>(`${this.API_URL}`);
+  }
+
   getJobVacancyById(id: number) {
     return this.httpClient.get<ApiResponse<IJobVacancyResponse>>(`${this.API_URL}/${id}`);
   }

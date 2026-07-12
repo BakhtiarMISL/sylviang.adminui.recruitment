@@ -33,6 +33,12 @@ export const webSidebarMenuItems: IMenuItem[] = [
         active: false,
         icon: 'fa-solid fa-users',
       },
+      {
+        href: '/applications',
+        title: 'ATS Dashboard',
+        active: false,
+        icon: 'fa-solid fa-list-check',
+      },
     ],
   },
   {

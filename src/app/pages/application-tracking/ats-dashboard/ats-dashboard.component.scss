@@ -1,0 +1,46 @@
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-end;
+  margin-bottom: 1rem;
+
+  > p-floatlabel {
+    flex: 1 1 12rem;
+    min-width: 12rem;
+  }
+
+  > button {
+    flex: 0 0 auto;
+  }
+}
+
+.bulk-action-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-end;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  background: var(--surface-100, #f4f4f5);
+
+  > p-floatlabel {
+    flex: 1 1 12rem;
+    min-width: 12rem;
+  }
+
+  > button {
+    flex: 0 0 auto;
+  }
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: #eef2ff;
+  color: #4338ca;
+}

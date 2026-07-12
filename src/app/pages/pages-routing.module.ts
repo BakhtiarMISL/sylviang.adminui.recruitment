@@ -35,6 +35,10 @@ const routes: Routes = [
       loadChildren: () => import('./hiring-pipeline-management/hiring-pipeline-management.module').then((m) => m.HiringPipelineManagementModule),
     },
     {
+      path: 'applications',
+      loadChildren: () => import('./application-tracking/application-tracking.module').then((m) => m.ApplicationTrackingModule),
+    },
+    {
       path: 'candidate-profile',
       loadChildren: () => import('./candidate-profile-management/candidate-profile-management.module').then((m) => m.CandidateProfileManagementModule),
     },
