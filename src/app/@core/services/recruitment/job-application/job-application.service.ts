@@ -9,6 +9,7 @@ import {
   IJobApplicationDetail,
   IJobApplicationListItem,
   IJobApplicationStatusUpdateRequest,
+  IMyApplication,
 } from '@core/interfaces/recruitment-management/job-application.interface';
 import { IJobApplicationSubmitResponse } from '@core/interfaces/recruitment-management/career-portal.interface';
 import { BASE_URL_Recruitment } from '@env/environment';
@@ -58,5 +59,15 @@ export class JobApplicationService {
     if (request.coverLetter) formData.append('coverLetter', request.coverLetter);
     formData.append('resume', request.resume, request.resume.name);
     return this.httpClient.post<ApiResponse<IJobApplicationSubmitResponse>>(`${this.API_URL}/apply-on-behalf`, formData);
+  }
+
+  // ── Candidate Self-Service (US-040) ─────────────────────────────
+
+  getMyApplications() {
+    return this.httpClient.get<ApiResponse<IMyApplication[]>>(`${this.API_URL}/my-applications`);
+  }
+
+  withdrawMyApplication(jobApplicationId: number) {
+    return this.httpClient.patch<ApiResponse<void>>(`${this.API_URL}/my-applications/${jobApplicationId}/withdraw`, {});
   }
 }

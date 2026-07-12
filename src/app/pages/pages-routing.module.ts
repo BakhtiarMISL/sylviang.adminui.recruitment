@@ -43,6 +43,10 @@ const routes: Routes = [
       loadChildren: () => import('./candidate-profile-management/candidate-profile-management.module').then((m) => m.CandidateProfileManagementModule),
     },
     {
+      path: 'my-applications',
+      loadChildren: () => import('./my-applications/my-applications.module').then((m) => m.MyApplicationsModule),
+    },
+    {
       path: 'account-settings',
       loadChildren: () => import('./account-settings-management/account-settings-management.module').then((m) => m.AccountSettingsManagementModule),
     },

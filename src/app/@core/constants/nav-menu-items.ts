@@ -55,6 +55,13 @@ export const webSidebarMenuItems: IMenuItem[] = [
     roles: [UserRoleEnum.Candidate],
   },
   {
+    href: '/my-applications',
+    title: 'My Applications',
+    active: false,
+    icon: 'fa-solid fa-list-check',
+    roles: [UserRoleEnum.Candidate],
+  },
+  {
     href: '/account-settings',
     title: 'Account Settings',
     active: false,

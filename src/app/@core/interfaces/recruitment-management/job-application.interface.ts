@@ -65,3 +65,21 @@ export interface IJobApplicationBulkStatusUpdateResponse {
   succeededIds: number[];
   failed: IJobApplicationBulkStatusUpdateFailure[];
 }
+
+export interface IMyApplicationInterview {
+  interviewId: number;
+  scheduledDate?: string;
+  location?: string;
+  meetingLink?: string;
+  round?: string;
+}
+
+export interface IMyApplication {
+  jobApplicationId: number;
+  jobPostingId: number;
+  jobPostingTitle?: string;
+  appliedDate?: string;
+  applicationStatus: ApplicationStatusEnum;
+  canWithdraw: boolean;
+  interviews: IMyApplicationInterview[];
+}

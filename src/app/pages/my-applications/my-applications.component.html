@@ -1,0 +1,43 @@
+<section class="page-container">
+  <h3 class="form-section-header">My Applications</h3>
+
+  <div *ngIf="loading" class="applications-list">
+    <p-skeleton height="6rem" styleClass="mb-3"></p-skeleton>
+    <p-skeleton height="6rem" styleClass="mb-3"></p-skeleton>
+    <p-skeleton height="6rem"></p-skeleton>
+  </div>
+
+  <div class="invalid" *ngIf="!loading && loadError">{{ loadError }}</div>
+
+  <div class="empty-state" *ngIf="!loading && !loadError && applications.length === 0">You haven't submitted any applications yet.</div>
+
+  <div class="applications-list" *ngIf="!loading && !loadError && applications.length > 0">
+    <div class="application-card" *ngFor="let application of applications">
+      <div class="application-card-header">
+        <div>
+          <h4>{{ application.jobPostingTitle || 'Untitled Position' }}</h4>
+          <span class="text-sm text-neutral">Applied {{ application.appliedDate ? (application.appliedDate | date: 'dd-MMM-yyyy') : '-' }}</span>
+        </div>
+        <span class="status-badge" [ngClass]="'status-' + application.applicationStatus">{{ formatEnumLabel(application.applicationStatus) }}</span>
+      </div>
+
+      <div class="interviews" *ngIf="application.interviews.length > 0">
+        <h5>Interviews</h5>
+        <div class="interview-row" *ngFor="let interview of application.interviews">
+          <i class="fa-solid fa-calendar-days"></i>
+          <span>{{ interview.round || 'Interview' }}</span>
+          <span>{{ interview.scheduledDate ? (interview.scheduledDate | date: 'dd-MMM-yyyy, h:mm a') : 'Date TBD' }}</span>
+          <span *ngIf="interview.location">{{ interview.location }}</span>
+          <a *ngIf="interview.meetingLink" [href]="interview.meetingLink" target="_blank" rel="noopener">Join link</a>
+        </div>
+      </div>
+
+      <div class="application-card-actions" *ngIf="application.canWithdraw">
+        <button pButton type="button" class="p-button-outlined p-button-danger p-button-sm" [disabled]="withdrawingId === application.jobApplicationId" (click)="confirmWithdraw($event, application)">
+          <i class="fa fa-ban"></i>
+          <span>Withdraw Application</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
