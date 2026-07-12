@@ -10,34 +10,6 @@ export const webSidebarMenuItems: IMenuItem[] = [
     roles: [UserRoleEnum.Admin, UserRoleEnum.HR],
   },
   {
-    title: 'Attendance',
-    active: false,
-    icon: 'fa-solid fa-clock',
-    roles: [UserRoleEnum.Admin, UserRoleEnum.HR],
-    subItems: [
-      {
-        href: '/attendance/shift-list',
-        title: 'Shift List',
-        active: false,
-        icon: 'fa-solid fa-random',
-      },
-    ],
-  },
-  {
-    title: 'Payroll',
-    active: false,
-    icon: 'fa-solid fa-money-bill-wave',
-    roles: [UserRoleEnum.Admin, UserRoleEnum.HR],
-    subItems: [
-      {
-        href: '/payroll/payroll-head-list',
-        title: 'Payroll Head',
-        active: false,
-        icon: 'fa-solid fa-list',
-      },
-    ],
-  },
-  {
     title: 'Recruitment',
     active: false,
     icon: 'fa-solid fa-briefcase',
@@ -55,6 +27,12 @@ export const webSidebarMenuItems: IMenuItem[] = [
         active: false,
         icon: 'fa-solid fa-diagram-project',
       },
+      {
+        href: '/candidates',
+        title: 'Candidates',
+        active: false,
+        icon: 'fa-solid fa-users',
+      },
     ],
   },
   {
@@ -62,5 +40,18 @@ export const webSidebarMenuItems: IMenuItem[] = [
     title: 'Internal Job Board',
     active: false,
     icon: 'fa-solid fa-building',
+  },
+  {
+    href: '/candidate-profile',
+    title: 'My Profile',
+    active: false,
+    icon: 'fa-solid fa-id-card',
+    roles: [UserRoleEnum.Candidate],
+  },
+  {
+    href: '/account-settings',
+    title: 'Account Settings',
+    active: false,
+    icon: 'fa-solid fa-user-gear',
   },
 ];

@@ -1,0 +1,53 @@
+.completeness-ring {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  flex-shrink: 0;
+
+  svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+  }
+
+  circle {
+    fill: none;
+    stroke-width: 9;
+  }
+
+  .completeness-ring-bg {
+    stroke: var(--p-content-border-color, #e5e7eb);
+  }
+
+  .completeness-ring-value {
+    stroke-linecap: round;
+    transition:
+      stroke-dashoffset 0.5s ease,
+      stroke 0.3s ease;
+  }
+
+  .completeness-ring-label {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .completeness-ring-percent {
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  &.ring-danger .completeness-ring-value {
+    stroke: #ef4444;
+  }
+
+  &.ring-warning .completeness-ring-value {
+    stroke: #eab308;
+  }
+
+  &.ring-success .completeness-ring-value {
+    stroke: #22c55e;
+  }
+}

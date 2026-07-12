@@ -7,6 +7,10 @@ export const routes: Routes = [
     loadChildren: () => import('./auth/auth.module').then((m) => m.AuthModule),
   },
   {
+    path: 'register',
+    loadChildren: () => import('./auth/register/register.module').then((m) => m.RegisterModule),
+  },
+  {
     path: 'careers',
     loadChildren: () => import('./career-portal/career-portal.module').then((m) => m.CareerPortalModule),
   },

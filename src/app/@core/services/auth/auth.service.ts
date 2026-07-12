@@ -4,6 +4,8 @@ import { ApiResponse } from '@core/interfaces/ApiResponse';
 import { IAuthenticatedUser } from '@core/interfaces/auth/authenticated-user.interface';
 import { ILoginRequest } from '@core/interfaces/auth/login-request.interface';
 import { ILoginResponse } from '@core/interfaces/auth/login-response.interface';
+import { IRegisterRequest } from '@core/interfaces/auth/register-request.interface';
+import { IRegisterResponse } from '@core/interfaces/auth/register-response.interface';
 import { UserRoleEnum } from '@core/enums/user-role.enum';
 import { BASE_URL_Recruitment } from '@env/environment';
 import { BehaviorSubject, Observable } from 'rxjs';
@@ -31,6 +33,10 @@ export class AuthService {
         }
       }),
     );
+  }
+
+  register(request: IRegisterRequest): Observable<ApiResponse<IRegisterResponse>> {
+    return this.httpClient.post<ApiResponse<IRegisterResponse>>(`${this.API_URL}/register`, request);
   }
 
   logout(): void {

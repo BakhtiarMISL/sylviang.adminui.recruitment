@@ -1,8 +1,10 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { IPublicJobPostingResponse } from '@app/@core/interfaces/recruitment-management/career-portal.interface';
 import { CareerPortalService } from '@app/@core/services/recruitment/career-portal/career-portal.service';
 import { UI_CONFIG } from '@app/@core/constants';
+import { SortEvent } from 'primeng/api';
 import { EmploymentTypeOptions, ExperienceBucketOptions } from '../career-portal.constants';
+import { JobBrowseColumns } from './job-browse.component.constants';
 
 @Component({
   selector: 'app-job-browse',
@@ -10,21 +12,27 @@ import { EmploymentTypeOptions, ExperienceBucketOptions } from '../career-portal
   templateUrl: './job-browse.component.html',
   styleUrl: './job-browse.component.scss',
 })
-export class JobBrowseComponent implements OnInit {
+export class JobBrowseComponent implements OnInit, AfterViewInit {
   constructor(
     private careerPortalService: CareerPortalService,
     private cdr: ChangeDetectorRef,
   ) {}
 
   jobPostings: IPublicJobPostingResponse[] = [];
+  sortedColumn: string = '';
   loading = false;
   totalRecords = 0;
   UI_CONFIG = UI_CONFIG;
   rows = UI_CONFIG.defaultPageSize;
   currentPage = 1;
 
+  sortBy: string = '';
+  sortDirection: string = '';
+
   employmentTypeOptions = EmploymentTypeOptions;
   experienceBucketOptions = ExperienceBucketOptions;
+
+  columns = JobBrowseColumns;
 
   searchTerm = '';
   location = '';
@@ -32,8 +40,18 @@ export class JobBrowseComponent implements OnInit {
   employmentType: string | null = null;
   maxExperienceYears: number | null = null;
 
+  get skeletonItems() {
+    return Array(this.rows)
+      .fill({})
+      .map((_, index) => ({ id: index }));
+  }
+
   ngOnInit(): void {
     this.loadJobPostings();
+  }
+
+  ngAfterViewInit(): void {
+    this.cdr.detectChanges();
   }
 
   applyFilters(): void {
@@ -62,6 +80,8 @@ export class JobBrowseComponent implements OnInit {
       ...(this.departmentId !== null && this.departmentId !== undefined && { departmentId: this.departmentId }),
       ...(this.employmentType && { employmentType: this.employmentType }),
       ...(this.maxExperienceYears !== null && this.maxExperienceYears !== undefined && { maxExperienceYears: this.maxExperienceYears }),
+      ...(this.sortBy && { sortBy: this.sortBy }),
+      ...(this.sortDirection && { sortDirection: this.sortDirection }),
     };
 
     this.careerPortalService.getJobPostings(params).subscribe({
@@ -88,6 +108,14 @@ export class JobBrowseComponent implements OnInit {
   onPageChange(event: any): void {
     this.currentPage = Math.floor(event.first / event.rows) + 1;
     this.rows = event.rows;
+    this.loadJobPostings();
+  }
+
+  onSort(event: SortEvent) {
+    this.sortedColumn = event.field || '';
+    this.sortBy = event.field || '';
+    this.sortDirection = event.order === 1 ? 'asc' : 'desc';
+    this.currentPage = 1;
     this.loadJobPostings();
   }
 

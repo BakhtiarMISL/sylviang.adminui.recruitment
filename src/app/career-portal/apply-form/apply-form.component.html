@@ -36,9 +36,16 @@
   </div>
 
   <div>
-    <label for="resume" class="mb-1 block text-sm text-gray-700">Resume (PDF, DOC, DOCX, max 10MB) *</label>
-    <input type="file" id="resume" accept=".pdf,.doc,.docx" (change)="onFileSelected($event)" />
-    <div *ngIf="fileError" class="invalid">{{ fileError }}</div>
+    <label for="resume" class="mb-1 block text-sm text-gray-700">Resume *</label>
+    <label for="resume" class="upload-dropzone">
+      <i class="fas fa-file-arrow-up"></i>
+      <span class="upload-dropzone-text">
+        <strong>{{ selectedFile?.name || 'Click to upload your resume' }}</strong>
+        <small>PDF, DOC or DOCX, up to 10MB</small>
+      </span>
+    </label>
+    <input type="file" id="resume" accept=".pdf,.doc,.docx" (change)="onFileSelected($event)" class="sr-only" />
+    <div *ngIf="fileError" class="invalid mt-2">{{ fileError }}</div>
   </div>
 
   <div *ngIf="submitError" class="invalid">{{ submitError }}</div>

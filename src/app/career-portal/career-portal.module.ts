@@ -6,9 +6,9 @@ import { ButtonModule } from 'primeng/button';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
-import { PaginatorModule } from 'primeng/paginator';
 import { SelectModule } from 'primeng/select';
 import { SkeletonModule } from 'primeng/skeleton';
+import { TableModule } from 'primeng/table';
 import { TextareaModule } from 'primeng/textarea';
 import { SharedModule } from '@shared/shared.module';
 import { ApplyFormComponent } from './apply-form/apply-form.component';
@@ -31,8 +31,8 @@ import { JobDetailComponent } from './job-detail/job-detail.component';
     SelectModule,
     FloatLabelModule,
     SkeletonModule,
+    TableModule,
     TextareaModule,
-    PaginatorModule,
   ],
 })
 export class CareerPortalModule {}

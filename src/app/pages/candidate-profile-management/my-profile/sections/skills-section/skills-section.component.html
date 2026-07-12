@@ -1,0 +1,66 @@
+<div class="form-container">
+  <div class="sm:col-span-2" *ngIf="loading">Loading skills...</div>
+
+  <div class="sm:col-span-2 text-sm text-neutral" *ngIf="!loading && items.length === 0">No skills added yet.</div>
+
+  <div class="sm:col-span-2 skill-list" *ngIf="!loading">
+    <span class="skill-chip" *ngFor="let item of items">
+      {{ item.skillName }}<span *ngIf="item.proficiencyLevel"> ({{ item.proficiencyLevel }})</span>
+      <button type="button" (click)="delete(item)" title="Remove skill"><i class="fas fa-times"></i></button>
+    </span>
+  </div>
+
+  <div class="sm:col-span-2 skill-list" *ngIf="prefillSkillSuggestions.length > 0">
+    <p class="text-sm text-neutral w-full">Suggested from your resume — click to fill, then Add Skill:</p>
+    <span class="skill-chip" *ngFor="let skill of prefillSkillSuggestions; let i = index">
+      <a (click)="useSkillSuggestion(skill, i)" style="cursor: pointer">{{ skill }}</a>
+      <button type="button" (click)="dismissSkillSuggestion(i)" title="Dismiss"><i class="fas fa-times"></i></button>
+    </span>
+  </div>
+</div>
+
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-container">
+  <div>
+    <p-floatlabel variant="in">
+      <p-autocomplete
+        inputId="skillName"
+        formControlName="skillName"
+        [suggestions]="skillSuggestions"
+        (completeMethod)="filterSkill($event)"
+        (onSelect)="onSkillSelect($event)"
+        (input)="onSkillNameInput()"
+        optionLabel="name"
+        field="name"
+        [forceSelection]="false"
+        class="w-full"
+        styleClass="w-full"
+        inputStyleClass="w-full"
+        [class.ng-invalid]="hasError('skillName')"
+        [class.ng-dirty]="hasError('skillName')"
+        (onBlur)="f['skillName'].markAsTouched()"
+      >
+        <ng-template let-skill pTemplate="item">
+          <span>{{ skill.name }}</span>
+        </ng-template>
+      </p-autocomplete>
+      <label for="skillName">Skill *</label>
+    </p-floatlabel>
+    <div *ngIf="hasError('skillName')" class="invalid">{{ getErrorMessage('skillName') }}</div>
+  </div>
+
+  <div>
+    <p-floatlabel variant="in">
+      <p-select inputId="proficiencyLevel" [options]="proficiencyLevelOptions" [appendTo]="'body'" [autoDisplayFirst]="false" optionLabel="label" optionValue="value" formControlName="proficiencyLevel" class="w-full"></p-select>
+      <label for="proficiencyLevel">Proficiency Level</label>
+    </p-floatlabel>
+  </div>
+
+  <div *ngIf="saveError" class="invalid sm:col-span-2">{{ saveError }}</div>
+
+  <div class="sm:col-span-2">
+    <button pButton type="submit" [disabled]="saving">
+      <i class="fas fa-plus"></i>
+      <span>{{ saving ? 'Adding...' : 'Add Skill' }}</span>
+    </button>
+  </div>
+</form>

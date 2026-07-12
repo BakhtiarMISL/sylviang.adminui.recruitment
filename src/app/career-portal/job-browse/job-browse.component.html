@@ -8,100 +8,159 @@
     </header>
 
     <!-- Filters -->
-    <section class="mb-6 grid grid-cols-1 gap-3 rounded-lg bg-white p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-5">
-      <div>
-        <p-floatlabel variant="in">
-          <input pInputText id="searchTerm" class="w-full" [(ngModel)]="searchTerm" name="searchTerm" (keyup.enter)="applyFilters()" />
-          <label for="searchTerm">Keyword</label>
-        </p-floatlabel>
-      </div>
+    <div class="grid grid-cols-1 gap-3 mb-4 sm:grid-cols-2 lg:grid-cols-5">
+      <p-floatlabel variant="in">
+        <input type="text" pInputText id="searchTerm" class="w-full" [(ngModel)]="searchTerm" name="searchTerm" (keyup.enter)="applyFilters()" />
+        <label for="searchTerm" class="whitespace-nowrap">Keyword</label>
+      </p-floatlabel>
 
-      <div>
-        <p-floatlabel variant="in">
-          <input pInputText id="location" class="w-full" [(ngModel)]="location" name="location" (keyup.enter)="applyFilters()" />
-          <label for="location">Location</label>
-        </p-floatlabel>
-      </div>
+      <p-floatlabel variant="in">
+        <input type="text" pInputText id="location" class="w-full" [(ngModel)]="location" name="location" (keyup.enter)="applyFilters()" />
+        <label for="location" class="whitespace-nowrap">Location</label>
+      </p-floatlabel>
 
-      <div>
-        <p-floatlabel variant="in">
-          <p-inputnumber inputId="departmentId" class="w-full" [(ngModel)]="departmentId" name="departmentId" [useGrouping]="false"></p-inputnumber>
-          <label for="departmentId">Department ID</label>
-        </p-floatlabel>
-      </div>
+      <p-floatlabel variant="in">
+        <p-inputnumber inputId="departmentId" class="w-full" [(ngModel)]="departmentId" name="departmentId" [useGrouping]="false"></p-inputnumber>
+        <label for="departmentId" class="whitespace-nowrap">Department ID</label>
+      </p-floatlabel>
 
-      <div>
-        <p-floatlabel variant="in">
-          <p-select inputId="employmentType" class="w-full" [options]="employmentTypeOptions" [(ngModel)]="employmentType" name="employmentType" optionLabel="label" optionValue="value" [appendTo]="'body'" [autoDisplayFirst]="false" [showClear]="true"></p-select>
-          <label for="employmentType">Employment Type</label>
-        </p-floatlabel>
-      </div>
+      <p-floatlabel variant="in">
+        <p-select
+          inputId="employmentType"
+          class="w-full"
+          [options]="employmentTypeOptions"
+          [(ngModel)]="employmentType"
+          name="employmentType"
+          optionLabel="label"
+          optionValue="value"
+          [appendTo]="'body'"
+          [autoDisplayFirst]="false"
+          [showClear]="true"
+        ></p-select>
+        <label for="employmentType" class="whitespace-nowrap">Employment Type</label>
+      </p-floatlabel>
 
-      <div>
-        <p-floatlabel variant="in">
-          <p-select
-            inputId="maxExperienceYears"
-            class="w-full"
-            [options]="experienceBucketOptions"
-            [(ngModel)]="maxExperienceYears"
-            name="maxExperienceYears"
-            optionLabel="label"
-            optionValue="value"
-            [appendTo]="'body'"
-            [autoDisplayFirst]="false"
-            [showClear]="true"
-          ></p-select>
-          <label for="maxExperienceYears">Experience</label>
-        </p-floatlabel>
-      </div>
+      <p-floatlabel variant="in">
+        <p-select
+          inputId="maxExperienceYears"
+          class="w-full"
+          [options]="experienceBucketOptions"
+          [(ngModel)]="maxExperienceYears"
+          name="maxExperienceYears"
+          optionLabel="label"
+          optionValue="value"
+          [appendTo]="'body'"
+          [autoDisplayFirst]="false"
+          [showClear]="true"
+        ></p-select>
+        <label for="maxExperienceYears" class="whitespace-nowrap">Experience</label>
+      </p-floatlabel>
 
       <div class="flex items-end gap-2 lg:col-span-5">
         <button pButton (click)="applyFilters()">
           <i class="fa fa-search"></i>
           <span>Search</span>
         </button>
+
         <button pButton severity="secondary" (click)="resetFilters()">
           <i class="fa fa-times"></i>
           <span>Reset</span>
         </button>
       </div>
-    </section>
+    </div>
 
-    <!-- Results -->
-    <section>
-      <p class="mb-3 text-sm text-gray-600" *ngIf="!loading">{{ totalRecords }} open position{{ totalRecords === 1 ? '' : 's' }} found</p>
-
-      <div *ngIf="loading" class="space-y-3">
-        <p-skeleton height="6rem" *ngFor="let i of [1, 2, 3]"></p-skeleton>
+    <!-- Job Postings Table -->
+    <div class="table-container">
+      <div class="table-title-container">
+        <h3 class="table-title">
+          Open Positions
+          <span class="table-title-info" *ngIf="totalRecords > 0">({{ totalRecords }} total)</span>
+        </h3>
       </div>
 
-      <div *ngIf="!loading && jobPostings.length === 0" class="rounded-lg bg-white p-8 text-center text-gray-500 shadow-sm">No open positions match your search right now.</div>
-
-      <div *ngIf="!loading" class="grid grid-cols-1 gap-4">
-        <a
-          *ngFor="let job of jobPostings"
-          [routerLink]="['/careers/jobs', job.jobPostingId]"
-          class="block rounded-lg bg-white p-4 shadow-sm transition hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+      <div class="transition-all duration-500 ease-in-out">
+        <p-table
+          #dt
+          [value]="loading ? skeletonItems : jobPostings"
+          dataKey="jobPostingId"
+          (onSort)="onSort($event)"
+          [paginator]="true"
+          [rows]="rows"
+          [first]="(currentPage - 1) * rows"
+          [rowsPerPageOptions]="UI_CONFIG.pageSizeOptions"
+          [totalRecords]="totalRecords"
+          (onPage)="onPageChange($event)"
+          [lazy]="true"
+          [loading]="false"
+          scrollHeight="flex"
+          [responsiveLayout]="'scroll'"
+          [showCurrentPageReport]="true"
+          currentPageReportTemplate="Showing {first} to {last} of {totalRecords} open positions"
         >
-          <div class="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
-            <div>
-              <h2 class="text-lg font-medium text-gray-900">{{ job.title }}</h2>
-              <p class="text-sm text-gray-600">
-                <span *ngIf="job.location">{{ job.location }}</span>
-                <span *ngIf="job.location"> &middot; </span>
-                <span>{{ formatEnumLabel(job.employmentType) }}</span>
-              </p>
-            </div>
-            <div class="text-sm text-gray-500">
-              <span *ngIf="job.closingDate">Closes {{ job.closingDate | date: 'dd-MMM-yyyy' }}</span>
-            </div>
-          </div>
-        </a>
-      </div>
+          <ng-template pTemplate="header">
+            <tr>
+              @for (col of columns; track col.field) {
+                <th [pSortableColumn]="col.sortable !== false ? col.field : null" [style.width]="col.width" class="group">
+                  <div class="flex items-center gap-2">
+                    {{ col.label }}
+                    @if (col.sortable !== false) {
+                      <span
+                        class="transition-opacity duration-150"
+                        [ngClass]="{
+                          'opacity-100': sortedColumn === col.field,
+                          'opacity-0 group-hover:opacity-100': sortedColumn !== col.field,
+                        }"
+                      >
+                        <p-sortIcon [field]="col.field"></p-sortIcon>
+                      </span>
+                    }
+                  </div>
+                </th>
+              }
+              <th style="width: 6rem">Actions</th>
+            </tr>
+          </ng-template>
 
-      <div class="mt-4 flex justify-center" *ngIf="!loading && totalRecords > 0">
-        <p-paginator [first]="(currentPage - 1) * rows" [rows]="rows" [totalRecords]="totalRecords" [rowsPerPageOptions]="UI_CONFIG.pageSizeOptions" (onPageChange)="onPageChange($event)"></p-paginator>
+          <ng-template pTemplate="body" let-job>
+            @if (loading) {
+              <tr>
+                <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+                <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+                <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+                <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+                <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+                <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+                <td><p-skeleton width="3rem" height="1rem"></p-skeleton></td>
+              </tr>
+            } @else {
+              <tr>
+                <td>{{ job.jobPostingCode }}</td>
+                <td>{{ job.title }}</td>
+                <td>{{ formatEnumLabel(job.employmentType) }}</td>
+                <td>{{ job.location || '-' }}</td>
+                <td>{{ job.postingDate ? (job.postingDate | date: 'dd-MMM-yyyy') : '-' }}</td>
+                <td>{{ job.closingDate ? (job.closingDate | date: 'dd-MMM-yyyy') : '-' }}</td>
+                <td>
+                  <button [routerLink]="['/careers/jobs', job.jobPostingId]" class="text-primary">
+                    <i class="fa fa-eye"></i>
+                  </button>
+                </td>
+              </tr>
+            }
+          </ng-template>
+
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="7" class="not-found">
+                <div>
+                  <i class="fa fa-magnifying-glass-minus"></i>
+                  <p>No open positions found</p>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
       </div>
-    </section>
+    </div>
   </div>
 </div>

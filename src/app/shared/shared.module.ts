@@ -15,10 +15,11 @@ import { SelectModule } from 'primeng/select';
 import { SkeletonModule } from 'primeng/skeleton';
 import { TableModule } from 'primeng/table';
 import { TooltipModule } from 'primeng/tooltip';
+import { CompletenessRingComponent } from './components/completeness-ring/completeness-ring.component';
 import { PublicSidebarComponent } from './components/public-sidebar/public-sidebar.component';
 
 @NgModule({
-  declarations: [PublicSidebarComponent],
+  declarations: [PublicSidebarComponent, CompletenessRingComponent],
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -43,6 +44,7 @@ import { PublicSidebarComponent } from './components/public-sidebar/public-sideb
     FormsModule,
     RouterModule,
     PublicSidebarComponent,
+    CompletenessRingComponent,
     DatePickerModule,
     SelectModule,
     MultiSelectModule,
