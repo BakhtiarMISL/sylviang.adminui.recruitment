@@ -1,0 +1,170 @@
+<section class="page-container">
+  <div class="form-container">
+    <h3 class="form-section-header">Candidate Profile</h3>
+
+    <div class="sm:col-span-2" *ngIf="loading">Loading...</div>
+    <div class="sm:col-span-2 invalid" *ngIf="loadError">{{ loadError }}</div>
+  </div>
+</section>
+
+<ng-container *ngIf="!loading && profile">
+  <section class="page-container">
+    <div class="form-container">
+      <div class="sm:col-span-2 profile-header">
+        <img *ngIf="getPhotoUrl()" [src]="getPhotoUrl()" class="profile-photo" alt="Profile photo" />
+        <i *ngIf="!getPhotoUrl()" class="fa-solid fa-circle-user profile-photo-placeholder"></i>
+
+        <div class="profile-header-text">
+          <span class="profile-header-name">{{ profile.fullName }}</span>
+          <span class="profile-header-email">{{ profile.email }}</span>
+          <span class="profile-header-phone" *ngIf="profile.phone">{{ profile.phone }}</span>
+        </div>
+
+        <app-completeness-ring [percentage]="profile.completenessPercentage"></app-completeness-ring>
+      </div>
+    </div>
+  </section>
+
+  <section class="page-container">
+    <div class="form-container">
+      <h3 class="form-section-header">Personal Info</h3>
+
+      <div><span class="field-label">Date of Birth</span><div>{{ profile.dateOfBirth ? (profile.dateOfBirth | date: 'dd-MMM-yyyy') : '-' }}</div></div>
+      <div><span class="field-label">Gender</span><div>{{ profile.gender || '-' }}</div></div>
+      <div><span class="field-label">National ID</span><div>{{ profile.nationalId || '-' }}</div></div>
+      <div><span class="field-label">Father's Name</span><div>{{ profile.fatherName || '-' }}</div></div>
+      <div><span class="field-label">Mother's Name</span><div>{{ profile.motherName || '-' }}</div></div>
+      <div><span class="field-label">Marital Status</span><div>{{ profile.maritalStatus || '-' }}</div></div>
+      <div><span class="field-label">Religion</span><div>{{ profile.religion || '-' }}</div></div>
+      <div><span class="field-label">Nationality</span><div>{{ profile.nationality || '-' }}</div></div>
+    </div>
+  </section>
+
+  <section class="page-container">
+    <div class="form-container">
+      <h3 class="form-section-header">Contact</h3>
+
+      <div><span class="field-label">Present Address</span><div>{{ profile.presentAddress || '-' }}</div></div>
+      <div><span class="field-label">Permanent Address</span><div>{{ profile.permanentAddress || '-' }}</div></div>
+    </div>
+  </section>
+
+  <section class="page-container">
+    <div class="form-container">
+      <h3 class="form-section-header">Education</h3>
+
+      <div class="sm:col-span-2 text-sm text-neutral" *ngIf="profile.educations.length === 0">No education records.</div>
+      <div class="sm:col-span-2" *ngIf="profile.educations.length > 0">
+        <div class="list-row" *ngFor="let edu of profile.educations">
+          <div>
+            <strong>{{ edu.degreeTitle }}</strong> — {{ edu.institution }}
+            <span class="text-sm text-neutral ml-2">{{ edu.passingYear }}, {{ edu.result }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="page-container">
+    <div class="form-container">
+      <h3 class="form-section-header">Work Experience</h3>
+
+      <div class="sm:col-span-2 text-sm text-neutral" *ngIf="profile.workExperiences.length === 0">No work experience records.</div>
+      <div class="sm:col-span-2" *ngIf="profile.workExperiences.length > 0">
+        <div class="list-row" *ngFor="let exp of profile.workExperiences">
+          <div>
+            <strong>{{ exp.designation }}</strong> — {{ exp.companyName }}
+            <span class="text-sm text-neutral ml-2">
+              {{ exp.startDate | date: 'MMM yyyy' }} - {{ exp.isCurrent ? 'Present' : (exp.endDate | date: 'MMM yyyy') }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="page-container">
+    <div class="form-container">
+      <h3 class="form-section-header">Skills</h3>
+
+      <div class="sm:col-span-2 text-sm text-neutral" *ngIf="profile.skills.length === 0">No skills recorded.</div>
+      <div class="sm:col-span-2 skills-list" *ngIf="profile.skills.length > 0">
+        <span class="skill-chip" *ngFor="let skill of profile.skills">
+          {{ skill.skillName }}<span *ngIf="skill.proficiencyLevel"> · {{ skill.proficiencyLevel }}</span>
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <section class="page-container">
+    <div class="form-container">
+      <h3 class="form-section-header">Certifications</h3>
+
+      <div class="sm:col-span-2 text-sm text-neutral" *ngIf="profile.certifications.length === 0">No certifications.</div>
+      <div class="sm:col-span-2" *ngIf="profile.certifications.length > 0">
+        <div class="list-row" *ngFor="let cert of profile.certifications">
+          <div>
+            <strong>{{ cert.certificationName }}</strong>
+            <span *ngIf="cert.issuingOrganization"> — {{ cert.issuingOrganization }}</span>
+            <a *ngIf="cert.certificateFilePath" [href]="getFileUrl(cert.certificateFilePath)" target="_blank" rel="noopener noreferrer" class="text-primary ml-2">
+              <i class="fa fa-download"></i> View
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="page-container">
+    <div class="form-container">
+      <h3 class="form-section-header">Documents</h3>
+
+      <div class="sm:col-span-2 text-sm text-neutral" *ngIf="profile.documents.length === 0">No documents uploaded.</div>
+      <div class="sm:col-span-2" *ngIf="profile.documents.length > 0">
+        <div class="list-row" *ngFor="let doc of profile.documents">
+          <div>
+            <strong>{{ doc.documentType }}</strong> —
+            <a [href]="getFileUrl(doc.downloadUrl)" target="_blank" rel="noopener noreferrer" class="text-primary">{{ doc.fileName }}</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="page-container">
+    <div class="form-container">
+      <h3 class="form-section-header">Application History</h3>
+
+      <div class="sm:col-span-2 text-sm text-neutral" *ngIf="profile.applicationHistory.length === 0">This candidate hasn't applied to any jobs yet.</div>
+      <div class="sm:col-span-2" *ngIf="profile.applicationHistory.length > 0">
+        <div class="list-row" *ngFor="let app of profile.applicationHistory">
+          <div>
+            <strong>{{ app.jobPostingTitle || 'Unknown posting' }}</strong>
+            <span class="text-sm text-neutral ml-2">{{ app.applicationStatus }}</span>
+            <span class="text-sm text-neutral ml-2" *ngIf="app.appliedDate">Applied {{ app.appliedDate | date: 'dd-MMM-yyyy' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="page-container">
+    <div class="form-container">
+      <h3 class="form-section-header">HR Notes</h3>
+
+      <div class="sm:col-span-2">
+        <textarea pInputText [(ngModel)]="hrNotes" rows="4" class="w-full" maxlength="2000" placeholder="Private notes visible only to HR/Admin"></textarea>
+      </div>
+
+      <div *ngIf="notesSaveError" class="invalid sm:col-span-2">{{ notesSaveError }}</div>
+      <div *ngIf="notesSaveSuccess" class="success-message sm:col-span-2">Notes saved.</div>
+
+      <div class="sm:col-span-2">
+        <button pButton type="button" [disabled]="savingNotes" (click)="saveHrNotes()">
+          <i class="fas fa-save"></i>
+          <span>{{ savingNotes ? 'Saving...' : 'Save Notes' }}</span>
+        </button>
+      </div>
+    </div>
+  </section>
+</ng-container>

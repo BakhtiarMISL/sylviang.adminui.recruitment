@@ -1,0 +1,16 @@
+<div class="completeness-ring" [ngClass]="getRingColorClass()">
+  <svg viewBox="0 0 100 100">
+    <circle class="completeness-ring-bg" cx="50" cy="50" [attr.r]="ringRadius"></circle>
+    <circle
+      class="completeness-ring-value"
+      cx="50"
+      cy="50"
+      [attr.r]="ringRadius"
+      [style.stroke-dasharray]="ringCircumference"
+      [style.stroke-dashoffset]="getRingOffset()"
+    ></circle>
+  </svg>
+  <div class="completeness-ring-label">
+    <span class="completeness-ring-percent">{{ percentage }}%</span>
+  </div>
+</div>
