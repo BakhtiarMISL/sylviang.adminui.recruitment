@@ -1,0 +1,125 @@
+<section class="page-container">
+  <div class="form-container">
+    <h3 class="form-section-header">Account Settings</h3>
+
+    <div class="sm:col-span-2" *ngIf="loading">Loading...</div>
+    <div class="sm:col-span-2 invalid" *ngIf="loadError">{{ loadError }}</div>
+  </div>
+</section>
+
+<section class="page-container" *ngIf="!loading && account">
+  <div class="form-container">
+    <h3 class="form-section-header">Profile Photo</h3>
+
+    <div class="sm:col-span-2">
+      <img *ngIf="getPhotoUrl()" [src]="getPhotoUrl()" class="media-preview" alt="Profile photo" />
+
+      <label for="photoFile" class="upload-dropzone" [class.disabled]="uploadingPhoto">
+        <i class="fas" [class.fa-spinner]="uploadingPhoto" [class.fa-spin]="uploadingPhoto" [class.fa-cloud-upload-alt]="!uploadingPhoto"></i>
+        <span class="upload-dropzone-text">
+          <strong>{{ uploadingPhoto ? 'Uploading...' : (selectedPhotoName || 'Click to upload a photo') }}</strong>
+          <small>JPG or PNG, up to 2MB</small>
+        </span>
+      </label>
+      <input id="photoFile" type="file" (change)="onPhotoSelected($event)" accept=".jpg,.jpeg,.png" [disabled]="uploadingPhoto" class="sr-only" />
+
+      <div *ngIf="photoError" class="invalid mt-2">{{ photoError }}</div>
+      <button *ngIf="account.profilePhotoPath" pButton severity="danger" type="button" (click)="deletePhoto()" class="mt-3">
+        <i class="fas fa-trash"></i>
+        <span>Remove Photo</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<section class="page-container" *ngIf="!loading && account">
+  <form [formGroup]="emailForm" (ngSubmit)="submitEmail()" class="form-container">
+    <h3 class="form-section-header">Email</h3>
+
+    <div>
+      <p-floatlabel variant="in">
+        <input pInputText inputId="email" formControlName="email" maxlength="200" class="w-full" [class.ng-invalid]="hasEmailError('email')" [class.ng-dirty]="hasEmailError('email')" (blur)="ef['email'].markAsTouched()" />
+        <label for="email">Email *</label>
+      </p-floatlabel>
+      <div *ngIf="hasEmailError('email')" class="invalid">{{ getEmailErrorMessage('email') }}</div>
+    </div>
+
+    <div *ngIf="emailSaveError" class="invalid sm:col-span-2">{{ emailSaveError }}</div>
+    <div *ngIf="emailSaveSuccess" class="success-message sm:col-span-2">Email updated.</div>
+
+    <div class="sm:col-span-2">
+      <button pButton type="submit" [disabled]="savingEmail">
+        <i class="fas fa-save"></i>
+        <span>{{ savingEmail ? 'Saving...' : 'Save Email' }}</span>
+      </button>
+    </div>
+  </form>
+</section>
+
+<section class="page-container" *ngIf="!loading && account">
+  <form [formGroup]="passwordForm" (ngSubmit)="submitPassword()" class="form-container">
+    <h3 class="form-section-header">Change Password</h3>
+
+    <div>
+      <p-floatlabel variant="in">
+        <input
+          pInputText
+          type="password"
+          inputId="currentPassword"
+          formControlName="currentPassword"
+          class="w-full"
+          [class.ng-invalid]="hasPasswordError('currentPassword')"
+          [class.ng-dirty]="hasPasswordError('currentPassword')"
+          (blur)="pf['currentPassword'].markAsTouched()"
+        />
+        <label for="currentPassword">Current Password *</label>
+      </p-floatlabel>
+      <div *ngIf="hasPasswordError('currentPassword')" class="invalid">{{ getPasswordErrorMessage('currentPassword') }}</div>
+    </div>
+
+    <div>
+      <p-floatlabel variant="in">
+        <input
+          pInputText
+          type="password"
+          inputId="newPassword"
+          formControlName="newPassword"
+          class="w-full"
+          [class.ng-invalid]="hasPasswordError('newPassword')"
+          [class.ng-dirty]="hasPasswordError('newPassword')"
+          (blur)="pf['newPassword'].markAsTouched()"
+        />
+        <label for="newPassword">New Password *</label>
+      </p-floatlabel>
+      <div *ngIf="hasPasswordError('newPassword')" class="invalid">{{ getPasswordErrorMessage('newPassword') }}</div>
+    </div>
+
+    <div>
+      <p-floatlabel variant="in">
+        <input
+          pInputText
+          type="password"
+          inputId="confirmPassword"
+          formControlName="confirmPassword"
+          class="w-full"
+          [class.ng-invalid]="hasPasswordError('confirmPassword')"
+          [class.ng-dirty]="hasPasswordError('confirmPassword')"
+          (blur)="pf['confirmPassword'].markAsTouched()"
+        />
+        <label for="confirmPassword">Confirm New Password *</label>
+      </p-floatlabel>
+      <div *ngIf="hasPasswordError('confirmPassword')" class="invalid">{{ getPasswordErrorMessage('confirmPassword') }}</div>
+    </div>
+
+    <div *ngIf="getPasswordFormError()" class="invalid sm:col-span-2">{{ getPasswordFormError() }}</div>
+    <div *ngIf="passwordSaveError" class="invalid sm:col-span-2">{{ passwordSaveError }}</div>
+    <div *ngIf="passwordSaveSuccess" class="success-message sm:col-span-2">Password changed.</div>
+
+    <div class="sm:col-span-2">
+      <button pButton type="submit" [disabled]="savingPassword">
+        <i class="fas fa-save"></i>
+        <span>{{ savingPassword ? 'Saving...' : 'Change Password' }}</span>
+      </button>
+    </div>
+  </form>
+</section>

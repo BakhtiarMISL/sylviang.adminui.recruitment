@@ -1,0 +1,12 @@
+.list-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--p-content-border-color, #e5e7eb);
+}
+
+.list-row-actions {
+  display: flex;
+  gap: 0.5rem;
+}

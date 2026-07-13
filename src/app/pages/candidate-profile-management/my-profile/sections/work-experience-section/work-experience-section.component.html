@@ -1,0 +1,107 @@
+<div class="form-container">
+  <div class="sm:col-span-2" *ngIf="loading">Loading work experience...</div>
+
+  <div class="sm:col-span-2 text-sm text-neutral" *ngIf="!loading && items.length === 0">No work experience entries added yet.</div>
+
+  <div class="sm:col-span-2" *ngIf="!loading">
+    <div class="list-row" *ngFor="let item of items">
+      <div>
+        <strong>{{ item.designation }}</strong> at {{ item.companyName }}
+        <span *ngIf="item.isCurrent"> (Current)</span>
+      </div>
+      <div class="list-row-actions">
+        <button pButton severity="secondary" type="button" (click)="startEdit(item)">
+          <i class="fas fa-edit"></i>
+        </button>
+        <button pButton severity="danger" type="button" (click)="delete(item)">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="sm:col-span-2" *ngIf="prefillSuggestions.length > 0">
+    <p class="text-sm text-neutral">Suggested from your resume — review before adding:</p>
+    <div class="list-row" *ngFor="let suggestion of prefillSuggestions; let i = index">
+      <div>{{ suggestion.designation }}</div>
+      <div class="list-row-actions">
+        <button pButton severity="secondary" type="button" (click)="useSuggestion(suggestion, i)">Use</button>
+        <button pButton severity="danger" type="button" (click)="dismissSuggestion(i)">Dismiss</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="sm:col-span-2" *ngIf="!showForm">
+    <button pButton severity="secondary" type="button" (click)="startAdd()">
+      <i class="fas fa-plus"></i>
+      <span>Add Work Experience</span>
+    </button>
+  </div>
+</div>
+
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-container" *ngIf="showForm">
+  <div>
+    <p-floatlabel variant="in">
+      <input pInputText inputId="companyName" formControlName="companyName" maxlength="200" class="w-full" [class.ng-invalid]="hasError('companyName')" [class.ng-dirty]="hasError('companyName')" (blur)="f['companyName'].markAsTouched()" />
+      <label for="companyName">Company Name *</label>
+    </p-floatlabel>
+    <div *ngIf="hasError('companyName')" class="invalid">{{ getErrorMessage('companyName') }}</div>
+  </div>
+
+  <div>
+    <p-floatlabel variant="in">
+      <input pInputText inputId="designation" formControlName="designation" maxlength="200" class="w-full" [class.ng-invalid]="hasError('designation')" [class.ng-dirty]="hasError('designation')" (blur)="f['designation'].markAsTouched()" />
+      <label for="designation">Designation *</label>
+    </p-floatlabel>
+    <div *ngIf="hasError('designation')" class="invalid">{{ getErrorMessage('designation') }}</div>
+  </div>
+
+  <div>
+    <p-floatlabel variant="in">
+      <p-datepicker inputId="startDate" formControlName="startDate" dateFormat="dd-M-yy" [showIcon]="true" styleClass="w-full" [class.ng-invalid]="hasError('startDate')" [class.ng-dirty]="hasError('startDate')"></p-datepicker>
+      <label for="startDate">Start Date *</label>
+    </p-floatlabel>
+    <div *ngIf="hasError('startDate')" class="invalid">{{ getErrorMessage('startDate') }}</div>
+  </div>
+
+  <div>
+    <p-floatlabel variant="in">
+      <p-datepicker inputId="endDate" formControlName="endDate" dateFormat="dd-M-yy" [showIcon]="true" styleClass="w-full" [disabled]="f['isCurrent'].value"></p-datepicker>
+      <label for="endDate">End Date</label>
+    </p-floatlabel>
+  </div>
+
+  <div class="flex items-center gap-2">
+    <p-checkbox inputId="isCurrent" formControlName="isCurrent" [binary]="true"></p-checkbox>
+    <label for="isCurrent">I currently work here</label>
+  </div>
+
+  <div>
+    <p-floatlabel variant="in">
+      <input pInputText inputId="location" formControlName="location" maxlength="200" class="w-full" [class.ng-invalid]="hasError('location')" [class.ng-dirty]="hasError('location')" (blur)="f['location'].markAsTouched()" />
+      <label for="location">Location</label>
+    </p-floatlabel>
+    <div *ngIf="hasError('location')" class="invalid">{{ getErrorMessage('location') }}</div>
+  </div>
+
+  <div class="sm:col-span-2">
+    <p-floatlabel variant="in">
+      <textarea pInputText inputId="responsibilities" formControlName="responsibilities" class="w-full" rows="3"></textarea>
+      <label for="responsibilities">Responsibilities *</label>
+    </p-floatlabel>
+    <div *ngIf="hasError('responsibilities')" class="invalid">{{ getErrorMessage('responsibilities') }}</div>
+  </div>
+
+  <div *ngIf="getFormErrorMessage()" class="invalid sm:col-span-2">{{ getFormErrorMessage() }}</div>
+  <div *ngIf="saveError" class="invalid sm:col-span-2">{{ saveError }}</div>
+
+  <div class="sm:col-span-2 flex gap-3">
+    <button pButton type="submit" [disabled]="saving">
+      <i class="fas fa-save"></i>
+      <span>{{ saving ? 'Saving...' : 'Save' }}</span>
+    </button>
+    <button pButton severity="secondary" type="button" (click)="cancel()">
+      <span>Cancel</span>
+    </button>
+  </div>
+</form>

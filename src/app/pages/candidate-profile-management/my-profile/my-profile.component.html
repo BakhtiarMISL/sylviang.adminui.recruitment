@@ -1,0 +1,65 @@
+<section class="page-container">
+  <div class="form-container">
+    <h3 class="form-section-header">My Profile</h3>
+
+    <div class="sm:col-span-2" *ngIf="loading">
+      <p-skeleton height="2rem" styleClass="mb-2"></p-skeleton>
+      <p-skeleton height="2rem"></p-skeleton>
+    </div>
+
+    <div class="sm:col-span-2 invalid" *ngIf="loadError">{{ loadError }}</div>
+
+    <div class="sm:col-span-2 profile-header" *ngIf="!loading && profile">
+      <app-completeness-ring [percentage]="profile.completenessPercentage"></app-completeness-ring>
+      <div class="profile-header-text">
+        <span class="profile-header-title">Profile completeness</span>
+        <span class="profile-header-subtitle">Fill out every section below to reach 100%.</span>
+      </div>
+    </div>
+
+    <div class="sm:col-span-2" *ngIf="!loading && profile">
+      <p class="text-sm text-neutral mb-2">Upload your resume to prefill sections below (free, best-effort — review and Save each section yourself; nothing is saved automatically).</p>
+
+      <label for="resumeFile" class="upload-dropzone" [class.disabled]="parsingResume">
+        <i class="fas" [class.fa-spinner]="parsingResume" [class.fa-spin]="parsingResume" [class.fa-file-arrow-up]="!parsingResume"></i>
+        <span class="upload-dropzone-text">
+          <strong>{{ parsingResume ? 'Parsing resume...' : (selectedResumeName || 'Click to upload your resume') }}</strong>
+          <small>PDF or DOCX</small>
+        </span>
+      </label>
+      <input id="resumeFile" type="file" (change)="onResumeFileSelected($event)" accept=".pdf,.docx" [disabled]="parsingResume" class="sr-only" />
+
+      <div *ngIf="resumeError" class="invalid mt-2">{{ resumeError }}</div>
+      <div *ngIf="resumeParsed" class="text-sm text-neutral mt-2">Resume parsed — check each section below for prefilled fields/suggestions.</div>
+    </div>
+  </div>
+</section>
+
+<section class="page-container" *ngIf="!loading && profile">
+  <p-accordion [multiple]="true" [value]="['0', '1', '2', '3', '4', '5', '6', '7']">
+    <p-accordion-tab header="Personal Info" value="0">
+      <app-personal-info-section [profile]="profile" (saved)="onSectionSaved()"></app-personal-info-section>
+    </p-accordion-tab>
+    <p-accordion-tab header="Contact" value="1">
+      <app-contact-section [profile]="profile" (saved)="onSectionSaved()"></app-contact-section>
+    </p-accordion-tab>
+    <p-accordion-tab header="Education" value="2">
+      <app-education-section (saved)="onSectionSaved()"></app-education-section>
+    </p-accordion-tab>
+    <p-accordion-tab header="Work Experience" value="3">
+      <app-work-experience-section (saved)="onSectionSaved()"></app-work-experience-section>
+    </p-accordion-tab>
+    <p-accordion-tab header="Skills" value="4">
+      <app-skills-section (saved)="onSectionSaved()"></app-skills-section>
+    </p-accordion-tab>
+    <p-accordion-tab header="Certifications" value="5">
+      <app-certifications-section (saved)="onSectionSaved()"></app-certifications-section>
+    </p-accordion-tab>
+    <p-accordion-tab header="Photo & Signature" value="6">
+      <app-photo-signature-upload [profile]="profile" (saved)="onSectionSaved()"></app-photo-signature-upload>
+    </p-accordion-tab>
+    <p-accordion-tab header="Documents" value="7">
+      <app-documents-section (saved)="onSectionSaved()"></app-documents-section>
+    </p-accordion-tab>
+  </p-accordion>
+</section>
