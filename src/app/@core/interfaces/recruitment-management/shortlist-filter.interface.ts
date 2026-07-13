@@ -60,3 +60,20 @@ export interface IShortlistFilterPreviewResponse {
   passingCount: number;
   passingJobApplicationIds: number[];
 }
+
+export interface IShortlistFilterApplyRequest {
+  shortlistFilterId: number;
+  jobPostingId: number;
+}
+
+export interface IShortlistFilterApplyFailure {
+  jobApplicationId: number;
+  reason: string;
+}
+
+export interface IShortlistFilterApplyResponse {
+  totalProcessed: number;
+  totalShortlisted: number;
+  totalFailed: number;
+  failures: IShortlistFilterApplyFailure[];
+}

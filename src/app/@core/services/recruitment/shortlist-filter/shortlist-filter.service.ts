@@ -2,6 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ApiResponse } from '@core/interfaces/ApiResponse';
 import {
+  IShortlistFilterApplyRequest,
+  IShortlistFilterApplyResponse,
   IShortlistFilterCreateRequest,
   IShortlistFilterLookupResponse,
   IShortlistFilterPreviewRequest,
@@ -45,5 +47,9 @@ export class ShortlistFilterService {
 
   preview(request: IShortlistFilterPreviewRequest) {
     return this.httpClient.post<ApiResponse<IShortlistFilterPreviewResponse>>(`${this.API_URL}/preview`, request);
+  }
+
+  apply(request: IShortlistFilterApplyRequest) {
+    return this.httpClient.post<ApiResponse<IShortlistFilterApplyResponse>>(`${this.API_URL}/apply`, request);
   }
 }

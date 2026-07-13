@@ -74,6 +74,28 @@
     </button>
   </div>
 
+  <div class="filter-bar" *ngIf="filterJobPostingId">
+    <p-floatlabel variant="in">
+      <p-select
+        inputId="selectedShortlistFilterId"
+        [options]="shortlistFilters"
+        [(ngModel)]="selectedShortlistFilterId"
+        optionLabel="name"
+        optionValue="shortlistFilterId"
+        [appendTo]="'body'"
+        [autoDisplayFirst]="false"
+        [showClear]="true"
+        class="w-full"
+      ></p-select>
+      <label for="selectedShortlistFilterId">Shortlist Filter</label>
+    </p-floatlabel>
+
+    <button pButton [disabled]="!canApplyShortlistFilter() || applyingShortlistFilter" (click)="applyShortlistFilter($event)">
+      <i class="fa fa-filter-circle-check"></i>
+      <span>Apply to Applications</span>
+    </button>
+  </div>
+
   <div class="bulk-action-bar" *ngIf="selectedApplications.length > 0">
     <p-floatlabel variant="in">
       <p-select
@@ -190,7 +212,11 @@
               <td>{{ application.jobPostingTitle || '-' }}</td>
               <td>{{ formatEnumLabel(application.source) }}</td>
               <td>{{ application.appliedDate ? (application.appliedDate | date: 'dd-MMM-yyyy') : '-' }}</td>
-              <td><span class="status-badge">{{ formatEnumLabel(application.applicationStatus) }}</span></td>
+              <td>
+                <span class="status-badge" [class.status-badge-shortlisted]="application.applicationStatus === 'Shortlisted'">
+                  {{ formatEnumLabel(application.applicationStatus) }}
+                </span>
+              </td>
               <td>
                 <button (click)="openDetail(application)" class="text-primary" pTooltip="View Detail">
                   <i class="fa fa-eye"></i>
@@ -220,4 +246,25 @@
 
 <p-dialog header="Pipeline Progress" [(visible)]="pipelineDialogVisible" [modal]="true" [style]="{ width: '60rem', maxWidth: '95vw' }">
   <app-pipeline-progress-tracker *ngIf="pipelineDialogVisible && pipelineDialogApplicationId" [jobApplicationId]="pipelineDialogApplicationId"></app-pipeline-progress-tracker>
+</p-dialog>
+
+<p-dialog header="Shortlist Filter Applied" [(visible)]="shortlistApplySummaryVisible" [modal]="true" [style]="{ width: '28rem', maxWidth: '95vw' }">
+  <div class="shortlist-summary" *ngIf="shortlistApplySummary as summary">
+    <div class="shortlist-summary-row">
+      <span>Total Processed</span>
+      <strong>{{ summary.totalProcessed }}</strong>
+    </div>
+    <div class="shortlist-summary-row">
+      <span>Total Shortlisted</span>
+      <strong>{{ summary.totalShortlisted }}</strong>
+    </div>
+    <div class="shortlist-summary-row">
+      <span>Total Failed</span>
+      <strong>{{ summary.totalFailed }}</strong>
+    </div>
+
+    <ul class="shortlist-summary-failures" *ngIf="summary.failures.length > 0">
+      <li *ngFor="let failure of summary.failures">Application #{{ failure.jobApplicationId }}: {{ failure.reason }}</li>
+    </ul>
+  </div>
 </p-dialog>
