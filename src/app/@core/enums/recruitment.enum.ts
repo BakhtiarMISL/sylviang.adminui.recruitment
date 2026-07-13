@@ -46,3 +46,10 @@ export enum ApplicationStatusEnum {
   Rejected = 'Rejected',
   Withdrawn = 'Withdrawn',
 }
+
+export enum StageProgressStatusEnum {
+  Pending = 'Pending',
+  InProgress = 'InProgress',
+  Completed = 'Completed',
+  Rejected = 'Rejected',
+}

@@ -8,6 +8,7 @@ import { AutoCompleteModule } from 'primeng/autocomplete';
 import { ButtonModule } from 'primeng/button';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DatePickerModule } from 'primeng/datepicker';
+import { DialogModule } from 'primeng/dialog';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
@@ -19,9 +20,10 @@ import { ApplicationTrackingRoutingModule } from './application-tracking-routing
 import { AtsDashboardComponent } from './ats-dashboard/ats-dashboard.component';
 import { ApplicationDetailComponent } from './application-detail/application-detail.component';
 import { ApplyOnBehalfComponent } from './apply-on-behalf/apply-on-behalf.component';
+import { PipelineProgressTrackerComponent } from './pipeline-progress-tracker/pipeline-progress-tracker.component';
 
 @NgModule({
-  declarations: [AtsDashboardComponent, ApplicationDetailComponent, ApplyOnBehalfComponent],
+  declarations: [AtsDashboardComponent, ApplicationDetailComponent, ApplyOnBehalfComponent, PipelineProgressTrackerComponent],
   imports: [
     ReactiveFormsModule,
     FormsModule,
@@ -41,6 +43,7 @@ import { ApplyOnBehalfComponent } from './apply-on-behalf/apply-on-behalf.compon
     TextareaModule,
     TooltipModule,
     DatePickerModule,
+    DialogModule,
   ],
 })
 export class ApplicationTrackingModule {}

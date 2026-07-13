@@ -59,6 +59,10 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit {
   bulkStatusOptions = ApplicationStatusOptions;
   bulkApplying = false;
 
+  // Pipeline progress tracker dialog (US-042 AC5)
+  pipelineDialogVisible = false;
+  pipelineDialogApplicationId: number | null = null;
+
   get skeletonItems() {
     return Array(this.rows)
       .fill({})
@@ -165,6 +169,11 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit {
 
   openDetail(application: IJobApplicationListItem): void {
     this.router.navigate(['/applications', application.jobApplicationId]);
+  }
+
+  openPipelineTracker(application: IJobApplicationListItem): void {
+    this.pipelineDialogApplicationId = application.jobApplicationId;
+    this.pipelineDialogVisible = true;
   }
 
   onBulkStatusChange(status: ApplicationStatusEnum | null): void {

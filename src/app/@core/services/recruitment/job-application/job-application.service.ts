@@ -12,6 +12,7 @@ import {
   IMyApplication,
 } from '@core/interfaces/recruitment-management/job-application.interface';
 import { IJobApplicationSubmitResponse } from '@core/interfaces/recruitment-management/career-portal.interface';
+import { IJobApplicationPipelineProgress, IPipelineStageProgressUpdateRequest } from '@core/interfaces/recruitment-management/pipeline-progress.interface';
 import { BASE_URL_Recruitment } from '@env/environment';
 
 @Injectable({
@@ -69,5 +70,15 @@ export class JobApplicationService {
 
   withdrawMyApplication(jobApplicationId: number) {
     return this.httpClient.patch<ApiResponse<void>>(`${this.API_URL}/my-applications/${jobApplicationId}/withdraw`, {});
+  }
+
+  // ── Pipeline Progress Tracker (US-042) ──────────────────────────
+
+  getPipelineProgress(jobApplicationId: number) {
+    return this.httpClient.get<ApiResponse<IJobApplicationPipelineProgress>>(`${this.API_URL}/${jobApplicationId}/pipeline-progress`);
+  }
+
+  updateStageProgress(jobApplicationId: number, pipelineStageId: number, request: IPipelineStageProgressUpdateRequest) {
+    return this.httpClient.patch<ApiResponse<void>>(`${this.API_URL}/${jobApplicationId}/pipeline-progress/${pipelineStageId}`, request);
   }
 }
