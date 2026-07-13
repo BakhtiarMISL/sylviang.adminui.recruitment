@@ -53,3 +53,17 @@ export enum StageProgressStatusEnum {
   Completed = 'Completed',
   Rejected = 'Rejected',
 }
+
+export enum CriterionTypeEnum {
+  EducationLevel = 'EducationLevel',
+  MinExperienceYears = 'MinExperienceYears',
+  RequiredSkills = 'RequiredSkills',
+  AgeRange = 'AgeRange',
+  District = 'District',
+  MinScreeningScore = 'MinScreeningScore',
+}
+
+export enum FilterCombinatorEnum {
+  And = 'And',
+  Or = 'Or',
+}

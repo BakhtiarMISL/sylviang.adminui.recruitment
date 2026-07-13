@@ -28,6 +28,12 @@ export const webSidebarMenuItems: IMenuItem[] = [
         icon: 'fa-solid fa-diagram-project',
       },
       {
+        href: '/shortlist-filters/shortlist-filter-list',
+        title: 'Shortlist Filters',
+        active: false,
+        icon: 'fa-solid fa-filter',
+      },
+      {
         href: '/candidates',
         title: 'Candidates',
         active: false,

@@ -1,0 +1,52 @@
+<section class="page-container">
+  <div class="flex justify-between items-center gap-3 mb-4">
+    <h3 class="table-title">Shortlist Filters</h3>
+    <button pButton [routerLink]="['/shortlist-filters/manage-shortlist-filter']">
+      <i class="fa fa-plus"></i>
+      <span>Add Filter</span>
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="space-y-3">
+    <p-skeleton height="5rem" *ngFor="let i of skeletonItems"></p-skeleton>
+  </div>
+
+  <div *ngIf="!loading && filters.length === 0" class="table-container">
+    <div class="not-found">
+      <i class="fa fa-magnifying-glass-minus"></i>
+      <p>No shortlist filters configured yet.</p>
+    </div>
+  </div>
+
+  <div *ngIf="!loading" class="grid grid-cols-1 gap-4">
+    <div *ngFor="let filter of filters" class="rounded-lg bg-white p-4 shadow-sm dark:bg-dark">
+      <div class="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+        <div>
+          <div class="flex items-center gap-2">
+            <h4 class="text-lg font-medium text-gray-900 dark:text-white">{{ filter.name }}</h4>
+            <span class="rounded-full px-2 py-0.5 text-xs font-medium bg-indigo-100 text-indigo-700">{{ filter.combineWith }}</span>
+          </div>
+          <p class="text-sm text-gray-600 dark:text-gray-300" *ngIf="filter.description">{{ filter.description }}</p>
+          <p class="mt-1 text-sm text-gray-500">{{ filter.criteria.length }} {{ filter.criteria.length === 1 ? 'criterion' : 'criteria' }}</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <button pButton severity="secondary" [routerLink]="['/shortlist-filters/manage-shortlist-filter', filter.shortlistFilterId]">
+            <i class="fa fa-edit"></i>
+            <span>Edit</span>
+          </button>
+          <button pButton severity="danger" (click)="deleteFilter(filter, $event)">
+            <i class="fa fa-trash"></i>
+            <span>Delete</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="mt-3 flex flex-wrap gap-2" *ngIf="filter.criteria.length > 0">
+        <span *ngFor="let criterion of filter.criteria" class="rounded-md px-2 py-1 text-xs font-medium bg-indigo-50 text-indigo-700">
+          {{ criterion.criterionType }}
+        </span>
+      </div>
+    </div>
+  </div>
+</section>
