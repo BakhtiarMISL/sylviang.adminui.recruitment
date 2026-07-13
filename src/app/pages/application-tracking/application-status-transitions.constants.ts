@@ -6,7 +6,7 @@ import { ApplicationStatusEnum } from '@app/@core/enums/recruitment.enum';
  * of truth/enforcement - this is a UX shortcut, not validation.
  */
 export const ApplicationStatusTransitions: Record<ApplicationStatusEnum, ApplicationStatusEnum[]> = {
-  [ApplicationStatusEnum.Applied]: [ApplicationStatusEnum.Screening, ApplicationStatusEnum.Rejected, ApplicationStatusEnum.Withdrawn],
+  [ApplicationStatusEnum.Applied]: [ApplicationStatusEnum.Screening, ApplicationStatusEnum.Shortlisted, ApplicationStatusEnum.Rejected, ApplicationStatusEnum.Withdrawn],
   [ApplicationStatusEnum.Screening]: [ApplicationStatusEnum.Shortlisted, ApplicationStatusEnum.Rejected, ApplicationStatusEnum.Withdrawn],
   [ApplicationStatusEnum.Shortlisted]: [ApplicationStatusEnum.InterviewScheduled, ApplicationStatusEnum.Rejected, ApplicationStatusEnum.Withdrawn],
   [ApplicationStatusEnum.InterviewScheduled]: [ApplicationStatusEnum.Interviewed, ApplicationStatusEnum.Rejected, ApplicationStatusEnum.Withdrawn],

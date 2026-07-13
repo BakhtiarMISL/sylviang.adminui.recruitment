@@ -43,4 +43,29 @@
   font-weight: 500;
   background: #eef2ff;
   color: #4338ca;
+
+  &.status-badge-shortlisted {
+    background: #dcfce7;
+    color: #15803d;
+  }
+}
+
+.shortlist-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  &-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.35rem 0;
+    border-bottom: 1px solid var(--surface-200, #e4e4e7);
+  }
+
+  &-failures {
+    margin: 0.5rem 0 0;
+    padding-left: 1.1rem;
+    font-size: 0.85rem;
+    color: var(--red-600, #dc2626);
+  }
 }

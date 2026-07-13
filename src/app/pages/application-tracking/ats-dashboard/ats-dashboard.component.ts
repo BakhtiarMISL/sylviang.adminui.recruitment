@@ -3,8 +3,10 @@ import { Router } from '@angular/router';
 import { ApplicationSourceEnum, ApplicationStatusEnum } from '@app/@core/enums/recruitment.enum';
 import { IApplicationStatusReason, IJobApplicationListItem } from '@app/@core/interfaces/recruitment-management/job-application.interface';
 import { IJobVacancyResponse } from '@app/@core/interfaces/recruitment-management/job-vacancy.interface';
+import { IShortlistFilterApplyResponse, IShortlistFilterLookupResponse } from '@app/@core/interfaces/recruitment-management/shortlist-filter.interface';
 import { JobApplicationService } from '@app/@core/services/recruitment/job-application/job-application.service';
 import { JobVacancyService } from '@app/@core/services/recruitment/job-vacancy/job-vacancy.service';
+import { ShortlistFilterService } from '@app/@core/services/recruitment/shortlist-filter/shortlist-filter.service';
 import { ToastService } from '@app/@core/services/misc/toast.service';
 import { UI_CONFIG } from '@app/@core/constants';
 import { ConfirmationService, SortEvent } from 'primeng/api';
@@ -21,6 +23,7 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit {
   constructor(
     private jobApplicationService: JobApplicationService,
     private jobVacancyService: JobVacancyService,
+    private shortlistFilterService: ShortlistFilterService,
     private cdr: ChangeDetectorRef,
     private confirmationService: ConfirmationService,
     private toast: ToastService,
@@ -63,6 +66,13 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit {
   pipelineDialogVisible = false;
   pipelineDialogApplicationId: number | null = null;
 
+  // Apply shortlist filter to vacancy (US-044)
+  shortlistFilters: IShortlistFilterLookupResponse[] = [];
+  selectedShortlistFilterId: number | null = null;
+  applyingShortlistFilter = false;
+  shortlistApplySummary: IShortlistFilterApplyResponse | null = null;
+  shortlistApplySummaryVisible = false;
+
   get skeletonItems() {
     return Array(this.rows)
       .fill({})
@@ -72,6 +82,7 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     this.loadJobPostings();
     this.loadApplications();
+    this.loadShortlistFilters();
     this.isLoading = false;
   }
 
@@ -174,6 +185,53 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit {
   openPipelineTracker(application: IJobApplicationListItem): void {
     this.pipelineDialogApplicationId = application.jobApplicationId;
     this.pipelineDialogVisible = true;
+  }
+
+  loadShortlistFilters(): void {
+    this.shortlistFilterService.getLookup().subscribe({
+      next: (response) => {
+        this.shortlistFilters = response && !response.hasError && response.content ? response.content : [];
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  canApplyShortlistFilter(): boolean {
+    return !!this.filterJobPostingId && !!this.selectedShortlistFilterId;
+  }
+
+  applyShortlistFilter(event: Event): void {
+    if (!this.filterJobPostingId || !this.selectedShortlistFilterId) return;
+
+    const filterName = this.shortlistFilters.find((f) => f.shortlistFilterId === this.selectedShortlistFilterId)?.name;
+
+    this.confirmationService.confirm({
+      target: event.target as EventTarget,
+      message: `Apply "${filterName}" to every application of this vacancy? Candidates who meet the criteria will be moved to Shortlisted.`,
+      header: 'Apply Shortlist Filter',
+      acceptButtonStyleClass: 'p-button-primary',
+      rejectButtonStyleClass: 'p-button-secondary',
+      acceptIcon: 'fa fa-check',
+      rejectIcon: 'fa fa-times',
+      accept: () => {
+        this.applyingShortlistFilter = true;
+
+        this.shortlistFilterService
+          .apply({ shortlistFilterId: this.selectedShortlistFilterId!, jobPostingId: this.filterJobPostingId! })
+          .subscribe({
+            next: (response) => {
+              this.applyingShortlistFilter = false;
+              this.shortlistApplySummary = response?.content ?? null;
+              this.shortlistApplySummaryVisible = true;
+              this.loadApplications();
+            },
+            error: (error) => {
+              this.applyingShortlistFilter = false;
+              this.toast.error({ detail: error?.error?.decentMessage || 'Failed to apply shortlist filter.' });
+            },
+          });
+      },
+    });
   }
 
   onBulkStatusChange(status: ApplicationStatusEnum | null): void {
