@@ -62,6 +62,12 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit {
   bulkStatusOptions = ApplicationStatusOptions;
   bulkApplying = false;
 
+  // Bulk selection across pages (US-047 AC5)
+  selectAllMatchingActive = false;
+  selectedAllIds: number[] = [];
+  loadingSelectAll = false;
+  shortlisting = false;
+
   // Pipeline progress tracker dialog (US-042 AC5)
   pipelineDialogVisible = false;
   pipelineDialogApplicationId: number | null = null;
@@ -101,6 +107,8 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit {
 
   onSelectionChange(event: any): void {
     this.selectedApplications = event;
+    this.selectAllMatchingActive = false;
+    this.selectedAllIds = [];
     this.bulkToStatus = null;
     this.bulkReasonId = null;
     this.bulkNote = '';
@@ -122,6 +130,17 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit {
     this.loadApplications();
   }
 
+  /** Filter-only query params (no page/sort) shared by loadApplications and select-all-matching (US-047 AC5). */
+  buildFilterParams(): any {
+    return {
+      ...(this.filterJobPostingId && { jobPostingId: this.filterJobPostingId }),
+      ...(this.filterStatus && { status: this.filterStatus }),
+      ...(this.filterSource && { source: this.filterSource }),
+      ...(this.filterDateFrom && { dateFrom: this.filterDateFrom.toISOString() }),
+      ...(this.filterDateTo && { dateTo: this.filterDateTo.toISOString() }),
+    };
+  }
+
   loadApplications(): void {
     this.loading = true;
 
@@ -130,11 +149,7 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit {
       pageSize: this.rows,
       ...(this.sortBy && { sortBy: this.sortBy }),
       ...(this.sortDirection && { sortDirection: this.sortDirection }),
-      ...(this.filterJobPostingId && { jobPostingId: this.filterJobPostingId }),
-      ...(this.filterStatus && { status: this.filterStatus }),
-      ...(this.filterSource && { source: this.filterSource }),
-      ...(this.filterDateFrom && { dateFrom: this.filterDateFrom.toISOString() }),
-      ...(this.filterDateTo && { dateTo: this.filterDateTo.toISOString() }),
+      ...this.buildFilterParams(),
     };
 
     this.jobApplicationService.getDashboardPaged(params).subscribe({
@@ -143,6 +158,8 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit {
           this.applications = response.content.data || [];
           this.totalRecords = response.content.totalCount || 0;
           this.selectedApplications = [];
+          this.selectAllMatchingActive = false;
+          this.selectedAllIds = [];
         } else {
           this.applications = [];
           this.totalRecords = 0;
@@ -234,6 +251,79 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit {
     });
   }
 
+  // ── Bulk selection across pages (US-047 AC5) ────────────────────
+
+  selectedCount(): number {
+    return this.selectAllMatchingActive ? this.selectedAllIds.length : this.selectedApplications.length;
+  }
+
+  getSelectedIds(): number[] {
+    return this.selectAllMatchingActive ? this.selectedAllIds : this.selectedApplications.map((a) => a.jobApplicationId);
+  }
+
+  selectAllMatching(): void {
+    this.loadingSelectAll = true;
+
+    this.jobApplicationService.getDashboardMatchingIds(this.buildFilterParams()).subscribe({
+      next: (response) => {
+        this.loadingSelectAll = false;
+        this.selectedAllIds = response && !response.hasError && response.content ? response.content : [];
+        this.selectAllMatchingActive = true;
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        this.loadingSelectAll = false;
+        this.toast.error({ detail: error?.error?.decentMessage || 'Failed to select all matching applications.' });
+      },
+    });
+  }
+
+  clearSelection(): void {
+    this.selectedApplications = [];
+    this.selectedAllIds = [];
+    this.selectAllMatchingActive = false;
+  }
+
+  // ── Dedicated "Shortlist Selected" bulk action (US-047 AC2/AC3) ─
+
+  shortlistSelected(event: Event): void {
+    const ids = this.getSelectedIds();
+    if (ids.length === 0) return;
+
+    this.confirmationService.confirm({
+      target: event.target as EventTarget,
+      message: `Move ${ids.length} application(s) to Shortlisted?`,
+      header: 'Shortlist Selected',
+      acceptButtonStyleClass: 'p-button-primary',
+      rejectButtonStyleClass: 'p-button-secondary',
+      acceptIcon: 'fa fa-check',
+      rejectIcon: 'fa fa-times',
+      accept: () => {
+        this.shortlisting = true;
+
+        this.jobApplicationService
+          .bulkUpdateStatus({ jobApplicationIds: ids, toStatus: ApplicationStatusEnum.Shortlisted })
+          .subscribe({
+            next: (response) => {
+              this.shortlisting = false;
+              const result = response?.content;
+              if (result && result.failed.length > 0) {
+                this.toast.warn({ detail: `${result.succeededIds.length} shortlisted, ${result.failed.length} failed.` });
+              } else {
+                this.toast.success({ detail: 'Applications shortlisted.' });
+              }
+              this.clearSelection();
+              this.loadApplications();
+            },
+            error: (error) => {
+              this.shortlisting = false;
+              this.toast.error({ detail: error?.error?.decentMessage || 'Failed to shortlist applications.' });
+            },
+          });
+      },
+    });
+  }
+
   onBulkStatusChange(status: ApplicationStatusEnum | null): void {
     this.bulkReasonId = null;
     this.bulkReasonOptions = [];
@@ -253,16 +343,17 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit {
   }
 
   canApplyBulk(): boolean {
-    if (!this.bulkToStatus || this.selectedApplications.length === 0) return false;
+    if (!this.bulkToStatus || this.selectedCount() === 0) return false;
     return !this.bulkRequiresReason() || !!this.bulkReasonId;
   }
 
   applyBulkStatus(event: Event): void {
     if (!this.bulkToStatus) return;
+    const ids = this.getSelectedIds();
 
     this.confirmationService.confirm({
       target: event.target as EventTarget,
-      message: `Move ${this.selectedApplications.length} application(s) to ${this.formatEnumLabel(this.bulkToStatus)}?`,
+      message: `Move ${ids.length} application(s) to ${this.formatEnumLabel(this.bulkToStatus)}?`,
       header: 'Confirm Bulk Status Update',
       acceptButtonStyleClass: 'p-button-primary',
       rejectButtonStyleClass: 'p-button-secondary',
@@ -273,7 +364,7 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit {
 
         this.jobApplicationService
           .bulkUpdateStatus({
-            jobApplicationIds: this.selectedApplications.map((a) => a.jobApplicationId),
+            jobApplicationIds: ids,
             toStatus: this.bulkToStatus!,
             reasonId: this.bulkReasonId ?? undefined,
             note: this.bulkNote || undefined,
@@ -290,6 +381,7 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit {
               this.bulkToStatus = null;
               this.bulkReasonId = null;
               this.bulkNote = '';
+              this.clearSelection();
               this.loadApplications();
             },
             error: (error) => {

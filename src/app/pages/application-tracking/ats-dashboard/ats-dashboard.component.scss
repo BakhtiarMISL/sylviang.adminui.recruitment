@@ -35,6 +35,21 @@
   }
 }
 
+.select-all-matching {
+  flex-basis: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-color-secondary, #52525b);
+
+  a {
+    color: var(--primary-color, #10b981);
+    font-weight: 500;
+    text-decoration: underline;
+  }
+}
+
 .status-badge {
   display: inline-block;
   padding: 0.15rem 0.6rem;

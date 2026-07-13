@@ -27,6 +27,11 @@ export class JobApplicationService {
     return this.httpClient.get<ApiResponse<PaginatedResponse<IJobApplicationListItem[]>>>(`${this.API_URL}/dashboard/paged`, { params });
   }
 
+  /** IDs of every application matching the dashboard filters, unpaginated (US-047 AC5). */
+  getDashboardMatchingIds(params: any) {
+    return this.httpClient.get<ApiResponse<number[]>>(`${this.API_URL}/dashboard/matching-ids`, { params });
+  }
+
   getDetail(jobApplicationId: number) {
     return this.httpClient.get<ApiResponse<IJobApplicationDetail>>(`${this.API_URL}/${jobApplicationId}/detail`);
   }

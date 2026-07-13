@@ -96,7 +96,22 @@
     </button>
   </div>
 
-  <div class="bulk-action-bar" *ngIf="selectedApplications.length > 0">
+  <div class="bulk-action-bar" *ngIf="selectedCount() > 0">
+    <div class="select-all-matching" *ngIf="!selectAllMatchingActive && selectedApplications.length > 0 && selectedApplications.length < totalRecords">
+      <a href="javascript:void(0)" (click)="selectAllMatching()">
+        {{ loadingSelectAll ? 'Selecting…' : 'Select all ' + totalRecords + ' applications matching the current filter' }}
+      </a>
+    </div>
+    <div class="select-all-matching" *ngIf="selectAllMatchingActive">
+      <span>All {{ selectedAllIds.length }} matching applications selected.</span>
+      <a href="javascript:void(0)" (click)="clearSelection()">Clear selection</a>
+    </div>
+
+    <button pButton severity="success" [disabled]="shortlisting || bulkApplying" (click)="shortlistSelected($event)">
+      <i class="fa fa-user-check"></i>
+      <span>Shortlist Selected ({{ selectedCount() }})</span>
+    </button>
+
     <p-floatlabel variant="in">
       <p-select
         inputId="bulkToStatus"
@@ -133,7 +148,7 @@
 
     <button pButton [disabled]="!canApplyBulk() || bulkApplying" (click)="applyBulkStatus($event)">
       <i class="fa fa-check"></i>
-      <span>Apply to {{ selectedApplications.length }} Selected</span>
+      <span>Apply to {{ selectedCount() }} Selected</span>
     </button>
   </div>
 
@@ -142,7 +157,7 @@
       <h3 class="table-title">
         ATS Dashboard
         <span class="table-title-info" *ngIf="totalRecords > 0">
-          ({{ totalRecords }} total{{ selectedApplications.length > 0 ? ', ' + selectedApplications.length + ' selected' : '' }})
+          ({{ totalRecords }} total{{ selectedCount() > 0 ? ', ' + selectedCount() + ' selected' : '' }})
         </span>
       </h3>
     </div>
