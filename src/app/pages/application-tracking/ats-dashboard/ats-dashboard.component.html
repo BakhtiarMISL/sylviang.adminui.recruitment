@@ -72,6 +72,38 @@
       <i class="fa fa-times"></i>
       <span>Reset</span>
     </button>
+
+    <button severity="secondary" pButton (click)="openSaveSearchDialog()">
+      <i class="fa fa-bookmark"></i>
+      <span>Save Search</span>
+    </button>
+  </div>
+
+  <div class="filter-bar">
+    <p-floatlabel variant="in">
+      <p-select
+        inputId="selectedSavedSearchId"
+        [options]="savedSearches"
+        [(ngModel)]="selectedSavedSearchId"
+        optionLabel="name"
+        optionValue="savedSearchId"
+        [appendTo]="'body'"
+        [autoDisplayFirst]="false"
+        [showClear]="true"
+        class="w-full"
+      ></p-select>
+      <label for="selectedSavedSearchId">Saved Search</label>
+    </p-floatlabel>
+
+    <button pButton [disabled]="!canApplySavedSearch()" (click)="applySavedSearch()">
+      <i class="fa fa-magnifying-glass"></i>
+      <span>Apply Saved Search</span>
+    </button>
+
+    <button severity="secondary" pButton (click)="openManageSavedSearchesDialog()">
+      <i class="fa fa-gear"></i>
+      <span>Manage Saved Searches</span>
+    </button>
   </div>
 
   <div class="filter-bar" *ngIf="filterJobPostingId">
@@ -343,5 +375,54 @@
     <ul class="shortlist-summary-failures" *ngIf="summary.failures.length > 0">
       <li *ngFor="let failure of summary.failures">Application #{{ failure.jobApplicationId }}: {{ failure.reason }}</li>
     </ul>
+  </div>
+</p-dialog>
+
+<p-dialog header="Save Search" [(visible)]="saveSearchDialogVisible" [modal]="true" [style]="{ width: '28rem', maxWidth: '95vw' }">
+  <div class="save-search-form">
+    <p-floatlabel variant="in">
+      <input pInputText id="saveSearchName" [(ngModel)]="saveSearchName" class="w-full" />
+      <label for="saveSearchName">Name</label>
+    </p-floatlabel>
+
+    <p-checkbox [(ngModel)]="saveSearchIsShared" [binary]="true" inputId="saveSearchIsShared"></p-checkbox>
+    <label for="saveSearchIsShared">Share with HR team</label>
+
+    <button pButton [disabled]="!saveSearchName.trim() || savingSearch" (click)="confirmSaveSearch()">
+      <i class="fa fa-check"></i>
+      <span>Save</span>
+    </button>
+  </div>
+</p-dialog>
+
+<p-dialog header="Manage Saved Searches" [(visible)]="manageSavedSearchesDialogVisible" [modal]="true" [style]="{ width: '36rem', maxWidth: '95vw' }">
+  <div class="manage-saved-searches">
+    <div class="manage-saved-search-row" *ngFor="let search of savedSearches">
+      <ng-container *ngIf="editingSavedSearchId === search.savedSearchId; else viewRow">
+        <input pInputText [(ngModel)]="editingSavedSearchName" class="manage-saved-search-name-input" />
+        <p-checkbox [(ngModel)]="editingSavedSearchIsShared" [binary]="true" inputId="editingSavedSearchIsShared-{{ search.savedSearchId }}"></p-checkbox>
+        <label for="editingSavedSearchIsShared-{{ search.savedSearchId }}">Shared</label>
+        <button pButton [disabled]="!editingSavedSearchName.trim()" (click)="confirmEditSavedSearch(search)">
+          <i class="fa fa-check"></i>
+        </button>
+        <button severity="secondary" pButton (click)="cancelEditSavedSearch()">
+          <i class="fa fa-times"></i>
+        </button>
+      </ng-container>
+      <ng-template #viewRow>
+        <span class="manage-saved-search-name">{{ search.name }}</span>
+        <span class="manage-saved-search-shared" *ngIf="search.isShared">Shared</span>
+        <button pButton [disabled]="!search.isOwner" pTooltip="Rename" (click)="startEditSavedSearch(search)">
+          <i class="fa fa-pen"></i>
+        </button>
+        <button severity="danger" pButton [disabled]="!search.isOwner" pTooltip="Delete" (click)="deleteSavedSearch(search, $event)">
+          <i class="fa fa-trash"></i>
+        </button>
+      </ng-template>
+    </div>
+
+    <div class="not-found" *ngIf="savedSearches.length === 0">
+      <p>No saved searches yet.</p>
+    </div>
   </div>
 </p-dialog>
