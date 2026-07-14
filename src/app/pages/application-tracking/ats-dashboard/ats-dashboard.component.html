@@ -77,6 +77,68 @@
   <div class="filter-bar" *ngIf="filterJobPostingId">
     <p-floatlabel variant="in">
       <p-select
+        inputId="filterMinEducationLevel"
+        [options]="educationLevelOptions"
+        [(ngModel)]="filterMinEducationLevel"
+        (ngModelChange)="onCandidateAttributeFilterChange()"
+        optionLabel="label"
+        optionValue="value"
+        [appendTo]="'body'"
+        [autoDisplayFirst]="false"
+        [showClear]="true"
+        class="w-full"
+      ></p-select>
+      <label for="filterMinEducationLevel">Min. Education Level</label>
+    </p-floatlabel>
+
+    <p-floatlabel variant="in">
+      <p-inputnumber inputId="filterMinExperienceYears" [(ngModel)]="filterMinExperienceYears" (ngModelChange)="onCandidateAttributeFilterChange()" [min]="0" suffix=" yrs" class="w-full"></p-inputnumber>
+      <label for="filterMinExperienceYears">Min. Experience</label>
+    </p-floatlabel>
+
+    <p-floatlabel variant="in">
+      <p-inputnumber inputId="filterMaxExperienceYears" [(ngModel)]="filterMaxExperienceYears" (ngModelChange)="onCandidateAttributeFilterChange()" [min]="0" suffix=" yrs" class="w-full"></p-inputnumber>
+      <label for="filterMaxExperienceYears">Max. Experience</label>
+    </p-floatlabel>
+
+    <p-floatlabel variant="in">
+      <p-multiSelect
+        inputId="filterSkills"
+        [options]="skillLibrary"
+        [(ngModel)]="filterSkills"
+        (ngModelChange)="onCandidateAttributeFilterChange()"
+        optionLabel="name"
+        optionValue="name"
+        [appendTo]="'body'"
+        display="chip"
+        class="w-full"
+      ></p-multiSelect>
+      <label for="filterSkills">Skills (any of)</label>
+    </p-floatlabel>
+
+    <p-floatlabel variant="in">
+      <input pInputText id="filterLocation" [(ngModel)]="filterLocation" (ngModelChange)="onCandidateAttributeFilterChange()" class="w-full" />
+      <label for="filterLocation">Location</label>
+    </p-floatlabel>
+
+    <p-floatlabel variant="in">
+      <p-inputnumber inputId="filterMinAge" [(ngModel)]="filterMinAge" (ngModelChange)="onCandidateAttributeFilterChange()" [min]="0" class="w-full"></p-inputnumber>
+      <label for="filterMinAge">Min. Age</label>
+    </p-floatlabel>
+
+    <p-floatlabel variant="in">
+      <p-inputnumber inputId="filterMaxAge" [(ngModel)]="filterMaxAge" (ngModelChange)="onCandidateAttributeFilterChange()" [min]="0" class="w-full"></p-inputnumber>
+      <label for="filterMaxAge">Max. Age</label>
+    </p-floatlabel>
+  </div>
+
+  <div class="active-filter-chips" *ngIf="activeFilterChips.length > 0">
+    <p-chip *ngFor="let chip of activeFilterChips" [label]="chip.label" [removable]="true" (onRemove)="removeFilterChip(chip.key)"></p-chip>
+  </div>
+
+  <div class="filter-bar" *ngIf="filterJobPostingId">
+    <p-floatlabel variant="in">
+      <p-select
         inputId="selectedShortlistFilterId"
         [options]="shortlistFilters"
         [(ngModel)]="selectedShortlistFilterId"

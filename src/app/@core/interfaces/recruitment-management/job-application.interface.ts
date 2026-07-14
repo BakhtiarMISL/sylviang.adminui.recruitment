@@ -1,4 +1,24 @@
-import { ApplicationSourceEnum, ApplicationStatusEnum } from '@app/@core/enums/recruitment.enum';
+import { ApplicationSourceEnum, ApplicationStatusEnum, EducationLevelEnum } from '@app/@core/enums/recruitment.enum';
+
+/**
+ * ATS dashboard filter query params (US-035 scalar filters + US-050 candidate-attribute filters).
+ * minEducationLevel/minExperienceYears/maxExperienceYears/skills/location/minAge/maxAge require
+ * jobPostingId to be set (enforced server-side).
+ */
+export interface IAtsDashboardFilterParams {
+  jobPostingId?: number;
+  status?: ApplicationStatusEnum;
+  source?: ApplicationSourceEnum;
+  dateFrom?: string;
+  dateTo?: string;
+  minEducationLevel?: EducationLevelEnum;
+  minExperienceYears?: number;
+  maxExperienceYears?: number;
+  skills?: string[];
+  location?: string;
+  minAge?: number;
+  maxAge?: number;
+}
 
 export interface IJobApplicationListItem {
   jobApplicationId: number;
