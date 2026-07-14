@@ -34,6 +34,13 @@ export const webSidebarMenuItems: IMenuItem[] = [
         icon: 'fa-solid fa-filter',
       },
       {
+        href: '/candidate-recommendations/candidate-recommendation-list',
+        title: 'Final Selection Recommendations',
+        active: false,
+        icon: 'fa-solid fa-star',
+        roles: [UserRoleEnum.Admin],
+      },
+      {
         href: '/candidates',
         title: 'Candidates',
         active: false,
