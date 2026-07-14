@@ -6,11 +6,14 @@ import { SharedModule } from '@app/shared/shared.module';
 import { TranslateModule } from '@ngx-translate/core';
 import { AutoCompleteModule } from 'primeng/autocomplete';
 import { ButtonModule } from 'primeng/button';
+import { ChipModule } from 'primeng/chip';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DatePickerModule } from 'primeng/datepicker';
 import { DialogModule } from 'primeng/dialog';
 import { FloatLabelModule } from 'primeng/floatlabel';
+import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
+import { MultiSelectModule } from 'primeng/multiselect';
 import { SelectModule } from 'primeng/select';
 import { SkeletonModule } from 'primeng/skeleton';
 import { TableModule } from 'primeng/table';
@@ -44,6 +47,9 @@ import { PipelineProgressTrackerComponent } from './pipeline-progress-tracker/pi
     TooltipModule,
     DatePickerModule,
     DialogModule,
+    InputNumberModule,
+    MultiSelectModule,
+    ChipModule,
   ],
 })
 export class ApplicationTrackingModule {}

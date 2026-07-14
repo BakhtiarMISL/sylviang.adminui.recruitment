@@ -1,17 +1,24 @@
-import { AfterViewInit, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { ApplicationSourceEnum, ApplicationStatusEnum } from '@app/@core/enums/recruitment.enum';
-import { IApplicationStatusReason, IJobApplicationListItem } from '@app/@core/interfaces/recruitment-management/job-application.interface';
+import { ApplicationSourceEnum, ApplicationStatusEnum, EducationLevelEnum } from '@app/@core/enums/recruitment.enum';
+import { ISkillLibraryItemResponse } from '@app/@core/interfaces/recruitment-management/candidate-profile.interface';
+import { IAtsDashboardFilterParams, IApplicationStatusReason, IJobApplicationListItem } from '@app/@core/interfaces/recruitment-management/job-application.interface';
 import { IJobVacancyResponse } from '@app/@core/interfaces/recruitment-management/job-vacancy.interface';
 import { IShortlistFilterApplyResponse, IShortlistFilterLookupResponse } from '@app/@core/interfaces/recruitment-management/shortlist-filter.interface';
+import { CandidateProfileService } from '@app/@core/services/recruitment/candidate-profile/candidate-profile.service';
 import { JobApplicationService } from '@app/@core/services/recruitment/job-application/job-application.service';
 import { JobVacancyService } from '@app/@core/services/recruitment/job-vacancy/job-vacancy.service';
 import { ShortlistFilterService } from '@app/@core/services/recruitment/shortlist-filter/shortlist-filter.service';
 import { ToastService } from '@app/@core/services/misc/toast.service';
 import { UI_CONFIG } from '@app/@core/constants';
 import { ConfirmationService, SortEvent } from 'primeng/api';
+import { Subject } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
 import { ApplicationStatusOptions, StatusesRequiringReason } from '../application-status-transitions.constants';
 import { AtsDashboardColumns } from './ats-dashboard.component.constants';
+
+/** Session-persisted candidate-attribute + scalar filter state (US-050 AC5). */
+const FILTER_SESSION_KEY = 'ats-dashboard-filters';
 
 @Component({
   selector: 'app-ats-dashboard',
@@ -19,11 +26,12 @@ import { AtsDashboardColumns } from './ats-dashboard.component.constants';
   templateUrl: './ats-dashboard.component.html',
   styleUrl: './ats-dashboard.component.scss',
 })
-export class AtsDashboardComponent implements OnInit, AfterViewInit {
+export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(
     private jobApplicationService: JobApplicationService,
     private jobVacancyService: JobVacancyService,
     private shortlistFilterService: ShortlistFilterService,
+    private candidateProfileService: CandidateProfileService,
     private cdr: ChangeDetectorRef,
     private confirmationService: ConfirmationService,
     private toast: ToastService,
@@ -53,6 +61,20 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit {
   filterSource: ApplicationSourceEnum | null = null;
   filterDateFrom: Date | null = null;
   filterDateTo: Date | null = null;
+
+  // Candidate-attribute filters, scoped to one vacancy (US-050 AC1/AC2)
+  filterMinEducationLevel: EducationLevelEnum | null = null;
+  filterMinExperienceYears: number | null = null;
+  filterMaxExperienceYears: number | null = null;
+  filterSkills: string[] = [];
+  filterLocation: string | null = null;
+  filterMinAge: number | null = null;
+  filterMaxAge: number | null = null;
+
+  educationLevelOptions = Object.values(EducationLevelEnum).map((value) => ({ label: value, value }));
+  skillLibrary: ISkillLibraryItemResponse[] = [];
+
+  private filterChange$ = new Subject<void>();
 
   // Bulk action (US-035 AC5)
   bulkToStatus: ApplicationStatusEnum | null = null;
@@ -86,14 +108,35 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
+    this.restoreFiltersFromSession();
+    this.filterChange$.pipe(debounceTime(400)).subscribe(() => {
+      this.currentPage = 1;
+      this.saveFiltersToSession();
+      this.loadApplications();
+    });
+
     this.loadJobPostings();
     this.loadApplications();
     this.loadShortlistFilters();
+    this.loadSkillLibrary();
     this.isLoading = false;
   }
 
   ngAfterViewInit(): void {
     this.cdr.detectChanges();
+  }
+
+  ngOnDestroy(): void {
+    this.filterChange$.complete();
+  }
+
+  private loadSkillLibrary(): void {
+    this.candidateProfileService.getSkillLibrary().subscribe({
+      next: (response) => {
+        this.skillLibrary = response && !response.hasError && response.content ? response.content : [];
+        this.cdr.detectChanges();
+      },
+    });
   }
 
   loadJobPostings(): void {
@@ -117,6 +160,7 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit {
 
   applyFilters(): void {
     this.currentPage = 1;
+    this.saveFiltersToSession();
     this.loadApplications();
   }
 
@@ -126,19 +170,151 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit {
     this.filterSource = null;
     this.filterDateFrom = null;
     this.filterDateTo = null;
+    this.resetCandidateAttributeFilters();
     this.currentPage = 1;
+    this.saveFiltersToSession();
     this.loadApplications();
   }
 
+  private resetCandidateAttributeFilters(): void {
+    this.filterMinEducationLevel = null;
+    this.filterMinExperienceYears = null;
+    this.filterMaxExperienceYears = null;
+    this.filterSkills = [];
+    this.filterLocation = null;
+    this.filterMinAge = null;
+    this.filterMaxAge = null;
+  }
+
+  /** Candidate-attribute filters real-time apply (US-050 AC3) - debounced via filterChange$. */
+  onCandidateAttributeFilterChange(): void {
+    this.filterChange$.next();
+  }
+
   /** Filter-only query params (no page/sort) shared by loadApplications and select-all-matching (US-047 AC5). */
-  buildFilterParams(): any {
+  buildFilterParams(): IAtsDashboardFilterParams {
     return {
       ...(this.filterJobPostingId && { jobPostingId: this.filterJobPostingId }),
       ...(this.filterStatus && { status: this.filterStatus }),
       ...(this.filterSource && { source: this.filterSource }),
       ...(this.filterDateFrom && { dateFrom: this.filterDateFrom.toISOString() }),
       ...(this.filterDateTo && { dateTo: this.filterDateTo.toISOString() }),
+      ...(this.filterMinEducationLevel && { minEducationLevel: this.filterMinEducationLevel }),
+      ...(this.filterMinExperienceYears != null && { minExperienceYears: this.filterMinExperienceYears }),
+      ...(this.filterMaxExperienceYears != null && { maxExperienceYears: this.filterMaxExperienceYears }),
+      ...(this.filterSkills.length > 0 && { skills: this.filterSkills }),
+      ...(this.filterLocation && { location: this.filterLocation }),
+      ...(this.filterMinAge != null && { minAge: this.filterMinAge }),
+      ...(this.filterMaxAge != null && { maxAge: this.filterMaxAge }),
     };
+  }
+
+  // ── Active filter chips (US-050 AC4) ────────────────────────────
+
+  get activeFilterChips(): { key: string; label: string }[] {
+    const chips: { key: string; label: string }[] = [];
+    if (this.filterJobPostingId) {
+      const title = this.jobPostings.find((j) => j.jobPostingId === this.filterJobPostingId)?.title;
+      chips.push({ key: 'filterJobPostingId', label: `Job Posting: ${title ?? this.filterJobPostingId}` });
+    }
+    if (this.filterStatus) chips.push({ key: 'filterStatus', label: `Status: ${this.filterStatus}` });
+    if (this.filterSource) chips.push({ key: 'filterSource', label: `Source: ${this.filterSource}` });
+    if (this.filterDateFrom) chips.push({ key: 'filterDateFrom', label: `From: ${this.filterDateFrom.toLocaleDateString()}` });
+    if (this.filterDateTo) chips.push({ key: 'filterDateTo', label: `To: ${this.filterDateTo.toLocaleDateString()}` });
+    if (this.filterMinEducationLevel) chips.push({ key: 'filterMinEducationLevel', label: `Education: ${this.filterMinEducationLevel}+` });
+    if (this.filterMinExperienceYears != null || this.filterMaxExperienceYears != null) {
+      chips.push({ key: 'filterExperience', label: `Experience: ${this.filterMinExperienceYears ?? 0}-${this.filterMaxExperienceYears ?? '∞'} yrs` });
+    }
+    if (this.filterSkills.length > 0) chips.push({ key: 'filterSkills', label: `Skills: ${this.filterSkills.join(', ')}` });
+    if (this.filterLocation) chips.push({ key: 'filterLocation', label: `Location: ${this.filterLocation}` });
+    if (this.filterMinAge != null || this.filterMaxAge != null) {
+      chips.push({ key: 'filterAge', label: `Age: ${this.filterMinAge ?? 0}-${this.filterMaxAge ?? '∞'}` });
+    }
+    return chips;
+  }
+
+  removeFilterChip(key: string): void {
+    switch (key) {
+      case 'filterJobPostingId':
+        this.filterJobPostingId = null;
+        this.resetCandidateAttributeFilters();
+        break;
+      case 'filterStatus':
+        this.filterStatus = null;
+        break;
+      case 'filterSource':
+        this.filterSource = null;
+        break;
+      case 'filterDateFrom':
+        this.filterDateFrom = null;
+        break;
+      case 'filterDateTo':
+        this.filterDateTo = null;
+        break;
+      case 'filterMinEducationLevel':
+        this.filterMinEducationLevel = null;
+        break;
+      case 'filterExperience':
+        this.filterMinExperienceYears = null;
+        this.filterMaxExperienceYears = null;
+        break;
+      case 'filterSkills':
+        this.filterSkills = [];
+        break;
+      case 'filterLocation':
+        this.filterLocation = null;
+        break;
+      case 'filterAge':
+        this.filterMinAge = null;
+        this.filterMaxAge = null;
+        break;
+    }
+    this.currentPage = 1;
+    this.saveFiltersToSession();
+    this.loadApplications();
+  }
+
+  // ── Session persistence (US-050 AC5) ────────────────────────────
+
+  private saveFiltersToSession(): void {
+    const state = {
+      filterJobPostingId: this.filterJobPostingId,
+      filterStatus: this.filterStatus,
+      filterSource: this.filterSource,
+      filterDateFrom: this.filterDateFrom ? this.filterDateFrom.toISOString() : null,
+      filterDateTo: this.filterDateTo ? this.filterDateTo.toISOString() : null,
+      filterMinEducationLevel: this.filterMinEducationLevel,
+      filterMinExperienceYears: this.filterMinExperienceYears,
+      filterMaxExperienceYears: this.filterMaxExperienceYears,
+      filterSkills: this.filterSkills,
+      filterLocation: this.filterLocation,
+      filterMinAge: this.filterMinAge,
+      filterMaxAge: this.filterMaxAge,
+    };
+    sessionStorage.setItem(FILTER_SESSION_KEY, JSON.stringify(state));
+  }
+
+  private restoreFiltersFromSession(): void {
+    const raw = sessionStorage.getItem(FILTER_SESSION_KEY);
+    if (!raw) return;
+
+    try {
+      const state = JSON.parse(raw);
+      this.filterJobPostingId = state.filterJobPostingId ?? null;
+      this.filterStatus = state.filterStatus ?? null;
+      this.filterSource = state.filterSource ?? null;
+      this.filterDateFrom = state.filterDateFrom ? new Date(state.filterDateFrom) : null;
+      this.filterDateTo = state.filterDateTo ? new Date(state.filterDateTo) : null;
+      this.filterMinEducationLevel = state.filterMinEducationLevel ?? null;
+      this.filterMinExperienceYears = state.filterMinExperienceYears ?? null;
+      this.filterMaxExperienceYears = state.filterMaxExperienceYears ?? null;
+      this.filterSkills = state.filterSkills ?? [];
+      this.filterLocation = state.filterLocation ?? null;
+      this.filterMinAge = state.filterMinAge ?? null;
+      this.filterMaxAge = state.filterMaxAge ?? null;
+    } catch {
+      sessionStorage.removeItem(FILTER_SESSION_KEY);
+    }
   }
 
   loadApplications(): void {
