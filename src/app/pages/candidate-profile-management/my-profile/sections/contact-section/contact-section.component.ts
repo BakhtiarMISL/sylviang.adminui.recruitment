@@ -22,6 +22,23 @@ export class ContactSectionComponent implements OnChanges {
       phone: [null, [Validators.maxLength(50)]],
       presentAddress: [null, [Validators.maxLength(500)]],
       permanentAddress: [null, [Validators.maxLength(500)]],
+      sameAsPresent: [false],
+    });
+
+    this.form.get('presentAddress')!.valueChanges.subscribe((value) => {
+      if (this.form.get('sameAsPresent')!.value) {
+        this.form.get('permanentAddress')!.setValue(value, { emitEvent: false });
+      }
+    });
+
+    this.form.get('sameAsPresent')!.valueChanges.subscribe((checked) => {
+      const permanentAddress = this.form.get('permanentAddress')!;
+      if (checked) {
+        permanentAddress.setValue(this.form.get('presentAddress')!.value, { emitEvent: false });
+        permanentAddress.disable({ emitEvent: false });
+      } else {
+        permanentAddress.enable({ emitEvent: false });
+      }
     });
   }
 
