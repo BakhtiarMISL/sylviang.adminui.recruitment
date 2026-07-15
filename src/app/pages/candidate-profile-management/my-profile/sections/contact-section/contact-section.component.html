@@ -15,7 +15,7 @@
     <div *ngIf="hasError('phone')" class="invalid">{{ getErrorMessage('phone') }}</div>
   </div>
 
-  <div class="sm:col-span-2">
+  <div class="sm:col-span-2 lg:col-span-3 xl:col-span-4">
     <p-floatlabel variant="in">
       <textarea pInputText inputId="presentAddress" formControlName="presentAddress" class="w-full" rows="2"></textarea>
       <label for="presentAddress">Present Address</label>
@@ -23,12 +23,12 @@
     <div *ngIf="hasError('presentAddress')" class="invalid">{{ getErrorMessage('presentAddress') }}</div>
   </div>
 
-  <div class="sm:col-span-2 flex items-center gap-2">
+  <div class="sm:col-span-2 lg:col-span-3 xl:col-span-4 flex items-center gap-2">
     <p-checkbox inputId="sameAsPresent" formControlName="sameAsPresent" [binary]="true"></p-checkbox>
     <label for="sameAsPresent">Permanent address same as present address</label>
   </div>
 
-  <div class="sm:col-span-2">
+  <div class="sm:col-span-2 lg:col-span-3 xl:col-span-4">
     <p-floatlabel variant="in">
       <textarea pInputText inputId="permanentAddress" formControlName="permanentAddress" class="w-full" rows="2"></textarea>
       <label for="permanentAddress">Permanent Address</label>
@@ -36,11 +36,11 @@
     <div *ngIf="hasError('permanentAddress')" class="invalid">{{ getErrorMessage('permanentAddress') }}</div>
   </div>
 
-  <div *ngIf="saveError" class="invalid sm:col-span-2">{{ saveError }}</div>
-  <div *ngIf="saveSuccess" class="success-message sm:col-span-2">Saved.</div>
+  <div *ngIf="saveError" class="invalid sm:col-span-2 lg:col-span-3 xl:col-span-4">{{ saveError }}</div>
+  <div *ngIf="saveSuccess" class="success-message sm:col-span-2 lg:col-span-3 xl:col-span-4">Saved.</div>
 
-  <div class="sm:col-span-2">
-    <button pButton type="submit" [disabled]="saving">
+  <div class="sm:col-span-2 lg:col-span-3 xl:col-span-4">
+    <button pButton type="submit" [disabled]="saving || form.pristine">
       <i class="fas fa-save"></i>
       <span>{{ saving ? 'Saving...' : 'Save' }}</span>
     </button>

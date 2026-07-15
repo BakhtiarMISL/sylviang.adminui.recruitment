@@ -111,9 +111,10 @@ export interface ICandidateResumeParseResponse {
   workExperiences: ICandidateResumeParsedWorkExperience[];
   parsingProvider?: string | null;
   aiParsingDegraded?: boolean;
+  resumeDocumentSaved?: boolean;
 }
 
-export type CandidateDocumentType = 'NID' | 'EducationCertificate' | 'ExperienceLetter' | 'Other';
+export type CandidateDocumentType = 'NID' | 'EducationCertificate' | 'ExperienceLetter' | 'Resume' | 'Other';
 
 export interface ICandidateDocumentResponse {
   candidateDocumentId: number;

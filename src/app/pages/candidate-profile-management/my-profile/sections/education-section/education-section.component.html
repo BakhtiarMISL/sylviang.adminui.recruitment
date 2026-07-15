@@ -6,7 +6,7 @@
   <div class="sm:col-span-2" *ngIf="!loading">
     <div class="list-row" *ngFor="let item of items">
       <div>
-        <strong>{{ item.degreeTitle }}</strong> — {{ item.institution }} ({{ item.passingYear }}, {{ item.result }})
+        <strong>{{ item.degreeTitle }}</strong> <span>— {{ item.institution }} ({{ item.passingYear }}, {{ item.result }})</span>
       </div>
       <div class="list-row-actions">
         <button pButton severity="secondary" type="button" (click)="startEdit(item)">
@@ -19,30 +19,48 @@
     </div>
   </div>
 
-  <div class="sm:col-span-2" *ngIf="prefillSuggestions.length > 0">
-    <div class="flex items-center justify-between">
-      <p class="text-sm text-neutral">Suggested from your resume — review before adding:</p>
-      <button pButton severity="success" type="button" [disabled]="!hasReadySuggestions() || savingAll" (click)="useAllSuggestions()">
+  <div class="suggestion-panel" *ngIf="prefillSuggestions.length > 0">
+    <div class="suggestion-panel-header">
+      <div class="suggestion-panel-title">
+        <i class="fas fa-wand-magic-sparkles"></i>
+        <span>Suggested from your resume</span>
+        <span class="suggestion-count">{{ prefillSuggestions.length }}</span>
+      </div>
+      <button pButton size="small" type="button" [disabled]="!hasReadySuggestions() || savingAll" (click)="useAllSuggestions()">
         <i class="fas fa-check-double"></i>
         <span>{{ savingAll ? 'Adding...' : 'Use All' }}</span>
       </button>
     </div>
-    <div class="list-row" *ngFor="let suggestion of prefillSuggestions; let i = index">
+    <p class="suggestion-panel-hint">Review each entry before adding it to your profile.</p>
+
+    <div class="suggestion-card" *ngFor="let suggestion of prefillSuggestions; let i = index">
       <div>
-        {{ suggestion.degreeTitle }}<span *ngIf="suggestion.institution"> — {{ suggestion.institution }}</span>
-        <span *ngIf="suggestion.passingYear"> ({{ suggestion.passingYear }})</span>
-        <span *ngIf="suggestion.result">, {{ suggestion.result }}</span>
-        <span class="text-sm text-neutral ml-2" *ngIf="!isSuggestionReady(suggestion)">(needs manual review)</span>
+        <div class="suggestion-card-title">
+          <span>{{ suggestion.degreeTitle }}</span>
+          <span class="suggestion-badge" *ngIf="!isSuggestionReady(suggestion)">Needs review</span>
+        </div>
+        <div class="suggestion-card-meta" *ngIf="suggestion.institution">{{ suggestion.institution }}</div>
+        <div class="suggestion-card-meta" *ngIf="suggestion.passingYear || suggestion.result">
+          <span *ngIf="suggestion.passingYear">{{ suggestion.passingYear }}</span>
+          <span *ngIf="suggestion.passingYear && suggestion.result"> · </span>
+          <span *ngIf="suggestion.result">{{ suggestion.result }}</span>
+        </div>
       </div>
-      <div class="list-row-actions">
-        <button pButton severity="secondary" type="button" (click)="useSuggestion(suggestion, i)">Use</button>
-        <button pButton severity="danger" type="button" (click)="dismissSuggestion(i)">Dismiss</button>
+      <div class="suggestion-card-actions">
+        <button pButton severity="secondary" size="small" type="button" (click)="useSuggestion(suggestion, i)">
+          <i class="fas fa-check"></i>
+          <span>Use</span>
+        </button>
+        <button pButton severity="danger" size="small" type="button" (click)="dismissSuggestion(i)">
+          <i class="fas fa-xmark"></i>
+          <span>Dismiss</span>
+        </button>
       </div>
     </div>
   </div>
 
   <div class="sm:col-span-2" *ngIf="!showForm">
-    <button pButton severity="secondary" type="button" (click)="startAdd()">
+    <button pButton type="button" (click)="startAdd()">
       <i class="fas fa-plus"></i>
       <span>Add Education</span>
     </button>
@@ -100,7 +118,7 @@
   <div *ngIf="saveError" class="invalid sm:col-span-2">{{ saveError }}</div>
 
   <div class="sm:col-span-2 flex gap-3">
-    <button pButton type="submit" [disabled]="saving">
+    <button pButton type="submit" [disabled]="saving || form.pristine">
       <i class="fas fa-save"></i>
       <span>{{ saving ? 'Saving...' : 'Save' }}</span>
     </button>

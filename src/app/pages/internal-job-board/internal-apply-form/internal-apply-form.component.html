@@ -51,7 +51,7 @@
   <div *ngIf="submitError" class="invalid">{{ submitError }}</div>
 
   <div>
-    <button pButton type="submit" [disabled]="submitting">
+    <button pButton type="submit" [disabled]="submitting || applyForm.pristine">
       <i class="fa fa-paper-plane"></i>
       <span>{{ submitting ? 'Submitting...' : 'Submit Application' }}</span>
     </button>

@@ -10,18 +10,26 @@
     </span>
   </div>
 
-  <div class="sm:col-span-2 skill-list" *ngIf="prefillSkillSuggestions.length > 0">
-    <div class="flex items-center justify-between w-full">
-      <p class="text-sm text-neutral">Suggested from your resume — click to fill one, or add them all:</p>
-      <button pButton severity="success" type="button" [disabled]="savingAllSkills" (click)="useAllSkillSuggestions()">
+  <div class="suggestion-panel" *ngIf="prefillSkillSuggestions.length > 0">
+    <div class="suggestion-panel-header">
+      <div class="suggestion-panel-title">
+        <i class="fas fa-wand-magic-sparkles"></i>
+        <span>Suggested from your resume</span>
+        <span class="suggestion-count">{{ prefillSkillSuggestions.length }}</span>
+      </div>
+      <button pButton size="small" type="button" [disabled]="savingAllSkills" (click)="useAllSkillSuggestions()">
         <i class="fas fa-check-double"></i>
         <span>{{ savingAllSkills ? 'Adding...' : 'Use All' }}</span>
       </button>
     </div>
-    <span class="skill-chip" *ngFor="let skill of prefillSkillSuggestions; let i = index">
-      <a (click)="useSkillSuggestion(skill, i)" style="cursor: pointer">{{ skill }}</a>
-      <button type="button" (click)="dismissSkillSuggestion(i)" title="Dismiss"><i class="fas fa-times"></i></button>
-    </span>
+    <p class="suggestion-panel-hint">Click a skill to add it, or Use All to add every suggestion.</p>
+
+    <div class="skill-list">
+      <span class="skill-chip suggestion-chip" *ngFor="let skill of prefillSkillSuggestions; let i = index">
+        <a (click)="useSkillSuggestion(skill, i)" title="Add this skill">{{ skill }}</a>
+        <button type="button" (click)="dismissSkillSuggestion(i)" title="Dismiss"><i class="fas fa-times"></i></button>
+      </span>
+    </div>
   </div>
 </div>
 
@@ -64,7 +72,7 @@
   <div *ngIf="saveError" class="invalid sm:col-span-2">{{ saveError }}</div>
 
   <div class="sm:col-span-2">
-    <button pButton type="submit" [disabled]="saving">
+    <button pButton type="submit" [disabled]="saving || form.pristine">
       <i class="fas fa-plus"></i>
       <span>{{ saving ? 'Adding...' : 'Add Skill' }}</span>
     </button>

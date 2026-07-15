@@ -7,6 +7,7 @@ import { ContactSectionComponent } from './sections/contact-section/contact-sect
 import { EducationSectionComponent } from './sections/education-section/education-section.component';
 import { WorkExperienceSectionComponent } from './sections/work-experience-section/work-experience-section.component';
 import { SkillsSectionComponent } from './sections/skills-section/skills-section.component';
+import { DocumentsSectionComponent } from './sections/documents-section/documents-section.component';
 
 const RESUME_ALLOWED_EXTENSIONS = ['.pdf', '.docx'];
 const RESUME_MAX_SIZE_BYTES = 10 * 1024 * 1024;
@@ -23,6 +24,7 @@ export class MyProfileComponent implements OnInit {
   @ViewChild(EducationSectionComponent) educationSection?: EducationSectionComponent;
   @ViewChild(WorkExperienceSectionComponent) workExperienceSection?: WorkExperienceSectionComponent;
   @ViewChild(SkillsSectionComponent) skillsSection?: SkillsSectionComponent;
+  @ViewChild(DocumentsSectionComponent) documentsSection?: DocumentsSectionComponent;
 
   constructor(
     private candidateProfileService: CandidateProfileService,
@@ -50,12 +52,12 @@ export class MyProfileComponent implements OnInit {
     this.loadProfile();
   }
 
-  loadProfile(): void {
-    this.loading = true;
+  loadProfile(showLoading = true): void {
+    if (showLoading) this.loading = true;
     this.loadError = '';
     this.candidateProfileService.getMyProfile().subscribe({
       next: (response) => {
-        this.loading = false;
+        if (showLoading) this.loading = false;
         if (response && !response.hasError && response.content) {
           this.profile = response.content;
         } else {
@@ -63,7 +65,7 @@ export class MyProfileComponent implements OnInit {
         }
       },
       error: (error) => {
-        this.loading = false;
+        if (showLoading) this.loading = false;
         this.loadError = error?.error?.decentMessage || 'Failed to load your profile.';
       },
     });
@@ -71,8 +73,11 @@ export class MyProfileComponent implements OnInit {
 
   // Each section saves independently; re-fetching the whole profile afterwards keeps
   // completenessPercentage and every other section's read-only view in sync (AC2).
+  // Skips the loading flag - toggling it destroys/recreates the whole accordion (it's
+  // gated behind *ngIf="!loading && profile"), which would wipe every sibling section's
+  // unsaved state (prefillSuggestions, in-progress form edits) just because one section saved.
   onSectionSaved(): void {
-    this.loadProfile();
+    this.loadProfile(false);
   }
 
   onResumeFileSelected(event: Event): void {
@@ -130,5 +135,10 @@ export class MyProfileComponent implements OnInit {
     this.resumeDegradedNotice = parsed.aiParsingDegraded
       ? 'AI parsing was unavailable, so we used basic extraction instead. Please double-check the suggested details below.'
       : '';
+
+    // The backend also saves the uploaded file itself as a Resume document in the same
+    // request - refresh Documents so it shows up immediately instead of only after a
+    // full page reload.
+    if (parsed.resumeDocumentSaved) this.documentsSection?.loadDocuments();
   }
 }

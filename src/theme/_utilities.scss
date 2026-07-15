@@ -119,6 +119,102 @@
   @apply sticky z-10;
 }
 
+// Resume-parse "prefill suggestion" review panel (education/work-experience sections)
+.suggestion-panel {
+  grid-column: 1 / -1;
+  border: 1px dashed var(--primary-300, #7dd3fc);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  background: var(--primary-50, #f0f9ff);
+}
+
+.suggestion-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.suggestion-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+
+  i {
+    color: var(--primary-600, #0284c7);
+  }
+}
+
+.suggestion-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.35rem;
+  height: 1.35rem;
+  padding: 0 0.4rem;
+  border-radius: 9999px;
+  background: var(--primary-600, #0284c7);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.suggestion-panel-hint {
+  font-size: 0.8rem;
+  color: var(--text-color-medium, #667085);
+  margin: 0.25rem 0 0.75rem;
+}
+
+.suggestion-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: var(--white, #fff);
+  border: 1px solid var(--p-content-border-color, #e5e7eb);
+  border-radius: 0.6rem;
+  padding: 0.75rem 1rem;
+  flex-wrap: wrap;
+
+  & + .suggestion-card {
+    margin-top: 0.6rem;
+  }
+}
+
+.suggestion-card-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.suggestion-card-meta {
+  font-size: 0.8rem;
+  color: var(--text-color-medium, #667085);
+  margin-top: 0.2rem;
+}
+
+.suggestion-badge {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  border-radius: 9999px;
+  background: #fef3c7;
+  color: #b45309;
+  font-size: 0.7rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.suggestion-card-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
 // Visual feedback for modified records
 .modified-row {
   background-color: rgba(59, 130, 246, 0.1);

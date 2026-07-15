@@ -29,14 +29,14 @@
     <div class="form-container">
       <h3 class="form-section-header">Personal Info</h3>
 
-      <div><span class="field-label">Date of Birth</span><div>{{ profile.dateOfBirth ? (profile.dateOfBirth | date: 'dd-MMM-yyyy') : '-' }}</div></div>
-      <div><span class="field-label">Gender</span><div>{{ profile.gender || '-' }}</div></div>
-      <div><span class="field-label">National ID</span><div>{{ profile.nationalId || '-' }}</div></div>
-      <div><span class="field-label">Father's Name</span><div>{{ profile.fatherName || '-' }}</div></div>
-      <div><span class="field-label">Mother's Name</span><div>{{ profile.motherName || '-' }}</div></div>
-      <div><span class="field-label">Marital Status</span><div>{{ profile.maritalStatus || '-' }}</div></div>
-      <div><span class="field-label">Religion</span><div>{{ profile.religion || '-' }}</div></div>
-      <div><span class="field-label">Nationality</span><div>{{ profile.nationality || '-' }}</div></div>
+      <div><span class="field-label">Date of Birth</span><div class="field-value">{{ profile.dateOfBirth ? (profile.dateOfBirth | date: 'dd-MMM-yyyy') : '-' }}</div></div>
+      <div><span class="field-label">Gender</span><div class="field-value">{{ profile.gender || '-' }}</div></div>
+      <div><span class="field-label">National ID</span><div class="field-value">{{ profile.nationalId || '-' }}</div></div>
+      <div><span class="field-label">Father's Name</span><div class="field-value">{{ profile.fatherName || '-' }}</div></div>
+      <div><span class="field-label">Mother's Name</span><div class="field-value">{{ profile.motherName || '-' }}</div></div>
+      <div><span class="field-label">Marital Status</span><div class="field-value">{{ profile.maritalStatus || '-' }}</div></div>
+      <div><span class="field-label">Religion</span><div class="field-value">{{ profile.religion || '-' }}</div></div>
+      <div><span class="field-label">Nationality</span><div class="field-value">{{ profile.nationality || '-' }}</div></div>
     </div>
   </section>
 
@@ -44,8 +44,8 @@
     <div class="form-container">
       <h3 class="form-section-header">Contact</h3>
 
-      <div><span class="field-label">Present Address</span><div>{{ profile.presentAddress || '-' }}</div></div>
-      <div><span class="field-label">Permanent Address</span><div>{{ profile.permanentAddress || '-' }}</div></div>
+      <div><span class="field-label">Present Address</span><div class="field-value">{{ profile.presentAddress || '-' }}</div></div>
+      <div><span class="field-label">Permanent Address</span><div class="field-value">{{ profile.permanentAddress || '-' }}</div></div>
     </div>
   </section>
 
@@ -57,7 +57,7 @@
       <div class="sm:col-span-2" *ngIf="profile.educations.length > 0">
         <div class="list-row" *ngFor="let edu of profile.educations">
           <div>
-            <strong>{{ edu.degreeTitle }}</strong> — {{ edu.institution }}
+            <strong>{{ edu.degreeTitle }}</strong> <span>— {{ edu.institution }}</span>
             <span class="text-sm text-neutral ml-2">{{ edu.passingYear }}, {{ edu.result }}</span>
           </div>
         </div>
@@ -73,7 +73,7 @@
       <div class="sm:col-span-2" *ngIf="profile.workExperiences.length > 0">
         <div class="list-row" *ngFor="let exp of profile.workExperiences">
           <div>
-            <strong>{{ exp.designation }}</strong> — {{ exp.companyName }}
+            <strong>{{ exp.designation }}</strong> <span>— {{ exp.companyName }}</span>
             <span class="text-sm text-neutral ml-2">
               {{ exp.startDate | date: 'MMM yyyy' }} - {{ exp.isCurrent ? 'Present' : (exp.endDate | date: 'MMM yyyy') }}
             </span>
@@ -123,7 +123,7 @@
       <div class="sm:col-span-2" *ngIf="profile.documents.length > 0">
         <div class="list-row" *ngFor="let doc of profile.documents">
           <div>
-            <strong>{{ doc.documentType }}</strong> —
+            <strong>{{ doc.documentType }}</strong> <span>—</span>
             <a [href]="getFileUrl(doc.downloadUrl)" target="_blank" rel="noopener noreferrer" class="text-primary">{{ doc.fileName }}</a>
           </div>
         </div>
