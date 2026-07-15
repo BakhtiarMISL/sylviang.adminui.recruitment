@@ -18,6 +18,42 @@ const routes: Routes = [
       path: 'payroll',
       loadChildren: () => import('./payroll-management/payroll-management.module').then((m) => m.PayrollManagementModule),
     },
+    {
+      path: 'job-vacancy',
+      loadChildren: () => import('./job-vacancy-management/job-vacancy-management.module').then((m) => m.JobVacancyManagementModule),
+    },
+    {
+      path: 'candidates',
+      loadChildren: () => import('./candidate-management/candidate-management.module').then((m) => m.CandidateManagementModule),
+    },
+    {
+      path: 'internal-jobs',
+      loadChildren: () => import('./internal-job-board/internal-job-board.module').then((m) => m.InternalJobBoardModule),
+    },
+    {
+      path: 'hiring-pipeline',
+      loadChildren: () => import('./hiring-pipeline-management/hiring-pipeline-management.module').then((m) => m.HiringPipelineManagementModule),
+    },
+    {
+      path: 'shortlist-filters',
+      loadChildren: () => import('./shortlist-filter-management/shortlist-filter-management.module').then((m) => m.ShortlistFilterManagementModule),
+    },
+    {
+      path: 'applications',
+      loadChildren: () => import('./application-tracking/application-tracking.module').then((m) => m.ApplicationTrackingModule),
+    },
+    {
+      path: 'candidate-profile',
+      loadChildren: () => import('./candidate-profile-management/candidate-profile-management.module').then((m) => m.CandidateProfileManagementModule),
+    },
+    {
+      path: 'my-applications',
+      loadChildren: () => import('./my-applications/my-applications.module').then((m) => m.MyApplicationsModule),
+    },
+    {
+      path: 'account-settings',
+      loadChildren: () => import('./account-settings-management/account-settings-management.module').then((m) => m.AccountSettingsManagementModule),
+    },
   ]),
 ];
 

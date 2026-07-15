@@ -1,0 +1,74 @@
+<section class="page-container">
+  <div class="form-container">
+    <h3 class="form-section-header">Apply on Behalf of a Candidate</h3>
+    <div class="sm:col-span-2 helper-text">
+      Search for an existing candidate to prefill their details, or type a new name/email below for a candidate sourced through an agency or direct outreach.
+    </div>
+
+    <div class="sm:col-span-2">
+      <p-floatlabel variant="in">
+        <p-autocomplete
+          inputId="candidateSearch"
+          [(ngModel)]="candidateName"
+          [suggestions]="candidateSuggestions"
+          (completeMethod)="filterCandidates($event)"
+          (onSelect)="onCandidateSelect($event)"
+          optionLabel="fullName"
+          field="fullName"
+          [forceSelection]="false"
+          [appendTo]="'body'"
+          class="w-full"
+        ></p-autocomplete>
+        <label for="candidateSearch">Candidate Name *</label>
+      </p-floatlabel>
+    </div>
+
+    <div>
+      <p-floatlabel variant="in">
+        <input type="email" pInputText id="candidateEmail" class="w-full" [(ngModel)]="candidateEmail" name="candidateEmail" />
+        <label for="candidateEmail">Candidate Email *</label>
+      </p-floatlabel>
+    </div>
+
+    <div>
+      <p-floatlabel variant="in">
+        <input type="text" pInputText id="candidatePhone" class="w-full" [(ngModel)]="candidatePhone" name="candidatePhone" />
+        <label for="candidatePhone">Candidate Phone</label>
+      </p-floatlabel>
+    </div>
+
+    <div>
+      <p-floatlabel variant="in">
+        <p-select
+          inputId="jobPostingId"
+          [options]="openJobPostings"
+          [(ngModel)]="jobPostingId"
+          optionLabel="title"
+          optionValue="jobPostingId"
+          [appendTo]="'body'"
+          [autoDisplayFirst]="false"
+          class="w-full"
+        ></p-select>
+        <label for="jobPostingId">Job Posting *</label>
+      </p-floatlabel>
+    </div>
+
+    <div class="sm:col-span-2">
+      <textarea pInputText id="coverLetter" [(ngModel)]="coverLetter" rows="3" class="w-full" maxlength="5000" placeholder="Cover letter (optional)"></textarea>
+    </div>
+
+    <div class="sm:col-span-2">
+      <label class="field-label">Resume/CV *</label>
+      <input type="file" (change)="onResumeSelected($event)" accept=".pdf,.doc,.docx" />
+    </div>
+
+    <div *ngIf="submitError" class="invalid sm:col-span-2">{{ submitError }}</div>
+
+    <div class="sm:col-span-2">
+      <button pButton type="button" [disabled]="!canSubmit() || submitting" (click)="submit()">
+        <i class="fa fa-paper-plane"></i>
+        <span>{{ submitting ? 'Submitting...' : 'Submit Application' }}</span>
+      </button>
+    </div>
+  </div>
+</section>

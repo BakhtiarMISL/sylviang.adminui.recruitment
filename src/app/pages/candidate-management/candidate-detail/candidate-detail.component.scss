@@ -1,0 +1,76 @@
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.profile-photo {
+  width: 64px;
+  height: 64px;
+  border-radius: 9999px;
+  object-fit: cover;
+  border: 1px solid var(--p-content-border-color, #e5e7eb);
+}
+
+.profile-photo-placeholder {
+  font-size: 64px;
+  color: var(--p-text-muted-color, #6b7280);
+  line-height: 1;
+}
+
+.profile-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  flex: 1;
+}
+
+.profile-header-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.profile-header-email,
+.profile-header-phone {
+  font-size: 0.875rem;
+  color: var(--p-text-muted-color, #6b7280);
+}
+
+.field-label {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--p-text-muted-color, #6b7280);
+  margin-bottom: 0.15rem;
+}
+
+.list-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--p-content-border-color, #e5e7eb);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.skills-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.skill-chip {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  background: var(--p-primary-50, #ecfdf5);
+  color: var(--p-primary-color, #10b981);
+  font-size: 0.8rem;
+}
+
+.success-message {
+  color: var(--p-primary-color, green);
+  font-size: 0.875rem;
+}

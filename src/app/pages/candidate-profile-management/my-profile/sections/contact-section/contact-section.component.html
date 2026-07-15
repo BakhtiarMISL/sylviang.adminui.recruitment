@@ -1,0 +1,48 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-container">
+  <div>
+    <p-floatlabel variant="in">
+      <input pInputText inputId="email" formControlName="email" maxlength="200" class="w-full" [class.ng-invalid]="hasError('email')" [class.ng-dirty]="hasError('email')" (blur)="f['email'].markAsTouched()" />
+      <label for="email">Email *</label>
+    </p-floatlabel>
+    <div *ngIf="hasError('email')" class="invalid">{{ getErrorMessage('email') }}</div>
+  </div>
+
+  <div>
+    <p-floatlabel variant="in">
+      <input pInputText inputId="phone" formControlName="phone" maxlength="50" class="w-full" [class.ng-invalid]="hasError('phone')" [class.ng-dirty]="hasError('phone')" (blur)="f['phone'].markAsTouched()" />
+      <label for="phone">Phone</label>
+    </p-floatlabel>
+    <div *ngIf="hasError('phone')" class="invalid">{{ getErrorMessage('phone') }}</div>
+  </div>
+
+  <div class="sm:col-span-2">
+    <p-floatlabel variant="in">
+      <textarea pInputText inputId="presentAddress" formControlName="presentAddress" class="w-full" rows="2"></textarea>
+      <label for="presentAddress">Present Address</label>
+    </p-floatlabel>
+    <div *ngIf="hasError('presentAddress')" class="invalid">{{ getErrorMessage('presentAddress') }}</div>
+  </div>
+
+  <div class="sm:col-span-2 flex items-center gap-2">
+    <p-checkbox inputId="sameAsPresent" formControlName="sameAsPresent" [binary]="true"></p-checkbox>
+    <label for="sameAsPresent">Permanent address same as present address</label>
+  </div>
+
+  <div class="sm:col-span-2">
+    <p-floatlabel variant="in">
+      <textarea pInputText inputId="permanentAddress" formControlName="permanentAddress" class="w-full" rows="2"></textarea>
+      <label for="permanentAddress">Permanent Address</label>
+    </p-floatlabel>
+    <div *ngIf="hasError('permanentAddress')" class="invalid">{{ getErrorMessage('permanentAddress') }}</div>
+  </div>
+
+  <div *ngIf="saveError" class="invalid sm:col-span-2">{{ saveError }}</div>
+  <div *ngIf="saveSuccess" class="success-message sm:col-span-2">Saved.</div>
+
+  <div class="sm:col-span-2">
+    <button pButton type="submit" [disabled]="saving">
+      <i class="fas fa-save"></i>
+      <span>{{ saving ? 'Saving...' : 'Save' }}</span>
+    </button>
+  </div>
+</form>

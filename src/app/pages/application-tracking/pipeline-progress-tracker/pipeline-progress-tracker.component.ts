@@ -1,0 +1,117 @@
+import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { StageProgressStatusEnum } from '@app/@core/enums/recruitment.enum';
+import { IJobApplicationPipelineProgress, IPipelineStageProgress } from '@app/@core/interfaces/recruitment-management/pipeline-progress.interface';
+import { JobApplicationService } from '@app/@core/services/recruitment/job-application/job-application.service';
+import { ToastService } from '@app/@core/services/misc/toast.service';
+
+interface StageEditState {
+  status: StageProgressStatusEnum;
+  scheduledDate: Date | null;
+  meetingLink: string;
+  notes: string;
+}
+
+@Component({
+  selector: 'app-pipeline-progress-tracker',
+  standalone: false,
+  templateUrl: './pipeline-progress-tracker.component.html',
+  styleUrl: './pipeline-progress-tracker.component.scss',
+})
+export class PipelineProgressTrackerComponent implements OnInit, OnChanges {
+  constructor(
+    private jobApplicationService: JobApplicationService,
+    private toast: ToastService,
+  ) {}
+
+  @Input() jobApplicationId!: number;
+
+  progress: IJobApplicationPipelineProgress | null = null;
+  loading = true;
+  loadError = '';
+
+  statusOptions = Object.values(StageProgressStatusEnum).map((value) => ({ label: this.formatEnumLabel(value), value }));
+
+  editingStageId: number | null = null;
+  editState: StageEditState | null = null;
+  saving = false;
+
+  ngOnInit(): void {
+    this.load();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['jobApplicationId'] && !changes['jobApplicationId'].firstChange) {
+      this.load();
+    }
+  }
+
+  load(): void {
+    if (!this.jobApplicationId) return;
+
+    this.loading = true;
+    this.loadError = '';
+    this.editingStageId = null;
+    this.jobApplicationService.getPipelineProgress(this.jobApplicationId).subscribe({
+      next: (response) => {
+        this.loading = false;
+        if (response && !response.hasError) {
+          this.progress = response.content;
+        } else {
+          this.loadError = response?.decentMessage || 'Failed to load pipeline tracker.';
+        }
+      },
+      error: (error) => {
+        this.loading = false;
+        this.loadError = error?.error?.decentMessage || 'Failed to load pipeline tracker.';
+      },
+    });
+  }
+
+  formatEnumLabel(value: string | null | undefined): string {
+    if (!value) return '';
+    return value.replace(/([a-z])([A-Z])/g, '$1 $2');
+  }
+
+  startEdit(stage: IPipelineStageProgress): void {
+    this.editingStageId = stage.pipelineStageId;
+    this.editState = {
+      status: stage.status,
+      scheduledDate: stage.scheduledDate ? new Date(stage.scheduledDate) : null,
+      meetingLink: stage.meetingLink || '',
+      notes: stage.notes || '',
+    };
+  }
+
+  cancelEdit(): void {
+    this.editingStageId = null;
+    this.editState = null;
+  }
+
+  saveEdit(stage: IPipelineStageProgress): void {
+    if (!this.editState) return;
+
+    this.saving = true;
+    this.jobApplicationService
+      .updateStageProgress(this.jobApplicationId, stage.pipelineStageId, {
+        status: this.editState.status,
+        scheduledDate: this.editState.scheduledDate ? this.editState.scheduledDate.toISOString() : undefined,
+        meetingLink: this.editState.meetingLink || undefined,
+        notes: this.editState.notes || undefined,
+      })
+      .subscribe({
+        next: (response) => {
+          this.saving = false;
+          if (response && !response.hasError) {
+            this.toast.success({ detail: 'Stage updated.' });
+            this.load();
+          } else {
+            this.toast.error({ detail: response?.decentMessage || 'Failed to update stage.' });
+          }
+        },
+        error: (error) => {
+          this.saving = false;
+          this.toast.error({ detail: error?.error?.decentMessage || 'Failed to update stage.' });
+        },
+      });
+  }
+}

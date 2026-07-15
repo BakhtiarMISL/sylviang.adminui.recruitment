@@ -1,0 +1,99 @@
+<section class="page-container">
+  <div class="flex justify-between items-center gap-3">
+    <div class="flex items-end gap-3 mb-4">
+      <p-floatlabel variant="in">
+        <input type="text" pInputText id="searchInput" class="w-full" [(ngModel)]="searchTerm" name="searchInput" (keyup.enter)="applySearch()" />
+        <label for="searchInput">Search by name or email</label>
+      </p-floatlabel>
+
+      <button pButton (click)="applySearch()">
+        <i class="fa fa-search"></i>
+        <span>Search</span>
+      </button>
+
+      <button *ngIf="searchTerm" severity="secondary" pButton (click)="resetSearch()">
+        <i class="fa fa-times"></i>
+        <span>Reset</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <div class="table-title-container">
+      <h3 class="table-title">
+        Candidates
+        <span class="table-title-info" *ngIf="totalRecords > 0">({{ totalRecords }} total)</span>
+      </h3>
+    </div>
+
+    <div class="transition-all duration-500 ease-in-out">
+      <p-table
+        [value]="loading ? skeletonItems : candidates"
+        dataKey="candidateProfileId"
+        [paginator]="true"
+        [rows]="rows"
+        [first]="(currentPage - 1) * rows"
+        [rowsPerPageOptions]="UI_CONFIG.pageSizeOptions"
+        [totalRecords]="totalRecords"
+        (onPage)="onPageChange($event)"
+        [lazy]="true"
+        [loading]="false"
+        scrollHeight="flex"
+        [responsiveLayout]="'scroll'"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} candidates"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="width: 3rem"></th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th style="width: 12rem">Profile Completeness</th>
+            <th style="width: 6rem">View</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-candidate>
+          @if (loading) {
+            <tr>
+              <td><p-skeleton width="2rem" height="2rem" styleClass="!rounded-full"></p-skeleton></td>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+              <td><p-skeleton width="2rem" height="1rem"></p-skeleton></td>
+            </tr>
+          } @else {
+            <tr>
+              <td>
+                <img *ngIf="getPhotoUrl(candidate)" [src]="getPhotoUrl(candidate)" class="candidate-avatar" alt="" />
+                <i *ngIf="!getPhotoUrl(candidate)" class="fa-solid fa-circle-user candidate-avatar-placeholder"></i>
+              </td>
+              <td>{{ candidate.fullName }}</td>
+              <td>{{ candidate.email }}</td>
+              <td>{{ candidate.phone || '-' }}</td>
+              <td>{{ candidate.completenessPercentage }}%</td>
+              <td>
+                <button [routerLink]="[candidate.candidateProfileId]" class="text-primary">
+                  <i class="fa fa-eye"></i>
+                </button>
+              </td>
+            </tr>
+          }
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="6" class="not-found">
+              <div>
+                <i class="fa fa-magnifying-glass-minus"></i>
+                <p>No candidates found</p>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+</section>

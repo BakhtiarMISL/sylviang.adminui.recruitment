@@ -1,0 +1,105 @@
+import { ApplicationSourceEnum, ApplicationStatusEnum, EducationLevelEnum } from '@app/@core/enums/recruitment.enum';
+
+/**
+ * ATS dashboard filter query params (US-035 scalar filters + US-050 candidate-attribute filters).
+ * minEducationLevel/minExperienceYears/maxExperienceYears/skills/location/minAge/maxAge require
+ * jobPostingId to be set (enforced server-side).
+ */
+export interface IAtsDashboardFilterParams {
+  jobPostingId?: number;
+  status?: ApplicationStatusEnum;
+  source?: ApplicationSourceEnum;
+  dateFrom?: string;
+  dateTo?: string;
+  minEducationLevel?: EducationLevelEnum;
+  minExperienceYears?: number;
+  maxExperienceYears?: number;
+  skills?: string[];
+  location?: string;
+  minAge?: number;
+  maxAge?: number;
+}
+
+export interface IJobApplicationListItem {
+  jobApplicationId: number;
+  candidateName: string;
+  jobPostingId: number;
+  jobPostingTitle?: string;
+  source: ApplicationSourceEnum;
+  appliedDate?: string;
+  applicationStatus: ApplicationStatusEnum;
+}
+
+export interface IApplicationStatusHistoryEntry {
+  applicationStatusHistoryId: number;
+  fromStatus?: ApplicationStatusEnum;
+  toStatus: ApplicationStatusEnum;
+  changedByUserName?: string;
+  changedAt: string;
+  reasonId?: number;
+  reasonLabel?: string;
+  note?: string;
+}
+
+export interface IJobApplicationDetail {
+  jobApplicationId: number;
+  jobPostingId: number;
+  jobPostingTitle?: string;
+  candidateName: string;
+  candidateEmail?: string;
+  candidatePhone?: string;
+  resumeUrl?: string;
+  coverLetter?: string;
+  applicationStatus: ApplicationStatusEnum;
+  appliedDate?: string;
+  source: ApplicationSourceEnum;
+  statusHistory: IApplicationStatusHistoryEntry[];
+}
+
+export interface IApplicationStatusReason {
+  applicationStatusReasonId: number;
+  label: string;
+  appliesToStatus: ApplicationStatusEnum;
+  displayOrder: number;
+}
+
+export interface IJobApplicationStatusUpdateRequest {
+  toStatus: ApplicationStatusEnum;
+  reasonId?: number;
+  note?: string;
+}
+
+export interface IJobApplicationBulkStatusUpdateRequest {
+  jobApplicationIds: number[];
+  toStatus: ApplicationStatusEnum;
+  reasonId?: number;
+  note?: string;
+}
+
+export interface IJobApplicationBulkStatusUpdateFailure {
+  jobApplicationId: number;
+  reason: string;
+}
+
+export interface IJobApplicationBulkStatusUpdateResponse {
+  succeededIds: number[];
+  failed: IJobApplicationBulkStatusUpdateFailure[];
+}
+
+export interface IMyApplicationInterview {
+  interviewId: number;
+  scheduledDate?: string;
+  location?: string;
+  meetingLink?: string;
+  round?: string;
+}
+
+export interface IMyApplication {
+  jobApplicationId: number;
+  jobPostingId: number;
+  jobPostingTitle?: string;
+  appliedDate?: string;
+  applicationStatus: ApplicationStatusEnum;
+  canWithdraw: boolean;
+  interviews: IMyApplicationInterview[];
+}

@@ -1,0 +1,22 @@
+.skill-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.75rem;
+  margin: 0.25rem;
+  border-radius: 999px;
+  background: var(--p-primary-50, #eef2ff);
+  border: 1px solid var(--p-primary-200, #c7d2fe);
+}
+
+.skill-chip button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--p-red-500, #ef4444);
+}
+
+.skill-list {
+  display: flex;
+  flex-wrap: wrap;
+}

@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 
 import { ButtonModule } from 'primeng/button';
 import { CheckboxModule } from 'primeng/checkbox';
@@ -14,12 +15,16 @@ import { SelectModule } from 'primeng/select';
 import { SkeletonModule } from 'primeng/skeleton';
 import { TableModule } from 'primeng/table';
 import { TooltipModule } from 'primeng/tooltip';
+import { CompletenessRingComponent } from './components/completeness-ring/completeness-ring.component';
+import { PublicSidebarComponent } from './components/public-sidebar/public-sidebar.component';
 
 @NgModule({
+  declarations: [PublicSidebarComponent, CompletenessRingComponent],
   imports: [
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
+    RouterModule,
     DatePickerModule,
     SelectModule,
     MultiSelectModule,
@@ -37,6 +42,9 @@ import { TooltipModule } from 'primeng/tooltip';
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
+    RouterModule,
+    PublicSidebarComponent,
+    CompletenessRingComponent,
     DatePickerModule,
     SelectModule,
     MultiSelectModule,

@@ -1,0 +1,41 @@
+<div class="form-container">
+  <div>
+    <h4>Profile Photo</h4>
+    <img *ngIf="getPhotoUrl()" [src]="getPhotoUrl()" class="media-preview" alt="Profile photo" />
+
+    <label for="profilePhotoFile" class="upload-dropzone" [class.disabled]="uploadingPhoto">
+      <i class="fas" [class.fa-spinner]="uploadingPhoto" [class.fa-spin]="uploadingPhoto" [class.fa-cloud-upload-alt]="!uploadingPhoto"></i>
+      <span class="upload-dropzone-text">
+        <strong>{{ uploadingPhoto ? 'Uploading...' : (selectedPhotoName || 'Click to upload a photo') }}</strong>
+        <small>JPG or PNG, up to 2MB</small>
+      </span>
+    </label>
+    <input id="profilePhotoFile" type="file" (change)="onPhotoSelected($event)" accept=".jpg,.jpeg,.png" [disabled]="uploadingPhoto" class="sr-only" />
+
+    <div *ngIf="photoError" class="invalid mt-2">{{ photoError }}</div>
+    <button *ngIf="profile?.profilePhotoPath" pButton severity="danger" type="button" (click)="deletePhoto()" class="mt-2">
+      <i class="fas fa-trash"></i>
+      <span>Remove Photo</span>
+    </button>
+  </div>
+
+  <div>
+    <h4>Signature</h4>
+    <img *ngIf="getSignatureUrl()" [src]="getSignatureUrl()" class="media-preview" alt="Signature" />
+
+    <label for="signatureFile" class="upload-dropzone" [class.disabled]="uploadingSignature">
+      <i class="fas" [class.fa-spinner]="uploadingSignature" [class.fa-spin]="uploadingSignature" [class.fa-cloud-upload-alt]="!uploadingSignature"></i>
+      <span class="upload-dropzone-text">
+        <strong>{{ uploadingSignature ? 'Uploading...' : (selectedSignatureName || 'Click to upload a signature') }}</strong>
+        <small>JPG or PNG, up to 2MB</small>
+      </span>
+    </label>
+    <input id="signatureFile" type="file" (change)="onSignatureSelected($event)" accept=".jpg,.jpeg,.png" [disabled]="uploadingSignature" class="sr-only" />
+
+    <div *ngIf="signatureError" class="invalid mt-2">{{ signatureError }}</div>
+    <button *ngIf="profile?.signaturePath" pButton severity="danger" type="button" (click)="deleteSignature()" class="mt-2">
+      <i class="fas fa-trash"></i>
+      <span>Remove Signature</span>
+    </button>
+  </div>
+</div>
