@@ -1,0 +1,121 @@
+.auto-shortlist-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-end;
+  margin-bottom: 0.75rem;
+
+  > p-floatlabel {
+    flex: 0 0 10rem;
+  }
+
+  > button {
+    flex: 0 0 auto;
+  }
+}
+
+.auto-shortlist-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.8rem;
+  color: var(--text-color-secondary, #6b7280);
+  margin-bottom: 0.75rem;
+}
+
+.auto-shortlist-loading {
+  padding: 0.5rem 0;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: #fee2e2;
+  color: #b91c1c;
+
+  &.status-badge-shortlisted {
+    background: #dcfce7;
+    color: #15803d;
+  }
+
+  &.status-badge-failed {
+    background: #f3f4f6;
+    color: #4b5563;
+  }
+}
+
+.override-badge {
+  margin-left: 0.4rem;
+  font-size: 0.7rem;
+  color: var(--text-color-secondary, #6b7280);
+}
+
+.match-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  align-items: center;
+}
+
+.experience-band {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--text-color-secondary, #6b7280);
+  flex-basis: 100%;
+}
+
+.skill-tag {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  background: #eef2ff;
+  color: #4338ca;
+}
+
+.explanation-text {
+  display: block;
+  white-space: normal;
+  overflow-wrap: break-word;
+  max-width: 24rem;
+}
+
+.explanation-error {
+  color: var(--red-600, #dc2626);
+  font-size: 0.85rem;
+}
+
+.apply-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  &-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.35rem 0;
+    border-bottom: 1px solid var(--surface-200, #e4e4e7);
+  }
+
+  &-failures {
+    margin: 0.5rem 0 0;
+    padding-left: 1.1rem;
+    font-size: 0.85rem;
+    color: var(--red-600, #dc2626);
+  }
+}
+
+// PrimeNG's button label/icon otherwise renders white regardless of variant when this
+// component is hosted inside a p-dialog - see pipeline-progress-tracker.component.scss
+// for the same fix.
+:host ::ng-deep {
+  .auto-shortlist-controls button {
+    span,
+    i {
+      color: inherit;
+    }
+  }
+}

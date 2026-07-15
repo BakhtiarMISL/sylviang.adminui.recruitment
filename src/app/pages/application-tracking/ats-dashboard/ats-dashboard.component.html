@@ -68,7 +68,7 @@
       <span>Apply Filters</span>
     </button>
 
-    <button severity="secondary" pButton (click)="resetFilters()">
+    <button *ngIf="filterJobPostingId || filterStatus || filterSource || filterDateFrom || filterDateTo" severity="secondary" pButton (click)="resetFilters()">
       <i class="fa fa-times"></i>
       <span>Reset</span>
     </button>
@@ -155,6 +155,13 @@
     <button pButton [disabled]="!canApplyShortlistFilter() || applyingShortlistFilter" (click)="applyShortlistFilter($event)">
       <i class="fa fa-filter-circle-check"></i>
       <span>Apply to Applications</span>
+    </button>
+  </div>
+
+  <div class="filter-bar" *ngIf="filterJobPostingId">
+    <button pButton severity="help" (click)="openAutoShortlistDialog()">
+      <i class="fa fa-robot"></i>
+      <span>AI Shortlist</span>
     </button>
   </div>
 
@@ -323,6 +330,14 @@
 
 <p-dialog header="Pipeline Progress" [(visible)]="pipelineDialogVisible" [modal]="true" [style]="{ width: '60rem', maxWidth: '95vw' }">
   <app-pipeline-progress-tracker *ngIf="pipelineDialogVisible && pipelineDialogApplicationId" [jobApplicationId]="pipelineDialogApplicationId"></app-pipeline-progress-tracker>
+</p-dialog>
+
+<p-dialog header="AI-Powered Auto-Shortlisting" [(visible)]="autoShortlistDialogVisible" [modal]="true" [style]="{ width: '60rem', maxWidth: '95vw' }">
+  <app-auto-shortlist-dialog
+    *ngIf="autoShortlistDialogVisible && filterJobPostingId"
+    [jobPostingId]="filterJobPostingId"
+    (applied)="loadApplications()"
+  ></app-auto-shortlist-dialog>
 </p-dialog>
 
 <p-dialog header="Shortlist Filter Applied" [(visible)]="shortlistApplySummaryVisible" [modal]="true" [style]="{ width: '28rem', maxWidth: '95vw' }">

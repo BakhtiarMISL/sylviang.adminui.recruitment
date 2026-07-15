@@ -101,6 +101,9 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   shortlistApplySummary: IShortlistFilterApplyResponse | null = null;
   shortlistApplySummaryVisible = false;
 
+  // AI-Powered Auto-Shortlisting (US-046)
+  autoShortlistDialogVisible = false;
+
   get skeletonItems() {
     return Array(this.rows)
       .fill({})
@@ -378,6 +381,10 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   openPipelineTracker(application: IJobApplicationListItem): void {
     this.pipelineDialogApplicationId = application.jobApplicationId;
     this.pipelineDialogVisible = true;
+  }
+
+  openAutoShortlistDialog(): void {
+    this.autoShortlistDialogVisible = true;
   }
 
   loadShortlistFilters(): void {
