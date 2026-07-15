@@ -1,9 +1,13 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ApiResponse } from '@core/interfaces/ApiResponse';
-import { ICandidateEducationResponse, ICandidateResumeParsedEducation } from '@app/@core/interfaces/recruitment-management/candidate-profile.interface';
+import {
+  ICandidateEducationCreateRequest,
+  ICandidateEducationResponse,
+  ICandidateResumeParsedEducation,
+} from '@app/@core/interfaces/recruitment-management/candidate-profile.interface';
 import { CandidateProfileService } from '@app/@core/services/recruitment/candidate-profile/candidate-profile.service';
-import { Observable } from 'rxjs';
+import { catchError, concatMap, from, Observable, of, toArray } from 'rxjs';
 import { EducationLevelOptions } from './education-section.component.constants';
 
 @Component({
@@ -43,6 +47,7 @@ export class EducationSectionComponent implements OnInit {
   // Nothing here is saved automatically - clicking "Use" only opens the add form pre-filled
   // so the candidate reviews/corrects and hits Save themselves.
   prefillSuggestions: ICandidateResumeParsedEducation[] = [];
+  savingAll = false;
 
   stagePrefill(suggestions: ICandidateResumeParsedEducation[]): void {
     this.prefillSuggestions = suggestions;
@@ -53,7 +58,10 @@ export class EducationSectionComponent implements OnInit {
     this.form.patchValue({
       degreeTitle: suggestion.degreeTitle,
       institution: suggestion.institution,
+      educationLevel: suggestion.educationLevel ?? null,
       passingYear: suggestion.passingYear,
+      result: suggestion.result,
+      majorSubject: suggestion.majorSubject,
     });
     this.prefillSuggestions = this.prefillSuggestions.filter((_, i) => i !== index);
   }
@@ -61,6 +69,51 @@ export class EducationSectionComponent implements OnInit {
   dismissSuggestion(index: number): void {
     this.prefillSuggestions = this.prefillSuggestions.filter((_, i) => i !== index);
   }
+
+  isSuggestionReady(suggestion: ICandidateResumeParsedEducation): boolean {
+    return !!(suggestion.degreeTitle && suggestion.institution && suggestion.passingYear && suggestion.result);
+  }
+
+  hasReadySuggestions(): boolean {
+    return this.prefillSuggestions.some((s) => this.isSuggestionReady(s));
+  }
+
+  // Bulk-saves every "ready" (all required fields present) suggestion directly, without opening
+  // the per-entry form - the chip (with its Dismiss) is the review surface for this action.
+  // Suggestions missing a required field are left behind for the manual "Use" flow.
+  useAllSuggestions(): void {
+    const ready = this.prefillSuggestions.filter((s) => this.isSuggestionReady(s));
+    if (ready.length === 0) return;
+
+    this.savingAll = true;
+    from(ready)
+      .pipe(
+        concatMap((suggestion) => {
+          const request: ICandidateEducationCreateRequest = {
+            degreeTitle: suggestion.degreeTitle!,
+            institution: suggestion.institution!,
+            educationLevel: suggestion.educationLevel ?? null,
+            passingYear: suggestion.passingYear!,
+            result: suggestion.result!,
+            majorSubject: suggestion.majorSubject ?? null,
+          };
+          // Each suggestion succeeds/fails independently - one bad entry must not block the rest.
+          return this.candidateProfileService.addEducation(request).pipe(
+            catchError(() => of(null)),
+            concatMap((response) => of({ suggestion, succeeded: !!response && !response.hasError })),
+          );
+        }),
+        toArray(),
+      )
+      .subscribe((results) => {
+        this.savingAll = false;
+        const succeeded = new Set(results.filter((r) => r.succeeded).map((r) => r.suggestion));
+        this.prefillSuggestions = this.prefillSuggestions.filter((s) => !succeeded.has(s));
+        this.loadEducation();
+        this.saved.emit();
+      });
+  }
+
   showForm = false;
 
   ngOnInit(): void {

@@ -36,6 +36,7 @@ export class MyProfileComponent implements OnInit {
   parsingResume = false;
   resumeError = '';
   resumeParsed = false;
+  resumeDegradedNotice = '';
   selectedResumeName = '';
 
   ngOnInit(): void {
@@ -98,6 +99,7 @@ export class MyProfileComponent implements OnInit {
 
     this.selectedResumeName = file.name;
     this.parsingResume = true;
+    this.resumeDegradedNotice = '';
     this.candidateProfileService.parseResume(file).subscribe({
       next: (response) => {
         this.parsingResume = false;
@@ -118,12 +120,15 @@ export class MyProfileComponent implements OnInit {
   }
 
   // Prefills every section's form/suggestions from the parsed resume. Nothing is persisted here
-  // — each section still requires its own explicit Save (or "Use" + Save for list sections).
+  // — each section still requires its own explicit Save (or "Use"/"Use All" for list sections).
   private applyResumePrefill(parsed: ICandidateResumeParseResponse): void {
-    this.personalInfoSection?.applyPrefill(parsed.fullName);
-    this.contactSection?.applyPrefill(parsed.email, parsed.phone);
+    this.personalInfoSection?.applyPrefill(parsed.fullName, parsed.dateOfBirth, parsed.gender);
+    this.contactSection?.applyPrefill(parsed.email, parsed.phone, parsed.presentAddress);
     this.educationSection?.stagePrefill(parsed.educations);
     this.workExperienceSection?.stagePrefill(parsed.workExperiences);
     this.skillsSection?.stagePrefill(parsed.skills);
+    this.resumeDegradedNotice = parsed.aiParsingDegraded
+      ? 'AI parsing was unavailable, so we used basic extraction instead. Please double-check the suggested details below.'
+      : '';
   }
 }

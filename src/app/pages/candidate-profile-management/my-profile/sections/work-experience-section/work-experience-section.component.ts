@@ -1,10 +1,14 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { ApiResponse } from '@core/interfaces/ApiResponse';
-import { ICandidateResumeParsedWorkExperience, ICandidateWorkExperienceResponse } from '@app/@core/interfaces/recruitment-management/candidate-profile.interface';
+import {
+  ICandidateResumeParsedWorkExperience,
+  ICandidateWorkExperienceCreateRequest,
+  ICandidateWorkExperienceResponse,
+} from '@app/@core/interfaces/recruitment-management/candidate-profile.interface';
 import { CandidateProfileService } from '@app/@core/services/recruitment/candidate-profile/candidate-profile.service';
 import { DateTimeUtility } from '@app/@core/utils/date-time.utility';
-import { Observable } from 'rxjs';
+import { catchError, concatMap, from, Observable, of, toArray } from 'rxjs';
 
 @Component({
   selector: 'app-work-experience-section',
@@ -46,6 +50,7 @@ export class WorkExperienceSectionComponent implements OnInit {
   // Nothing here is saved automatically - clicking "Use" only opens the add form pre-filled
   // so the candidate reviews/completes (start date, responsibilities) and hits Save themselves.
   prefillSuggestions: ICandidateResumeParsedWorkExperience[] = [];
+  savingAll = false;
 
   stagePrefill(suggestions: ICandidateResumeParsedWorkExperience[]): void {
     this.prefillSuggestions = suggestions;
@@ -56,12 +61,62 @@ export class WorkExperienceSectionComponent implements OnInit {
     this.form.patchValue({
       companyName: suggestion.companyName,
       designation: suggestion.designation,
+      startDate: suggestion.startDate ? new Date(suggestion.startDate) : null,
+      endDate: !suggestion.isCurrent && suggestion.endDate ? new Date(suggestion.endDate) : null,
+      isCurrent: !!suggestion.isCurrent,
+      responsibilities: suggestion.responsibilities,
+      location: suggestion.location,
     });
     this.prefillSuggestions = this.prefillSuggestions.filter((_, i) => i !== index);
   }
 
   dismissSuggestion(index: number): void {
     this.prefillSuggestions = this.prefillSuggestions.filter((_, i) => i !== index);
+  }
+
+  isSuggestionReady(suggestion: ICandidateResumeParsedWorkExperience): boolean {
+    return !!(suggestion.companyName && suggestion.designation && suggestion.startDate && suggestion.responsibilities);
+  }
+
+  hasReadySuggestions(): boolean {
+    return this.prefillSuggestions.some((s) => this.isSuggestionReady(s));
+  }
+
+  // Bulk-saves every "ready" suggestion directly (see EducationSectionComponent.useAllSuggestions
+  // for the same pattern/rationale). endDate is forced null whenever isCurrent is true so a
+  // suggestion with an inconsistent isCurrent/endDate combination can't trip endDateValidator.
+  useAllSuggestions(): void {
+    const ready = this.prefillSuggestions.filter((s) => this.isSuggestionReady(s));
+    if (ready.length === 0) return;
+
+    this.savingAll = true;
+    from(ready)
+      .pipe(
+        concatMap((suggestion) => {
+          const isCurrent = !!suggestion.isCurrent;
+          const request: ICandidateWorkExperienceCreateRequest = {
+            companyName: suggestion.companyName!,
+            designation: suggestion.designation!,
+            startDate: suggestion.startDate!,
+            endDate: isCurrent ? null : (suggestion.endDate ?? null),
+            isCurrent,
+            responsibilities: suggestion.responsibilities!,
+            location: suggestion.location ?? null,
+          };
+          return this.candidateProfileService.addWorkExperience(request).pipe(
+            catchError(() => of(null)),
+            concatMap((response) => of({ suggestion, succeeded: !!response && !response.hasError })),
+          );
+        }),
+        toArray(),
+      )
+      .subscribe((results) => {
+        this.savingAll = false;
+        const succeeded = new Set(results.filter((r) => r.succeeded).map((r) => r.suggestion));
+        this.prefillSuggestions = this.prefillSuggestions.filter((s) => !succeeded.has(s));
+        this.loadWorkExperience();
+        this.saved.emit();
+      });
   }
 
   ngOnInit(): void {

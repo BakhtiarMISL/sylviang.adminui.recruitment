@@ -20,9 +20,20 @@
   </div>
 
   <div class="sm:col-span-2" *ngIf="prefillSuggestions.length > 0">
-    <p class="text-sm text-neutral">Suggested from your resume — review before adding:</p>
+    <div class="flex items-center justify-between">
+      <p class="text-sm text-neutral">Suggested from your resume — review before adding:</p>
+      <button pButton severity="success" type="button" [disabled]="!hasReadySuggestions() || savingAll" (click)="useAllSuggestions()">
+        <i class="fas fa-check-double"></i>
+        <span>{{ savingAll ? 'Adding...' : 'Use All' }}</span>
+      </button>
+    </div>
     <div class="list-row" *ngFor="let suggestion of prefillSuggestions; let i = index">
-      <div>{{ suggestion.degreeTitle }}<span *ngIf="suggestion.passingYear"> ({{ suggestion.passingYear }})</span></div>
+      <div>
+        {{ suggestion.degreeTitle }}<span *ngIf="suggestion.institution"> — {{ suggestion.institution }}</span>
+        <span *ngIf="suggestion.passingYear"> ({{ suggestion.passingYear }})</span>
+        <span *ngIf="suggestion.result">, {{ suggestion.result }}</span>
+        <span class="text-sm text-neutral ml-2" *ngIf="!isSuggestionReady(suggestion)">(needs manual review)</span>
+      </div>
       <div class="list-row-actions">
         <button pButton severity="secondary" type="button" (click)="useSuggestion(suggestion, i)">Use</button>
         <button pButton severity="danger" type="button" (click)="dismissSuggestion(i)">Dismiss</button>
