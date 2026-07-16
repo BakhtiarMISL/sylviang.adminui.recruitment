@@ -12,8 +12,17 @@
     <div class="sm:col-span-2 profile-header" *ngIf="!loading && profile">
       <app-completeness-ring [percentage]="profile.completenessPercentage"></app-completeness-ring>
       <div class="profile-header-text">
-        <span class="profile-header-title">Profile completeness</span>
+        <span class="profile-header-title">
+          Profile completeness
+          <span class="profile-type-badge" [class.internal]="profile.isInternal">{{ profile.isInternal ? 'Internal Candidate' : 'External Candidate' }}</span>
+        </span>
         <span class="profile-header-subtitle">Fill out every section below to reach 100%.</span>
+        <span class="profile-header-subtitle" *ngIf="profile.isInternal && (profile.departmentName || profile.designationName)">
+          {{ profile.designationName }}<span *ngIf="profile.designationName && profile.departmentName"> &middot; </span>{{ profile.departmentName }}
+        </span>
+        <span class="text-sm text-neutral mt-1" *ngIf="profile.hasPrepopulatedFieldEdits">
+          <i class="fas fa-flag"></i> You've edited a field pre-filled from Core HR — HR has been notified.
+        </span>
       </div>
     </div>
 

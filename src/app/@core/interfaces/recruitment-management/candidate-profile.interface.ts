@@ -22,6 +22,11 @@ export interface ICandidateProfileResponse extends ICandidateProfilePersonalInfo
   profilePhotoPath?: string | null;
   signaturePath?: string | null;
   completenessPercentage: number;
+  // US-005: Core HR pre-population / internal-vs-external distinction.
+  isInternal: boolean;
+  departmentName?: string | null;
+  designationName?: string | null;
+  hasPrepopulatedFieldEdits: boolean;
 }
 
 export interface ICandidateEducationCreateRequest {

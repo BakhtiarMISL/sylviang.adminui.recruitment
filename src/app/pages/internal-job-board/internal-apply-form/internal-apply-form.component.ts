@@ -1,6 +1,7 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { IJobApplicationSubmitResponse } from '@app/@core/interfaces/recruitment-management/career-portal.interface';
+import { CandidateProfileService } from '@app/@core/services/recruitment/candidate-profile/candidate-profile.service';
 import { InternalJobBoardService } from '@app/@core/services/recruitment/internal-job-board/internal-job-board.service';
 import { RESUME_ALLOWED_EXTENSIONS, RESUME_MAX_SIZE_BYTES } from '../internal-job-board.constants';
 
@@ -10,18 +11,36 @@ import { RESUME_ALLOWED_EXTENSIONS, RESUME_MAX_SIZE_BYTES } from '../internal-jo
   templateUrl: './internal-apply-form.component.html',
   styleUrl: './internal-apply-form.component.scss',
 })
-export class InternalApplyFormComponent {
+export class InternalApplyFormComponent implements OnInit {
   @Input() jobPostingId!: number;
 
   constructor(
     private fb: FormBuilder,
     private internalJobBoardService: InternalJobBoardService,
+    private candidateProfileService: CandidateProfileService,
   ) {
     this.applyForm = this.fb.group({
       candidateName: [null, [Validators.required]],
       candidateEmail: [null, [Validators.required, Validators.email]],
       candidatePhone: [null],
       coverLetter: [null],
+    });
+  }
+
+  // US-005 AC1: pre-fill from the logged-in candidate's own profile (Core-HR-populated for
+  // internal candidates) instead of the blank manual-entry form used previously. Candidate can
+  // still edit before submitting.
+  ngOnInit(): void {
+    this.candidateProfileService.getMyProfile().subscribe({
+      next: (response) => {
+        if (response && !response.hasError && response.content) {
+          this.applyForm.patchValue({
+            candidateName: response.content.fullName,
+            candidateEmail: response.content.email,
+            candidatePhone: response.content.phone,
+          });
+        }
+      },
     });
   }
 
