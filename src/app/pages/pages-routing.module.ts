@@ -27,6 +27,10 @@ const routes: Routes = [
       loadChildren: () => import('./candidate-management/candidate-management.module').then((m) => m.CandidateManagementModule),
     },
     {
+      path: 'cv-bank',
+      loadChildren: () => import('./cv-bank-management/cv-bank-management.module').then((m) => m.CvBankManagementModule),
+    },
+    {
       path: 'internal-jobs',
       loadChildren: () => import('./internal-job-board/internal-job-board.module').then((m) => m.InternalJobBoardModule),
     },

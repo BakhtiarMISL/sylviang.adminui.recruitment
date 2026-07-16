@@ -40,6 +40,12 @@ export const webSidebarMenuItems: IMenuItem[] = [
         icon: 'fa-solid fa-users',
       },
       {
+        href: '/cv-bank',
+        title: 'CV Bank',
+        active: false,
+        icon: 'fa-solid fa-magnifying-glass',
+      },
+      {
         href: '/applications',
         title: 'ATS Dashboard',
         active: false,
