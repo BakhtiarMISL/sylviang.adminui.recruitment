@@ -1,3 +1,5 @@
+import type { ITalentPoolBadgeResponse } from './talent-pool.interface';
+
 export interface ICandidateProfilePersonalInfoUpdateRequest {
   fullName: string;
   dateOfBirth?: string | null;
@@ -141,6 +143,7 @@ export interface ICandidateProfileDetailResponse extends ICandidateProfileRespon
   documents: ICandidateDocumentResponse[];
   applicationHistory: IApplicationHistoryItem[];
   hrNotes?: string | null;
+  talentPools: ITalentPoolBadgeResponse[];
 }
 
 export interface ICandidateProfileHrNotesUpdateRequest {

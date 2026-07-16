@@ -40,6 +40,12 @@ export const webSidebarMenuItems: IMenuItem[] = [
         icon: 'fa-solid fa-users',
       },
       {
+        href: '/talent-pools/talent-pool-list',
+        title: 'Talent Pools',
+        active: false,
+        icon: 'fa-solid fa-user-group',
+      },
+      {
         href: '/applications',
         title: 'ATS Dashboard',
         active: false,
