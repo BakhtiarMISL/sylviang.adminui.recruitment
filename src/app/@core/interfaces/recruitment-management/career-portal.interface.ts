@@ -37,3 +37,8 @@ export interface IJobApplicationSubmitResponse {
   appliedDate?: string;
   source: string;
 }
+
+export interface IJobEligibilityResponse {
+  isEligible: boolean;
+  unmetRequirements: string[];
+}

@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { IJobApplicationSubmitResponse } from '@app/@core/interfaces/recruitment-management/career-portal.interface';
+import { IJobApplicationSubmitResponse, IJobEligibilityResponse } from '@app/@core/interfaces/recruitment-management/career-portal.interface';
 import { InternalJobBoardService } from '@app/@core/services/recruitment/internal-job-board/internal-job-board.service';
 import { RESUME_ALLOWED_EXTENSIONS, RESUME_MAX_SIZE_BYTES } from '../internal-job-board.constants';
 
@@ -12,6 +12,13 @@ import { RESUME_ALLOWED_EXTENSIONS, RESUME_MAX_SIZE_BYTES } from '../internal-jo
 })
 export class InternalApplyFormComponent {
   @Input() jobPostingId!: number;
+  @Input() eligibilityResult: IJobEligibilityResponse | null = null;
+  acknowledgedIneligibility = false;
+
+  /** US-024 AC4: ineligible candidates can still apply, but must re-acknowledge the warning first. */
+  get needsAcknowledgement(): boolean {
+    return !!this.eligibilityResult && !this.eligibilityResult.isEligible;
+  }
 
   constructor(
     private fb: FormBuilder,
@@ -93,7 +100,7 @@ export class InternalApplyFormComponent {
       this.fileError = 'Resume is required';
     }
 
-    if (this.applyForm.invalid || !this.selectedFile) {
+    if (this.applyForm.invalid || !this.selectedFile || (this.needsAcknowledgement && !this.acknowledgedIneligibility)) {
       this.applyForm.markAllAsTouched();
       return;
     }
