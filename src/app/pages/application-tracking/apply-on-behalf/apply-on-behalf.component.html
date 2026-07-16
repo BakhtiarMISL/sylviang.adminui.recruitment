@@ -39,6 +39,13 @@
 
     <div>
       <p-floatlabel variant="in">
+        <input type="text" pInputText id="candidateNationalId" class="w-full" [(ngModel)]="candidateNationalId" name="candidateNationalId" />
+        <label for="candidateNationalId">National ID</label>
+      </p-floatlabel>
+    </div>
+
+    <div>
+      <p-floatlabel variant="in">
         <p-select
           inputId="jobPostingId"
           [options]="openJobPostings"

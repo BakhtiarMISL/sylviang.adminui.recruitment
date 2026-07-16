@@ -56,6 +56,31 @@ export interface IJobApplicationDetail {
   statusHistory: IApplicationStatusHistoryEntry[];
 }
 
+// ── Duplicate Detection (US-038) ──────────────────────────────────────────
+
+export interface IJobApplicationDuplicateItem {
+  jobApplicationId: number;
+  candidateName: string;
+  candidateEmail?: string;
+  candidatePhone?: string;
+  candidateNationalId?: string;
+  source: ApplicationSourceEnum;
+  applicationStatus: ApplicationStatusEnum;
+  appliedDate?: string;
+  resumeUrl?: string;
+}
+
+export interface IJobApplicationDuplicateGroup {
+  applications: IJobApplicationDuplicateItem[];
+  matchedOn: string[];
+}
+
+export interface IJobApplicationDuplicateResolveRequest {
+  jobPostingId: number;
+  primaryJobApplicationId: number;
+  duplicateJobApplicationIds: number[];
+}
+
 export interface IApplicationStatusReason {
   applicationStatusReasonId: number;
   label: string;

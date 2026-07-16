@@ -23,6 +23,11 @@
       <label for="filterJobPostingId">Job Posting</label>
     </p-floatlabel>
 
+    <button pButton type="button" class="p-button-secondary" [disabled]="!filterJobPostingId" (click)="viewDuplicates()">
+      <i class="fa fa-clone"></i>
+      <span>View Duplicates</span>
+    </button>
+
     <p-floatlabel variant="in">
       <p-select
         inputId="filterStatus"
