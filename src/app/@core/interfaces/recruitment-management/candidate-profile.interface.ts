@@ -141,8 +141,20 @@ export interface ICandidateProfileDetailResponse extends ICandidateProfileRespon
   documents: ICandidateDocumentResponse[];
   applicationHistory: IApplicationHistoryItem[];
   hrNotes?: string | null;
+  tags: string[];
 }
 
 export interface ICandidateProfileHrNotesUpdateRequest {
   hrNotes?: string | null;
+}
+
+// ── Tags (US-041, HR-only) ────────────────────────────────────────
+
+export interface ICandidateTagResponse {
+  candidateTagId: number;
+  tagName: string;
+}
+
+export interface ICandidateTagCreateRequest {
+  tagName: string;
 }

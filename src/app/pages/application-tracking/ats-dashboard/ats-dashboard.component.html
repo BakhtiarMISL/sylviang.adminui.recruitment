@@ -130,6 +130,20 @@
       <p-inputnumber inputId="filterMaxAge" [(ngModel)]="filterMaxAge" (ngModelChange)="onCandidateAttributeFilterChange()" [min]="0" class="w-full"></p-inputnumber>
       <label for="filterMaxAge">Max. Age</label>
     </p-floatlabel>
+
+    <p-floatlabel variant="in">
+      <p-multiSelect
+        inputId="filterTags"
+        [options]="tagSuggestions"
+        [(ngModel)]="filterTags"
+        (ngModelChange)="onCandidateAttributeFilterChange()"
+        [filter]="true"
+        [appendTo]="'body'"
+        display="chip"
+        class="w-full"
+      ></p-multiSelect>
+      <label for="filterTags">Tags (any of)</label>
+    </p-floatlabel>
   </div>
 
   <div class="active-filter-chips" *ngIf="activeFilterChips.length > 0">

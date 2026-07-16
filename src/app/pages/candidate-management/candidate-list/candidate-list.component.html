@@ -6,12 +6,27 @@
         <label for="searchInput">Search by name or email</label>
       </p-floatlabel>
 
+      <p-floatlabel variant="in">
+        <p-multiSelect
+          inputId="filterTags"
+          [options]="tagSuggestions"
+          [(ngModel)]="filterTags"
+          (ngModelChange)="onTagFilterChange()"
+          [filter]="true"
+          [appendTo]="'body'"
+          display="chip"
+          class="w-full"
+          styleClass="min-w-56"
+        ></p-multiSelect>
+        <label for="filterTags">Tags (any of)</label>
+      </p-floatlabel>
+
       <button pButton (click)="applySearch()">
         <i class="fa fa-search"></i>
         <span>Search</span>
       </button>
 
-      <button *ngIf="searchTerm" severity="secondary" pButton (click)="resetSearch()">
+      <button *ngIf="searchTerm || filterTags.length > 0" severity="secondary" pButton (click)="resetSearch()">
         <i class="fa fa-times"></i>
         <span>Reset</span>
       </button>
