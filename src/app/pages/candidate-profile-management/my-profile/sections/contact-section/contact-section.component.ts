@@ -32,7 +32,10 @@ export class ContactSectionComponent implements OnChanges {
   saveSuccess = false;
 
   // See PersonalInfoSectionComponent.applyPrefill for why this bypasses the pristine guard.
+  // Skipped entirely once locked (US-003 AC4) - patchValue would otherwise write into a disabled
+  // control, which the user can't see changing, only to have the eventual Save rejected.
   applyPrefill(email?: string | null, phone?: string | null): void {
+    if (this.identityFieldsLocked) return;
     const patch: { email?: string; phone?: string } = {};
     if (email) patch.email = email;
     if (phone) patch.phone = phone;
@@ -46,6 +49,19 @@ export class ContactSectionComponent implements OnChanges {
     if (changes['profile'] && this.profile && this.form.pristine) {
       this.form.patchValue({ ...this.profile });
     }
+
+    // US-003 AC4: Email/Phone are the candidate's application-matching identity - once they have
+    // a submitted application, changing either would orphan their own application history, so
+    // lock these two fields (independent of the pristine guard above, which only gates re-patch).
+    if (changes['profile'] && this.profile) {
+      const lockMethod = this.profile.hasSubmittedApplication ? 'disable' : 'enable';
+      this.form.get('email')?.[lockMethod]({ emitEvent: false });
+      this.form.get('phone')?.[lockMethod]({ emitEvent: false });
+    }
+  }
+
+  get identityFieldsLocked(): boolean {
+    return !!this.profile?.hasSubmittedApplication;
   }
 
   get f() {

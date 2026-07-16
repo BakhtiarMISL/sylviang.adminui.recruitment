@@ -2,7 +2,7 @@
   <div>
     <p-floatlabel variant="in">
       <input pInputText inputId="email" formControlName="email" maxlength="200" class="w-full" [class.ng-invalid]="hasError('email')" [class.ng-dirty]="hasError('email')" (blur)="f['email'].markAsTouched()" />
-      <label for="email">Email *</label>
+      <label for="email">Email * <i *ngIf="identityFieldsLocked" class="fas fa-lock" pTooltip="Locked because you have a submitted application. Contact HR support to correct this." tooltipPosition="top"></i></label>
     </p-floatlabel>
     <div *ngIf="hasError('email')" class="invalid">{{ getErrorMessage('email') }}</div>
   </div>
@@ -10,7 +10,7 @@
   <div>
     <p-floatlabel variant="in">
       <input pInputText inputId="phone" formControlName="phone" maxlength="50" class="w-full" [class.ng-invalid]="hasError('phone')" [class.ng-dirty]="hasError('phone')" (blur)="f['phone'].markAsTouched()" />
-      <label for="phone">Phone</label>
+      <label for="phone">Phone <i *ngIf="identityFieldsLocked" class="fas fa-lock" pTooltip="Locked because you have a submitted application. Contact HR support to correct this." tooltipPosition="top"></i></label>
     </p-floatlabel>
     <div *ngIf="hasError('phone')" class="invalid">{{ getErrorMessage('phone') }}</div>
   </div>

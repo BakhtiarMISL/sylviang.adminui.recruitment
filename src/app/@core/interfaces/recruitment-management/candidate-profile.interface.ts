@@ -22,6 +22,9 @@ export interface ICandidateProfileResponse extends ICandidateProfilePersonalInfo
   profilePhotoPath?: string | null;
   signaturePath?: string | null;
   completenessPercentage: number;
+  // US-003 AC4: true once the candidate has a submitted application - Email/Phone/NationalId
+  // lock in that state, since JobApplication self-service lookups match by Email.
+  hasSubmittedApplication: boolean;
 }
 
 export interface ICandidateEducationCreateRequest {

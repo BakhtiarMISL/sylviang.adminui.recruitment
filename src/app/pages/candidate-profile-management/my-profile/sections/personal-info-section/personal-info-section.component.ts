@@ -56,6 +56,17 @@ export class PersonalInfoSectionComponent implements OnChanges {
         dateOfBirth: this.profile.dateOfBirth ? new Date(this.profile.dateOfBirth) : null,
       });
     }
+
+    // US-003 AC4: National ID is part of the candidate's application-matching identity - once
+    // they have a submitted application it locks (independent of the pristine guard above, which
+    // only gates re-patch).
+    if (changes['profile'] && this.profile) {
+      this.form.get('nationalId')?.[this.profile.hasSubmittedApplication ? 'disable' : 'enable']({ emitEvent: false });
+    }
+  }
+
+  get identityFieldsLocked(): boolean {
+    return !!this.profile?.hasSubmittedApplication;
   }
 
   get f() {

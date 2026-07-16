@@ -25,7 +25,7 @@
   <div>
     <p-floatlabel variant="in">
       <input pInputText inputId="nationalId" formControlName="nationalId" maxlength="50" class="w-full" [class.ng-invalid]="hasError('nationalId')" [class.ng-dirty]="hasError('nationalId')" (blur)="f['nationalId'].markAsTouched()" />
-      <label for="nationalId">National ID</label>
+      <label for="nationalId">National ID <i *ngIf="identityFieldsLocked" class="fas fa-lock" pTooltip="Locked because you have a submitted application. Contact HR support to correct this." tooltipPosition="top"></i></label>
     </p-floatlabel>
     <div *ngIf="hasError('nationalId')" class="invalid">{{ getErrorMessage('nationalId') }}</div>
   </div>
