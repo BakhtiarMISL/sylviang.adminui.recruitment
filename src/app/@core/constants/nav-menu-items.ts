@@ -34,6 +34,12 @@ export const webSidebarMenuItems: IMenuItem[] = [
         icon: 'fa-solid fa-filter',
       },
       {
+        href: '/assessment-workflow/assessment-workflow-list',
+        title: 'Assessment Workflows',
+        active: false,
+        icon: 'fa-solid fa-clipboard-check',
+      },
+      {
         href: '/candidates',
         title: 'Candidates',
         active: false,

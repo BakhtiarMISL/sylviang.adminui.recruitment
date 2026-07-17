@@ -67,3 +67,11 @@ export enum FilterCombinatorEnum {
   And = 'And',
   Or = 'Or',
 }
+
+export enum StageTypeEnum {
+  WrittenTest = 'WrittenTest',
+  AptitudeTest = 'AptitudeTest',
+  PsychometricTest = 'PsychometricTest',
+  GroupDiscussion = 'GroupDiscussion',
+  PracticalAssessment = 'PracticalAssessment',
+}
