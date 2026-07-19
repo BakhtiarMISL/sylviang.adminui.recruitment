@@ -71,10 +71,17 @@ export const webSidebarMenuItems: IMenuItem[] = [
         icon: 'fa-solid fa-users',
       },
       {
+<<<<<<< HEAD
         href: '/cv-bank',
         title: 'CV Bank',
         active: false,
         icon: 'fa-solid fa-magnifying-glass',
+=======
+        href: '/talent-pools/talent-pool-list',
+        title: 'Talent Pools',
+        active: false,
+        icon: 'fa-solid fa-user-group',
+>>>>>>> feature/talent-pool-management
       },
       {
         href: '/applications',

@@ -150,6 +150,19 @@
 
   <section class="page-container">
     <div class="form-container">
+      <h3 class="form-section-header">Talent Pools</h3>
+
+      <div class="sm:col-span-2 text-sm text-neutral" *ngIf="profile.talentPools.length === 0">Not in any talent pool.</div>
+      <div class="sm:col-span-2 skills-list" *ngIf="profile.talentPools.length > 0">
+        <span class="skill-chip" *ngFor="let pool of profile.talentPools">
+          <a [routerLink]="['/talent-pools/talent-pool-detail', pool.talentPoolId]">{{ pool.name }}</a>
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <section class="page-container">
+    <div class="form-container">
       <h3 class="form-section-header">HR Notes</h3>
 
       <div class="sm:col-span-2">

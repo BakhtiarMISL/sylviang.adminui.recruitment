@@ -1,6 +1,8 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ICandidateProfileSummaryResponse } from '@app/@core/interfaces/recruitment-management/candidate-profile.interface';
+import { ITalentPoolLookupResponse } from '@app/@core/interfaces/recruitment-management/talent-pool.interface';
 import { CandidateProfileService } from '@app/@core/services/recruitment/candidate-profile/candidate-profile.service';
+import { TalentPoolService } from '@app/@core/services/recruitment/talent-pool/talent-pool.service';
 import { UI_CONFIG } from '@app/@core/constants';
 import { Base_URL } from '@env/environment';
 
@@ -13,6 +15,7 @@ import { Base_URL } from '@env/environment';
 export class CandidateListComponent implements OnInit {
   constructor(
     private candidateProfileService: CandidateProfileService,
+    private talentPoolService: TalentPoolService,
     private cdr: ChangeDetectorRef,
   ) {}
 
@@ -25,6 +28,16 @@ export class CandidateListComponent implements OnInit {
   currentPage = 1;
   searchTerm = '';
 
+  pools: ITalentPoolLookupResponse[] = [];
+  selectedPoolIds: number[] = [];
+
+  showAddToPoolDialog = false;
+  addToPoolCandidate: ICandidateProfileSummaryResponse | null = null;
+  addToPoolSelectedId: number | null = null;
+  addingToPool = false;
+  addToPoolError = '';
+  addToPoolSuccess = false;
+
   get skeletonItems() {
     return Array(this.rows)
       .fill({})
@@ -33,7 +46,60 @@ export class CandidateListComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadCandidates();
+    this.loadPools();
     this.isLoading = false;
+  }
+
+  loadPools(): void {
+    this.talentPoolService.getLookup().subscribe({
+      next: (response) => {
+        this.pools = !response.hasError && response.content ? response.content : [];
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.pools = [];
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  applyPoolFilter(): void {
+    this.currentPage = 1;
+    this.loadCandidates();
+  }
+
+  openAddToPoolDialog(candidate: ICandidateProfileSummaryResponse): void {
+    this.addToPoolCandidate = candidate;
+    this.addToPoolSelectedId = null;
+    this.addToPoolError = '';
+    this.addToPoolSuccess = false;
+    this.showAddToPoolDialog = true;
+  }
+
+  addToPool(): void {
+    if (!this.addToPoolCandidate || !this.addToPoolSelectedId) return;
+
+    this.addingToPool = true;
+    this.addToPoolError = '';
+
+    this.talentPoolService
+      .addCandidates(this.addToPoolSelectedId, { candidateProfileIds: [this.addToPoolCandidate.candidateProfileId] })
+      .subscribe({
+        next: (response) => {
+          this.addingToPool = false;
+          if (!response.hasError) {
+            this.addToPoolSuccess = true;
+          } else {
+            this.addToPoolError = response.decentMessage || 'Failed to add candidate to pool.';
+          }
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          this.addingToPool = false;
+          this.addToPoolError = error?.error?.decentMessage || 'Failed to add candidate to pool.';
+          this.cdr.detectChanges();
+        },
+      });
   }
 
   getPhotoUrl(candidate: ICandidateProfileSummaryResponse): string {
@@ -58,6 +124,7 @@ export class CandidateListComponent implements OnInit {
       page: this.currentPage,
       pageSize: this.rows,
       ...(this.searchTerm && this.searchTerm.trim() && { searchTerm: this.searchTerm.trim(), searchProperties: ['FullName', 'Email'] }),
+      ...(this.selectedPoolIds.length > 0 && { talentPoolIds: this.selectedPoolIds }),
     };
 
     this.candidateProfileService.getPaged(params).subscribe({
