@@ -69,6 +69,7 @@ export enum FilterCombinatorEnum {
   Or = 'Or',
 }
 
+<<<<<<< HEAD
 export enum HrOverrideDecisionEnum {
   Approved = 'Approved',
   Rejected = 'Rejected',
@@ -86,4 +87,17 @@ export enum RecommendationStatusEnum {
   Pending = 'Pending',
   Accepted = 'Accepted',
   Rejected = 'Rejected',
+=======
+export enum QuestionTypeEnum {
+  McqSingle = 'McqSingle',
+  McqMultiple = 'McqMultiple',
+  TrueFalse = 'TrueFalse',
+  Subjective = 'Subjective',
+}
+
+export enum DifficultyLevelEnum {
+  Easy = 'Easy',
+  Medium = 'Medium',
+  Hard = 'Hard',
+>>>>>>> feature/exam-question-bank
 }
