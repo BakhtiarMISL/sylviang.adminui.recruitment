@@ -39,6 +39,10 @@ const routes: Routes = [
       loadChildren: () => import('./shortlist-filter-management/shortlist-filter-management.module').then((m) => m.ShortlistFilterManagementModule),
     },
     {
+      path: 'exam-halls',
+      loadChildren: () => import('./exam-hall-management/exam-hall-management.module').then((m) => m.ExamHallManagementModule),
+    },
+    {
       path: 'applications',
       loadChildren: () => import('./application-tracking/application-tracking.module').then((m) => m.ApplicationTrackingModule),
     },

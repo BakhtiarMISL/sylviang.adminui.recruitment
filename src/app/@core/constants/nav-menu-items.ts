@@ -34,6 +34,12 @@ export const webSidebarMenuItems: IMenuItem[] = [
         icon: 'fa-solid fa-filter',
       },
       {
+        href: '/exam-halls/exam-hall-list',
+        title: 'Exam Halls',
+        active: false,
+        icon: 'fa-solid fa-door-open',
+      },
+      {
         href: '/candidates',
         title: 'Candidates',
         active: false,
