@@ -24,9 +24,17 @@ export interface ICandidateProfileResponse extends ICandidateProfilePersonalInfo
   profilePhotoPath?: string | null;
   signaturePath?: string | null;
   completenessPercentage: number;
+<<<<<<< HEAD
   // US-003 AC4: true once the candidate has a submitted application - Email/Phone/NationalId
   // lock in that state, since JobApplication self-service lookups match by Email.
   hasSubmittedApplication: boolean;
+=======
+  // US-005: Core HR pre-population / internal-vs-external distinction.
+  isInternal: boolean;
+  departmentName?: string | null;
+  designationName?: string | null;
+  hasPrepopulatedFieldEdits: boolean;
+>>>>>>> feature/us005-internal-candidate-prepopulation
 }
 
 export interface ICandidateEducationCreateRequest {

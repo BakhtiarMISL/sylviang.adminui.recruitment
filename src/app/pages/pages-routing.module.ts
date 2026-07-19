@@ -27,13 +27,12 @@ const routes: Routes = [
       loadChildren: () => import('./candidate-management/candidate-management.module').then((m) => m.CandidateManagementModule),
     },
     {
-<<<<<<< HEAD
       path: 'cv-bank',
       loadChildren: () => import('./cv-bank-management/cv-bank-management.module').then((m) => m.CvBankManagementModule),
-=======
+    },
+    {
       path: 'talent-pools',
       loadChildren: () => import('./talent-pool-management/talent-pool-management.module').then((m) => m.TalentPoolManagementModule),
->>>>>>> feature/talent-pool-management
     },
     {
       path: 'internal-jobs',

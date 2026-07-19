@@ -15,9 +15,18 @@
         <i *ngIf="!getPhotoUrl()" class="fa-solid fa-circle-user profile-photo-placeholder"></i>
 
         <div class="profile-header-text">
-          <span class="profile-header-name">{{ profile.fullName }}</span>
+          <span class="profile-header-name">
+            {{ profile.fullName }}
+            <span class="profile-type-badge" [class.internal]="profile.isInternal">{{ profile.isInternal ? 'Internal' : 'External' }}</span>
+          </span>
           <span class="profile-header-email">{{ profile.email }}</span>
           <span class="profile-header-phone" *ngIf="profile.phone">{{ profile.phone }}</span>
+          <span class="profile-header-phone" *ngIf="profile.isInternal && (profile.departmentName || profile.designationName)">
+            {{ profile.designationName }}<span *ngIf="profile.designationName && profile.departmentName"> &middot; </span>{{ profile.departmentName }}
+          </span>
+          <span class="text-sm mt-1" *ngIf="profile.hasPrepopulatedFieldEdits">
+            <i class="fas fa-flag"></i> Candidate has edited a field pre-filled from Core HR.
+          </span>
         </div>
 
         <app-completeness-ring [percentage]="profile.completenessPercentage"></app-completeness-ring>

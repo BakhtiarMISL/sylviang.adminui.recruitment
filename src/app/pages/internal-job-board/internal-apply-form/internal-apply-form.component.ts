@@ -1,7 +1,12 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+<<<<<<< HEAD
 import { CandidateProfileService } from '@app/@core/services/recruitment/candidate-profile/candidate-profile.service';
 import { IJobApplicationSubmitResponse, IJobEligibilityResponse } from '@app/@core/interfaces/recruitment-management/career-portal.interface';
+=======
+import { IJobApplicationSubmitResponse } from '@app/@core/interfaces/recruitment-management/career-portal.interface';
+import { CandidateProfileService } from '@app/@core/services/recruitment/candidate-profile/candidate-profile.service';
+>>>>>>> feature/us005-internal-candidate-prepopulation
 import { InternalJobBoardService } from '@app/@core/services/recruitment/internal-job-board/internal-job-board.service';
 import { PaymentService } from '@app/@core/services/recruitment/payment/payment.service';
 import { RESUME_ALLOWED_EXTENSIONS, RESUME_MAX_SIZE_BYTES } from '../internal-job-board.constants';
@@ -25,7 +30,10 @@ export class InternalApplyFormComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private internalJobBoardService: InternalJobBoardService,
+<<<<<<< HEAD
     private paymentService: PaymentService,
+=======
+>>>>>>> feature/us005-internal-candidate-prepopulation
     private candidateProfileService: CandidateProfileService,
   ) {
     this.applyForm = this.fb.group({
@@ -36,6 +44,7 @@ export class InternalApplyFormComponent implements OnInit {
     });
   }
 
+<<<<<<< HEAD
   ngOnInit(): void {
     // Internal candidates are already logged in with a profile on file - prefill from it so
     // they don't have to retype what's already known, rather than forcing a blank form every time.
@@ -53,6 +62,22 @@ export class InternalApplyFormComponent implements OnInit {
       // Prefill is a convenience, not a requirement - leave the form blank on failure rather
       // than blocking the candidate from applying.
       error: () => {},
+=======
+  // US-005 AC1: pre-fill from the logged-in candidate's own profile (Core-HR-populated for
+  // internal candidates) instead of the blank manual-entry form used previously. Candidate can
+  // still edit before submitting.
+  ngOnInit(): void {
+    this.candidateProfileService.getMyProfile().subscribe({
+      next: (response) => {
+        if (response && !response.hasError && response.content) {
+          this.applyForm.patchValue({
+            candidateName: response.content.fullName,
+            candidateEmail: response.content.email,
+            candidatePhone: response.content.phone,
+          });
+        }
+      },
+>>>>>>> feature/us005-internal-candidate-prepopulation
     });
   }
 
