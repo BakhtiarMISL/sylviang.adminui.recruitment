@@ -18,6 +18,8 @@ import {
   ICandidateProfileResponse,
   ICandidateSkillCreateRequest,
   ICandidateSkillResponse,
+  ICandidateTagCreateRequest,
+  ICandidateTagResponse,
   ICandidateWorkExperienceCreateRequest,
   ICandidateWorkExperienceResponse,
   ICandidateWorkExperienceUpdateRequest,
@@ -203,5 +205,23 @@ export class CandidateProfileService {
 
   updateHrNotes(candidateProfileId: number, request: ICandidateProfileHrNotesUpdateRequest) {
     return this.httpClient.put<ApiResponse<void>>(`${this.API_URL}/${candidateProfileId}/hr-notes`, request);
+  }
+
+  // ── Tags (US-041, HR-only) ───────────────────────────────────────
+
+  getTagSuggestions(search: string) {
+    return this.httpClient.get<ApiResponse<string[]>>(`${this.API_URL}/tags/suggestions`, { params: { search } });
+  }
+
+  getTags(candidateProfileId: number) {
+    return this.httpClient.get<ApiResponse<ICandidateTagResponse[]>>(`${this.API_URL}/${candidateProfileId}/tags`);
+  }
+
+  addTag(candidateProfileId: number, request: ICandidateTagCreateRequest) {
+    return this.httpClient.post<ApiResponse<number>>(`${this.API_URL}/${candidateProfileId}/tags`, request);
+  }
+
+  deleteTag(candidateProfileId: number, candidateTagId: number) {
+    return this.httpClient.delete<ApiResponse<void>>(`${this.API_URL}/${candidateProfileId}/tags/${candidateTagId}`);
   }
 }

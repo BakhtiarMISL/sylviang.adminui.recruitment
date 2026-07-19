@@ -73,9 +73,11 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   filterLocation: string | null = null;
   filterMinAge: number | null = null;
   filterMaxAge: number | null = null;
+  filterTags: string[] = [];
 
   educationLevelOptions = Object.values(EducationLevelEnum).map((value) => ({ label: value, value }));
   skillLibrary: ISkillLibraryItemResponse[] = [];
+  tagSuggestions: string[] = [];
 
   private filterChange$ = new Subject<void>();
 
@@ -141,6 +143,7 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     this.loadShortlistFilters();
     this.loadSavedSearches();
     this.loadSkillLibrary();
+    this.loadTagSuggestions();
     this.isLoading = false;
   }
 
@@ -156,6 +159,15 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     this.candidateProfileService.getSkillLibrary().subscribe({
       next: (response) => {
         this.skillLibrary = response && !response.hasError && response.content ? response.content : [];
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  private loadTagSuggestions(): void {
+    this.candidateProfileService.getTagSuggestions('').subscribe({
+      next: (response) => {
+        this.tagSuggestions = response && !response.hasError && response.content ? response.content : [];
         this.cdr.detectChanges();
       },
     });
@@ -206,6 +218,7 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     this.filterLocation = null;
     this.filterMinAge = null;
     this.filterMaxAge = null;
+    this.filterTags = [];
   }
 
   /** Candidate-attribute filters real-time apply (US-050 AC3) - debounced via filterChange$. */
@@ -228,6 +241,7 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
       ...(this.filterLocation && { location: this.filterLocation }),
       ...(this.filterMinAge != null && { minAge: this.filterMinAge }),
       ...(this.filterMaxAge != null && { maxAge: this.filterMaxAge }),
+      ...(this.filterTags.length > 0 && { tags: this.filterTags }),
     };
   }
 
@@ -252,6 +266,7 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.filterMinAge != null || this.filterMaxAge != null) {
       chips.push({ key: 'filterAge', label: `Age: ${this.filterMinAge ?? 0}-${this.filterMaxAge ?? '∞'}` });
     }
+    if (this.filterTags.length > 0) chips.push({ key: 'filterTags', label: `Tags: ${this.filterTags.join(', ')}` });
     return chips;
   }
 
@@ -290,6 +305,9 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
         this.filterMinAge = null;
         this.filterMaxAge = null;
         break;
+      case 'filterTags':
+        this.filterTags = [];
+        break;
     }
     this.currentPage = 1;
     this.saveFiltersToSession();
@@ -312,6 +330,7 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
       filterLocation: this.filterLocation,
       filterMinAge: this.filterMinAge,
       filterMaxAge: this.filterMaxAge,
+      filterTags: this.filterTags,
     };
     sessionStorage.setItem(FILTER_SESSION_KEY, JSON.stringify(state));
   }
@@ -334,6 +353,7 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
       this.filterLocation = state.filterLocation ?? null;
       this.filterMinAge = state.filterMinAge ?? null;
       this.filterMaxAge = state.filterMaxAge ?? null;
+      this.filterTags = state.filterTags ?? [];
     } catch {
       sessionStorage.removeItem(FILTER_SESSION_KEY);
     }

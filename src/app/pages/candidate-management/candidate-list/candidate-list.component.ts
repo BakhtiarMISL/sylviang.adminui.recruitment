@@ -38,6 +38,12 @@ export class CandidateListComponent implements OnInit {
   addToPoolError = '';
   addToPoolSuccess = false;
 
+  // US-041 AC3: filter by HR tags. Suggestions loaded once (same shape as ATS dashboard's
+  // skillLibrary p-multiSelect) rather than per-keystroke, since this is a dropdown filter, not
+  // a free-text autocomplete.
+  filterTags: string[] = [];
+  tagSuggestions: string[] = [];
+
   get skeletonItems() {
     return Array(this.rows)
       .fill({})
@@ -47,6 +53,7 @@ export class CandidateListComponent implements OnInit {
   ngOnInit(): void {
     this.loadCandidates();
     this.loadPools();
+    this.loadTagSuggestions();
     this.isLoading = false;
   }
 
@@ -63,7 +70,23 @@ export class CandidateListComponent implements OnInit {
     });
   }
 
+  loadTagSuggestions(): void {
+    this.candidateProfileService.getTagSuggestions('').subscribe({
+      next: (response) => {
+        this.tagSuggestions = !response.hasError && response.content ? response.content : [];
+      },
+      error: () => {
+        this.tagSuggestions = [];
+      },
+    });
+  }
+
   applyPoolFilter(): void {
+    this.currentPage = 1;
+    this.loadCandidates();
+  }
+
+  onTagFilterChange(): void {
     this.currentPage = 1;
     this.loadCandidates();
   }
@@ -114,6 +137,7 @@ export class CandidateListComponent implements OnInit {
 
   resetSearch(): void {
     this.searchTerm = '';
+    this.filterTags = [];
     this.loadCandidates();
   }
 
@@ -125,6 +149,7 @@ export class CandidateListComponent implements OnInit {
       pageSize: this.rows,
       ...(this.searchTerm && this.searchTerm.trim() && { searchTerm: this.searchTerm.trim(), searchProperties: ['FullName', 'Email'] }),
       ...(this.selectedPoolIds.length > 0 && { talentPoolIds: this.selectedPoolIds }),
+      ...(this.filterTags.length > 0 && { tags: this.filterTags }),
     };
 
     this.candidateProfileService.getPaged(params).subscribe({

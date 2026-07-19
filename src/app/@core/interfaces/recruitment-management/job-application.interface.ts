@@ -18,6 +18,7 @@ export interface IAtsDashboardFilterParams {
   location?: string;
   minAge?: number;
   maxAge?: number;
+  tags?: string[];
 }
 
 export interface IJobApplicationListItem {

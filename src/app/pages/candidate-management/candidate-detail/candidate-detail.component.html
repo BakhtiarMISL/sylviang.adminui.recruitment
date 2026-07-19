@@ -172,6 +172,46 @@
 
   <section class="page-container">
     <div class="form-container">
+      <h3 class="form-section-header">Tags</h3>
+      <p class="sm:col-span-2 text-sm text-neutral">Visible to HR/Admin only &mdash; never shown to the candidate.</p>
+
+      <div class="sm:col-span-2 text-sm text-neutral" *ngIf="tags.length === 0">No tags yet.</div>
+      <div class="sm:col-span-2 skills-list" *ngIf="tags.length > 0">
+        <span class="skill-chip" *ngFor="let tag of tags">
+          {{ tag.tagName }}
+          <button type="button" (click)="removeTag(tag)" title="Remove tag"><i class="fas fa-times"></i></button>
+        </span>
+      </div>
+
+      <div class="sm:col-span-2">
+        <p-floatlabel variant="in">
+          <p-autocomplete
+            inputId="newTagName"
+            [(ngModel)]="newTagName"
+            [suggestions]="tagSuggestions"
+            (completeMethod)="filterTagSuggestions($event)"
+            [forceSelection]="false"
+            class="w-full"
+            styleClass="w-full"
+            inputStyleClass="w-full"
+          ></p-autocomplete>
+          <label for="newTagName">Add a tag</label>
+        </p-floatlabel>
+      </div>
+
+      <div *ngIf="addTagError" class="invalid sm:col-span-2">{{ addTagError }}</div>
+
+      <div class="sm:col-span-2">
+        <button pButton type="button" [disabled]="addingTag || !newTagName.trim()" (click)="addTag()">
+          <i class="fas fa-plus"></i>
+          <span>{{ addingTag ? 'Adding...' : 'Add Tag' }}</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section class="page-container">
+    <div class="form-container">
       <h3 class="form-section-header">HR Notes</h3>
 
       <div class="sm:col-span-2">

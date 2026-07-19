@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { ICandidateProfileDetailResponse } from '@app/@core/interfaces/recruitment-management/candidate-profile.interface';
+import { AutoCompleteCompleteEvent } from 'primeng/autocomplete';
+import { ICandidateProfileDetailResponse, ICandidateTagResponse } from '@app/@core/interfaces/recruitment-management/candidate-profile.interface';
 import { CandidateProfileService } from '@app/@core/services/recruitment/candidate-profile/candidate-profile.service';
 import { BreadcrumbService } from '@app/@core/services';
 import { Base_URL } from '@env/environment';
@@ -28,6 +29,13 @@ export class CandidateDetailComponent implements OnInit {
   notesSaveError = '';
   notesSaveSuccess = false;
 
+  // ── Tags (US-041, HR-only) ─────────────────────────────────────
+  tags: ICandidateTagResponse[] = [];
+  tagSuggestions: string[] = [];
+  newTagName = '';
+  addingTag = false;
+  addTagError = '';
+
   ngOnInit(): void {
     this.candidateProfileId = Number(this.route.snapshot.paramMap.get('id'));
     this.breadcrumbService.setBreadcrumbs([
@@ -35,6 +43,7 @@ export class CandidateDetailComponent implements OnInit {
       { title: 'Candidate Profile', icon: 'fa-solid fa-id-card', href: `/candidates/${this.candidateProfileId}` },
     ]);
     this.loadProfile();
+    this.loadTags();
   }
 
   loadProfile(): void {
@@ -84,6 +93,61 @@ export class CandidateDetailComponent implements OnInit {
       error: (error) => {
         this.savingNotes = false;
         this.notesSaveError = error?.error?.decentMessage || 'Failed to save notes.';
+      },
+    });
+  }
+
+  loadTags(): void {
+    this.candidateProfileService.getTags(this.candidateProfileId).subscribe({
+      next: (response) => {
+        this.tags = !response.hasError && response.content ? response.content : [];
+      },
+      error: () => {
+        this.tags = [];
+      },
+    });
+  }
+
+  filterTagSuggestions(event: AutoCompleteCompleteEvent): void {
+    this.candidateProfileService.getTagSuggestions(event.query).subscribe({
+      next: (response) => {
+        this.tagSuggestions = !response.hasError && response.content ? response.content : [];
+      },
+      error: () => {
+        this.tagSuggestions = [];
+      },
+    });
+  }
+
+  addTag(): void {
+    const tagName = this.newTagName.trim();
+    if (!tagName) return;
+
+    this.addTagError = '';
+    this.addingTag = true;
+
+    this.candidateProfileService.addTag(this.candidateProfileId, { tagName }).subscribe({
+      next: (response) => {
+        this.addingTag = false;
+        if (response && !response.hasError) {
+          this.newTagName = '';
+          this.loadTags();
+        } else {
+          this.addTagError = response?.decentMessage || 'Failed to add tag.';
+        }
+      },
+      error: (error) => {
+        this.addingTag = false;
+        this.addTagError = error?.error?.decentMessage || 'Failed to add tag.';
+      },
+    });
+  }
+
+  removeTag(tag: ICandidateTagResponse): void {
+    this.candidateProfileService.deleteTag(this.candidateProfileId, tag.candidateTagId).subscribe({
+      next: () => this.loadTags(),
+      error: (error) => {
+        console.error('Error removing tag:', error);
       },
     });
   }
