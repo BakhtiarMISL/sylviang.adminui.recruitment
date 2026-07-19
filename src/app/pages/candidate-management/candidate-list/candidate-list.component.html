@@ -40,6 +40,7 @@
           [(ngModel)]="selectedPoolIds"
           (onChange)="applyPoolFilter()"
           styleClass="min-w-48"
+          [appendTo]="'body'"
         ></p-multiSelect>
         <label for="poolFilter">Talent Pools</label>
       </p-floatlabel>
@@ -145,6 +146,7 @@
         optionValue="talentPoolId"
         [(ngModel)]="addToPoolSelectedId"
         styleClass="w-full"
+        [appendTo]="'body'"
       ></p-select>
       <label for="addToPoolPicker">Talent Pool</label>
     </p-floatlabel>
