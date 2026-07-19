@@ -1,0 +1,55 @@
+<section class="page-container">
+  <form [formGroup]="hallForm" (ngSubmit)="onSubmit()">
+    <div class="table-container mb-4 p-4">
+      <h3 class="table-title mb-3">{{ isEditMode ? 'Edit Exam Hall' : 'Add Exam Hall' }}</h3>
+
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <p-floatlabel variant="in">
+          <input pInputText id="hallName" class="w-full" formControlName="hallName" />
+          <label for="hallName">Hall Name</label>
+        </p-floatlabel>
+        <small class="text-red-500" *ngIf="hasError('hallName')">Hall name is required.</small>
+
+        <p-floatlabel variant="in">
+          <input pInputText id="location" class="w-full" formControlName="location" />
+          <label for="location">Location / Address</label>
+        </p-floatlabel>
+        <small class="text-red-500" *ngIf="hasError('location')">Location is required.</small>
+
+        <p-floatlabel variant="in">
+          <p-inputnumber inputId="totalCapacity" class="w-full" formControlName="totalCapacity" [min]="1"></p-inputnumber>
+          <label for="totalCapacity">Total Capacity</label>
+        </p-floatlabel>
+        <small class="text-red-500" *ngIf="hasError('totalCapacity')">Total capacity must be greater than zero.</small>
+
+        <p-floatlabel variant="in">
+          <input
+            pInputText
+            id="invigilatorEmployeeIds"
+            class="w-full"
+            [value]="invigilatorEmployeeIds.join(', ')"
+            (blur)="onInvigilatorIdsBlur($event)"
+          />
+          <label for="invigilatorEmployeeIds">Invigilator Employee IDs</label>
+        </p-floatlabel>
+
+        <div class="checkbox-container sm:col-span-2">
+          <p-checkbox inputId="notifyInvigilatorsOnAssign" formControlName="notifyInvigilatorsOnAssign" [binary]="true"></p-checkbox>
+          <label for="notifyInvigilatorsOnAssign">Notify invigilators when assigned</label>
+        </div>
+      </div>
+
+      <small class="mt-3 block text-red-500" *ngIf="errorMessage">{{ errorMessage }}</small>
+
+      <div class="mt-4 flex gap-2">
+        <button pButton type="submit">
+          <i class="fa fa-save"></i>
+          <span>{{ isEditMode ? 'Save Changes' : 'Create Hall' }}</span>
+        </button>
+        <button pButton type="button" severity="secondary" [routerLink]="['/exam-halls/exam-hall-list']">
+          <span>Cancel</span>
+        </button>
+      </div>
+    </div>
+  </form>
+</section>

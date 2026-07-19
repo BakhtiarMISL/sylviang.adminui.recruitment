@@ -51,6 +51,10 @@ const routes: Routes = [
       loadChildren: () => import('./candidate-recommendation-management/candidate-recommendation-management.module').then((m) => m.CandidateRecommendationManagementModule),
     },
     {
+      path: 'exam-halls',
+      loadChildren: () => import('./exam-hall-management/exam-hall-management.module').then((m) => m.ExamHallManagementModule),
+    },
+    {
       path: 'applications',
       loadChildren: () => import('./application-tracking/application-tracking.module').then((m) => m.ApplicationTrackingModule),
     },

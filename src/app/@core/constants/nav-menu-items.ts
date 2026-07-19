@@ -47,6 +47,12 @@ export const webSidebarMenuItems: IMenuItem[] = [
         roles: [UserRoleEnum.Admin],
       },
       {
+        href: '/exam-halls/exam-hall-list',
+        title: 'Exam Halls',
+        active: false,
+        icon: 'fa-solid fa-door-open',
+      },
+      {
         href: '/candidates',
         title: 'Candidates',
         active: false,
