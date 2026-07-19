@@ -41,3 +41,8 @@ export interface IJobApplicationSubmitResponse {
   paymentRequired?: boolean;
   paymentRedirectUrl?: string;
 }
+
+export interface IJobEligibilityResponse {
+  isEligible: boolean;
+  unmetRequirements: string[];
+}

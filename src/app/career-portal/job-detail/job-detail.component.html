@@ -50,6 +50,14 @@
             <li *ngIf="jobPosting.requiredDistrict">Required District: {{ jobPosting.requiredDistrict }}</li>
           </ul>
           <p *ngIf="!hasEligibilityInfo" class="mt-1 text-sm text-gray-500">No specific eligibility requirements.</p>
+
+          <!-- Real-time eligibility check against the logged-in candidate's profile (US-024 AC2/AC3) -->
+          <div *ngIf="eligibilityResult?.isEligible" class="mt-3 rounded-md bg-green-50 p-3 text-sm text-green-800">
+            <i class="fa fa-check-circle mr-1"></i>You are eligible to apply for this position.
+          </div>
+          <div *ngIf="eligibilityResult && !eligibilityResult.isEligible" class="mt-3 rounded-md bg-amber-50 p-3 text-sm text-amber-800">
+            <i class="fa fa-triangle-exclamation mr-1"></i>You do not meet the following requirements: {{ eligibilityResult.unmetRequirements.join(', ') }}
+          </div>
         </div>
 
         <!-- Fee info -->
@@ -60,7 +68,7 @@
 
       <section class="rounded-lg bg-white p-6 shadow-sm">
         <h2 class="mb-4 text-lg font-medium text-gray-900">Apply for this position</h2>
-        <app-apply-form [jobPostingId]="jobPosting.jobPostingId"></app-apply-form>
+        <app-apply-form [jobPostingId]="jobPosting.jobPostingId" [eligibilityResult]="eligibilityResult"></app-apply-form>
       </section>
     </div>
   </div>

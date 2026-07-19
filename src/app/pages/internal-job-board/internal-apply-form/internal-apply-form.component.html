@@ -60,8 +60,17 @@
 
   <div *ngIf="submitError" class="invalid">{{ submitError }}</div>
 
+  <!-- US-024 AC4: re-show the eligibility warning at confirmation time, require acknowledgement -->
+  <div *ngIf="needsAcknowledgement" class="rounded-md bg-amber-50 p-3 text-sm text-amber-800">
+    <p><i class="fa fa-triangle-exclamation mr-1"></i>You do not meet the following requirements: {{ eligibilityResult!.unmetRequirements.join(', ') }}</p>
+    <label class="mt-2 flex items-start gap-2">
+      <input type="checkbox" [(ngModel)]="acknowledgedIneligibility" [ngModelOptions]="{ standalone: true }" class="mt-0.5" />
+      <span>I understand I may not meet all eligibility requirements and wish to apply anyway.</span>
+    </label>
+  </div>
+
   <div>
-    <button pButton type="submit" [disabled]="submitting">
+    <button pButton type="submit" [disabled]="submitting || (needsAcknowledgement && !acknowledgedIneligibility)">
       <i class="fa fa-paper-plane"></i>
       <span>{{ submitting ? 'Submitting...' : 'Submit Application' }}</span>
     </button>

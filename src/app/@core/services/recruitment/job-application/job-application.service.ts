@@ -11,7 +11,7 @@ import {
   IJobApplicationStatusUpdateRequest,
   IMyApplication,
 } from '@core/interfaces/recruitment-management/job-application.interface';
-import { IJobApplicationSubmitResponse } from '@core/interfaces/recruitment-management/career-portal.interface';
+import { IJobApplicationSubmitResponse, IJobEligibilityResponse } from '@core/interfaces/recruitment-management/career-portal.interface';
 import { IJobApplicationPipelineProgress, IPipelineStageProgressUpdateRequest } from '@core/interfaces/recruitment-management/pipeline-progress.interface';
 import { BASE_URL_Recruitment } from '@env/environment';
 
@@ -75,6 +75,11 @@ export class JobApplicationService {
 
   withdrawMyApplication(jobApplicationId: number) {
     return this.httpClient.patch<ApiResponse<void>>(`${this.API_URL}/my-applications/${jobApplicationId}/withdraw`, {});
+  }
+
+  /** Real-time eligibility check for the current candidate against a job posting (US-024 AC2/AC3). */
+  checkEligibility(jobPostingId: number) {
+    return this.httpClient.get<ApiResponse<IJobEligibilityResponse>>(`${this.API_URL}/job-posting/${jobPostingId}/eligibility`);
   }
 
   // ── Pipeline Progress Tracker (US-042) ──────────────────────────
