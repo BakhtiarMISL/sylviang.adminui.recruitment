@@ -67,3 +67,16 @@ export enum FilterCombinatorEnum {
   And = 'And',
   Or = 'Or',
 }
+
+export enum QuestionTypeEnum {
+  McqSingle = 'McqSingle',
+  McqMultiple = 'McqMultiple',
+  TrueFalse = 'TrueFalse',
+  Subjective = 'Subjective',
+}
+
+export enum DifficultyLevelEnum {
+  Easy = 'Easy',
+  Medium = 'Medium',
+  Hard = 'Hard',
+}

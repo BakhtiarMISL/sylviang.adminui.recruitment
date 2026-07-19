@@ -34,6 +34,18 @@ export const webSidebarMenuItems: IMenuItem[] = [
         icon: 'fa-solid fa-filter',
       },
       {
+        href: '/exam-questions/question-group-list',
+        title: 'Question Groups',
+        active: false,
+        icon: 'fa-solid fa-layer-group',
+      },
+      {
+        href: '/exam-questions/exam-question-list',
+        title: 'Exam Questions',
+        active: false,
+        icon: 'fa-solid fa-circle-question',
+      },
+      {
         href: '/candidates',
         title: 'Candidates',
         active: false,
