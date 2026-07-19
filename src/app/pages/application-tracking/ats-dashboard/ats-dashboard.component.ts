@@ -4,10 +4,12 @@ import { ApplicationSourceEnum, ApplicationStatusEnum, EducationLevelEnum } from
 import { ISkillLibraryItemResponse } from '@app/@core/interfaces/recruitment-management/candidate-profile.interface';
 import { IAtsDashboardFilterParams, IApplicationStatusReason, IJobApplicationListItem } from '@app/@core/interfaces/recruitment-management/job-application.interface';
 import { IJobVacancyResponse } from '@app/@core/interfaces/recruitment-management/job-vacancy.interface';
+import { ISavedSearchFilterSnapshot, ISavedSearchLookupResponse } from '@app/@core/interfaces/recruitment-management/saved-search.interface';
 import { IShortlistFilterApplyResponse, IShortlistFilterLookupResponse } from '@app/@core/interfaces/recruitment-management/shortlist-filter.interface';
 import { CandidateProfileService } from '@app/@core/services/recruitment/candidate-profile/candidate-profile.service';
 import { JobApplicationService } from '@app/@core/services/recruitment/job-application/job-application.service';
 import { JobVacancyService } from '@app/@core/services/recruitment/job-vacancy/job-vacancy.service';
+import { SavedSearchService } from '@app/@core/services/recruitment/saved-search/saved-search.service';
 import { ShortlistFilterService } from '@app/@core/services/recruitment/shortlist-filter/shortlist-filter.service';
 import { ToastService } from '@app/@core/services/misc/toast.service';
 import { UI_CONFIG } from '@app/@core/constants';
@@ -31,6 +33,7 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     private jobApplicationService: JobApplicationService,
     private jobVacancyService: JobVacancyService,
     private shortlistFilterService: ShortlistFilterService,
+    private savedSearchService: SavedSearchService,
     private candidateProfileService: CandidateProfileService,
     private cdr: ChangeDetectorRef,
     private confirmationService: ConfirmationService,
@@ -104,6 +107,21 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   // AI-Powered Auto-Shortlisting (US-046)
   autoShortlistDialogVisible = false;
 
+  // Saved search bookmarks (US-048)
+  savedSearches: ISavedSearchLookupResponse[] = [];
+  selectedSavedSearchId: number | null = null;
+  applyingSavedSearch = false;
+
+  saveSearchDialogVisible = false;
+  saveSearchName = '';
+  saveSearchIsShared = false;
+  savingSearch = false;
+
+  manageSavedSearchesDialogVisible = false;
+  editingSavedSearchId: number | null = null;
+  editingSavedSearchName = '';
+  editingSavedSearchIsShared = false;
+
   get skeletonItems() {
     return Array(this.rows)
       .fill({})
@@ -121,6 +139,7 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     this.loadJobPostings();
     this.loadApplications();
     this.loadShortlistFilters();
+    this.loadSavedSearches();
     this.loadSkillLibrary();
     this.isLoading = false;
   }
@@ -436,6 +455,158 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
               this.toast.error({ detail: error?.error?.decentMessage || 'Failed to apply shortlist filter.' });
             },
           });
+      },
+    });
+  }
+
+  // ── Saved search bookmarks (US-048) ─────────────────────────────
+
+  loadSavedSearches(): void {
+    this.savedSearchService.getLookup().subscribe({
+      next: (response) => {
+        this.savedSearches = response && !response.hasError && response.content ? response.content : [];
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  private currentFilterSnapshot(): ISavedSearchFilterSnapshot {
+    return {
+      filterJobPostingId: this.filterJobPostingId,
+      filterStatus: this.filterStatus,
+      filterSource: this.filterSource,
+      filterDateFrom: this.filterDateFrom ? this.filterDateFrom.toISOString() : null,
+      filterDateTo: this.filterDateTo ? this.filterDateTo.toISOString() : null,
+      filterMinEducationLevel: this.filterMinEducationLevel,
+      filterMinExperienceYears: this.filterMinExperienceYears,
+      filterMaxExperienceYears: this.filterMaxExperienceYears,
+      filterSkills: this.filterSkills,
+      filterLocation: this.filterLocation,
+      filterMinAge: this.filterMinAge,
+      filterMaxAge: this.filterMaxAge,
+    };
+  }
+
+  openSaveSearchDialog(): void {
+    this.saveSearchName = '';
+    this.saveSearchIsShared = false;
+    this.saveSearchDialogVisible = true;
+  }
+
+  confirmSaveSearch(): void {
+    if (!this.saveSearchName.trim()) return;
+
+    this.savingSearch = true;
+    this.savedSearchService
+      .create({
+        name: this.saveSearchName.trim(),
+        isShared: this.saveSearchIsShared,
+        filterJson: JSON.stringify(this.currentFilterSnapshot()),
+      })
+      .subscribe({
+        next: () => {
+          this.savingSearch = false;
+          this.saveSearchDialogVisible = false;
+          this.toast.success({ detail: 'Search saved.' });
+          this.loadSavedSearches();
+        },
+        error: (error) => {
+          this.savingSearch = false;
+          this.toast.error({ detail: error?.error?.decentMessage || 'Failed to save search.' });
+        },
+      });
+  }
+
+  canApplySavedSearch(): boolean {
+    return !!this.selectedSavedSearchId;
+  }
+
+  applySavedSearch(): void {
+    const search = this.savedSearches.find((s) => s.savedSearchId === this.selectedSavedSearchId);
+    if (!search) return;
+
+    try {
+      const snapshot: ISavedSearchFilterSnapshot = JSON.parse(search.filterJson);
+      this.filterJobPostingId = snapshot.filterJobPostingId ?? null;
+      this.filterStatus = snapshot.filterStatus ?? null;
+      this.filterSource = snapshot.filterSource ?? null;
+      this.filterDateFrom = snapshot.filterDateFrom ? new Date(snapshot.filterDateFrom) : null;
+      this.filterDateTo = snapshot.filterDateTo ? new Date(snapshot.filterDateTo) : null;
+      this.filterMinEducationLevel = snapshot.filterMinEducationLevel ?? null;
+      this.filterMinExperienceYears = snapshot.filterMinExperienceYears ?? null;
+      this.filterMaxExperienceYears = snapshot.filterMaxExperienceYears ?? null;
+      this.filterSkills = snapshot.filterSkills ?? [];
+      this.filterLocation = snapshot.filterLocation ?? null;
+      this.filterMinAge = snapshot.filterMinAge ?? null;
+      this.filterMaxAge = snapshot.filterMaxAge ?? null;
+    } catch {
+      this.toast.error({ detail: 'This saved search is corrupted and could not be applied.' });
+      return;
+    }
+
+    this.currentPage = 1;
+    this.saveFiltersToSession();
+    this.loadApplications();
+  }
+
+  openManageSavedSearchesDialog(): void {
+    this.cancelEditSavedSearch();
+    this.manageSavedSearchesDialogVisible = true;
+  }
+
+  startEditSavedSearch(search: ISavedSearchLookupResponse): void {
+    this.editingSavedSearchId = search.savedSearchId;
+    this.editingSavedSearchName = search.name;
+    this.editingSavedSearchIsShared = search.isShared;
+  }
+
+  cancelEditSavedSearch(): void {
+    this.editingSavedSearchId = null;
+    this.editingSavedSearchName = '';
+    this.editingSavedSearchIsShared = false;
+  }
+
+  confirmEditSavedSearch(search: ISavedSearchLookupResponse): void {
+    if (!this.editingSavedSearchName.trim()) return;
+
+    this.savedSearchService
+      .update(search.savedSearchId, {
+        name: this.editingSavedSearchName.trim(),
+        isShared: this.editingSavedSearchIsShared,
+        filterJson: search.filterJson,
+      })
+      .subscribe({
+        next: () => {
+          this.toast.success({ detail: 'Saved search updated.' });
+          this.cancelEditSavedSearch();
+          this.loadSavedSearches();
+        },
+        error: (error) => {
+          this.toast.error({ detail: error?.error?.decentMessage || 'Failed to update saved search.' });
+        },
+      });
+  }
+
+  deleteSavedSearch(search: ISavedSearchLookupResponse, event: Event): void {
+    this.confirmationService.confirm({
+      target: event.target as EventTarget,
+      message: `Are you sure you want to delete saved search: ${search.name}?`,
+      header: 'Delete Confirmation',
+      acceptButtonStyleClass: 'p-button-danger',
+      rejectButtonStyleClass: 'p-button-secondary',
+      acceptIcon: 'fa fa-check',
+      rejectIcon: 'fa fa-times',
+      accept: () => {
+        this.savedSearchService.delete(search.savedSearchId).subscribe({
+          next: () => {
+            if (this.selectedSavedSearchId === search.savedSearchId) this.selectedSavedSearchId = null;
+            this.toast.success({ detail: 'Saved search deleted.' });
+            this.loadSavedSearches();
+          },
+          error: (error) => {
+            this.toast.error({ detail: error?.error?.decentMessage || 'Failed to delete saved search.' });
+          },
+        });
       },
     });
   }

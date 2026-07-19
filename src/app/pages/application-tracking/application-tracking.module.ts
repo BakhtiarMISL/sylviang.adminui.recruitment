@@ -6,6 +6,7 @@ import { SharedModule } from '@app/shared/shared.module';
 import { TranslateModule } from '@ngx-translate/core';
 import { AutoCompleteModule } from 'primeng/autocomplete';
 import { ButtonModule } from 'primeng/button';
+import { CheckboxModule } from 'primeng/checkbox';
 import { ChipModule } from 'primeng/chip';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DatePickerModule } from 'primeng/datepicker';
@@ -54,6 +55,7 @@ import { AutoShortlistDialogComponent } from './auto-shortlist-dialog/auto-short
     MultiSelectModule,
     ChipModule,
     RadioButtonModule,
+    CheckboxModule,
   ],
 })
 export class ApplicationTrackingModule {}
