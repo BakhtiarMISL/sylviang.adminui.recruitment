@@ -15,9 +15,10 @@ import { ApplyFormComponent } from './apply-form/apply-form.component';
 import { CareerPortalRoutingModule } from './career-portal-routing.module';
 import { JobBrowseComponent } from './job-browse/job-browse.component';
 import { JobDetailComponent } from './job-detail/job-detail.component';
+import { PaymentResultComponent } from './payment-result/payment-result.component';
 
 @NgModule({
-  declarations: [JobBrowseComponent, JobDetailComponent, ApplyFormComponent],
+  declarations: [JobBrowseComponent, JobDetailComponent, ApplyFormComponent, PaymentResultComponent],
   imports: [
     CommonModule,
     ReactiveFormsModule,
