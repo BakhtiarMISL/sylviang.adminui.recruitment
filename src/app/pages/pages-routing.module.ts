@@ -43,6 +43,10 @@ const routes: Routes = [
       loadChildren: () => import('./assessment-workflow-management/assessment-workflow-management.module').then((m) => m.AssessmentWorkflowManagementModule),
     },
     {
+      path: 'candidate-recommendations',
+      loadChildren: () => import('./candidate-recommendation-management/candidate-recommendation-management.module').then((m) => m.CandidateRecommendationManagementModule),
+    },
+    {
       path: 'applications',
       loadChildren: () => import('./application-tracking/application-tracking.module').then((m) => m.ApplicationTrackingModule),
     },

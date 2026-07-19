@@ -80,3 +80,9 @@ export enum StageTypeEnum {
   GroupDiscussion = 'GroupDiscussion',
   PracticalAssessment = 'PracticalAssessment',
 }
+
+export enum RecommendationStatusEnum {
+  Pending = 'Pending',
+  Accepted = 'Accepted',
+  Rejected = 'Rejected',
+}

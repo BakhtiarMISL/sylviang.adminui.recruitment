@@ -21,9 +21,18 @@ export class MenuService {
 
   private loadFallbackMenu(): void {
     const role = this._authService.getRole();
-    const itemsForRole = webSidebarMenuItems.filter((item) => !item.roles || (role && item.roles.includes(role)));
-    const items = this.transformMenuItems(itemsForRole);
+    const items = this.transformMenuItems(this.filterByRole(webSidebarMenuItems, role));
     this.menuSubject.next(items);
+  }
+
+  /** Recursive so per-role restrictions on sub-items (not just top-level items) are actually enforced. */
+  private filterByRole(items: IMenuItem[], role: ReturnType<AuthService['getRole']>): IMenuItem[] {
+    return items
+      .filter((item) => !item.roles || (role && item.roles.includes(role)))
+      .map((item) => ({
+        ...item,
+        subItems: item.subItems ? this.filterByRole(item.subItems, role) : undefined,
+      }));
   }
 
   private transformMenuItems(items: IMenuItem[]): IMenuItem[] {
