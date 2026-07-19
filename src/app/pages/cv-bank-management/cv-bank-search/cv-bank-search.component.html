@@ -22,7 +22,7 @@
     </p-floatlabel>
 
     <div class="flex flex-wrap items-end gap-3">
-      <p-floatlabel variant="in">
+      <p-floatlabel variant="in" class="min-w-48">
         <p-select
           inputId="educationLevel"
           class="w-full"
@@ -38,22 +38,22 @@
         <label for="educationLevel">Min education level</label>
       </p-floatlabel>
 
-      <p-floatlabel variant="in">
+      <p-floatlabel variant="in" class="min-w-48">
         <p-inputnumber inputId="minExperienceYears" [(ngModel)]="minExperienceYears" name="minExperienceYears" [min]="0"></p-inputnumber>
         <label for="minExperienceYears">Min experience (years)</label>
       </p-floatlabel>
 
-      <p-floatlabel variant="in">
+      <p-floatlabel variant="in" class="min-w-48">
         <p-inputnumber inputId="maxExperienceYears" [(ngModel)]="maxExperienceYears" name="maxExperienceYears" [min]="0"></p-inputnumber>
         <label for="maxExperienceYears">Max experience (years)</label>
       </p-floatlabel>
 
-      <p-floatlabel variant="in">
+      <p-floatlabel variant="in" class="min-w-40">
         <input type="text" pInputText id="location" class="w-full" [(ngModel)]="location" name="location" />
         <label for="location">Location</label>
       </p-floatlabel>
 
-      <p-floatlabel variant="in">
+      <p-floatlabel variant="in" class="min-w-48">
         <p-select
           inputId="candidateType"
           class="w-full"
