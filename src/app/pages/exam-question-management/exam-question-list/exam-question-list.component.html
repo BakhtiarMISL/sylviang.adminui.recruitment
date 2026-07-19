@@ -1,0 +1,254 @@
+<section class="page-container">
+  <div class="flex justify-between items-center gap-3 flex-wrap">
+    <h3 class="table-title">Exam Questions</h3>
+    <div class="flex items-center gap-2">
+      <button pButton severity="secondary" (click)="downloadTemplate()">
+        <i class="fa fa-download"></i>
+        <span>Download Template</span>
+      </button>
+      <button pButton severity="secondary" (click)="openBulkImportDialog()">
+        <i class="fa fa-file-import"></i>
+        <span>Bulk Import</span>
+      </button>
+      <button pButton [routerLink]="['/exam-questions/manage-exam-question']">
+        <i class="fa fa-plus"></i>
+        <span>Add Question</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Search + Filters -->
+  <div class="filter-bar mt-3">
+    <p-floatlabel variant="in">
+      <input type="text" pInputText id="searchInput" class="w-full" [(ngModel)]="searchTerm" name="searchInput" (keyup.enter)="applySearch()" />
+      <label for="searchInput">Search question text</label>
+    </p-floatlabel>
+    <button pButton (click)="applySearch()">
+      <i class="fa fa-search"></i>
+      <span>Search</span>
+    </button>
+
+    <p-floatlabel variant="in">
+      <p-select
+        inputId="filterGroup"
+        class="w-full"
+        [options]="groupLookup"
+        [(ngModel)]="filterQuestionGroupId"
+        optionLabel="name"
+        optionValue="questionGroupId"
+        [showClear]="true"
+        [appendTo]="'body'"
+        (onChange)="applyFilters()"
+        (onClear)="applyFilters()"
+      ></p-select>
+      <label for="filterGroup">Group</label>
+    </p-floatlabel>
+
+    <p-floatlabel variant="in">
+      <p-select
+        inputId="filterType"
+        class="w-full"
+        [options]="questionTypeOptions"
+        [(ngModel)]="filterQuestionType"
+        optionLabel="label"
+        optionValue="value"
+        [showClear]="true"
+        [appendTo]="'body'"
+        (onChange)="applyFilters()"
+        (onClear)="applyFilters()"
+      ></p-select>
+      <label for="filterType">Type</label>
+    </p-floatlabel>
+
+    <p-floatlabel variant="in">
+      <p-select
+        inputId="filterDifficulty"
+        class="w-full"
+        [options]="difficultyLevelOptions"
+        [(ngModel)]="filterDifficultyLevel"
+        optionLabel="label"
+        optionValue="value"
+        [showClear]="true"
+        [appendTo]="'body'"
+        (onChange)="applyFilters()"
+        (onClear)="applyFilters()"
+      ></p-select>
+      <label for="filterDifficulty">Difficulty</label>
+    </p-floatlabel>
+
+    <p-floatlabel variant="in">
+      <p-select
+        inputId="filterActive"
+        class="w-full"
+        [options]="activeStatusOptions"
+        [(ngModel)]="filterIsActive"
+        optionLabel="label"
+        optionValue="value"
+        [showClear]="true"
+        [appendTo]="'body'"
+        (onChange)="applyFilters()"
+        (onClear)="applyFilters()"
+      ></p-select>
+      <label for="filterActive">Status</label>
+    </p-floatlabel>
+
+    <button pButton severity="secondary" (click)="resetFilters()">
+      <i class="fa fa-times"></i>
+      <span>Reset</span>
+    </button>
+  </div>
+
+  <div class="table-container">
+    <div class="table-title-container">
+      <h3 class="table-title">
+        Question Table
+        <span class="table-title-info" *ngIf="totalRecords > 0">({{ totalRecords }} total)</span>
+      </h3>
+    </div>
+
+    <div class="transition-all duration-500 ease-in-out">
+      <p-table
+        [value]="loading ? skeletonItems : questions"
+        dataKey="examQuestionId"
+        (onSort)="onSort($event)"
+        [paginator]="true"
+        [rows]="rows"
+        [first]="(currentPage - 1) * rows"
+        [rowsPerPageOptions]="UI_CONFIG.pageSizeOptions"
+        [totalRecords]="totalRecords"
+        (onPage)="onPageChange($event)"
+        [lazy]="true"
+        [loading]="false"
+        scrollHeight="flex"
+        [responsiveLayout]="'scroll'"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} questions"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            @for (col of columns; track col.field) {
+              <th [pSortableColumn]="col.sortable !== false ? col.field : null" [style.width]="col.width" class="group">
+                <div class="flex items-center gap-2">
+                  {{ col.label }}
+                  @if (col.sortable !== false) {
+                    <span
+                      class="transition-opacity duration-150"
+                      [ngClass]="{
+                        'opacity-100': sortedColumn === col.field,
+                        'opacity-0 group-hover:opacity-100': sortedColumn !== col.field,
+                      }"
+                    >
+                      <p-sortIcon [field]="col.field"></p-sortIcon>
+                    </span>
+                  }
+                </div>
+              </th>
+            }
+            <th style="width: 8rem">Actions</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-question>
+          @if (loading) {
+            <tr>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+              <td><p-skeleton width="3rem" height="1rem"></p-skeleton></td>
+            </tr>
+          } @else {
+            <tr>
+              <td class="max-w-md truncate" [title]="question.questionText">{{ question.questionText }}</td>
+              <td>{{ question.questionGroupName }}</td>
+              <td>{{ question.questionType }}</td>
+              <td>{{ question.difficultyLevel }}</td>
+              <td>{{ question.marks }}</td>
+              <td>
+                <span
+                  class="rounded-full px-2 py-0.5 text-xs font-medium"
+                  [ngClass]="question.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'"
+                >
+                  {{ question.isActive ? 'Active' : 'Inactive' }}
+                </span>
+              </td>
+              <td>
+                <button [routerLink]="['/exam-questions/manage-exam-question', question.examQuestionId]" class="text-primary mr-2">
+                  <i class="fa fa-edit"></i>
+                </button>
+                <button class="text-danger" (click)="toggleActiveStatus(question, $event)">
+                  <i class="fa" [ngClass]="question.isActive ? 'fa-ban' : 'fa-check'"></i>
+                </button>
+              </td>
+            </tr>
+          }
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="7" class="not-found">
+              <div>
+                <i class="fa fa-magnifying-glass-minus"></i>
+                <p>No exam questions found</p>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+</section>
+
+<p-dialog header="Bulk Import Exam Questions" [(visible)]="showBulkImportDialog" [modal]="true" [style]="{ width: '32rem', maxWidth: '95vw' }">
+  <div class="flex flex-col gap-3">
+    <p-floatlabel variant="in">
+      <p-select
+        inputId="bulkImportGroup"
+        class="w-full"
+        [options]="groupLookup"
+        [(ngModel)]="bulkImportGroupId"
+        optionLabel="name"
+        optionValue="questionGroupId"
+        [appendTo]="'body'"
+      ></p-select>
+      <label for="bulkImportGroup">Question Group</label>
+    </p-floatlabel>
+
+    <div>
+      <label for="bulkImportFile" class="upload-dropzone">
+        <i class="fas fa-file-arrow-up"></i>
+        <span class="upload-dropzone-text">
+          <strong>{{ bulkImportFile?.name || 'Click to select an XLSX or CSV file' }}</strong>
+        </span>
+      </label>
+      <input id="bulkImportFile" type="file" accept=".xlsx,.csv" (change)="onBulkImportFileSelected($event)" class="sr-only" />
+    </div>
+
+    <small class="text-red-500" *ngIf="bulkImportError">{{ bulkImportError }}</small>
+
+    <div *ngIf="bulkImportResult" class="rounded-md border border-gray-200 p-3">
+      <p class="font-medium">Import Summary</p>
+      <p>Total Rows: {{ bulkImportResult.totalRows }}</p>
+      <p class="text-green-700">Imported: {{ bulkImportResult.importedCount }}</p>
+      <p class="text-red-600" *ngIf="bulkImportResult.failedCount > 0">Failed: {{ bulkImportResult.failedCount }}</p>
+
+      <div *ngIf="bulkImportResult.errors.length > 0" class="mt-2 max-h-48 overflow-y-auto">
+        <div *ngFor="let error of bulkImportResult.errors" class="border-t border-gray-100 py-1 text-xs">
+          <strong>Row {{ error.rowNumber }}:</strong> {{ error.message }}
+        </div>
+      </div>
+    </div>
+
+    <div class="flex gap-2 pb-3">
+      <button pButton [loading]="bulkImportLoading" (click)="submitBulkImport()">
+        <i class="fa fa-upload"></i>
+        <span>Import</span>
+      </button>
+      <button pButton type="button" severity="secondary" (click)="showBulkImportDialog = false">
+        <span>Close</span>
+      </button>
+    </div>
+  </div>
+</p-dialog>
