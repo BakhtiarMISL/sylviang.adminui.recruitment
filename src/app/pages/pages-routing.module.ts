@@ -39,6 +39,10 @@ const routes: Routes = [
       loadChildren: () => import('./shortlist-filter-management/shortlist-filter-management.module').then((m) => m.ShortlistFilterManagementModule),
     },
     {
+      path: 'assessment-workflow',
+      loadChildren: () => import('./assessment-workflow-management/assessment-workflow-management.module').then((m) => m.AssessmentWorkflowManagementModule),
+    },
+    {
       path: 'applications',
       loadChildren: () => import('./application-tracking/application-tracking.module').then((m) => m.ApplicationTrackingModule),
     },

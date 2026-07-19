@@ -72,3 +72,11 @@ export enum HrOverrideDecisionEnum {
   Approved = 'Approved',
   Rejected = 'Rejected',
 }
+
+export enum StageTypeEnum {
+  WrittenTest = 'WrittenTest',
+  AptitudeTest = 'AptitudeTest',
+  PsychometricTest = 'PsychometricTest',
+  GroupDiscussion = 'GroupDiscussion',
+  PracticalAssessment = 'PracticalAssessment',
+}
