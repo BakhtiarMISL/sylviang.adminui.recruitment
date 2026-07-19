@@ -378,6 +378,12 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     this.router.navigate(['/applications', application.jobApplicationId]);
   }
 
+  viewDuplicates(): void {
+    if (!this.filterJobPostingId) return;
+    const title = this.jobPostings.find((p) => p.jobPostingId === this.filterJobPostingId)?.title;
+    this.router.navigate(['/applications/duplicates', this.filterJobPostingId], { queryParams: title ? { title } : {} });
+  }
+
   openPipelineTracker(application: IJobApplicationListItem): void {
     this.pipelineDialogApplicationId = application.jobApplicationId;
     this.pipelineDialogVisible = true;

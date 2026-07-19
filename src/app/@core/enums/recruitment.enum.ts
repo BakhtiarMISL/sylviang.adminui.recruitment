@@ -45,6 +45,7 @@ export enum ApplicationStatusEnum {
   Hired = 'Hired',
   Rejected = 'Rejected',
   Withdrawn = 'Withdrawn',
+  DuplicateDismissed = 'DuplicateDismissed',
 }
 
 export enum StageProgressStatusEnum {
