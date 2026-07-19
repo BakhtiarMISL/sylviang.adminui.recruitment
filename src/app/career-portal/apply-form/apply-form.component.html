@@ -70,7 +70,7 @@
   </div>
 
   <div>
-    <button pButton type="submit" [disabled]="submitting || (needsAcknowledgement && !acknowledgedIneligibility)">
+    <button pButton type="submit" [disabled]="submitting || applyForm.pristine || (needsAcknowledgement && !acknowledgedIneligibility)">
       <i class="fa fa-paper-plane"></i>
       <span>{{ submitting ? 'Submitting...' : 'Submit Application' }}</span>
     </button>

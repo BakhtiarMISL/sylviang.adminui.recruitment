@@ -9,7 +9,7 @@
 
   <div>
     <p-floatlabel variant="in">
-      <p-datepicker inputId="dateOfBirth" formControlName="dateOfBirth" dateFormat="dd-M-yy" [showIcon]="true" styleClass="w-full"></p-datepicker>
+      <p-datepicker inputId="dateOfBirth" formControlName="dateOfBirth" dateFormat="dd-M-yy" [showIcon]="true" [appendTo]="'body'" styleClass="w-full"></p-datepicker>
       <label for="dateOfBirth">Date of Birth</label>
     </p-floatlabel>
   </div>
@@ -74,7 +74,7 @@
   <div *ngIf="saveSuccess" class="success-message sm:col-span-2">Saved.</div>
 
   <div class="sm:col-span-2">
-    <button pButton type="submit" [disabled]="saving">
+    <button pButton type="submit" [disabled]="saving || form.pristine">
       <i class="fas fa-save"></i>
       <span>{{ saving ? 'Saving...' : 'Save' }}</span>
     </button>

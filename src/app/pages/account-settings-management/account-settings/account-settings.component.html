@@ -48,7 +48,7 @@
     <div *ngIf="emailSaveSuccess" class="success-message sm:col-span-2">Email updated.</div>
 
     <div class="sm:col-span-2">
-      <button pButton type="submit" [disabled]="savingEmail">
+      <button pButton type="submit" [disabled]="savingEmail || emailForm.pristine">
         <i class="fas fa-save"></i>
         <span>{{ savingEmail ? 'Saving...' : 'Save Email' }}</span>
       </button>
@@ -116,7 +116,7 @@
     <div *ngIf="passwordSaveSuccess" class="success-message sm:col-span-2">Password changed.</div>
 
     <div class="sm:col-span-2">
-      <button pButton type="submit" [disabled]="savingPassword">
+      <button pButton type="submit" [disabled]="savingPassword || passwordForm.pristine">
         <i class="fas fa-save"></i>
         <span>{{ savingPassword ? 'Saving...' : 'Change Password' }}</span>
       </button>

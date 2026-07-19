@@ -40,10 +40,12 @@ export class PersonalInfoSectionComponent implements OnChanges {
   // Called explicitly from a resume upload action (MyProfileComponent), not from ngOnChanges -
   // an intentional "prefill from resume" action should override, even if the user has already
   // started editing here. Nothing is saved; the user still reviews and hits Save.
-  applyPrefill(fullName?: string | null): void {
-    if (fullName) {
-      this.form.patchValue({ fullName });
-    }
+  applyPrefill(fullName?: string | null, dateOfBirth?: string | null, gender?: string | null): void {
+    const patch: { fullName?: string; dateOfBirth?: Date; gender?: string } = {};
+    if (fullName) patch.fullName = fullName;
+    if (dateOfBirth) patch.dateOfBirth = new Date(dateOfBirth);
+    if (gender) patch.gender = gender;
+    if (Object.keys(patch).length > 0) this.form.patchValue(patch);
   }
 
   ngOnChanges(changes: SimpleChanges): void {

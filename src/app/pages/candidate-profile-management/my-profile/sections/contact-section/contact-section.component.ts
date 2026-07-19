@@ -51,11 +51,12 @@ export class ContactSectionComponent implements OnChanges {
   // See PersonalInfoSectionComponent.applyPrefill for why this bypasses the pristine guard.
   // Skipped entirely once locked (US-003 AC4) - patchValue would otherwise write into a disabled
   // control, which the user can't see changing, only to have the eventual Save rejected.
-  applyPrefill(email?: string | null, phone?: string | null): void {
+  applyPrefill(email?: string | null, phone?: string | null, presentAddress?: string | null): void {
     if (this.identityFieldsLocked) return;
-    const patch: { email?: string; phone?: string } = {};
+    const patch: { email?: string; phone?: string; presentAddress?: string } = {};
     if (email) patch.email = email;
     if (phone) patch.phone = phone;
+    if (presentAddress) patch.presentAddress = presentAddress;
     if (Object.keys(patch).length > 0) this.form.patchValue(patch);
   }
 

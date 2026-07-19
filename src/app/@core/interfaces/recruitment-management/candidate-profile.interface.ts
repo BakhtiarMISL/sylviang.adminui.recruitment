@@ -93,24 +93,38 @@ export interface ICandidateCertificationResponse {
 export interface ICandidateResumeParsedEducation {
   degreeTitle?: string | null;
   institution?: string | null;
+  educationLevel?: string | null;
   passingYear?: number | null;
+  result?: string | null;
+  majorSubject?: string | null;
 }
 
 export interface ICandidateResumeParsedWorkExperience {
   companyName?: string | null;
   designation?: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
+  isCurrent?: boolean | null;
+  responsibilities?: string | null;
+  location?: string | null;
 }
 
 export interface ICandidateResumeParseResponse {
   fullName?: string | null;
   email?: string | null;
   phone?: string | null;
+  presentAddress?: string | null;
+  dateOfBirth?: string | null;
+  gender?: string | null;
   skills: string[];
   educations: ICandidateResumeParsedEducation[];
   workExperiences: ICandidateResumeParsedWorkExperience[];
+  parsingProvider?: string | null;
+  aiParsingDegraded?: boolean;
+  resumeDocumentSaved?: boolean;
 }
 
-export type CandidateDocumentType = 'NID' | 'EducationCertificate' | 'ExperienceLetter' | 'Other';
+export type CandidateDocumentType = 'NID' | 'EducationCertificate' | 'ExperienceLetter' | 'Resume' | 'Other';
 
 export interface ICandidateDocumentResponse {
   candidateDocumentId: number;

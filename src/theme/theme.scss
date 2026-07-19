@@ -74,12 +74,22 @@ label,
 p,
 span,
 a,
+strong,
+small,
+li,
 h1,
 h2,
 h3,
 h4,
 h5,
 h6 {
+  color: var(--text-color-dark);
+}
+
+// value text in label/value detail views (e.g. field-label + field-value pairs)
+// plain divs are excluded from the rule above and were rendering with no
+// explicit color, so give them one instead of relying on inheritance
+.field-value {
   color: var(--text-color-dark);
 }
 
