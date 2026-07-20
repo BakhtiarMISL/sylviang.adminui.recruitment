@@ -1,4 +1,6 @@
-<div class="mx-auto max-w-md p-6 text-center">
+<app-public-navbar></app-public-navbar>
+
+<div class="mx-auto min-h-[calc(100vh-4.5rem)] max-w-md p-6 text-center">
   <div *ngIf="polling" class="rounded-md bg-blue-50 p-4 text-blue-800">
     <p class="font-medium">Confirming your payment...</p>
     <p class="mt-1 text-sm">This usually takes a few seconds. Please don't close this page.</p>
@@ -20,3 +22,5 @@
     </button>
   </div>
 </div>
+
+<app-public-footer></app-public-footer>
