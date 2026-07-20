@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { Router, UrlTree } from '@angular/router';
+import { Route, Router, UrlSegment, UrlTree } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { AuthGuard } from './auth.guard';
 import { AuthService } from '@core/services/auth/auth.service';
@@ -21,30 +21,46 @@ describe('AuthGuard', () => {
     router = TestBed.inject(Router);
   });
 
-  it('should allow activation when the user is authenticated', () => {
-    authServiceSpy.isAuthenticated.and.returnValue(true);
+  describe('canActivate', () => {
+    it('should allow activation when the user is authenticated', () => {
+      authServiceSpy.isAuthenticated.and.returnValue(true);
 
-    expect(guard.canActivate()).toBeTrue();
+      expect(guard.canActivate()).toBeTrue();
+    });
+
+    it('should redirect to /login with a returnUrl when not authenticated', () => {
+      authServiceSpy.isAuthenticated.and.returnValue(false);
+      spyOnProperty(router, 'url', 'get').and.returnValue('/dashboard');
+
+      const result = guard.canActivate(null, { url: '/dashboard' } as any) as UrlTree;
+
+      expect(result instanceof UrlTree).toBeTrue();
+      expect(result.toString()).toContain('/login');
+      expect(result.toString()).toContain('returnUrl');
+    });
   });
 
-  it('should redirect to /login with a returnUrl when not authenticated on a deep link', () => {
-    authServiceSpy.isAuthenticated.and.returnValue(false);
-    spyOnProperty(router, 'url', 'get').and.returnValue('/dashboard');
+  describe('canMatch', () => {
+    it('should allow matching when the user is authenticated', () => {
+      authServiceSpy.isAuthenticated.and.returnValue(true);
 
-    const result = guard.canActivate(null, { url: '/dashboard' } as any) as UrlTree;
+      expect(guard.canMatch({} as Route, [new UrlSegment('dashboard', {})])).toBeTrue();
+    });
 
-    expect(result instanceof UrlTree).toBeTrue();
-    expect(result.toString()).toContain('/login');
-    expect(result.toString()).toContain('returnUrl');
-  });
+    it('should return false (not redirect) for the bare root URL when not authenticated, so the router falls through to the public landing page', () => {
+      authServiceSpy.isAuthenticated.and.returnValue(false);
 
-  it('should redirect to /careers (not /login) when not authenticated on the bare root URL', () => {
-    authServiceSpy.isAuthenticated.and.returnValue(false);
+      expect(guard.canMatch({} as Route, [])).toBeFalse();
+    });
 
-    const result = guard.canActivate(null, { url: '/' } as any) as UrlTree;
+    it('should redirect to /login with a returnUrl for a deep link when not authenticated', () => {
+      authServiceSpy.isAuthenticated.and.returnValue(false);
 
-    expect(result instanceof UrlTree).toBeTrue();
-    expect(result.toString()).toContain('/careers');
-    expect(result.toString()).not.toContain('/login');
+      const result = guard.canMatch({} as Route, [new UrlSegment('dashboard', {})]) as UrlTree;
+
+      expect(result instanceof UrlTree).toBeTrue();
+      expect(result.toString()).toContain('/login');
+      expect(result.toString()).toContain('returnUrl');
+    });
   });
 });
