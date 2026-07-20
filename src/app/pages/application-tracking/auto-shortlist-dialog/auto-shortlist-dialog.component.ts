@@ -135,6 +135,11 @@ export class AutoShortlistDialogComponent implements OnInit, OnChanges, OnDestro
     });
   }
 
+  get sortedResults(): IAutoShortlistResult[] {
+    if (!this.run) return [];
+    return [...this.run.results].sort((a, b) => Number(b.finalIncluded) - Number(a.finalIncluded));
+  }
+
   canApply(): boolean {
     return !!this.run && this.run.results.length > 0;
   }
