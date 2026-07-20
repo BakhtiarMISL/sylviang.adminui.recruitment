@@ -3,31 +3,6 @@
   <section class="form-container">
     <h3 class="form-section-header">{{ isEditMode ? 'Update Job Vacancy' : 'Add Job Vacancy' }}</h3>
 
-    <!-- Site -->
-    <div>
-      <p-floatlabel variant="in">
-        <p-inputnumber inputId="siteId" formControlName="siteId" class="w-full" [useGrouping]="false" [class.ng-invalid]="hasError('siteId')" [class.ng-dirty]="hasError('siteId')" (onBlur)="f['siteId'].markAsTouched()"></p-inputnumber>
-        <label for="siteId">Site ID *</label>
-      </p-floatlabel>
-      <div *ngIf="hasError('siteId')" class="invalid">{{ getErrorMessage('siteId') }}</div>
-    </div>
-
-    <!-- Department -->
-    <div>
-      <p-floatlabel variant="in">
-        <p-inputnumber inputId="departmentId" formControlName="departmentId" class="w-full" [useGrouping]="false"></p-inputnumber>
-        <label for="departmentId">Department ID</label>
-      </p-floatlabel>
-    </div>
-
-    <!-- Designation -->
-    <div>
-      <p-floatlabel variant="in">
-        <p-inputnumber inputId="designationId" formControlName="designationId" class="w-full" [useGrouping]="false"></p-inputnumber>
-        <label for="designationId">Designation ID</label>
-      </p-floatlabel>
-    </div>
-
     <!-- Hiring Pipeline -->
     <div>
       <p-floatlabel variant="in">
