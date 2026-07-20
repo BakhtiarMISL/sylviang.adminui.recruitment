@@ -33,6 +33,7 @@ export class JobBrowseComponent implements OnInit, AfterViewInit {
   experienceBucketOptions = ExperienceBucketOptions;
 
   columns = JobBrowseColumns;
+  filtersCollapsed = false;
 
   searchTerm = '';
   location = '';
@@ -66,6 +67,7 @@ export class JobBrowseComponent implements OnInit, AfterViewInit {
     this.employmentType = null;
     this.maxExperienceYears = null;
     this.currentPage = 1;
+    this.filtersCollapsed = false;
     this.loadJobPostings();
   }
 
@@ -94,12 +96,14 @@ export class JobBrowseComponent implements OnInit, AfterViewInit {
           this.totalRecords = 0;
         }
         this.loading = false;
+        this.filtersCollapsed = this.totalRecords > 0;
         this.cdr.detectChanges();
       },
       error: () => {
         this.jobPostings = [];
         this.totalRecords = 0;
         this.loading = false;
+        this.filtersCollapsed = false;
         this.cdr.detectChanges();
       },
     });

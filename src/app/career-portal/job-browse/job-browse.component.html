@@ -8,7 +8,8 @@
     </header>
 
     <!-- Filters -->
-    <div class="grid grid-cols-1 gap-3 mb-4 sm:grid-cols-2 lg:grid-cols-5">
+    <app-filter-panel [(collapsed)]="filtersCollapsed">
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
       <p-floatlabel variant="in">
         <input type="text" pInputText id="searchTerm" class="w-full" [(ngModel)]="searchTerm" name="searchTerm" (keyup.enter)="applyFilters()" />
         <label for="searchTerm" class="whitespace-nowrap">Keyword</label>
@@ -68,6 +69,7 @@
         </button>
       </div>
     </div>
+    </app-filter-panel>
 
     <!-- Job Postings Table -->
     <div class="table-container">

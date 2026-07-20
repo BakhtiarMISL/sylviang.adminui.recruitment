@@ -27,6 +27,7 @@ export class CandidateListComponent implements OnInit {
   rows = UI_CONFIG.defaultPageSize;
   currentPage = 1;
   searchTerm = '';
+  filtersCollapsed = false;
 
   pools: ITalentPoolLookupResponse[] = [];
   selectedPoolIds: number[] = [];
@@ -138,6 +139,7 @@ export class CandidateListComponent implements OnInit {
   resetSearch(): void {
     this.searchTerm = '';
     this.filterTags = [];
+    this.filtersCollapsed = false;
     this.loadCandidates();
   }
 
@@ -162,12 +164,14 @@ export class CandidateListComponent implements OnInit {
           this.totalRecords = 0;
         }
         this.loading = false;
+        this.filtersCollapsed = this.totalRecords > 0;
         this.cdr.detectChanges();
       },
       error: () => {
         this.candidates = [];
         this.totalRecords = 0;
         this.loading = false;
+        this.filtersCollapsed = false;
         this.cdr.detectChanges();
       },
     });

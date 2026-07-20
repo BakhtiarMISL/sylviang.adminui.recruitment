@@ -1,0 +1,10 @@
+<div class="table-container mb-4">
+  <div class="table-title-container cursor-pointer" (click)="toggle()">
+    <h3 class="table-title">{{ title }}</h3>
+    <i class="fa collapse-button" [ngClass]="collapsed ? 'fa-chevron-down' : 'fa-chevron-up'"></i>
+  </div>
+
+  <div class="p-4" *ngIf="!collapsed">
+    <ng-content></ng-content>
+  </div>
+</div>
