@@ -23,6 +23,11 @@
     <div *ngIf="hasError('presentAddress')" class="invalid">{{ getErrorMessage('presentAddress') }}</div>
   </div>
 
+  <div class="sm:col-span-2 flex items-center gap-2">
+    <p-checkbox inputId="sameAsPresent" formControlName="sameAsPresent" [binary]="true"></p-checkbox>
+    <label for="sameAsPresent">Permanent address same as present address</label>
+  </div>
+
   <div class="sm:col-span-2">
     <p-floatlabel variant="in">
       <textarea pInputText inputId="permanentAddress" formControlName="permanentAddress" class="w-full" rows="2"></textarea>

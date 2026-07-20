@@ -24,9 +24,10 @@ import { AtsDashboardComponent } from './ats-dashboard/ats-dashboard.component';
 import { ApplicationDetailComponent } from './application-detail/application-detail.component';
 import { ApplyOnBehalfComponent } from './apply-on-behalf/apply-on-behalf.component';
 import { PipelineProgressTrackerComponent } from './pipeline-progress-tracker/pipeline-progress-tracker.component';
+import { AutoShortlistDialogComponent } from './auto-shortlist-dialog/auto-shortlist-dialog.component';
 
 @NgModule({
-  declarations: [AtsDashboardComponent, ApplicationDetailComponent, ApplyOnBehalfComponent, PipelineProgressTrackerComponent],
+  declarations: [AtsDashboardComponent, ApplicationDetailComponent, ApplyOnBehalfComponent, PipelineProgressTrackerComponent, AutoShortlistDialogComponent],
   imports: [
     ReactiveFormsModule,
     FormsModule,

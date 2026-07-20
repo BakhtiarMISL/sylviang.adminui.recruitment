@@ -67,3 +67,8 @@ export enum FilterCombinatorEnum {
   And = 'And',
   Or = 'Or',
 }
+
+export enum HrOverrideDecisionEnum {
+  Approved = 'Approved',
+  Rejected = 'Rejected',
+}

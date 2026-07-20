@@ -37,10 +37,10 @@
     <div class="form-container">
       <h3 class="form-section-header">Update Status</h3>
 
-      <div *ngIf="updateError" class="invalid sm:col-span-2">{{ updateError }}</div>
-      <div *ngIf="updateSuccess" class="success-message sm:col-span-2">Status updated.</div>
+      <div *ngIf="updateError" class="invalid sm:col-span-2 lg:col-span-3 xl:col-span-4">{{ updateError }}</div>
+      <div *ngIf="updateSuccess" class="success-message sm:col-span-2 lg:col-span-3 xl:col-span-4">Status updated.</div>
 
-      <div class="sm:col-span-2 text-sm text-neutral" *ngIf="nextStatusOptions.length === 0">
+      <div class="sm:col-span-2 lg:col-span-3 xl:col-span-4 text-sm text-neutral" *ngIf="nextStatusOptions.length === 0">
         No further transitions available from {{ formatEnumLabel(application.applicationStatus) }}.
       </div>
 
@@ -78,11 +78,11 @@
           </p-floatlabel>
         </div>
 
-        <div class="sm:col-span-2">
+        <div class="sm:col-span-2 lg:col-span-3 xl:col-span-4">
           <textarea pInputText [(ngModel)]="note" rows="3" class="w-full" maxlength="2000" placeholder="Private note (visible only to HR/Admin)"></textarea>
         </div>
 
-        <div class="sm:col-span-2">
+        <div class="sm:col-span-2 lg:col-span-3 xl:col-span-4">
           <button pButton type="button" [disabled]="!canUpdateStatus() || updating" (click)="updateStatus()">
             <i class="fas fa-save"></i>
             <span>{{ updating ? 'Updating...' : 'Update Status' }}</span>

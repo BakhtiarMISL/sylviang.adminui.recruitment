@@ -62,7 +62,7 @@
           <span>Search</span>
         </button>
 
-        <button pButton severity="secondary" (click)="resetFilters()">
+        <button *ngIf="searchTerm || location || departmentId || employmentType || maxExperienceYears" pButton severity="secondary" (click)="resetFilters()">
           <i class="fa fa-times"></i>
           <span>Reset</span>
         </button>
