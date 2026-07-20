@@ -31,7 +31,7 @@
     <p>No shortlisting run yet. Click "Run Shortlisting" to score every applicant against this vacancy.</p>
   </div>
 
-  <p-table *ngIf="!loading && run" [value]="run.results" dataKey="autoShortlistResultId">
+  <p-table *ngIf="!loading && run" [value]="sortedResults" dataKey="autoShortlistResultId">
     <ng-template pTemplate="header">
       <tr>
         <th>Candidate</th>
@@ -64,13 +64,13 @@
           <span *ngIf="!result.explanation && result.scoringError" class="explanation-error">{{ result.scoringError }}</span>
         </td>
         <td>
-          <button (click)="overrideRow(result, HrOverrideDecisionEnum.Approved)" class="text-primary" pTooltip="Approve">
+          <button (click)="overrideRow(result, HrOverrideDecisionEnum.Approved)" class="text-primary decision-btn" pTooltip="Approve">
             <i class="fa fa-check"></i>
           </button>
-          <button (click)="overrideRow(result, HrOverrideDecisionEnum.Rejected)" class="text-primary ml-2" pTooltip="Reject">
+          <button (click)="overrideRow(result, HrOverrideDecisionEnum.Rejected)" class="text-primary decision-btn ml-2" pTooltip="Reject">
             <i class="fa fa-times"></i>
           </button>
-          <button (click)="overrideRow(result, null)" class="text-primary ml-2" pTooltip="Reset to auto" *ngIf="result.hrOverrideDecision">
+          <button (click)="overrideRow(result, null)" class="text-primary decision-btn ml-2" pTooltip="Reset to auto" *ngIf="result.hrOverrideDecision">
             <i class="fa fa-rotate-left"></i>
           </button>
         </td>
