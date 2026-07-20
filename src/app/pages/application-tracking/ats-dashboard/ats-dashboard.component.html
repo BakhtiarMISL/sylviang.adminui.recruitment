@@ -189,7 +189,7 @@
     <p-chip *ngFor="let chip of activeFilterChips" [label]="chip.label" [removable]="true" (onRemove)="removeFilterChip(chip.key)"></p-chip>
   </div>
 
-  <div class="filter-bar" *ngIf="filterJobPostingId">
+  <div class="filter-bar mb-4" *ngIf="filterJobPostingId">
     <p-floatlabel variant="in">
       <p-select
         inputId="selectedShortlistFilterId"
@@ -211,7 +211,7 @@
     </button>
   </div>
 
-  <div class="filter-bar" *ngIf="filterJobPostingId">
+  <div class="filter-bar mb-4" *ngIf="filterJobPostingId">
     <button pButton severity="help" (click)="openAutoShortlistDialog()">
       <i class="fa fa-robot"></i>
       <span>AI Shortlist</span>
