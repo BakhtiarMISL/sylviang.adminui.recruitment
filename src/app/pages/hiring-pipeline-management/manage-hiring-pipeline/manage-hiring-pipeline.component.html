@@ -67,11 +67,6 @@
             </p-floatlabel>
 
             <p-floatlabel variant="in">
-              <p-inputnumber [inputId]="'departmentId' + i" class="w-full" [(ngModel)]="stage.departmentId" [ngModelOptions]="{ standalone: true }" [useGrouping]="false"></p-inputnumber>
-              <label [for]="'departmentId' + i">Assigned Department ID</label>
-            </p-floatlabel>
-
-            <p-floatlabel variant="in">
               <p-inputnumber [inputId]="'estimatedDuration' + i" class="w-full" [(ngModel)]="stage.estimatedDurationMinutes" [ngModelOptions]="{ standalone: true }" suffix=" min"></p-inputnumber>
               <label [for]="'estimatedDuration' + i">Estimated Duration</label>
             </p-floatlabel>
