@@ -5,6 +5,8 @@ export interface ITalentPoolResponse {
   name: string;
   candidateCount: number;
   createdAt?: string | null;
+  jobPostingId?: number | null;
+  jobPostingTitle?: string | null;
 }
 
 export interface ITalentPoolLookupResponse {
@@ -20,11 +22,19 @@ export interface ITalentPoolBadgeResponse {
 export interface ITalentPoolDetailResponse {
   talentPoolId: number;
   name: string;
+  jobPostingId?: number | null;
+  jobPostingTitle?: string | null;
   candidates: ICandidateProfileSummaryResponse[];
 }
 
 export interface ITalentPoolCreateRequest {
   name: string;
+  jobPostingId?: number | null;
+}
+
+export interface ITalentPoolUpdateRequest {
+  name: string;
+  jobPostingId?: number | null;
 }
 
 export interface ITalentPoolCandidateAddRequest {

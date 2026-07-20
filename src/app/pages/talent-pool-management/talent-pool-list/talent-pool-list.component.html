@@ -7,6 +7,24 @@
     </button>
   </div>
 
+  <div class="table-container mb-4 p-4">
+    <p-floatlabel variant="in" class="max-w-sm">
+      <p-select
+        inputId="jobPostingFilter"
+        class="w-full"
+        [options]="jobVacancies"
+        [(ngModel)]="selectedJobPostingFilter"
+        optionLabel="title"
+        optionValue="jobPostingId"
+        [showClear]="true"
+        [appendTo]="'body'"
+        (onChange)="onFilterChange()"
+        (onClear)="onFilterChange()"
+      ></p-select>
+      <label for="jobPostingFilter">Filter by Job Vacancy</label>
+    </p-floatlabel>
+  </div>
+
   <div *ngIf="loading" class="space-y-3">
     <p-skeleton height="4rem" *ngFor="let i of skeletonItems"></p-skeleton>
   </div>
@@ -24,12 +42,17 @@
         <div>
           <h4 class="text-lg font-medium text-gray-900 dark:text-white">{{ pool.name }}</h4>
           <p class="mt-1 text-sm text-gray-500">{{ pool.candidateCount }} {{ pool.candidateCount === 1 ? 'candidate' : 'candidates' }}</p>
+          <p *ngIf="pool.jobPostingTitle" class="mt-1 text-sm text-primary">Linked to: {{ pool.jobPostingTitle }}</p>
         </div>
 
         <div class="flex flex-wrap items-center gap-2">
           <button pButton severity="secondary" [routerLink]="['/talent-pools/talent-pool-detail', pool.talentPoolId]">
             <i class="fa fa-eye"></i>
             <span>View</span>
+          </button>
+          <button pButton severity="secondary" (click)="openEditDialog(pool)">
+            <i class="fa fa-edit"></i>
+            <span>Edit</span>
           </button>
           <button pButton severity="danger" (click)="deletePool(pool, $event)">
             <i class="fa fa-trash"></i>
@@ -41,11 +64,25 @@
   </div>
 </section>
 
-<p-dialog header="Create Talent Pool" [(visible)]="showCreateDialog" [modal]="true" [style]="{ width: '28rem' }">
+<p-dialog [header]="editingPool ? 'Edit Talent Pool' : 'Create Talent Pool'" [(visible)]="showCreateDialog" [modal]="true" [style]="{ width: '28rem' }">
   <div class="form-container">
     <p-floatlabel variant="in" class="sm:col-span-2">
-      <input type="text" pInputText id="poolName" class="w-full" [(ngModel)]="newPoolName" name="poolName" (keyup.enter)="createPool()" />
+      <input type="text" pInputText id="poolName" class="w-full" [(ngModel)]="newPoolName" name="poolName" (keyup.enter)="savePool()" />
       <label for="poolName">Pool name (e.g. "Senior Engineers – 2026")</label>
+    </p-floatlabel>
+
+    <p-floatlabel variant="in" class="sm:col-span-2">
+      <p-select
+        inputId="poolJobPosting"
+        class="w-full"
+        [options]="jobVacancies"
+        [(ngModel)]="newPoolJobPostingId"
+        optionLabel="title"
+        optionValue="jobPostingId"
+        [showClear]="true"
+        [appendTo]="'body'"
+      ></p-select>
+      <label for="poolJobPosting">Job Vacancy (optional)</label>
     </p-floatlabel>
 
     <div *ngIf="createError" class="invalid sm:col-span-2">{{ createError }}</div>
@@ -53,8 +90,8 @@
 
   <ng-template pTemplate="footer">
     <button pButton severity="secondary" (click)="showCreateDialog = false">Cancel</button>
-    <button pButton [disabled]="creating || !newPoolName.trim()" (click)="createPool()">
-      {{ creating ? 'Creating...' : 'Create' }}
+    <button pButton [disabled]="creating || !newPoolName.trim()" (click)="savePool()">
+      {{ creating ? 'Saving...' : editingPool ? 'Save Changes' : 'Create' }}
     </button>
   </ng-template>
 </p-dialog>
