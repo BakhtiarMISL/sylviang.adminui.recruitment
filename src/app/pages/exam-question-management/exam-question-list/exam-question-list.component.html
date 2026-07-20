@@ -18,7 +18,8 @@
   </div>
 
   <!-- Search + Filters -->
-  <div class="filter-bar mt-3">
+  <app-filter-panel [(collapsed)]="filtersCollapsed">
+  <div class="filter-bar">
     <p-floatlabel variant="in">
       <input type="text" pInputText id="searchInput" class="w-full" [(ngModel)]="searchTerm" name="searchInput" (keyup.enter)="applySearch()" />
       <label for="searchInput">Search question text</label>
@@ -97,6 +98,7 @@
       <span>Reset</span>
     </button>
   </div>
+  </app-filter-panel>
 
   <div class="table-container">
     <div class="table-title-container">

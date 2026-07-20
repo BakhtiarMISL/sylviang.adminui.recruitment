@@ -1,6 +1,7 @@
 <section class="page-container">
+  <app-filter-panel [(collapsed)]="filtersCollapsed">
   <div class="flex justify-between items-center gap-3">
-    <div class="flex items-end gap-3 mb-4">
+    <div class="flex items-end gap-3">
       <p-floatlabel variant="in">
         <input type="text" pInputText id="searchInput" class="w-full" [(ngModel)]="searchTerm" name="searchInput" (keyup.enter)="applySearch()" />
         <label for="searchInput">Search by name or email</label>
@@ -46,6 +47,7 @@
       </p-floatlabel>
     </div>
   </div>
+  </app-filter-panel>
 
   <div class="table-container">
     <div class="table-title-container">

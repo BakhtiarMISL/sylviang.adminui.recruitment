@@ -7,6 +7,7 @@
     </button>
   </div>
 
+  <app-filter-panel [(collapsed)]="filtersCollapsed">
   <div class="filter-bar">
     <p-floatlabel variant="in">
       <p-select
@@ -182,6 +183,7 @@
       <label for="filterTags">Tags (any of)</label>
     </p-floatlabel>
   </div>
+  </app-filter-panel>
 
   <div class="active-filter-chips" *ngIf="activeFilterChips.length > 0">
     <p-chip *ngFor="let chip of activeFilterChips" [label]="chip.label" [removable]="true" (onRemove)="removeFilterChip(chip.key)"></p-chip>

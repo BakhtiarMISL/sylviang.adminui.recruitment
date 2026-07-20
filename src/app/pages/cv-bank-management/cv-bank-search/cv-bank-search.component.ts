@@ -37,6 +37,7 @@ export class CvBankSearchComponent implements OnInit {
   currentPage = 1;
   statusMessage = '';
   statusIsError = false;
+  filtersCollapsed = false;
 
   get skeletonItems() {
     return Array(this.rows)
@@ -60,6 +61,7 @@ export class CvBankSearchComponent implements OnInit {
     this.maxExperienceYears = null;
     this.location = '';
     this.candidateType = null;
+    this.filtersCollapsed = false;
     this.search();
   }
 
@@ -92,6 +94,7 @@ export class CvBankSearchComponent implements OnInit {
           }
           this.selectedResults = [];
           this.loading = false;
+          this.filtersCollapsed = this.totalRecords > 0;
           this.cdr.detectChanges();
         },
         error: () => {
