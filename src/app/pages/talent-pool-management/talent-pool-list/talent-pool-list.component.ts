@@ -1,5 +1,7 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { IJobVacancyResponse } from '@app/@core/interfaces/recruitment-management/job-vacancy.interface';
 import { ITalentPoolResponse } from '@app/@core/interfaces/recruitment-management/talent-pool.interface';
+import { JobVacancyService } from '@app/@core/services/recruitment/job-vacancy/job-vacancy.service';
 import { TalentPoolService } from '@app/@core/services/recruitment/talent-pool/talent-pool.service';
 import { ConfirmationService } from 'primeng/api';
 
@@ -12,15 +14,21 @@ import { ConfirmationService } from 'primeng/api';
 export class TalentPoolListComponent implements OnInit {
   constructor(
     private talentPoolService: TalentPoolService,
+    private jobVacancyService: JobVacancyService,
     private confirmationService: ConfirmationService,
     private cdr: ChangeDetectorRef,
   ) {}
 
   pools: ITalentPoolResponse[] = [];
+  jobVacancies: IJobVacancyResponse[] = [];
   loading = false;
 
+  selectedJobPostingFilter: number | null = null;
+
   showCreateDialog = false;
+  editingPool: ITalentPoolResponse | null = null;
   newPoolName = '';
+  newPoolJobPostingId: number | null = null;
   creating = false;
   createError = '';
 
@@ -31,12 +39,26 @@ export class TalentPoolListComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.loadJobVacancies();
     this.loadPools();
+  }
+
+  loadJobVacancies(): void {
+    this.jobVacancyService.getAllJobVacancies().subscribe({
+      next: (response) => {
+        this.jobVacancies = !response.hasError && response.content ? response.content : [];
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.jobVacancies = [];
+        this.cdr.detectChanges();
+      },
+    });
   }
 
   loadPools(): void {
     this.loading = true;
-    this.talentPoolService.getAll().subscribe({
+    this.talentPoolService.getAll(this.selectedJobPostingFilter ?? undefined).subscribe({
       next: (response) => {
         this.pools = !response.hasError && response.content ? response.content : [];
         this.loading = false;
@@ -50,35 +72,56 @@ export class TalentPoolListComponent implements OnInit {
     });
   }
 
+  onFilterChange(): void {
+    this.loadPools();
+  }
+
   openCreateDialog(): void {
+    this.editingPool = null;
     this.newPoolName = '';
+    this.newPoolJobPostingId = null;
     this.createError = '';
     this.showCreateDialog = true;
   }
 
-  createPool(): void {
+  openEditDialog(pool: ITalentPoolResponse): void {
+    this.editingPool = pool;
+    this.newPoolName = pool.name;
+    this.newPoolJobPostingId = pool.jobPostingId ?? null;
+    this.createError = '';
+    this.showCreateDialog = true;
+  }
+
+  savePool(): void {
     if (!this.newPoolName.trim()) return;
 
     this.creating = true;
     this.createError = '';
 
-    this.talentPoolService.create({ name: this.newPoolName.trim() }).subscribe({
-      next: (response) => {
-        this.creating = false;
-        if (!response.hasError) {
-          this.showCreateDialog = false;
-          this.loadPools();
-        } else {
-          this.createError = response.decentMessage || 'Failed to create talent pool.';
-        }
-        this.cdr.detectChanges();
-      },
-      error: (error) => {
-        this.creating = false;
-        this.createError = error?.error?.decentMessage || 'Failed to create talent pool.';
-        this.cdr.detectChanges();
-      },
-    });
+    const request = { name: this.newPoolName.trim(), jobPostingId: this.newPoolJobPostingId };
+
+    const onSuccess = (response: { hasError: boolean; decentMessage?: string | null }) => {
+      this.creating = false;
+      if (!response.hasError) {
+        this.showCreateDialog = false;
+        this.loadPools();
+      } else {
+        this.createError = response.decentMessage || 'Failed to save talent pool.';
+      }
+      this.cdr.detectChanges();
+    };
+
+    const onError = (error: any) => {
+      this.creating = false;
+      this.createError = error?.error?.decentMessage || 'Failed to save talent pool.';
+      this.cdr.detectChanges();
+    };
+
+    if (this.editingPool) {
+      this.talentPoolService.update(this.editingPool.talentPoolId, request).subscribe({ next: onSuccess, error: onError });
+    } else {
+      this.talentPoolService.create(request).subscribe({ next: onSuccess, error: onError });
+    }
   }
 
   deletePool(pool: ITalentPoolResponse, event: Event): void {

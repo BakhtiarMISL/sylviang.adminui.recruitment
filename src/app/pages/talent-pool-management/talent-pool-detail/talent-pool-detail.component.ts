@@ -112,6 +112,7 @@ export class TalentPoolDetailComponent implements OnInit {
     this.jobVacancyService.getAllJobVacancies().subscribe({
       next: (response) => {
         this.openVacancies = !response.hasError && response.content ? response.content.filter((v) => v.status === JobStatusEnum.Open) : [];
+        this.selectedJobPostingId = this.pool?.jobPostingId ?? null;
         this.cdr.detectChanges();
       },
       error: () => {

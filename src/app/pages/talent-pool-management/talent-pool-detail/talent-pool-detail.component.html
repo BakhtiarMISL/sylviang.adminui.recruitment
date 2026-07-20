@@ -6,7 +6,10 @@
 <ng-container *ngIf="!loading && pool">
   <section class="page-container">
     <div class="flex justify-between items-center gap-3 mb-4">
-      <h3 class="table-title">{{ pool.name }}</h3>
+      <div>
+        <h3 class="table-title">{{ pool.name }}</h3>
+        <p *ngIf="pool.jobPostingTitle" class="mt-1 text-sm text-primary">Linked to: {{ pool.jobPostingTitle }}</p>
+      </div>
       <button pButton [disabled]="selectedCandidateIds.length === 0" (click)="openFastTrackDialog()">
         <i class="fa fa-forward"></i>
         <span>Fast-track to Vacancy ({{ selectedCandidateIds.length }})</span>

@@ -10,6 +10,7 @@ import {
   ITalentPoolFastTrackResponse,
   ITalentPoolLookupResponse,
   ITalentPoolResponse,
+  ITalentPoolUpdateRequest,
 } from '@core/interfaces/recruitment-management/talent-pool.interface';
 import { BASE_URL_Recruitment } from '@env/environment';
 
@@ -21,8 +22,9 @@ export class TalentPoolService {
 
   API_URL = BASE_URL_Recruitment + '/talent-pool';
 
-  getAll() {
-    return this.httpClient.get<ApiResponse<ITalentPoolResponse[]>>(`${this.API_URL}`);
+  getAll(jobPostingId?: number) {
+    const params = jobPostingId ? { jobPostingId } : {};
+    return this.httpClient.get<ApiResponse<ITalentPoolResponse[]>>(`${this.API_URL}`, { params });
   }
 
   getLookup() {
@@ -35,6 +37,10 @@ export class TalentPoolService {
 
   create(request: ITalentPoolCreateRequest) {
     return this.httpClient.post<ApiResponse<number>>(`${this.API_URL}`, request);
+  }
+
+  update(talentPoolId: number, request: ITalentPoolUpdateRequest) {
+    return this.httpClient.put<ApiResponse<void>>(`${this.API_URL}/${talentPoolId}`, request);
   }
 
   delete(talentPoolId: number) {
