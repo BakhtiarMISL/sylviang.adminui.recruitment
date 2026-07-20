@@ -1,7 +1,5 @@
 <section class="page-container" *ngIf="loading || loadError">
   <div class="form-container">
-    <h3 class="form-section-header">Account Settings</h3>
-
     <div class="sm:col-span-2" *ngIf="loading">Loading...</div>
     <div class="sm:col-span-2 invalid" *ngIf="loadError">{{ loadError }}</div>
   </div>
