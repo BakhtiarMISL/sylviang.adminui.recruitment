@@ -207,6 +207,10 @@ export class CandidateProfileService {
     return this.httpClient.put<ApiResponse<void>>(`${this.API_URL}/${candidateProfileId}/hr-notes`, request);
   }
 
+  markInternal(candidateProfileId: number) {
+    return this.httpClient.put<ApiResponse<void>>(`${this.API_URL}/${candidateProfileId}/mark-internal`, {});
+  }
+
   // ── Tags (US-041, HR-only) ───────────────────────────────────────
 
   getTagSuggestions(search: string) {

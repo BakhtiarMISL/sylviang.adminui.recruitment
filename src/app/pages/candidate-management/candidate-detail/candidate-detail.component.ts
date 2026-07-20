@@ -29,6 +29,9 @@ export class CandidateDetailComponent implements OnInit {
   notesSaveError = '';
   notesSaveSuccess = false;
 
+  markingInternal = false;
+  markInternalError = '';
+
   // ── Tags (US-041, HR-only) ─────────────────────────────────────
   tags: ICandidateTagResponse[] = [];
   tagSuggestions: string[] = [];
@@ -93,6 +96,26 @@ export class CandidateDetailComponent implements OnInit {
       error: (error) => {
         this.savingNotes = false;
         this.notesSaveError = error?.error?.decentMessage || 'Failed to save notes.';
+      },
+    });
+  }
+
+  markInternal(): void {
+    this.markInternalError = '';
+    this.markingInternal = true;
+
+    this.candidateProfileService.markInternal(this.candidateProfileId).subscribe({
+      next: (response) => {
+        this.markingInternal = false;
+        if (response && !response.hasError) {
+          if (this.profile) this.profile.isInternal = true;
+        } else {
+          this.markInternalError = response?.decentMessage || 'Failed to mark candidate as internal.';
+        }
+      },
+      error: (error) => {
+        this.markingInternal = false;
+        this.markInternalError = error?.error?.decentMessage || 'Failed to mark candidate as internal.';
       },
     });
   }

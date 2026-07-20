@@ -25,6 +25,13 @@
           <span class="text-sm mt-1" *ngIf="profile.hasPrepopulatedFieldEdits">
             <i class="fas fa-flag"></i> Candidate has edited a field pre-filled from Core HR.
           </span>
+          <div class="sm:col-span-2" *ngIf="!profile.isInternal">
+            <button pButton type="button" severity="secondary" [disabled]="markingInternal" (click)="markInternal()">
+              <i class="fas fa-user-check"></i>
+              <span>{{ markingInternal ? 'Marking...' : 'Mark as Internal' }}</span>
+            </button>
+            <div *ngIf="markInternalError" class="invalid">{{ markInternalError }}</div>
+          </div>
         </div>
 
         <app-completeness-ring [percentage]="profile.completenessPercentage"></app-completeness-ring>
