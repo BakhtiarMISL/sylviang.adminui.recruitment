@@ -45,6 +45,12 @@ export const webSidebarMenuItems: IMenuItem[] = [
         active: false,
         icon: 'fa-solid fa-list-check',
       },
+      {
+        href: '/exam-venues/exam-venue-list',
+        title: 'Exam Venues',
+        active: false,
+        icon: 'fa-solid fa-building',
+      },
     ],
   },
   {

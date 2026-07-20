@@ -54,6 +54,10 @@ const routes: Routes = [
       path: 'account-settings',
       loadChildren: () => import('./account-settings-management/account-settings-management.module').then((m) => m.AccountSettingsManagementModule),
     },
+    {
+      path: 'exam-venues',
+      loadChildren: () => import('./exam-venue-management/exam-venue-management.module').then((m) => m.ExamVenueManagementModule),
+    },
   ]),
 ];
 
