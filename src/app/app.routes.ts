@@ -1,11 +1,19 @@
+import { inject } from '@angular/core';
 import { CanMatchFn, Route, Routes, UrlSegment } from '@angular/router';
 import { AuthGuard } from '@core/guards/auth.guard';
+import { AuthService } from '@core/services/auth/auth.service';
 
 // Matches ONLY the bare root URL ('/'). Decides the landing route at recognition
 // time from the segments alone, so '/' never has to load the lazy landing module
 // and match its '' child to be selected. Any deeper path (segments.length > 0)
 // is rejected here and falls through to the guarded pages route below.
 const isRootPath: CanMatchFn = (_route: Route, segments: UrlSegment[]) => segments.length === 0;
+
+// The standalone public career portal (its own navbar/footer, no Shell) is only for anonymous
+// visitors and pre-login browsing. A logged-in user hitting /careers should get the same
+// CareerPortalModule wrapped in Shell instead (see 'careers' under pages-routing.module.ts) -
+// returning false here (not a redirect) lets that guarded sibling route match next.
+const isAnonymous: CanMatchFn = () => !inject(AuthService).isAuthenticated();
 
 export const routes: Routes = [
   {
@@ -18,6 +26,7 @@ export const routes: Routes = [
   },
   {
     path: 'careers',
+    canMatch: [isAnonymous],
     loadChildren: () => import('./career-portal/career-portal.module').then((m) => m.CareerPortalModule),
   },
   {

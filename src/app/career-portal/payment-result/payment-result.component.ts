@@ -2,6 +2,7 @@ import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { IPaymentStatusResponse } from '@app/@core/interfaces/recruitment-management/payment.interface';
 import { PaymentService } from '@app/@core/services/recruitment/payment/payment.service';
+import { AuthService } from '@core/services/auth/auth.service';
 
 const POLL_INTERVAL_MS = 3000;
 const MAX_POLL_ATTEMPTS = 20; // ~1 minute - the IPN usually lands within a few seconds of the browser redirect.
@@ -21,9 +22,14 @@ const MAX_POLL_ATTEMPTS = 20; // ~1 minute - the IPN usually lands within a few 
 export class PaymentResultComponent implements OnInit, OnDestroy {
   constructor(
     private paymentService: PaymentService,
+    private authService: AuthService,
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef,
   ) {}
+
+  get isLoggedIn(): boolean {
+    return this.authService.isAuthenticated();
+  }
 
   jobApplicationId: number | null = null;
   hintStatus: string | null = null;
