@@ -133,7 +133,7 @@
     </p-floatlabel>
     <ng-template #resultInput>
       <p-floatlabel variant="in">
-        <input pInputText inputId="result" formControlName="result" maxlength="50" class="w-full" [class.ng-invalid]="hasError('result')" [class.ng-dirty]="hasError('result')" (blur)="f['result'].markAsTouched()" placeholder="e.g. 3.85" />
+        <input pInputText inputId="result" formControlName="result" maxlength="50" class="w-full" [class.ng-invalid]="hasError('result')" [class.ng-dirty]="hasError('result')" (blur)="f['result'].markAsTouched()" />
         <label for="result">Result *</label>
       </p-floatlabel>
     </ng-template>

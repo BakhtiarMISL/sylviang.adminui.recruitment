@@ -54,13 +54,13 @@
       <app-contact-section [profile]="profile" (saved)="onSectionSaved()"></app-contact-section>
     </p-accordion-tab>
     <p-accordion-tab header="Education" value="2">
-      <app-education-section (saved)="onSectionSaved()"></app-education-section>
+      <app-education-section (saved)="onSectionSaved()" (suggestionsChanged)="onEducationSuggestionsChanged($event)"></app-education-section>
     </p-accordion-tab>
     <p-accordion-tab header="Work Experience" value="3">
-      <app-work-experience-section (saved)="onSectionSaved()"></app-work-experience-section>
+      <app-work-experience-section (saved)="onSectionSaved()" (suggestionsChanged)="onWorkExperienceSuggestionsChanged($event)"></app-work-experience-section>
     </p-accordion-tab>
     <p-accordion-tab header="Skills" value="4">
-      <app-skills-section (saved)="onSectionSaved()"></app-skills-section>
+      <app-skills-section (saved)="onSectionSaved()" (suggestionsChanged)="onSkillSuggestionsChanged($event)"></app-skills-section>
     </p-accordion-tab>
     <p-accordion-tab header="Certifications" value="5">
       <app-certifications-section (saved)="onSectionSaved()"></app-certifications-section>
