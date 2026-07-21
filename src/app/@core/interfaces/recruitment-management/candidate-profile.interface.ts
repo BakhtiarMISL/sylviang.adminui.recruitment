@@ -8,6 +8,7 @@ export interface ICandidateProfilePersonalInfoUpdateRequest {
   maritalStatus?: string | null;
   religion?: string | null;
   nationality?: string | null;
+  bloodGroup?: string | null;
 }
 
 export interface ICandidateProfileContactUpdateRequest {
@@ -95,6 +96,10 @@ export interface ICandidateResumeParseResponse {
   fullName?: string | null;
   email?: string | null;
   phone?: string | null;
+  dateOfBirth?: string | null;
+  gender?: string | null;
+  religion?: string | null;
+  maritalStatus?: string | null;
   skills: string[];
   educations: ICandidateResumeParsedEducation[];
   workExperiences: ICandidateResumeParsedWorkExperience[];
