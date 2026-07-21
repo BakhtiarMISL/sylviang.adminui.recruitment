@@ -21,7 +21,10 @@ import {
   ICandidateWorkExperienceCreateRequest,
   ICandidateWorkExperienceResponse,
   ICandidateWorkExperienceUpdateRequest,
+  IDistrictResponse,
+  IDivisionResponse,
   ISkillLibraryItemResponse,
+  IThanaResponse,
 } from '@core/interfaces/recruitment-management/candidate-profile.interface';
 import { BASE_URL_Recruitment } from '@env/environment';
 
@@ -43,6 +46,20 @@ export class CandidateProfileService {
 
   updateContact(request: ICandidateProfileContactUpdateRequest) {
     return this.httpClient.put<ApiResponse<void>>(`${this.API_URL}/me/contact`, request);
+  }
+
+  // ── Address lookup (Division -> District -> Thana cascade) ───────
+
+  getDivisions() {
+    return this.httpClient.get<ApiResponse<IDivisionResponse[]>>(`${BASE_URL_Recruitment}/address-lookup/divisions`);
+  }
+
+  getDistricts(divisionId: number) {
+    return this.httpClient.get<ApiResponse<IDistrictResponse[]>>(`${BASE_URL_Recruitment}/address-lookup/districts`, { params: { divisionId } });
+  }
+
+  getThanas(districtId: number) {
+    return this.httpClient.get<ApiResponse<IThanaResponse[]>>(`${BASE_URL_Recruitment}/address-lookup/thanas`, { params: { districtId } });
   }
 
   // ── Education ────────────────────────────────────────────────────
