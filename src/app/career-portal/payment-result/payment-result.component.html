@@ -1,4 +1,4 @@
-<app-public-navbar></app-public-navbar>
+<app-public-navbar *ngIf="!isLoggedIn"></app-public-navbar>
 
 <div class="mx-auto min-h-[calc(100vh-4.5rem)] max-w-md p-6 text-center">
   <div *ngIf="polling" class="rounded-md bg-blue-50 p-4 text-blue-800">

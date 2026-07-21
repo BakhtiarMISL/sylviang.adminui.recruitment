@@ -79,6 +79,10 @@ export class JobDetailComponent implements OnInit {
     return value.replace(/([a-z])([A-Z])/g, '$1 $2');
   }
 
+  get isLoggedIn(): boolean {
+    return this.authService.isAuthenticated();
+  }
+
   get hasEligibilityInfo(): boolean {
     if (!this.jobPosting) return false;
     const j = this.jobPosting;

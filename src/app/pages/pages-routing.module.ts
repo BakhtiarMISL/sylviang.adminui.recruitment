@@ -39,6 +39,13 @@ const routes: Routes = [
       loadChildren: () => import('./internal-job-board/internal-job-board.module').then((m) => m.InternalJobBoardModule),
     },
     {
+      // Same public CareerPortalModule as the anonymous '/careers' route in app.routes.ts, wrapped
+      // in Shell here for logged-in users - that top-level route canMatch's away once authenticated
+      // (see isAnonymous guard) so this is the one that actually resolves post-login.
+      path: 'careers',
+      loadChildren: () => import('../career-portal/career-portal.module').then((m) => m.CareerPortalModule),
+    },
+    {
       path: 'hiring-pipeline',
       loadChildren: () => import('./hiring-pipeline-management/hiring-pipeline-management.module').then((m) => m.HiringPipelineManagementModule),
     },
@@ -77,6 +84,10 @@ const routes: Routes = [
     {
       path: 'exam-venues',
       loadChildren: () => import('./exam-venue-management/exam-venue-management.module').then((m) => m.ExamVenueManagementModule),
+    },
+    {
+      path: 'application-settings',
+      loadChildren: () => import('./application-settings-management/application-settings-management.module').then((m) => m.ApplicationSettingsManagementModule),
     },
   ]),
 ];

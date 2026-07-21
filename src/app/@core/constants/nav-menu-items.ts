@@ -97,6 +97,13 @@ export const webSidebarMenuItems: IMenuItem[] = [
     icon: 'fa-solid fa-building',
   },
   {
+    href: '/careers',
+    title: 'Browse Careers',
+    active: false,
+    icon: 'fa-solid fa-magnifying-glass',
+    roles: [UserRoleEnum.Candidate],
+  },
+  {
     href: '/candidate-profile',
     title: 'My Profile',
     active: false,
@@ -115,5 +122,12 @@ export const webSidebarMenuItems: IMenuItem[] = [
     title: 'Account Settings',
     active: false,
     icon: 'fa-solid fa-user-gear',
+  },
+  {
+    href: '/application-settings',
+    title: 'Application Settings',
+    active: false,
+    icon: 'fa-solid fa-sliders',
+    roles: [UserRoleEnum.Admin],
   },
 ];
