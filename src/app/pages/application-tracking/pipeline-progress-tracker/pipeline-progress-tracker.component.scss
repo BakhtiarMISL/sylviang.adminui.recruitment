@@ -1,0 +1,122 @@
+.tracker-loading {
+  display: flex;
+}
+
+.no-pipeline {
+  color: var(--text-color-secondary, #6b7280);
+  padding: 1rem 0;
+}
+
+.tracker-row {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.stage-card {
+  flex: 0 0 16rem;
+  border: 1px solid var(--surface-200, #e5e7eb);
+  border-top: 3px solid var(--surface-300, #d1d5db);
+  border-radius: 0.75rem;
+  padding: 0.85rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+
+  &.status-InProgress {
+    border-top-color: #4338ca;
+  }
+
+  &.status-Completed {
+    border-top-color: #15803d;
+    opacity: 0.9;
+  }
+
+  &.status-Rejected {
+    border-top-color: #b91c1c;
+  }
+}
+
+.stage-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.stage-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.stage-type {
+  font-size: 0.75rem;
+  color: var(--text-color-secondary, #6b7280);
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  background: #eef2ff;
+  color: #4338ca;
+  white-space: nowrap;
+}
+
+.status-Completed .status-badge {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.status-Rejected .status-badge {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.stage-field {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+
+  i {
+    color: var(--primary-color, #4338ca);
+  }
+}
+
+.stage-field.notes {
+  white-space: pre-wrap;
+  color: var(--text-color-secondary, #6b7280);
+}
+
+.edit-btn {
+  margin-top: 0.5rem;
+  align-self: flex-start;
+}
+
+.edit-field {
+  margin-top: 0.25rem;
+}
+
+.edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+// PrimeNG's button label/icon otherwise renders white regardless of variant when this
+// component is hosted inside a p-dialog (button's own color themes correctly - only the
+// projected <span>/<i> children don't inherit it there) - white-on-white was invisible.
+:host ::ng-deep {
+  .edit-btn,
+  .edit-actions button {
+    span,
+    i {
+      color: inherit;
+    }
+  }
+}

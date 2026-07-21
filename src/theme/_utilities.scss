@@ -7,7 +7,7 @@
 }
 
 .form-container {
-  @apply grid gap-x-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 rounded-lg p-4 shadow-md mb-4 border dark:border-borderLight/50 bg-light dark:bg-dark;
+  @apply grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 rounded-lg p-4 shadow-md mb-4 border dark:border-borderLight/50 bg-light dark:bg-dark;
 }
 
 .form-section-header {
@@ -33,6 +33,30 @@
 
 .page-container {
   @apply px-5 pt-2 pb-5;
+}
+
+.upload-dropzone {
+  @apply flex items-center gap-3 rounded-lg border-2 border-dashed border-borderLight dark:border-borderDark bg-light dark:bg-dark px-4 py-3 cursor-pointer transition-colors hover:border-primary hover:bg-primary/5;
+
+  i {
+    @apply text-2xl text-primary;
+  }
+
+  &.disabled {
+    @apply pointer-events-none cursor-not-allowed opacity-60;
+  }
+}
+
+.upload-dropzone-text {
+  @apply flex flex-col leading-tight;
+
+  strong {
+    @apply text-sm font-medium text-black dark:text-white;
+  }
+
+  small {
+    @apply text-xs text-neutral;
+  }
 }
 
 .table-container {

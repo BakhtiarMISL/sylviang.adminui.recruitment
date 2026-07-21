@@ -1,0 +1,80 @@
+<div class="tracker">
+  <div *ngIf="loading" class="tracker-loading">
+    <p-skeleton height="8rem" width="16rem" styleClass="mr-3"></p-skeleton>
+    <p-skeleton height="8rem" width="16rem" styleClass="mr-3"></p-skeleton>
+    <p-skeleton height="8rem" width="16rem"></p-skeleton>
+  </div>
+
+  <div class="invalid" *ngIf="!loading && loadError">{{ loadError }}</div>
+
+  <div class="no-pipeline" *ngIf="!loading && !loadError && progress && !progress.hasPipeline">No hiring pipeline is configured for this job posting.</div>
+
+  <div class="tracker-row" *ngIf="!loading && !loadError && progress && progress.hasPipeline">
+    <div class="stage-card" *ngFor="let stage of progress.stages" [ngClass]="'status-' + stage.status">
+      <div class="stage-card-header">
+        <span class="stage-name">{{ stage.stageName }}</span>
+        <span class="status-badge">{{ formatEnumLabel(stage.status) }}</span>
+      </div>
+      <div class="stage-type">{{ formatEnumLabel(stage.stageType) }}</div>
+
+      <ng-container *ngIf="editingStageId !== stage.pipelineStageId">
+        <div class="stage-field" *ngIf="stage.scheduledDate">
+          <i class="fa-solid fa-calendar-days"></i>
+          <span>{{ stage.scheduledDate | date: 'dd-MMM-yyyy, h:mm a' }}</span>
+        </div>
+        <div class="stage-field" *ngIf="stage.meetingLink">
+          <i class="fa-solid fa-link"></i>
+          <a [href]="stage.meetingLink" target="_blank" rel="noopener">Join link</a>
+        </div>
+        <div class="stage-field notes" *ngIf="stage.notes">{{ stage.notes }}</div>
+        <div class="stage-field text-sm text-neutral" *ngIf="stage.lastUpdatedByUserName">Last updated by {{ stage.lastUpdatedByUserName }}</div>
+
+        <button pButton type="button" class="p-button-outlined p-button-sm edit-btn" (click)="startEdit(stage)">
+          <i class="fa fa-pen"></i>
+          <span>Update</span>
+        </button>
+      </ng-container>
+
+      <ng-container *ngIf="editingStageId === stage.pipelineStageId && editState">
+        <div class="edit-field">
+          <p-floatlabel variant="in">
+            <p-select
+              [inputId]="'status-' + stage.pipelineStageId"
+              [options]="statusOptions"
+              [(ngModel)]="editState.status"
+              optionLabel="label"
+              optionValue="value"
+              [appendTo]="'body'"
+              [autoDisplayFirst]="false"
+              class="w-full"
+            ></p-select>
+            <label [for]="'status-' + stage.pipelineStageId">Status</label>
+          </p-floatlabel>
+        </div>
+
+        <div class="edit-field">
+          <p-floatlabel variant="in">
+            <p-datepicker [inputId]="'date-' + stage.pipelineStageId" [(ngModel)]="editState.scheduledDate" [showTime]="true" hourFormat="12" dateFormat="dd-M-yy" [showIcon]="true" class="w-full"></p-datepicker>
+            <label [for]="'date-' + stage.pipelineStageId">Scheduled Date</label>
+          </p-floatlabel>
+        </div>
+
+        <div class="edit-field">
+          <p-floatlabel variant="in">
+            <input type="text" pInputText [id]="'link-' + stage.pipelineStageId" [(ngModel)]="editState.meetingLink" class="w-full" />
+            <label [for]="'link-' + stage.pipelineStageId">Meeting Link</label>
+          </p-floatlabel>
+        </div>
+
+        <div class="edit-field">
+          <textarea pInputText [(ngModel)]="editState.notes" rows="2" class="w-full" maxlength="1000" placeholder="Notes"></textarea>
+        </div>
+
+        <div class="edit-actions">
+          <button pButton type="button" class="p-button-secondary p-button-sm" [disabled]="saving" (click)="cancelEdit()">Cancel</button>
+          <button pButton type="button" class="p-button-sm" [disabled]="saving" (click)="saveEdit(stage)">Save</button>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</div>

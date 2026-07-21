@@ -1,0 +1,149 @@
+<section class="page-container">
+  <form [formGroup]="filterForm" (ngSubmit)="onSubmit()">
+    <div class="table-container mb-4 p-4">
+      <h3 class="table-title mb-3">{{ isEditMode ? 'Edit Filter' : 'Add Filter' }}</h3>
+
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <p-floatlabel variant="in">
+          <input pInputText id="name" class="w-full" formControlName="name" />
+          <label for="name">Filter Name</label>
+        </p-floatlabel>
+        <small class="text-red-500" *ngIf="hasError('name')">Filter name is required.</small>
+
+        <p-floatlabel variant="in">
+          <p-select inputId="combineWith" class="w-full" [options]="combinatorOptions" formControlName="combineWith" optionLabel="label" optionValue="value" [appendTo]="'body'" [autoDisplayFirst]="false"></p-select>
+          <label for="combineWith">Criteria Logic</label>
+        </p-floatlabel>
+
+        <p-floatlabel variant="in" class="sm:col-span-2">
+          <textarea pTextarea id="description" class="w-full" formControlName="description" rows="1"></textarea>
+          <label for="description">Description</label>
+        </p-floatlabel>
+      </div>
+    </div>
+
+    <div class="table-container p-4">
+      <div class="mb-3 flex items-center justify-between">
+        <h3 class="table-title">Criteria</h3>
+        <button pButton type="button" severity="secondary" (click)="addCriterion()">
+          <i class="fa fa-plus"></i>
+          <span>Add Criterion</span>
+        </button>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <div *ngFor="let criterion of criteria; let i = index" class="rounded-lg border border-gray-200 bg-white dark:border-neutral dark:bg-dark">
+          <div class="flex cursor-pointer items-center gap-3 p-3" (click)="toggleCriterionExpanded(i)">
+            <span class="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 text-xs font-semibold text-blue-700">{{ i + 1 }}</span>
+            <div class="flex-1">
+              <span class="font-medium text-gray-900 dark:text-white">{{ criterion.criterionType }}</span>
+              <span class="ml-2 text-xs text-red-500" *ngIf="formSubmitted && criterionIsInvalid(criterion)">Missing required value</span>
+            </div>
+            <button pButton type="button" severity="danger" text="true" (click)="removeCriterion(i); $event.stopPropagation()">
+              <i class="fa fa-trash"></i>
+            </button>
+            <i class="fa" [ngClass]="expandedCriterionIndex === i ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+          </div>
+
+          <div *ngIf="expandedCriterionIndex === i" class="grid grid-cols-1 gap-3 border-t border-gray-100 p-4 sm:grid-cols-2 lg:grid-cols-3" (click)="$event.stopPropagation()">
+            <p-floatlabel variant="in">
+              <p-select [inputId]="'criterionType' + i" class="w-full" [(ngModel)]="criterion.criterionType" [ngModelOptions]="{ standalone: true }" [options]="criterionTypeOptions" optionLabel="label" optionValue="value" [appendTo]="'body'" [autoDisplayFirst]="false"></p-select>
+              <label [for]="'criterionType' + i">Criterion Type</label>
+            </p-floatlabel>
+
+            <ng-container [ngSwitch]="criterion.criterionType">
+              <p-floatlabel variant="in" *ngSwitchCase="CriterionTypeEnum.EducationLevel">
+                <p-select [inputId]="'minEducationLevel' + i" class="w-full" [(ngModel)]="criterion.minEducationLevel" [ngModelOptions]="{ standalone: true }" [options]="educationLevelOptions" optionLabel="label" optionValue="value" [appendTo]="'body'" [autoDisplayFirst]="false"></p-select>
+                <label [for]="'minEducationLevel' + i">Minimum Education Level</label>
+              </p-floatlabel>
+
+              <p-floatlabel variant="in" *ngSwitchCase="CriterionTypeEnum.MinExperienceYears">
+                <p-inputnumber [inputId]="'minExperienceYears' + i" class="w-full" [(ngModel)]="criterion.minExperienceYears" [ngModelOptions]="{ standalone: true }" [min]="0" suffix=" yrs"></p-inputnumber>
+                <label [for]="'minExperienceYears' + i">Minimum Experience Years</label>
+              </p-floatlabel>
+
+              <p-floatlabel variant="in" class="sm:col-span-2" *ngSwitchCase="CriterionTypeEnum.RequiredSkills">
+                <p-multiSelect
+                  [inputId]="'requiredSkills' + i"
+                  class="w-full"
+                  [options]="skillLibrary"
+                  [ngModel]="criterion.selectedSkills"
+                  (ngModelChange)="onRequiredSkillsChange(criterion, $event)"
+                  [ngModelOptions]="{ standalone: true }"
+                  optionLabel="name"
+                  optionValue="name"
+                  [appendTo]="'body'"
+                  display="chip"
+                ></p-multiSelect>
+                <label [for]="'requiredSkills' + i">Required Skills</label>
+              </p-floatlabel>
+
+              <ng-container *ngSwitchCase="CriterionTypeEnum.AgeRange">
+                <p-floatlabel variant="in">
+                  <p-inputnumber [inputId]="'minAge' + i" class="w-full" [(ngModel)]="criterion.minAge" [ngModelOptions]="{ standalone: true }" [min]="0"></p-inputnumber>
+                  <label [for]="'minAge' + i">Minimum Age</label>
+                </p-floatlabel>
+                <p-floatlabel variant="in">
+                  <p-inputnumber [inputId]="'maxAge' + i" class="w-full" [(ngModel)]="criterion.maxAge" [ngModelOptions]="{ standalone: true }" [min]="0"></p-inputnumber>
+                  <label [for]="'maxAge' + i">Maximum Age</label>
+                </p-floatlabel>
+              </ng-container>
+
+              <p-floatlabel variant="in" *ngSwitchCase="CriterionTypeEnum.District">
+                <input pInputText [id]="'requiredDistrict' + i" class="w-full" [(ngModel)]="criterion.requiredDistrict" [ngModelOptions]="{ standalone: true }" />
+                <label [for]="'requiredDistrict' + i">Location / District</label>
+              </p-floatlabel>
+
+              <p-floatlabel variant="in" *ngSwitchCase="CriterionTypeEnum.MinScreeningScore">
+                <p-inputnumber [inputId]="'minScreeningScore' + i" class="w-full" [(ngModel)]="criterion.minScreeningScore" [ngModelOptions]="{ standalone: true }" [min]="0" [max]="100"></p-inputnumber>
+                <label [for]="'minScreeningScore' + i">Minimum Screening Score</label>
+              </p-floatlabel>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="criteria.length === 0" class="not-found">
+        <i class="fa fa-magnifying-glass-minus"></i>
+        <p>No criteria yet — add at least one.</p>
+      </div>
+    </div>
+
+    <small class="mt-3 block text-red-500" *ngIf="errorMessage">{{ errorMessage }}</small>
+
+    <div class="mt-4 flex gap-2">
+      <button pButton type="submit">
+        <i class="fa fa-save"></i>
+        <span>{{ isEditMode ? 'Save Changes' : 'Create Filter' }}</span>
+      </button>
+      <button pButton type="button" severity="secondary" [routerLink]="['/shortlist-filters/shortlist-filter-list']">
+        <span>Cancel</span>
+      </button>
+    </div>
+  </form>
+
+  <div class="table-container mt-4 p-4">
+    <h3 class="table-title mb-3">Preview</h3>
+    <p class="mb-3 text-sm text-gray-500">See how many of a job posting's current applications would pass this filter, before you apply it anywhere.</p>
+
+    <div class="flex flex-wrap items-end gap-3">
+      <p-floatlabel variant="in" class="min-w-[16rem]">
+        <p-select inputId="previewJobPosting" class="w-full" [options]="jobPostings" [(ngModel)]="previewJobPostingId" [ngModelOptions]="{ standalone: true }" optionLabel="title" optionValue="jobPostingId" [appendTo]="'body'" [autoDisplayFirst]="false" [showClear]="true"></p-select>
+        <label for="previewJobPosting">Job Posting</label>
+      </p-floatlabel>
+
+      <button pButton type="button" severity="secondary" [disabled]="previewLoading" (click)="runPreview()">
+        <i class="fa fa-eye"></i>
+        <span>{{ previewLoading ? 'Checking...' : 'Preview' }}</span>
+      </button>
+    </div>
+
+    <small class="mt-2 block text-red-500" *ngIf="previewError">{{ previewError }}</small>
+
+    <div class="mt-3" *ngIf="previewResult">
+      <span class="rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-700">
+        {{ previewResult.passingCount }} of {{ previewResult.totalApplications }} applications would pass
+      </span>
+    </div>
+  </div>
+</section>

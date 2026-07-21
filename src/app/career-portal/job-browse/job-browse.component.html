@@ -1,0 +1,166 @@
+<app-public-sidebar></app-public-sidebar>
+
+<div class="min-h-screen bg-gray-50 px-4 py-8 pl-24 sm:px-8 lg:pl-8 lg:ml-60">
+  <div class="mx-auto max-w-5xl">
+    <header class="mb-6">
+      <h1 class="text-2xl font-semibold text-gray-900">Career Opportunities</h1>
+      <p class="text-sm text-gray-600">Browse our open positions and apply online.</p>
+    </header>
+
+    <!-- Filters -->
+    <div class="grid grid-cols-1 gap-3 mb-4 sm:grid-cols-2 lg:grid-cols-5">
+      <p-floatlabel variant="in">
+        <input type="text" pInputText id="searchTerm" class="w-full" [(ngModel)]="searchTerm" name="searchTerm" (keyup.enter)="applyFilters()" />
+        <label for="searchTerm" class="whitespace-nowrap">Keyword</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="in">
+        <input type="text" pInputText id="location" class="w-full" [(ngModel)]="location" name="location" (keyup.enter)="applyFilters()" />
+        <label for="location" class="whitespace-nowrap">Location</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="in">
+        <p-inputnumber inputId="departmentId" class="w-full" [(ngModel)]="departmentId" name="departmentId" [useGrouping]="false"></p-inputnumber>
+        <label for="departmentId" class="whitespace-nowrap">Department ID</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="in">
+        <p-select
+          inputId="employmentType"
+          class="w-full"
+          [options]="employmentTypeOptions"
+          [(ngModel)]="employmentType"
+          name="employmentType"
+          optionLabel="label"
+          optionValue="value"
+          [appendTo]="'body'"
+          [autoDisplayFirst]="false"
+          [showClear]="true"
+        ></p-select>
+        <label for="employmentType" class="whitespace-nowrap">Employment Type</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="in">
+        <p-select
+          inputId="maxExperienceYears"
+          class="w-full"
+          [options]="experienceBucketOptions"
+          [(ngModel)]="maxExperienceYears"
+          name="maxExperienceYears"
+          optionLabel="label"
+          optionValue="value"
+          [appendTo]="'body'"
+          [autoDisplayFirst]="false"
+          [showClear]="true"
+        ></p-select>
+        <label for="maxExperienceYears" class="whitespace-nowrap">Experience</label>
+      </p-floatlabel>
+
+      <div class="flex items-end gap-2 lg:col-span-5">
+        <button pButton (click)="applyFilters()">
+          <i class="fa fa-search"></i>
+          <span>Search</span>
+        </button>
+
+        <button pButton severity="secondary" (click)="resetFilters()">
+          <i class="fa fa-times"></i>
+          <span>Reset</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Job Postings Table -->
+    <div class="table-container">
+      <div class="table-title-container">
+        <h3 class="table-title">
+          Open Positions
+          <span class="table-title-info" *ngIf="totalRecords > 0">({{ totalRecords }} total)</span>
+        </h3>
+      </div>
+
+      <div class="transition-all duration-500 ease-in-out">
+        <p-table
+          #dt
+          [value]="loading ? skeletonItems : jobPostings"
+          dataKey="jobPostingId"
+          (onSort)="onSort($event)"
+          [paginator]="true"
+          [rows]="rows"
+          [first]="(currentPage - 1) * rows"
+          [rowsPerPageOptions]="UI_CONFIG.pageSizeOptions"
+          [totalRecords]="totalRecords"
+          (onPage)="onPageChange($event)"
+          [lazy]="true"
+          [loading]="false"
+          scrollHeight="flex"
+          [responsiveLayout]="'scroll'"
+          [showCurrentPageReport]="true"
+          currentPageReportTemplate="Showing {first} to {last} of {totalRecords} open positions"
+        >
+          <ng-template pTemplate="header">
+            <tr>
+              @for (col of columns; track col.field) {
+                <th [pSortableColumn]="col.sortable !== false ? col.field : null" [style.width]="col.width" class="group">
+                  <div class="flex items-center gap-2">
+                    {{ col.label }}
+                    @if (col.sortable !== false) {
+                      <span
+                        class="transition-opacity duration-150"
+                        [ngClass]="{
+                          'opacity-100': sortedColumn === col.field,
+                          'opacity-0 group-hover:opacity-100': sortedColumn !== col.field,
+                        }"
+                      >
+                        <p-sortIcon [field]="col.field"></p-sortIcon>
+                      </span>
+                    }
+                  </div>
+                </th>
+              }
+              <th style="width: 6rem">Actions</th>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="body" let-job>
+            @if (loading) {
+              <tr>
+                <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+                <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+                <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+                <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+                <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+                <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+                <td><p-skeleton width="3rem" height="1rem"></p-skeleton></td>
+              </tr>
+            } @else {
+              <tr>
+                <td>{{ job.jobPostingCode }}</td>
+                <td>{{ job.title }}</td>
+                <td>{{ formatEnumLabel(job.employmentType) }}</td>
+                <td>{{ job.location || '-' }}</td>
+                <td>{{ job.postingDate ? (job.postingDate | date: 'dd-MMM-yyyy') : '-' }}</td>
+                <td>{{ job.closingDate ? (job.closingDate | date: 'dd-MMM-yyyy') : '-' }}</td>
+                <td>
+                  <button [routerLink]="['/careers/jobs', job.jobPostingId]" class="text-primary">
+                    <i class="fa fa-eye"></i>
+                  </button>
+                </td>
+              </tr>
+            }
+          </ng-template>
+
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="7" class="not-found">
+                <div>
+                  <i class="fa fa-magnifying-glass-minus"></i>
+                  <p>No open positions found</p>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </div>
+  </div>
+</div>

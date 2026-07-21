@@ -1,0 +1,39 @@
+<app-public-sidebar></app-public-sidebar>
+
+<div class="login-page pl-20 lg:pl-60">
+  <div class="login-card" *ngIf="registered">
+    <h1 class="login-title">Check your email</h1>
+    <p class="login-subtitle" *ngIf="requiresEmailVerification">We've sent a verification link to your email. Verify it, then log in.</p>
+    <p class="login-subtitle" *ngIf="!requiresEmailVerification">Your account is ready — log in to continue.</p>
+    <p-button label="Go to Login" (onClick)="goToLogin()" styleClass="w-full"></p-button>
+  </div>
+
+  <form class="login-card" [formGroup]="form" (ngSubmit)="onSubmit()" *ngIf="!registered">
+    <h1 class="login-title">Create your account</h1>
+    <p class="login-subtitle">Register to apply for jobs and track your applications</p>
+
+    <div class="login-field">
+      <label for="fullName">Full Name</label>
+      <input id="fullName" type="text" pInputText formControlName="fullName" autocomplete="name" />
+      <small class="login-error" *ngIf="fullName?.invalid && fullName?.touched">Full name is required.</small>
+    </div>
+
+    <div class="login-field">
+      <label for="email">Email</label>
+      <input id="email" type="email" pInputText formControlName="email" autocomplete="email" />
+      <small class="login-error" *ngIf="email?.errors?.['required'] && email?.touched">Email is required.</small>
+      <small class="login-error" *ngIf="email?.errors?.['email'] && email?.touched">Enter a valid email address.</small>
+    </div>
+
+    <div class="login-field">
+      <label for="password">Password</label>
+      <input id="password" type="password" pInputText formControlName="password" autocomplete="new-password" />
+      <small class="login-error" *ngIf="password?.errors?.['required'] && password?.touched">Password is required.</small>
+      <small class="login-error" *ngIf="password?.errors?.['minlength'] && password?.touched">Password must be at least 8 characters.</small>
+    </div>
+
+    <p-button type="submit" label="Create Account" [loading]="isSubmitting" [disabled]="isSubmitting" styleClass="w-full"></p-button>
+
+    <p class="login-subtitle">Already have an account? <a routerLink="/login" class="text-primary font-medium hover:underline">Login</a></p>
+  </form>
+</div>

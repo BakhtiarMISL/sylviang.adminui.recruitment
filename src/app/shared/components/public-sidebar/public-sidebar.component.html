@@ -1,0 +1,17 @@
+<nav class="fixed inset-y-0 left-0 z-40 flex h-screen w-20 flex-col items-center bg-light py-8 shadow-lg dark:bg-dark lg:w-60 lg:items-stretch lg:px-4">
+  <div class="mb-8 flex justify-center lg:justify-start">
+    <img alt="Logo" class="w-10 rounded-lg lg:w-14" src="assets/images/sylvia_logo.png" />
+  </div>
+
+  <div class="flex flex-col gap-1">
+    <a
+      *ngFor="let item of navItems"
+      [routerLink]="[item.link]"
+      routerLinkActive="bg-blue-50 text-blue-600"
+      class="flex items-center justify-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 lg:justify-start"
+    >
+      <i [class]="item.icon"></i>
+      <span class="hidden lg:inline">{{ item.label }}</span>
+    </a>
+  </div>
+</nav>

@@ -1,39 +1,102 @@
 <section class="page-container">
-  <div class="welcome-message">
-    <div class="flex flex-col items-center justify-center gap-4 py-16">
-      <div class="flex items-center justify-center w-20 h-20 rounded-full bg-primary/10">
-        <i class="fa-solid fa-chart-line text-4xl text-primary"></i>
-      </div>
-      <h1 class="text-2xl font-bold text-dark dark:text-white">Welcome to Sylvia NG</h1>
-      <p class="text-neutral dark:text-white/60 text-center max-w-md">
-        Use the sidebar to navigate to Attendance or Payroll management modules.
+  <div class="dashboard-header">
+    <div class="flex items-center justify-center w-16 h-16 rounded-full bg-primary/10">
+      <i class="fa-solid fa-chart-line text-3xl text-primary"></i>
+    </div>
+    <div>
+      <h1 class="text-2xl font-bold text-dark dark:text-white">Welcome back, {{ displayName }}</h1>
+      <p class="text-neutral dark:text-white/60">
+        <span *ngIf="role === UserRoleEnum.Admin">Administrator dashboard</span>
+        <span *ngIf="role === UserRoleEnum.HR">HR dashboard</span>
+        <span *ngIf="role === UserRoleEnum.Candidate">Your recruitment overview</span>
       </p>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 w-full max-w-xl">
-        <a
-          routerLink="/attendance/shift-list"
-          class="flex items-center gap-4 p-4 rounded-xl border border-borderLight dark:border-borderDark bg-light dark:bg-dark hover:border-primary hover:shadow-md transition-all duration-200 group cursor-pointer"
-        >
-          <div class="flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
-            <i class="fa-solid fa-clock text-xl text-primary"></i>
-          </div>
-          <div>
-            <p class="font-semibold text-dark dark:text-white">Attendance</p>
-            <p class="text-sm text-neutral dark:text-white/50">Manage shifts &amp; schedules</p>
-          </div>
-        </a>
-        <a
-          routerLink="/payroll/payroll-head-list"
-          class="flex items-center gap-4 p-4 rounded-xl border border-borderLight dark:border-borderDark bg-light dark:bg-dark hover:border-primary hover:shadow-md transition-all duration-200 group cursor-pointer"
-        >
-          <div class="flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
-            <i class="fa-solid fa-money-bill-wave text-xl text-primary"></i>
-          </div>
-          <div>
-            <p class="font-semibold text-dark dark:text-white">Payroll</p>
-            <p class="text-sm text-neutral dark:text-white/50">Manage payroll heads</p>
-          </div>
-        </a>
+    </div>
+  </div>
+
+  <!-- Admin / HR: recruitment stats -->
+  <div class="stat-grid" *ngIf="role === UserRoleEnum.Admin || role === UserRoleEnum.HR">
+    <div class="stat-card" *ngIf="loading">
+      <p-skeleton height="4rem"></p-skeleton>
+    </div>
+    <ng-container *ngIf="!loading">
+      <div class="stat-card">
+        <div class="stat-icon bg-primary/10"><i class="fa-solid fa-briefcase text-primary"></i></div>
+        <div>
+          <p class="stat-value">{{ summary?.openJobPostingsCount ?? 0 }}</p>
+          <p class="stat-label">Open Job Postings</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon bg-primary/10"><i class="fa-solid fa-users text-primary"></i></div>
+        <div>
+          <p class="stat-value">{{ summary?.totalApplicationsCount ?? 0 }}</p>
+          <p class="stat-label">Total Applications</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon bg-primary/10"><i class="fa-solid fa-diagram-project text-primary"></i></div>
+        <div>
+          <p class="stat-value">{{ summary?.activeHiringPipelinesCount ?? 0 }}</p>
+          <p class="stat-label">Active Hiring Pipelines</p>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+
+  <!-- Candidate: profile completeness -->
+  <div class="form-container" *ngIf="role === UserRoleEnum.Candidate">
+    <div class="sm:col-span-2" *ngIf="loading">
+      <p-skeleton height="3rem"></p-skeleton>
+    </div>
+    <div class="sm:col-span-2 profile-completeness-card" *ngIf="!loading">
+      <app-completeness-ring [percentage]="summary?.profileCompletenessPercentage ?? 0"></app-completeness-ring>
+      <div class="profile-completeness-text">
+        <span class="profile-completeness-title">Profile completeness</span>
+        <a routerLink="/candidate-profile" class="text-sm text-primary hover:underline">Complete your profile &rarr;</a>
       </div>
     </div>
+  </div>
+
+  <!-- Quick links (role-scoped) -->
+  <div class="quick-links-grid">
+    <a *ngIf="role === UserRoleEnum.Admin || role === UserRoleEnum.HR" routerLink="/job-vacancy/job-vacancy-list" class="quick-link-card">
+      <div class="quick-link-icon"><i class="fa-solid fa-briefcase text-xl text-primary"></i></div>
+      <div>
+        <p class="font-semibold text-dark dark:text-white">Recruitment</p>
+        <p class="text-sm text-neutral dark:text-white/50">Manage job vacancies &amp; hiring pipelines</p>
+      </div>
+    </a>
+
+    <a *ngIf="role === UserRoleEnum.Admin || role === UserRoleEnum.HR" routerLink="/hiring-pipeline/hiring-pipeline-list" class="quick-link-card">
+      <div class="quick-link-icon"><i class="fa-solid fa-diagram-project text-xl text-primary"></i></div>
+      <div>
+        <p class="font-semibold text-dark dark:text-white">Hiring Pipelines</p>
+        <p class="text-sm text-neutral dark:text-white/50">Configure interview stages</p>
+      </div>
+    </a>
+
+    <a routerLink="/internal-jobs/job-list" class="quick-link-card">
+      <div class="quick-link-icon"><i class="fa-solid fa-building text-xl text-primary"></i></div>
+      <div>
+        <p class="font-semibold text-dark dark:text-white">Internal Job Board</p>
+        <p class="text-sm text-neutral dark:text-white/50">Manage internal job postings</p>
+      </div>
+    </a>
+
+    <a *ngIf="role === UserRoleEnum.Candidate" routerLink="/candidate-profile" class="quick-link-card">
+      <div class="quick-link-icon"><i class="fa-solid fa-id-card text-xl text-primary"></i></div>
+      <div>
+        <p class="font-semibold text-dark dark:text-white">My Profile</p>
+        <p class="text-sm text-neutral dark:text-white/50">Personal info, education, skills &amp; more</p>
+      </div>
+    </a>
+
+    <a routerLink="/account-settings" class="quick-link-card">
+      <div class="quick-link-icon"><i class="fa-solid fa-user-gear text-xl text-primary"></i></div>
+      <div>
+        <p class="font-semibold text-dark dark:text-white">Account Settings</p>
+        <p class="text-sm text-neutral dark:text-white/50">Email, password &amp; profile photo</p>
+      </div>
+    </a>
   </div>
 </section>
