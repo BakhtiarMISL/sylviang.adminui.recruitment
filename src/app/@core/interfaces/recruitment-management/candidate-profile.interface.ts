@@ -16,8 +16,34 @@ export interface ICandidateProfilePersonalInfoUpdateRequest {
 export interface ICandidateProfileContactUpdateRequest {
   email: string;
   phone?: string | null;
-  presentAddress?: string | null;
-  permanentAddress?: string | null;
+  mobileOperator?: string | null;
+
+  presentDivisionId?: number | null;
+  presentDistrictId?: number | null;
+  presentThanaId?: number | null;
+  presentAddressDetail?: string | null;
+
+  homeDivisionId?: number | null;
+  homeDistrictId?: number | null;
+  homeThanaId?: number | null;
+  permanentAddressDetail?: string | null;
+}
+
+export interface IDivisionResponse {
+  divisionId: number;
+  name: string;
+}
+
+export interface IDistrictResponse {
+  districtId: number;
+  name: string;
+  divisionId: number;
+}
+
+export interface IThanaResponse {
+  thanaId: number;
+  name: string;
+  districtId: number;
 }
 
 export interface ICandidateProfileResponse extends ICandidateProfilePersonalInfoUpdateRequest, ICandidateProfileContactUpdateRequest {

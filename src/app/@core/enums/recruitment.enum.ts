@@ -131,3 +131,12 @@ export enum BloodGroupEnum {
   OPositive = 'OPositive',
   ONegative = 'ONegative',
 }
+
+export enum MobileOperatorEnum {
+  Grameenphone = 'Grameenphone',
+  Banglalink = 'Banglalink',
+  Robi = 'Robi',
+  Airtel = 'Airtel',
+  Teletalk = 'Teletalk',
+  Other = 'Other',
+}
