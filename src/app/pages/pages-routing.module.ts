@@ -27,6 +27,14 @@ const routes: Routes = [
       loadChildren: () => import('./candidate-management/candidate-management.module').then((m) => m.CandidateManagementModule),
     },
     {
+      path: 'cv-bank',
+      loadChildren: () => import('./cv-bank-management/cv-bank-management.module').then((m) => m.CvBankManagementModule),
+    },
+    {
+      path: 'talent-pools',
+      loadChildren: () => import('./talent-pool-management/talent-pool-management.module').then((m) => m.TalentPoolManagementModule),
+    },
+    {
       path: 'internal-jobs',
       loadChildren: () => import('./internal-job-board/internal-job-board.module').then((m) => m.InternalJobBoardModule),
     },
@@ -37,6 +45,18 @@ const routes: Routes = [
     {
       path: 'shortlist-filters',
       loadChildren: () => import('./shortlist-filter-management/shortlist-filter-management.module').then((m) => m.ShortlistFilterManagementModule),
+    },
+    {
+      path: 'assessment-workflow',
+      loadChildren: () => import('./assessment-workflow-management/assessment-workflow-management.module').then((m) => m.AssessmentWorkflowManagementModule),
+    },
+    {
+      path: 'candidate-recommendations',
+      loadChildren: () => import('./candidate-recommendation-management/candidate-recommendation-management.module').then((m) => m.CandidateRecommendationManagementModule),
+    },
+    {
+      path: 'exam-questions',
+      loadChildren: () => import('./exam-question-management/exam-question-management.module').then((m) => m.ExamQuestionManagementModule),
     },
     {
       path: 'applications',
@@ -53,6 +73,14 @@ const routes: Routes = [
     {
       path: 'account-settings',
       loadChildren: () => import('./account-settings-management/account-settings-management.module').then((m) => m.AccountSettingsManagementModule),
+    },
+    {
+      path: 'exam-venues',
+      loadChildren: () => import('./exam-venue-management/exam-venue-management.module').then((m) => m.ExamVenueManagementModule),
+    },
+    {
+      path: 'application-settings',
+      loadChildren: () => import('./application-settings-management/application-settings-management.module').then((m) => m.ApplicationSettingsManagementModule),
     },
   ]),
 ];

@@ -9,23 +9,22 @@
 
   <div>
     <p-floatlabel variant="in">
-      <p-datepicker inputId="dateOfBirth" formControlName="dateOfBirth" dateFormat="dd-M-yy" [showIcon]="true" styleClass="w-full"></p-datepicker>
+      <p-datepicker inputId="dateOfBirth" formControlName="dateOfBirth" dateFormat="dd-M-yy" [showIcon]="true" [appendTo]="'body'" styleClass="w-full"></p-datepicker>
       <label for="dateOfBirth">Date of Birth</label>
     </p-floatlabel>
   </div>
 
   <div>
     <p-floatlabel variant="in">
-      <input pInputText inputId="gender" formControlName="gender" maxlength="20" class="w-full" [class.ng-invalid]="hasError('gender')" [class.ng-dirty]="hasError('gender')" (blur)="f['gender'].markAsTouched()" />
+      <p-select inputId="gender" [options]="genderOptions" [appendTo]="'body'" [autoDisplayFirst]="false" optionLabel="label" optionValue="value" formControlName="gender" class="w-full"></p-select>
       <label for="gender">Gender</label>
     </p-floatlabel>
-    <div *ngIf="hasError('gender')" class="invalid">{{ getErrorMessage('gender') }}</div>
   </div>
 
   <div>
     <p-floatlabel variant="in">
       <input pInputText inputId="nationalId" formControlName="nationalId" maxlength="50" class="w-full" [class.ng-invalid]="hasError('nationalId')" [class.ng-dirty]="hasError('nationalId')" (blur)="f['nationalId'].markAsTouched()" />
-      <label for="nationalId">National ID</label>
+      <label for="nationalId">National ID <i *ngIf="identityFieldsLocked" class="fas fa-lock" pTooltip="Locked because you have a submitted application. Contact HR support to correct this." tooltipPosition="top"></i></label>
     </p-floatlabel>
     <div *ngIf="hasError('nationalId')" class="invalid">{{ getErrorMessage('nationalId') }}</div>
   </div>
@@ -48,33 +47,37 @@
 
   <div>
     <p-floatlabel variant="in">
-      <input pInputText inputId="maritalStatus" formControlName="maritalStatus" maxlength="20" class="w-full" [class.ng-invalid]="hasError('maritalStatus')" [class.ng-dirty]="hasError('maritalStatus')" (blur)="f['maritalStatus'].markAsTouched()" />
+      <p-select inputId="maritalStatus" [options]="maritalStatusOptions" [appendTo]="'body'" [autoDisplayFirst]="false" optionLabel="label" optionValue="value" formControlName="maritalStatus" class="w-full"></p-select>
       <label for="maritalStatus">Marital Status</label>
     </p-floatlabel>
-    <div *ngIf="hasError('maritalStatus')" class="invalid">{{ getErrorMessage('maritalStatus') }}</div>
   </div>
 
   <div>
     <p-floatlabel variant="in">
-      <input pInputText inputId="religion" formControlName="religion" maxlength="50" class="w-full" [class.ng-invalid]="hasError('religion')" [class.ng-dirty]="hasError('religion')" (blur)="f['religion'].markAsTouched()" />
+      <p-select inputId="religion" [options]="religionOptions" [appendTo]="'body'" [autoDisplayFirst]="false" optionLabel="label" optionValue="value" formControlName="religion" class="w-full"></p-select>
       <label for="religion">Religion</label>
     </p-floatlabel>
-    <div *ngIf="hasError('religion')" class="invalid">{{ getErrorMessage('religion') }}</div>
   </div>
 
   <div>
     <p-floatlabel variant="in">
-      <input pInputText inputId="nationality" formControlName="nationality" maxlength="100" class="w-full" [class.ng-invalid]="hasError('nationality')" [class.ng-dirty]="hasError('nationality')" (blur)="f['nationality'].markAsTouched()" />
+      <p-select inputId="nationality" [options]="nationalityOptions" [appendTo]="'body'" [autoDisplayFirst]="false" [filter]="true" filterBy="label" optionLabel="label" optionValue="value" formControlName="nationality" class="w-full"></p-select>
       <label for="nationality">Nationality</label>
     </p-floatlabel>
-    <div *ngIf="hasError('nationality')" class="invalid">{{ getErrorMessage('nationality') }}</div>
+  </div>
+
+  <div>
+    <p-floatlabel variant="in">
+      <p-select inputId="bloodGroup" [options]="bloodGroupOptions" [appendTo]="'body'" [autoDisplayFirst]="false" optionLabel="label" optionValue="value" formControlName="bloodGroup" class="w-full"></p-select>
+      <label for="bloodGroup">Blood Group</label>
+    </p-floatlabel>
   </div>
 
   <div *ngIf="saveError" class="invalid sm:col-span-2">{{ saveError }}</div>
   <div *ngIf="saveSuccess" class="success-message sm:col-span-2">Saved.</div>
 
   <div class="sm:col-span-2">
-    <button pButton type="submit" [disabled]="saving">
+    <button pButton type="submit" [disabled]="saving || form.pristine">
       <i class="fas fa-save"></i>
       <span>{{ saving ? 'Saving...' : 'Save' }}</span>
     </button>

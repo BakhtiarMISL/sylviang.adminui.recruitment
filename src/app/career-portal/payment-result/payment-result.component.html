@@ -1,0 +1,26 @@
+<app-public-navbar></app-public-navbar>
+
+<div class="mx-auto min-h-[calc(100vh-4.5rem)] max-w-md p-6 text-center">
+  <div *ngIf="polling" class="rounded-md bg-blue-50 p-4 text-blue-800">
+    <p class="font-medium">Confirming your payment...</p>
+    <p class="mt-1 text-sm">This usually takes a few seconds. Please don't close this page.</p>
+  </div>
+
+  <div *ngIf="!polling && isSuccess" class="rounded-md bg-green-50 p-4 text-green-800">
+    <p class="font-medium">Payment successful!</p>
+    <p class="mt-1 text-sm" *ngIf="status?.amount">{{ status?.amount }} {{ status?.currency }} received.</p>
+    <p class="mt-2 text-sm text-green-700">Your application has been submitted. Thank you.</p>
+  </div>
+
+  <div *ngIf="!polling && !isSuccess" class="rounded-md bg-red-50 p-4 text-red-800">
+    <p class="font-medium">Payment not completed</p>
+    <p class="mt-1 text-sm" *ngIf="timedOut">We couldn't confirm your payment yet. If you completed checkout, please refresh this page in a moment.</p>
+    <p class="mt-1 text-sm" *ngIf="!timedOut">Your payment {{ hintStatus === 'cancel' ? 'was cancelled' : 'was not successful' }}. Your application is saved - you can try paying again below.</p>
+    <div *ngIf="retryError" class="invalid mt-2">{{ retryError }}</div>
+    <button pButton type="button" class="mt-3" [disabled]="retryingPayment" (click)="retryPayment()">
+      <span>{{ retryingPayment ? 'Starting payment...' : 'Retry Payment' }}</span>
+    </button>
+  </div>
+</div>
+
+<app-public-footer></app-public-footer>

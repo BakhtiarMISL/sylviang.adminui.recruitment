@@ -1,0 +1,50 @@
+<section class="page-container">
+  <div class="flex justify-between items-center gap-3 mb-4">
+    <h3 class="table-title">Final Selection Recommendations</h3>
+  </div>
+
+  <div *ngIf="loading" class="space-y-3">
+    <p-skeleton height="5rem" *ngFor="let i of skeletonItems"></p-skeleton>
+  </div>
+
+  <div *ngIf="!loading && pending.length === 0" class="table-container">
+    <div class="not-found">
+      <i class="fa fa-magnifying-glass-minus"></i>
+      <p>No recommendations pending review.</p>
+    </div>
+  </div>
+
+  <div *ngIf="!loading" class="grid grid-cols-1 gap-4">
+    <div *ngFor="let item of pending" class="rounded-lg bg-white p-4 shadow-sm dark:bg-dark">
+      <div class="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
+        <div>
+          <h4 class="text-lg font-medium text-gray-900 dark:text-white">{{ item.candidateName }}</h4>
+          <p class="text-sm text-gray-600 dark:text-gray-300" *ngIf="item.jobPostingTitle">{{ item.jobPostingTitle }}</p>
+          <p class="mt-1 text-sm text-gray-500">Recommended by {{ item.recommendedByUserName }} on {{ item.recommendedAt | date: 'dd-MMM-yyyy' }}</p>
+          <p class="mt-2 text-sm text-gray-700 dark:text-gray-200">{{ item.justification }}</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <button pButton severity="success" (click)="openAccept(item)">
+            <i class="fa fa-check"></i>
+            <span>Accept</span>
+          </button>
+          <button pButton severity="danger" (click)="openReject(item)">
+            <i class="fa fa-times"></i>
+            <span>Reject</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<p-dialog [header]="reviewingStatus === 'Accepted' ? 'Accept Recommendation' : 'Reject Recommendation'" [(visible)]="reviewDialogVisible" [modal]="true" [style]="{ width: '28rem', maxWidth: '95vw' }">
+  <div class="review-form">
+    <textarea pInputText [(ngModel)]="reviewComments" rows="3" class="w-full" maxlength="2000" placeholder="Comments (optional)"></textarea>
+    <div class="review-actions">
+      <button pButton severity="secondary" [disabled]="reviewing" (click)="cancelReview()">Cancel</button>
+      <button pButton [disabled]="reviewing" (click)="confirmReview()">Confirm</button>
+    </div>
+  </div>
+</p-dialog>

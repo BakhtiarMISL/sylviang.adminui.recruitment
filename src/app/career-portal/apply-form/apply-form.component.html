@@ -1,7 +1,23 @@
-<div *ngIf="submitted" class="rounded-md bg-green-50 p-4 text-green-800">
+<div *ngIf="submitted && !paymentPending" class="rounded-md bg-green-50 p-4 text-green-800">
   <p class="font-medium">Application submitted successfully!</p>
   <p class="mt-1 text-sm" *ngIf="submitResult">Reference: application #{{ submitResult.jobApplicationId }}</p>
   <p class="mt-2 text-sm text-green-700">We have received your application. Please keep your reference number for your records.</p>
+  <div class="mt-3 border-t border-green-200 pt-3">
+    <p class="text-sm text-green-700">Create an account to track this application's status and apply faster next time.</p>
+    <a [routerLink]="['/register']" [queryParams]="{ fullName: f['candidateName'].value, email: f['candidateEmail'].value }" pButton type="button" class="mt-2 p-button-outlined">
+      <span>Create Account</span>
+    </a>
+  </div>
+</div>
+
+<div *ngIf="submitted && paymentPending" class="rounded-md bg-amber-50 p-4 text-amber-800">
+  <p class="font-medium">Application saved, but payment couldn't start.</p>
+  <p class="mt-1 text-sm" *ngIf="submitResult">Reference: application #{{ submitResult.jobApplicationId }}</p>
+  <p class="mt-2 text-sm">An application fee is required for this position. We couldn't reach the payment gateway just now - please try again below.</p>
+  <div *ngIf="retryError" class="invalid mt-2">{{ retryError }}</div>
+  <button pButton type="button" class="mt-3" [disabled]="retryingPayment" (click)="retryPayment()">
+    <span>{{ retryingPayment ? 'Starting payment...' : 'Retry Payment' }}</span>
+  </button>
 </div>
 
 <form *ngIf="!submitted" [formGroup]="applyForm" (ngSubmit)="onSubmit()" class="space-y-4">
@@ -50,8 +66,17 @@
 
   <div *ngIf="submitError" class="invalid">{{ submitError }}</div>
 
+  <!-- US-024 AC4: re-show the eligibility warning at confirmation time, require acknowledgement -->
+  <div *ngIf="needsAcknowledgement" class="rounded-md bg-amber-50 p-3 text-sm text-amber-800">
+    <p><i class="fa fa-triangle-exclamation mr-1"></i>You do not meet the following requirements: {{ eligibilityResult!.unmetRequirements.join(', ') }}</p>
+    <label class="mt-2 flex items-start gap-2">
+      <input type="checkbox" [(ngModel)]="acknowledgedIneligibility" [ngModelOptions]="{ standalone: true }" class="mt-0.5" />
+      <span>I understand I may not meet all eligibility requirements and wish to apply anyway.</span>
+    </label>
+  </div>
+
   <div>
-    <button pButton type="submit" [disabled]="submitting">
+    <button pButton type="submit" [disabled]="submitting || applyForm.pristine || (needsAcknowledgement && !acknowledgedIneligibility)">
       <i class="fa fa-paper-plane"></i>
       <span>{{ submitting ? 'Submitting...' : 'Submit Application' }}</span>
     </button>
