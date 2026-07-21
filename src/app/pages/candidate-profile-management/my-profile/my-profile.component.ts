@@ -127,7 +127,7 @@ export class MyProfileComponent implements OnInit {
   // Prefills every section's form/suggestions from the parsed resume. Nothing is persisted here
   // — each section still requires its own explicit Save (or "Use"/"Use All" for list sections).
   private applyResumePrefill(parsed: ICandidateResumeParseResponse): void {
-    this.personalInfoSection?.applyPrefill(parsed.fullName, parsed.dateOfBirth, parsed.gender);
+    this.personalInfoSection?.applyPrefill(parsed.fullName, parsed.dateOfBirth, parsed.gender, parsed.religion, parsed.maritalStatus);
     this.contactSection?.applyPrefill(parsed.email, parsed.phone, parsed.presentAddress);
     this.educationSection?.stagePrefill(parsed.educations);
     this.workExperienceSection?.stagePrefill(parsed.workExperiences);
