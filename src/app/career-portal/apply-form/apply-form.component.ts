@@ -1,7 +1,8 @@
 import { Component, Input } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { IJobApplicationSubmitResponse } from '@app/@core/interfaces/recruitment-management/career-portal.interface';
+import { IJobApplicationSubmitResponse, IJobEligibilityResponse } from '@app/@core/interfaces/recruitment-management/career-portal.interface';
 import { CareerPortalService } from '@app/@core/services/recruitment/career-portal/career-portal.service';
+import { PaymentService } from '@app/@core/services/recruitment/payment/payment.service';
 import { RESUME_ALLOWED_EXTENSIONS, RESUME_MAX_SIZE_BYTES } from '../career-portal.constants';
 
 @Component({
@@ -12,10 +13,18 @@ import { RESUME_ALLOWED_EXTENSIONS, RESUME_MAX_SIZE_BYTES } from '../career-port
 })
 export class ApplyFormComponent {
   @Input() jobPostingId!: number;
+  @Input() eligibilityResult: IJobEligibilityResponse | null = null;
+  acknowledgedIneligibility = false;
+
+  /** US-024 AC4: ineligible candidates can still apply, but must re-acknowledge the warning first. */
+  get needsAcknowledgement(): boolean {
+    return !!this.eligibilityResult && !this.eligibilityResult.isEligible;
+  }
 
   constructor(
     private fb: FormBuilder,
     private careerPortalService: CareerPortalService,
+    private paymentService: PaymentService,
   ) {
     this.applyForm = this.fb.group({
       candidateName: [null, [Validators.required]],
@@ -33,6 +42,11 @@ export class ApplyFormComponent {
   submitError = '';
   submitted = false;
   submitResult: IJobApplicationSubmitResponse | null = null;
+  // EP-17: true when the application was saved but the SSLCommerz redirect couldn't be started
+  // (gateway outage at submit time) - the candidate can retry from here.
+  paymentPending = false;
+  retryingPayment = false;
+  retryError = '';
 
   get f() {
     return this.applyForm.controls;
@@ -93,7 +107,7 @@ export class ApplyFormComponent {
       this.fileError = 'Resume is required';
     }
 
-    if (this.applyForm.invalid || !this.selectedFile) {
+    if (this.applyForm.invalid || !this.selectedFile || (this.needsAcknowledgement && !this.acknowledgedIneligibility)) {
       this.applyForm.markAllAsTouched();
       return;
     }
@@ -104,8 +118,13 @@ export class ApplyFormComponent {
       next: (response) => {
         this.submitting = false;
         if (response && !response.hasError && response.content) {
-          this.submitted = true;
           this.submitResult = response.content;
+          if (this.submitResult.paymentRequired && this.submitResult.paymentRedirectUrl) {
+            window.location.href = this.submitResult.paymentRedirectUrl;
+            return;
+          }
+          this.submitted = true;
+          this.paymentPending = !!this.submitResult.paymentRequired;
         } else {
           this.submitError = response?.decentMessage || 'Failed to submit application. Please try again.';
         }
@@ -117,6 +136,27 @@ export class ApplyFormComponent {
         } else {
           this.submitError = error?.error?.decentMessage || 'Failed to submit application. Please try again.';
         }
+      },
+    });
+  }
+
+  retryPayment(): void {
+    if (!this.submitResult) return;
+    this.retryingPayment = true;
+    this.retryError = '';
+
+    this.paymentService.initiatePayment(this.submitResult.jobApplicationId).subscribe({
+      next: (response) => {
+        this.retryingPayment = false;
+        if (response && !response.hasError && response.content?.success && response.content.gatewayRedirectUrl) {
+          window.location.href = response.content.gatewayRedirectUrl;
+        } else {
+          this.retryError = response?.content?.failureReason || response?.decentMessage || 'Could not start payment. Please try again.';
+        }
+      },
+      error: (error) => {
+        this.retryingPayment = false;
+        this.retryError = error?.error?.decentMessage || 'Could not start payment. Please try again.';
       },
     });
   }

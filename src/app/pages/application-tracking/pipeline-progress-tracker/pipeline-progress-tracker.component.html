@@ -9,6 +9,28 @@
 
   <div class="no-pipeline" *ngIf="!loading && !loadError && progress && !progress.hasPipeline">No hiring pipeline is configured for this job posting.</div>
 
+  <div class="recommendation-panel" *ngIf="!loading">
+    <ng-container *ngIf="recommendation; else noRecommendation">
+      <div class="recommendation-status" [ngClass]="'recommendation-status-' + recommendation.status.toLowerCase()">
+        <span class="recommendation-status-label">Final Selection: {{ formatEnumLabel(recommendation.status) }}</span>
+        <span class="recommendation-meta">Recommended by {{ recommendation.recommendedByUserName }} on {{ recommendation.recommendedAt | date: 'dd-MMM-yyyy' }}</span>
+        <div class="recommendation-justification">{{ recommendation.justification }}</div>
+        <div class="recommendation-review" *ngIf="recommendation.status !== 'Pending'">
+          <span>Reviewed by {{ recommendation.reviewedByUserName }} on {{ recommendation.reviewedAt | date: 'dd-MMM-yyyy' }}</span>
+          <div *ngIf="recommendation.reviewComments">{{ recommendation.reviewComments }}</div>
+        </div>
+      </div>
+    </ng-container>
+    <ng-template #noRecommendation>
+      <span class="recommendation-meta">No final selection recommendation yet.</span>
+    </ng-template>
+
+    <button pButton type="button" class="p-button-outlined p-button-sm" [disabled]="!canRecommend()" (click)="openRecommendDialog()">
+      <i class="fa fa-star"></i>
+      <span>Recommend for Final Selection</span>
+    </button>
+  </div>
+
   <div class="tracker-row" *ngIf="!loading && !loadError && progress && progress.hasPipeline">
     <div class="stage-card" *ngFor="let stage of progress.stages" [ngClass]="'status-' + stage.status">
       <div class="stage-card-header">
@@ -78,3 +100,13 @@
     </div>
   </div>
 </div>
+
+<p-dialog header="Recommend for Final Selection" [(visible)]="recommendDialogVisible" [modal]="true" [style]="{ width: '28rem', maxWidth: '95vw' }">
+  <div class="recommend-form">
+    <textarea pInputText [(ngModel)]="recommendJustification" rows="4" class="w-full" maxlength="2000" placeholder="Justification (required)"></textarea>
+    <button pButton type="button" [disabled]="!recommendJustification.trim() || submittingRecommendation" (click)="confirmRecommend()">
+      <i class="fa fa-check"></i>
+      <span>Submit</span>
+    </button>
+  </div>
+</p-dialog>

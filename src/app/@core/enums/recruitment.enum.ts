@@ -45,6 +45,7 @@ export enum ApplicationStatusEnum {
   Hired = 'Hired',
   Rejected = 'Rejected',
   Withdrawn = 'Withdrawn',
+  DuplicateDismissed = 'DuplicateDismissed',
 }
 
 export enum StageProgressStatusEnum {
@@ -66,4 +67,82 @@ export enum CriterionTypeEnum {
 export enum FilterCombinatorEnum {
   And = 'And',
   Or = 'Or',
+}
+
+export enum HrOverrideDecisionEnum {
+  Approved = 'Approved',
+  Rejected = 'Rejected',
+}
+
+export enum StageTypeEnum {
+  WrittenTest = 'WrittenTest',
+  AptitudeTest = 'AptitudeTest',
+  PsychometricTest = 'PsychometricTest',
+  GroupDiscussion = 'GroupDiscussion',
+  PracticalAssessment = 'PracticalAssessment',
+}
+
+export enum RecommendationStatusEnum {
+  Pending = 'Pending',
+  Accepted = 'Accepted',
+  Rejected = 'Rejected',
+}
+
+export enum QuestionTypeEnum {
+  McqSingle = 'McqSingle',
+  McqMultiple = 'McqMultiple',
+  TrueFalse = 'TrueFalse',
+  Subjective = 'Subjective',
+}
+
+export enum DifficultyLevelEnum {
+  Easy = 'Easy',
+  Medium = 'Medium',
+  Hard = 'Hard',
+}
+
+export enum GenderEnum {
+  Male = 'Male',
+  Female = 'Female',
+  Other = 'Other',
+}
+
+export enum MaritalStatusEnum {
+  Single = 'Single',
+  Married = 'Married',
+  Other = 'Other',
+}
+
+export enum ReligionEnum {
+  Islam = 'Islam',
+  Hinduism = 'Hinduism',
+  Christianity = 'Christianity',
+  Buddhism = 'Buddhism',
+  Other = 'Other',
+}
+
+export enum BloodGroupEnum {
+  APositive = 'APositive',
+  ANegative = 'ANegative',
+  BPositive = 'BPositive',
+  BNegative = 'BNegative',
+  ABPositive = 'ABPositive',
+  ABNegative = 'ABNegative',
+  OPositive = 'OPositive',
+  ONegative = 'ONegative',
+}
+
+export enum MobileOperatorEnum {
+  Grameenphone = 'Grameenphone',
+  Banglalink = 'Banglalink',
+  Robi = 'Robi',
+  Airtel = 'Airtel',
+  Teletalk = 'Teletalk',
+  Other = 'Other',
+}
+
+export enum GradingSystemEnum {
+  GPA = 'GPA',
+  CGPA = 'CGPA',
+  Division = 'Division',
 }

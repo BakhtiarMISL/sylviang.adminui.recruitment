@@ -1,6 +1,6 @@
-<app-public-sidebar></app-public-sidebar>
+<app-public-navbar></app-public-navbar>
 
-<div class="min-h-screen bg-gray-50 px-4 py-8 pl-24 sm:px-8 lg:pl-8 lg:ml-60">
+<div class="min-h-[calc(100vh-4.5rem)] bg-gray-50 px-4 py-8 sm:px-8">
   <div class="mx-auto max-w-5xl">
     <header class="mb-6">
       <h1 class="text-2xl font-semibold text-gray-900">Career Opportunities</h1>
@@ -8,7 +8,8 @@
     </header>
 
     <!-- Filters -->
-    <div class="grid grid-cols-1 gap-3 mb-4 sm:grid-cols-2 lg:grid-cols-5">
+    <app-filter-panel [(collapsed)]="filtersCollapsed">
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
       <p-floatlabel variant="in">
         <input type="text" pInputText id="searchTerm" class="w-full" [(ngModel)]="searchTerm" name="searchTerm" (keyup.enter)="applyFilters()" />
         <label for="searchTerm" class="whitespace-nowrap">Keyword</label>
@@ -62,12 +63,13 @@
           <span>Search</span>
         </button>
 
-        <button pButton severity="secondary" (click)="resetFilters()">
+        <button *ngIf="searchTerm || location || departmentId || employmentType || maxExperienceYears" pButton severity="secondary" (click)="resetFilters()">
           <i class="fa fa-times"></i>
           <span>Reset</span>
         </button>
       </div>
     </div>
+    </app-filter-panel>
 
     <!-- Job Postings Table -->
     <div class="table-container">
@@ -164,3 +166,5 @@
     </div>
   </div>
 </div>
+
+<app-public-footer></app-public-footer>
