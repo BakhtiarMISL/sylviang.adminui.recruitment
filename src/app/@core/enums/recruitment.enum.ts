@@ -140,3 +140,9 @@ export enum MobileOperatorEnum {
   Teletalk = 'Teletalk',
   Other = 'Other',
 }
+
+export enum GradingSystemEnum {
+  GPA = 'GPA',
+  CGPA = 'CGPA',
+  Division = 'Division',
+}

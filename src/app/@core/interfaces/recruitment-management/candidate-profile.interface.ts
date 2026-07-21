@@ -64,8 +64,10 @@ export interface ICandidateProfileResponse extends ICandidateProfilePersonalInfo
 export interface ICandidateEducationCreateRequest {
   degreeTitle: string;
   institution: string;
+  universityLibraryItemId?: number | null;
   educationLevel?: string | null;
   passingYear: number;
+  gradingSystem?: string | null;
   result: string;
   majorSubject?: string | null;
 }
@@ -74,6 +76,12 @@ export type ICandidateEducationUpdateRequest = ICandidateEducationCreateRequest;
 
 export interface ICandidateEducationResponse extends ICandidateEducationCreateRequest {
   candidateEducationId: number;
+}
+
+export interface IUniversityLibraryItemResponse {
+  universityLibraryItemId: number;
+  name: string;
+  code: string;
 }
 
 export interface ICandidateWorkExperienceCreateRequest {
@@ -121,6 +129,7 @@ export interface ICandidateResumeParsedEducation {
   degreeTitle?: string | null;
   institution?: string | null;
   educationLevel?: string | null;
+  universityLibraryItemId?: number | null;
   passingYear?: number | null;
   result?: string | null;
   majorSubject?: string | null;

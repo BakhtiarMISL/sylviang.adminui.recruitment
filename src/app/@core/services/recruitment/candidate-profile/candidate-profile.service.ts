@@ -27,6 +27,7 @@ import {
   IDivisionResponse,
   ISkillLibraryItemResponse,
   IThanaResponse,
+  IUniversityLibraryItemResponse,
 } from '@core/interfaces/recruitment-management/candidate-profile.interface';
 import { BASE_URL_Recruitment } from '@env/environment';
 
@@ -80,6 +81,10 @@ export class CandidateProfileService {
 
   deleteEducation(id: number) {
     return this.httpClient.delete<ApiResponse<void>>(`${this.API_URL}/me/education/${id}`);
+  }
+
+  getUniversityLibrary() {
+    return this.httpClient.get<ApiResponse<IUniversityLibraryItemResponse[]>>(`${BASE_URL_Recruitment}/university-library`);
   }
 
   // ── Work Experience ──────────────────────────────────────────────
