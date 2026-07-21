@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ICandidateProfileResponse } from '@app/@core/interfaces/recruitment-management/candidate-profile.interface';
 import { CandidateProfileService } from '@app/@core/services/recruitment/candidate-profile/candidate-profile.service';
 import { DateTimeUtility } from '@app/@core/utils/date-time.utility';
+import { BloodGroupOptions, GenderOptions, MaritalStatusOptions, NationalityOptions, ReligionOptions } from './personal-info-section.component.constants';
 
 @Component({
   selector: 'app-personal-info-section',
@@ -21,15 +22,22 @@ export class PersonalInfoSectionComponent implements OnChanges {
     this.form = this.fb.group({
       fullName: [null, [Validators.required, Validators.maxLength(200)]],
       dateOfBirth: [null],
-      gender: [null, [Validators.maxLength(20)]],
+      gender: [null],
       nationalId: [null, [Validators.maxLength(50)]],
       fatherName: [null, [Validators.maxLength(200)]],
       motherName: [null, [Validators.maxLength(200)]],
-      maritalStatus: [null, [Validators.maxLength(20)]],
-      religion: [null, [Validators.maxLength(50)]],
+      maritalStatus: [null],
+      religion: [null],
       nationality: [null, [Validators.maxLength(100)]],
+      bloodGroup: [null],
     });
   }
+
+  genderOptions = GenderOptions;
+  maritalStatusOptions = MaritalStatusOptions;
+  religionOptions = ReligionOptions;
+  bloodGroupOptions = BloodGroupOptions;
+  nationalityOptions = NationalityOptions;
 
   form: FormGroup;
   formSubmitted = false;
@@ -40,9 +48,21 @@ export class PersonalInfoSectionComponent implements OnChanges {
   // Called explicitly from a resume upload action (MyProfileComponent), not from ngOnChanges -
   // an intentional "prefill from resume" action should override, even if the user has already
   // started editing here. Nothing is saved; the user still reviews and hits Save.
-  applyPrefill(fullName?: string | null): void {
+  applyPrefill(fullName?: string | null, dateOfBirth?: string | null, gender?: string | null, religion?: string | null, maritalStatus?: string | null): void {
     if (fullName) {
       this.form.patchValue({ fullName });
+    }
+    if (dateOfBirth) {
+      this.form.patchValue({ dateOfBirth: new Date(dateOfBirth) });
+    }
+    if (gender) {
+      this.form.patchValue({ gender });
+    }
+    if (religion) {
+      this.form.patchValue({ religion });
+    }
+    if (maritalStatus) {
+      this.form.patchValue({ maritalStatus });
     }
   }
 
@@ -87,6 +107,7 @@ export class PersonalInfoSectionComponent implements OnChanges {
       maritalStatus: 'Marital Status',
       religion: 'Religion',
       nationality: 'Nationality',
+      bloodGroup: 'Blood Group',
     };
     return displayNames[fieldName] || fieldName;
   }
