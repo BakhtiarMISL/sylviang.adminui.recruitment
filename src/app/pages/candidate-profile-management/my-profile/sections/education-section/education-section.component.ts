@@ -1,10 +1,11 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ApiResponse } from '@core/interfaces/ApiResponse';
-import { ICandidateEducationResponse, ICandidateResumeParsedEducation } from '@app/@core/interfaces/recruitment-management/candidate-profile.interface';
+import { ICandidateEducationResponse, ICandidateResumeParsedEducation, IUniversityLibraryItemResponse } from '@app/@core/interfaces/recruitment-management/candidate-profile.interface';
 import { CandidateProfileService } from '@app/@core/services/recruitment/candidate-profile/candidate-profile.service';
 import { Observable } from 'rxjs';
-import { EducationLevelOptions } from './education-section.component.constants';
+import { AutoCompleteCompleteEvent, AutoCompleteSelectEvent } from 'primeng/autocomplete';
+import { DivisionResultOptions, EducationLevelOptions, GradingSystemOptions } from './education-section.component.constants';
 
 @Component({
   selector: 'app-education-section',
@@ -22,14 +23,18 @@ export class EducationSectionComponent implements OnInit {
     this.form = this.fb.group({
       degreeTitle: [null, [Validators.required, Validators.maxLength(200)]],
       institution: [null, [Validators.required, Validators.maxLength(200)]],
+      universityLibraryItemId: [null],
       educationLevel: [null],
       passingYear: [null, [Validators.required, Validators.min(1950), Validators.max(new Date().getFullYear())]],
+      gradingSystem: [null],
       result: [null, [Validators.required, Validators.maxLength(50)]],
       majorSubject: [null, [Validators.maxLength(200)]],
     });
   }
 
   educationLevelOptions = EducationLevelOptions;
+  gradingSystemOptions = GradingSystemOptions;
+  divisionResultOptions = DivisionResultOptions;
   form: FormGroup;
   formSubmitted = false;
   saving = false;
@@ -38,6 +43,9 @@ export class EducationSectionComponent implements OnInit {
   items: ICandidateEducationResponse[] = [];
   loading = false;
   editingId: number | null = null;
+
+  universityLibrary: IUniversityLibraryItemResponse[] = [];
+  universitySuggestions: IUniversityLibraryItemResponse[] = [];
 
   // Best-effort suggestions from a parsed resume (see MyProfileComponent.onResumeParsed).
   // Nothing here is saved automatically - clicking "Use" only opens the add form pre-filled
@@ -53,6 +61,7 @@ export class EducationSectionComponent implements OnInit {
     this.form.patchValue({
       degreeTitle: suggestion.degreeTitle,
       institution: suggestion.institution,
+      universityLibraryItemId: suggestion.universityLibraryItemId,
       passingYear: suggestion.passingYear,
     });
     this.prefillSuggestions = this.prefillSuggestions.filter((_, i) => i !== index);
@@ -65,6 +74,7 @@ export class EducationSectionComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadEducation();
+    this.loadUniversityLibrary();
   }
 
   loadEducation(): void {
@@ -79,6 +89,46 @@ export class EducationSectionComponent implements OnInit {
         this.loading = false;
       },
     });
+  }
+
+  loadUniversityLibrary(): void {
+    this.candidateProfileService.getUniversityLibrary().subscribe({
+      next: (response) => {
+        this.universityLibrary = !response.hasError && response.content ? response.content : [];
+      },
+      error: () => {
+        this.universityLibrary = [];
+      },
+    });
+  }
+
+  filterUniversity(event: AutoCompleteCompleteEvent): void {
+    const query = event.query.trim().toLowerCase();
+    this.universitySuggestions = this.universityLibrary.filter((u) => u.name.toLowerCase().includes(query) || u.code.toLowerCase().includes(query));
+  }
+
+  onUniversitySelect(event: AutoCompleteSelectEvent): void {
+    const selected = event.value as IUniversityLibraryItemResponse;
+    this.form.patchValue({ institution: selected.name, universityLibraryItemId: selected.universityLibraryItemId });
+  }
+
+  // Typing free text (no library match) clears the library link - UniversityLibraryItemId stays
+  // null and the raw text is saved as-is, same "null = free text" convention as CandidateSkill.
+  onInstitutionInput(): void {
+    const currentName = this.form.get('institution')?.value;
+    const currentLinkedId = this.form.get('universityLibraryItemId')?.value;
+    if (currentLinkedId) {
+      const linked = this.universityLibrary.find((u) => u.universityLibraryItemId === currentLinkedId);
+      if (!linked || linked.name !== currentName) {
+        this.form.patchValue({ universityLibraryItemId: null }, { emitEvent: false });
+      }
+    }
+  }
+
+  // Switching to/from "Division" changes what the Result field means (free-text GPA/CGPA number
+  // vs a First/Second/Third dropdown) - the previously entered value no longer applies either way.
+  onGradingSystemChange(): void {
+    this.form.patchValue({ result: null });
   }
 
   get f() {
@@ -107,6 +157,7 @@ export class EducationSectionComponent implements OnInit {
       institution: 'Institution',
       educationLevel: 'Education Level',
       passingYear: 'Passing Year',
+      gradingSystem: 'Grading System',
       result: 'Result',
       majorSubject: 'Major Subject',
     };

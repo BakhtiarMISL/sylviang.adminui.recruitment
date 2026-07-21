@@ -49,7 +49,27 @@
 
   <div>
     <p-floatlabel variant="in">
-      <input pInputText inputId="institution" formControlName="institution" maxlength="200" class="w-full" [class.ng-invalid]="hasError('institution')" [class.ng-dirty]="hasError('institution')" (blur)="f['institution'].markAsTouched()" />
+      <p-autocomplete
+        inputId="institution"
+        formControlName="institution"
+        [suggestions]="universitySuggestions"
+        (completeMethod)="filterUniversity($event)"
+        (onSelect)="onUniversitySelect($event)"
+        (input)="onInstitutionInput()"
+        optionLabel="name"
+        field="name"
+        [forceSelection]="false"
+        class="w-full"
+        styleClass="w-full"
+        inputStyleClass="w-full"
+        [class.ng-invalid]="hasError('institution')"
+        [class.ng-dirty]="hasError('institution')"
+        (onBlur)="f['institution'].markAsTouched()"
+      >
+        <ng-template let-university pTemplate="item">
+          <span>{{ university.name }} ({{ university.code }})</span>
+        </ng-template>
+      </p-autocomplete>
       <label for="institution">Institution *</label>
     </p-floatlabel>
     <div *ngIf="hasError('institution')" class="invalid">{{ getErrorMessage('institution') }}</div>
@@ -72,9 +92,22 @@
 
   <div>
     <p-floatlabel variant="in">
-      <input pInputText inputId="result" formControlName="result" maxlength="50" class="w-full" [class.ng-invalid]="hasError('result')" [class.ng-dirty]="hasError('result')" (blur)="f['result'].markAsTouched()" />
+      <p-select inputId="gradingSystem" [options]="gradingSystemOptions" [appendTo]="'body'" [autoDisplayFirst]="false" optionLabel="label" optionValue="value" formControlName="gradingSystem" class="w-full" (onChange)="onGradingSystemChange()"></p-select>
+      <label for="gradingSystem">Grading System</label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel variant="in" *ngIf="f['gradingSystem'].value === 'Division'; else resultInput">
+      <p-select inputId="result" [options]="divisionResultOptions" [appendTo]="'body'" [autoDisplayFirst]="false" optionLabel="label" optionValue="value" formControlName="result" class="w-full"></p-select>
       <label for="result">Result *</label>
     </p-floatlabel>
+    <ng-template #resultInput>
+      <p-floatlabel variant="in">
+        <input pInputText inputId="result" formControlName="result" maxlength="50" class="w-full" [class.ng-invalid]="hasError('result')" [class.ng-dirty]="hasError('result')" (blur)="f['result'].markAsTouched()" placeholder="e.g. 3.85" />
+        <label for="result">Result *</label>
+      </p-floatlabel>
+    </ng-template>
     <div *ngIf="hasError('result')" class="invalid">{{ getErrorMessage('result') }}</div>
   </div>
 

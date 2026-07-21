@@ -67,3 +67,9 @@ export enum FilterCombinatorEnum {
   And = 'And',
   Or = 'Or',
 }
+
+export enum GradingSystemEnum {
+  GPA = 'GPA',
+  CGPA = 'CGPA',
+  Division = 'Division',
+}
