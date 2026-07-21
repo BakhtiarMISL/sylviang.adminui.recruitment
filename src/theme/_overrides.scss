@@ -359,6 +359,14 @@
 }
 
 // ---------------------------------------------Autocomplete CSS Override--------------------------------------------
+.p-autocomplete {
+  @apply border-b border-b-neutral hover:border-b-primary focus-within:border-b-primary border-x-0 border-t-0 rounded-none !important;
+  background: transparent !important;
+  box-shadow: none;
+}
+.p-autocomplete-dropdown {
+  @apply text-neutral hover:text-primary bg-transparent !important;
+}
 .p-autocomplete-overlay {
   @apply border-borderLight dark:border-borderDark rounded !important;
 }

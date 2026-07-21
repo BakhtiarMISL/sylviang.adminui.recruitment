@@ -1,8 +1,13 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AutoCompleteCompleteEvent, AutoCompleteSelectEvent } from 'primeng/autocomplete';
-import { ICandidateSkillResponse, ISkillLibraryItemResponse } from '@app/@core/interfaces/recruitment-management/candidate-profile.interface';
+import {
+  ICandidateSkillCreateRequest,
+  ICandidateSkillResponse,
+  ISkillLibraryItemResponse,
+} from '@app/@core/interfaces/recruitment-management/candidate-profile.interface';
 import { CandidateProfileService } from '@app/@core/services/recruitment/candidate-profile/candidate-profile.service';
+import { catchError, concatMap, from, of, toArray } from 'rxjs';
 import { ProficiencyLevelOptions } from './skills-section.component.constants';
 
 @Component({
@@ -40,9 +45,12 @@ export class SkillsSectionComponent implements OnInit {
   // Best-effort skill names from a parsed resume (see MyProfileComponent.onResumeParsed).
   // Clicking a chip only fills the skillName input - nothing is saved until Add Skill is clicked.
   prefillSkillSuggestions: string[] = [];
+  savingAllSkills = false;
 
   stagePrefill(skills: string[]): void {
-    this.prefillSkillSuggestions = skills;
+    // Drop anything already saved so re-uploading the same resume doesn't re-suggest it.
+    const existing = new Set(this.items.map((i) => i.skillName.toLowerCase()));
+    this.prefillSkillSuggestions = skills.filter((s) => !existing.has(s.toLowerCase()));
   }
 
   useSkillSuggestion(skill: string, index: number): void {
@@ -52,6 +60,41 @@ export class SkillsSectionComponent implements OnInit {
 
   dismissSkillSuggestion(index: number): void {
     this.prefillSkillSuggestions = this.prefillSkillSuggestions.filter((_, i) => i !== index);
+  }
+
+  // Bulk-saves every suggested skill directly (see EducationSectionComponent.useAllSuggestions
+  // for the same pattern/rationale). Dedupes case-insensitively against already-saved skills
+  // and against duplicates within the suggestion list itself.
+  useAllSkillSuggestions(): void {
+    const existing = new Set(this.items.map((i) => i.skillName.toLowerCase()));
+    const seen = new Set<string>();
+    const unique = this.prefillSkillSuggestions.filter((skill) => {
+      const key = skill.toLowerCase();
+      if (existing.has(key) || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+    if (unique.length === 0) return;
+
+    this.savingAllSkills = true;
+    from(unique)
+      .pipe(
+        concatMap((skillName) => {
+          const request: ICandidateSkillCreateRequest = { skillName, skillLibraryItemId: null, proficiencyLevel: null };
+          return this.candidateProfileService.addSkill(request).pipe(
+            catchError(() => of(null)),
+            concatMap((response) => of({ skillName, succeeded: !!response && !response.hasError })),
+          );
+        }),
+        toArray(),
+      )
+      .subscribe((results) => {
+        this.savingAllSkills = false;
+        const succeeded = new Set(results.filter((r) => r.succeeded).map((r) => r.skillName));
+        this.prefillSkillSuggestions = this.prefillSkillSuggestions.filter((s) => !succeeded.has(s));
+        this.loadSkills();
+        this.saved.emit();
+      });
   }
 
   ngOnInit(): void {

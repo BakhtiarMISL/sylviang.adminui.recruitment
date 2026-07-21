@@ -1,0 +1,95 @@
+<section class="page-container">
+  <form [formGroup]="workflowForm" (ngSubmit)="onSubmit()">
+    <div class="table-container mb-4 p-4">
+      <h3 class="table-title mb-3">{{ isEditMode ? 'Edit Workflow' : 'Add Workflow' }}</h3>
+
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <p-floatlabel variant="in">
+          <input pInputText id="name" class="w-full" formControlName="name" />
+          <label for="name">Workflow Name</label>
+        </p-floatlabel>
+        <small class="text-red-500" *ngIf="hasError('name')">Workflow name is required.</small>
+
+        <p-floatlabel variant="in">
+          <textarea pTextarea id="description" class="w-full" formControlName="description" rows="1"></textarea>
+          <label for="description">Description</label>
+        </p-floatlabel>
+      </div>
+    </div>
+
+    <div class="table-container p-4">
+      <div class="mb-3 flex items-center justify-between">
+        <h3 class="table-title">Stages</h3>
+        <button pButton type="button" severity="secondary" (click)="addStage()">
+          <i class="fa fa-plus"></i>
+          <span>Add Stage</span>
+        </button>
+      </div>
+
+      <p class="mb-3 text-sm text-gray-500">Drag stages to reorder. Candidates must pass mandatory stages in order.</p>
+
+      <div cdkDropList class="flex flex-col gap-2" (cdkDropListDropped)="onStageDrop($event)">
+        <div cdkDrag *ngFor="let stage of stages; let i = index" class="rounded-lg border border-gray-200 bg-white dark:border-neutral dark:bg-dark">
+          <div class="flex cursor-move items-center gap-3 p-3" (click)="toggleStageExpanded(i)">
+            <i class="fa fa-grip-vertical text-gray-400" cdkDragHandle></i>
+            <span class="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 text-xs font-semibold text-blue-700">{{ i + 1 }}</span>
+            <div class="flex-1">
+              <span class="font-medium text-gray-900 dark:text-white">{{ stage.stageType }}</span>
+              <span class="ml-2 text-xs text-gray-500">{{ stage.maxMarks }} marks &middot; {{ stage.durationMinutes }} min</span>
+              <span class="ml-2 text-xs text-red-500" *ngIf="formSubmitted && stageIsInvalid(stage)">Check stage marks/duration</span>
+            </div>
+            <span *ngIf="!stage.isMandatory" class="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">Optional</span>
+            <button pButton type="button" severity="danger" text="true" (click)="removeStage(i); $event.stopPropagation()">
+              <i class="fa fa-trash"></i>
+            </button>
+            <i class="fa" [ngClass]="expandedStageIndex === i ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+          </div>
+
+          <div *ngIf="expandedStageIndex === i" class="grid grid-cols-1 gap-3 border-t border-gray-100 p-4 sm:grid-cols-2 lg:grid-cols-3" (click)="$event.stopPropagation()">
+            <p-floatlabel variant="in">
+              <p-select [inputId]="'stageType' + i" class="w-full" [(ngModel)]="stage.stageType" [ngModelOptions]="{ standalone: true }" [options]="stageTypeOptions" optionLabel="label" optionValue="value" [appendTo]="'body'" [autoDisplayFirst]="false"></p-select>
+              <label [for]="'stageType' + i">Stage Type</label>
+            </p-floatlabel>
+
+            <p-floatlabel variant="in">
+              <p-inputnumber [inputId]="'maxMarks' + i" class="w-full" [(ngModel)]="stage.maxMarks" [ngModelOptions]="{ standalone: true }" [min]="1" [useGrouping]="false"></p-inputnumber>
+              <label [for]="'maxMarks' + i">Max Marks</label>
+            </p-floatlabel>
+
+            <p-floatlabel variant="in">
+              <p-inputnumber [inputId]="'passMarks' + i" class="w-full" [(ngModel)]="stage.passMarks" [ngModelOptions]="{ standalone: true }" [min]="1" [useGrouping]="false"></p-inputnumber>
+              <label [for]="'passMarks' + i">Pass Marks</label>
+            </p-floatlabel>
+
+            <p-floatlabel variant="in">
+              <p-inputnumber [inputId]="'durationMinutes' + i" class="w-full" [(ngModel)]="stage.durationMinutes" [ngModelOptions]="{ standalone: true }" [min]="1" [useGrouping]="false" suffix=" min"></p-inputnumber>
+              <label [for]="'durationMinutes' + i">Duration</label>
+            </p-floatlabel>
+
+            <div class="checkbox-container sm:col-span-2 lg:col-span-3">
+              <p-checkbox [(ngModel)]="stage.isMandatory" [ngModelOptions]="{ standalone: true }" [binary]="true" [inputId]="'mandatory' + i"></p-checkbox>
+              <label [for]="'mandatory' + i">Mandatory stage</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="stages.length === 0" class="not-found">
+        <i class="fa fa-magnifying-glass-minus"></i>
+        <p>No stages yet — add at least one.</p>
+      </div>
+    </div>
+
+    <small class="mt-3 block text-red-500" *ngIf="errorMessage">{{ errorMessage }}</small>
+
+    <div class="mt-4 flex gap-2">
+      <button pButton type="submit">
+        <i class="fa fa-save"></i>
+        <span>{{ isEditMode ? 'Save Changes' : 'Create Workflow' }}</span>
+      </button>
+      <button pButton type="button" severity="secondary" [routerLink]="['/assessment-workflow/assessment-workflow-list']">
+        <span>Cancel</span>
+      </button>
+    </div>
+  </form>
+</section>

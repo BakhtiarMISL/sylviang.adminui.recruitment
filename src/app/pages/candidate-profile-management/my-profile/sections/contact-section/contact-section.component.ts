@@ -22,6 +22,23 @@ export class ContactSectionComponent implements OnChanges {
       phone: [null, [Validators.maxLength(50)]],
       presentAddress: [null, [Validators.maxLength(500)]],
       permanentAddress: [null, [Validators.maxLength(500)]],
+      sameAsPresent: [false],
+    });
+
+    this.form.get('presentAddress')!.valueChanges.subscribe((value) => {
+      if (this.form.get('sameAsPresent')!.value) {
+        this.form.get('permanentAddress')!.setValue(value, { emitEvent: false });
+      }
+    });
+
+    this.form.get('sameAsPresent')!.valueChanges.subscribe((checked) => {
+      const permanentAddress = this.form.get('permanentAddress')!;
+      if (checked) {
+        permanentAddress.setValue(this.form.get('presentAddress')!.value, { emitEvent: false });
+        permanentAddress.disable({ emitEvent: false });
+      } else {
+        permanentAddress.enable({ emitEvent: false });
+      }
     });
   }
 
@@ -32,10 +49,14 @@ export class ContactSectionComponent implements OnChanges {
   saveSuccess = false;
 
   // See PersonalInfoSectionComponent.applyPrefill for why this bypasses the pristine guard.
-  applyPrefill(email?: string | null, phone?: string | null): void {
-    const patch: { email?: string; phone?: string } = {};
+  // Skipped entirely once locked (US-003 AC4) - patchValue would otherwise write into a disabled
+  // control, which the user can't see changing, only to have the eventual Save rejected.
+  applyPrefill(email?: string | null, phone?: string | null, presentAddress?: string | null): void {
+    if (this.identityFieldsLocked) return;
+    const patch: { email?: string; phone?: string; presentAddress?: string } = {};
     if (email) patch.email = email;
     if (phone) patch.phone = phone;
+    if (presentAddress) patch.presentAddress = presentAddress;
     if (Object.keys(patch).length > 0) this.form.patchValue(patch);
   }
 
@@ -46,6 +67,19 @@ export class ContactSectionComponent implements OnChanges {
     if (changes['profile'] && this.profile && this.form.pristine) {
       this.form.patchValue({ ...this.profile });
     }
+
+    // US-003 AC4: Email/Phone are the candidate's application-matching identity - once they have
+    // a submitted application, changing either would orphan their own application history, so
+    // lock these two fields (independent of the pristine guard above, which only gates re-patch).
+    if (changes['profile'] && this.profile) {
+      const lockMethod = this.profile.hasSubmittedApplication ? 'disable' : 'enable';
+      this.form.get('email')?.[lockMethod]({ emitEvent: false });
+      this.form.get('phone')?.[lockMethod]({ emitEvent: false });
+    }
+  }
+
+  get identityFieldsLocked(): boolean {
+    return !!this.profile?.hasSubmittedApplication;
   }
 
   get f() {

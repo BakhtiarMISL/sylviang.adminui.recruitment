@@ -12,13 +12,22 @@
     <div class="sm:col-span-2 profile-header" *ngIf="!loading && profile">
       <app-completeness-ring [percentage]="profile.completenessPercentage"></app-completeness-ring>
       <div class="profile-header-text">
-        <span class="profile-header-title">Profile completeness</span>
+        <span class="profile-header-title">
+          Profile completeness
+          <span class="profile-type-badge" [class.internal]="profile.isInternal">{{ profile.isInternal ? 'Internal Candidate' : 'External Candidate' }}</span>
+        </span>
         <span class="profile-header-subtitle">Fill out every section below to reach 100%.</span>
+        <span class="profile-header-subtitle" *ngIf="profile.isInternal && (profile.departmentName || profile.designationName)">
+          {{ profile.designationName }}<span *ngIf="profile.designationName && profile.departmentName"> &middot; </span>{{ profile.departmentName }}
+        </span>
+        <span class="text-sm text-neutral mt-1" *ngIf="profile.hasPrepopulatedFieldEdits">
+          <i class="fas fa-flag"></i> You've edited a field pre-filled from Core HR — HR has been notified.
+        </span>
       </div>
     </div>
 
     <div class="sm:col-span-2" *ngIf="!loading && profile">
-      <p class="text-sm text-neutral mb-2">Upload your resume to prefill sections below (free, best-effort — review and Save each section yourself; nothing is saved automatically).</p>
+      <p class="text-sm text-neutral mb-2">Upload your resume to auto-fill the sections below — review the prefilled fields/suggestions and hit Save (or "Use All").</p>
 
       <label for="resumeFile" class="upload-dropzone" [class.disabled]="parsingResume">
         <i class="fas" [class.fa-spinner]="parsingResume" [class.fa-spin]="parsingResume" [class.fa-file-arrow-up]="!parsingResume"></i>
@@ -31,6 +40,7 @@
 
       <div *ngIf="resumeError" class="invalid mt-2">{{ resumeError }}</div>
       <div *ngIf="resumeParsed" class="text-sm text-neutral mt-2">Resume parsed — check each section below for prefilled fields/suggestions.</div>
+      <div *ngIf="resumeDegradedNotice" class="invalid mt-2">{{ resumeDegradedNotice }}</div>
     </div>
   </div>
 </section>

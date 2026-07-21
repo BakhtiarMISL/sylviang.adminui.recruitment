@@ -37,6 +37,7 @@ export class InternalJobListComponent implements OnInit, AfterViewInit {
 
   employmentTypeOptions = EmploymentTypeOptions;
   experienceBucketOptions = ExperienceBucketOptions;
+  filtersCollapsed = false;
 
   columns = InternalJobListColumns;
 
@@ -67,6 +68,7 @@ export class InternalJobListComponent implements OnInit, AfterViewInit {
     this.employmentType = null;
     this.maxExperienceYears = null;
     this.currentPage = 1;
+    this.filtersCollapsed = false;
     this.loadJobPostings();
   }
 
@@ -95,12 +97,14 @@ export class InternalJobListComponent implements OnInit, AfterViewInit {
           this.totalRecords = 0;
         }
         this.loading = false;
+        this.filtersCollapsed = this.totalRecords > 0;
         this.cdr.detectChanges();
       },
       error: () => {
         this.jobPostings = [];
         this.totalRecords = 0;
         this.loading = false;
+        this.filtersCollapsed = false;
         this.cdr.detectChanges();
       },
     });

@@ -63,7 +63,7 @@ export class ErrorHandlerInterceptor implements HttpInterceptor {
     const disableToast = request.context.get(DISABLE_TOAST);
 
     if (error.status === 401 || error.status === 403) {
-      if (error.status === 401 && !this._isAuthLoginRequest(request)) {
+      if (error.status === 401 && !this._isAuthLoginRequest(request) && !this._isPublicEndpointRequest(request)) {
         this.authService.logout();
         this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
       }
@@ -103,6 +103,13 @@ export class ErrorHandlerInterceptor implements HttpInterceptor {
 
   private _isAuthLoginRequest(request: HttpRequest<any>): boolean {
     return request.url.includes('/auth/login');
+  }
+
+  // Public/anonymous endpoints (landing page, career portal, job browse/detail/apply) must
+  // never force-logout a visitor over a stale/expired token attached by AuthInterceptor —
+  // a 401 here just means "treat as anonymous", not "session invalid".
+  private _isPublicEndpointRequest(request: HttpRequest<any>): boolean {
+    return request.url.includes('/career-portal');
   }
 
   private _isApiResponseBody(body: unknown): body is { hasError: boolean; decentMessage: string } {

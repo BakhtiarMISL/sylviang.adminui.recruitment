@@ -32,6 +32,7 @@ export class ApplyOnBehalfComponent implements OnInit {
   candidateName = '';
   candidateEmail = '';
   candidatePhone = '';
+  candidateNationalId = '';
   coverLetter = '';
   resumeFile: File | null = null;
 
@@ -89,6 +90,7 @@ export class ApplyOnBehalfComponent implements OnInit {
         candidateName: this.candidateName.trim(),
         candidateEmail: this.candidateEmail.trim(),
         candidatePhone: this.candidatePhone.trim() || undefined,
+        candidateNationalId: this.candidateNationalId.trim() || undefined,
         coverLetter: this.coverLetter.trim() || undefined,
         resume: this.resumeFile,
       })

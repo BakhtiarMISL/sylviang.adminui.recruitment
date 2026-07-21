@@ -1,0 +1,70 @@
+<header class="sticky top-0 z-40 border-b border-[#D1D5DB] bg-white/95 backdrop-blur">
+  <nav class="mx-auto flex max-w-[1240px] items-center justify-between px-4 py-3 sm:px-8">
+    <a routerLink="/" class="flex items-center gap-2" (click)="closeMenu()">
+      <img src="assets/images/sylvia_logo.png" alt="Sylvia" class="h-10 w-auto" />
+    </a>
+
+    <div class="hidden items-center gap-8 lg:flex">
+      <a
+        *ngFor="let item of navLinks"
+        [routerLink]="[item.link]"
+        [fragment]="item.fragment"
+        class="text-sm font-medium text-[#334155] transition-colors hover:text-[#DC2626]"
+      >
+        {{ item.label }}
+      </a>
+    </div>
+
+    <ng-container *ngIf="user$ | async as user; else loggedOutActions">
+      <div class="hidden items-center gap-3 lg:flex">
+        <a routerLink="/dashboard" class="rounded-[4px] bg-[#DC2626] px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-[#B91C1C]">
+          Dashboard
+        </a>
+        <button
+          type="button"
+          (click)="logout()"
+          class="rounded-[4px] border border-[#DC2626] px-5 py-2 text-sm font-medium text-[#DC2626] transition-colors hover:bg-[#DC2626] hover:text-white"
+        >
+          Logout
+        </button>
+      </div>
+    </ng-container>
+
+    <ng-template #loggedOutActions>
+      <div class="hidden items-center gap-3 lg:flex">
+        <a routerLink="/login" class="rounded-[4px] border border-[#DC2626] px-5 py-2 text-sm font-medium text-[#DC2626] transition-colors hover:bg-[#DC2626] hover:text-white">
+          Login
+        </a>
+        <a routerLink="/register" class="rounded-[4px] bg-[#DC2626] px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-[#B91C1C]">
+          Register
+        </a>
+      </div>
+    </ng-template>
+
+    <button type="button" class="text-2xl text-[#334155] lg:hidden" (click)="toggleMenu()">
+      <i class="fa" [ngClass]="menuOpen ? 'fa-times' : 'fa-bars'"></i>
+    </button>
+  </nav>
+
+  <div class="flex flex-col gap-1 border-t border-[#D1D5DB] bg-white px-4 py-3 lg:hidden" *ngIf="menuOpen">
+    <a
+      *ngFor="let item of navLinks"
+      [routerLink]="[item.link]"
+      [fragment]="item.fragment"
+      class="rounded-md px-3 py-2 text-sm font-medium text-[#334155] hover:bg-[#F0F5FA]"
+      (click)="closeMenu()"
+    >
+      {{ item.label }}
+    </a>
+
+    <ng-container *ngIf="user$ | async as user; else loggedOutMobileActions">
+      <a routerLink="/dashboard" class="rounded-md px-3 py-2 text-sm font-medium text-white bg-[#DC2626]" (click)="closeMenu()">Dashboard</a>
+      <button type="button" (click)="logout()" class="rounded-md px-3 py-2 text-left text-sm font-medium text-[#DC2626] hover:bg-[#F0F5FA]">Logout</button>
+    </ng-container>
+
+    <ng-template #loggedOutMobileActions>
+      <a routerLink="/login" class="rounded-md px-3 py-2 text-sm font-medium text-[#DC2626] hover:bg-[#F0F5FA]" (click)="closeMenu()">Login</a>
+      <a routerLink="/register" class="rounded-md px-3 py-2 text-sm font-medium text-white bg-[#DC2626]" (click)="closeMenu()">Register</a>
+    </ng-template>
+  </div>
+</header>
