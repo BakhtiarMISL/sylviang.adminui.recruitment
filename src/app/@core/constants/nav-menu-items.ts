@@ -116,4 +116,11 @@ export const webSidebarMenuItems: IMenuItem[] = [
     active: false,
     icon: 'fa-solid fa-user-gear',
   },
+  {
+    href: '/application-settings',
+    title: 'Application Settings',
+    active: false,
+    icon: 'fa-solid fa-sliders',
+    roles: [UserRoleEnum.Admin],
+  },
 ];
