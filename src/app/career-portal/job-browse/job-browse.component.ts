@@ -2,6 +2,7 @@ import { AfterViewInit, ChangeDetectorRef, Component, OnInit } from '@angular/co
 import { IPublicJobPostingResponse } from '@app/@core/interfaces/recruitment-management/career-portal.interface';
 import { CareerPortalService } from '@app/@core/services/recruitment/career-portal/career-portal.service';
 import { UI_CONFIG } from '@app/@core/constants';
+import { AuthService } from '@core/services/auth/auth.service';
 import { SortEvent } from 'primeng/api';
 import { EmploymentTypeOptions, ExperienceBucketOptions } from '../career-portal.constants';
 import { JobBrowseColumns } from './job-browse.component.constants';
@@ -15,8 +16,16 @@ import { JobBrowseColumns } from './job-browse.component.constants';
 export class JobBrowseComponent implements OnInit, AfterViewInit {
   constructor(
     private careerPortalService: CareerPortalService,
+    private authService: AuthService,
     private cdr: ChangeDetectorRef,
   ) {}
+
+  // Reached both pre-login (top-level /careers, standalone public layout) and post-login
+  // (same module nested under Shell, see pages-routing.module.ts) - suppress the page's own
+  // public navbar in the latter case so it doesn't stack with Shell's sidebar/header.
+  get isLoggedIn(): boolean {
+    return this.authService.isAuthenticated();
+  }
 
   jobPostings: IPublicJobPostingResponse[] = [];
   sortedColumn: string = '';
@@ -33,6 +42,7 @@ export class JobBrowseComponent implements OnInit, AfterViewInit {
   experienceBucketOptions = ExperienceBucketOptions;
 
   columns = JobBrowseColumns;
+  filtersCollapsed = false;
 
   searchTerm = '';
   location = '';
@@ -66,6 +76,7 @@ export class JobBrowseComponent implements OnInit, AfterViewInit {
     this.employmentType = null;
     this.maxExperienceYears = null;
     this.currentPage = 1;
+    this.filtersCollapsed = false;
     this.loadJobPostings();
   }
 
@@ -94,12 +105,14 @@ export class JobBrowseComponent implements OnInit, AfterViewInit {
           this.totalRecords = 0;
         }
         this.loading = false;
+        this.filtersCollapsed = this.totalRecords > 0;
         this.cdr.detectChanges();
       },
       error: () => {
         this.jobPostings = [];
         this.totalRecords = 0;
         this.loading = false;
+        this.filtersCollapsed = false;
         this.cdr.detectChanges();
       },
     });

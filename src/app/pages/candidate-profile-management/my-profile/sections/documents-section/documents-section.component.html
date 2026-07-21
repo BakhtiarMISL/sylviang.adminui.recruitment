@@ -6,7 +6,7 @@
   <div class="sm:col-span-2" *ngIf="!loading">
     <div class="list-row" *ngFor="let item of items">
       <div>
-        <strong>{{ getDocumentTypeLabel(item.documentType) }}</strong> —
+        <strong>{{ getDocumentTypeLabel(item.documentType) }}</strong> <span>—</span>
         <a [href]="getDownloadUrl(item)" target="_blank" rel="noopener noreferrer" class="text-primary">{{ item.fileName }}</a>
         <span class="text-sm text-neutral ml-2">({{ formatFileSize(item.fileSizeBytes) }})</span>
       </div>

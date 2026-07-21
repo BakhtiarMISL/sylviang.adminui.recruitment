@@ -1,34 +1,40 @@
 import { Injectable } from '@angular/core';
-import { CanActivate, Router, RouterStateSnapshot, UrlTree } from '@angular/router';
+import { CanActivate, CanMatch, Route, Router, RouterStateSnapshot, UrlSegment, UrlTree } from '@angular/router';
 import { AuthService } from '@core/services/auth/auth.service';
 
 @Injectable({
   providedIn: 'root',
 })
-export class AuthGuard implements CanActivate {
+export class AuthGuard implements CanActivate, CanMatch {
   constructor(
     private authService: AuthService,
     private router: Router,
   ) {}
 
   canActivate(_route?: unknown, state?: RouterStateSnapshot): boolean | UrlTree {
-    const authed = this.authService.isAuthenticated();
-    console.log('[DEBUG] AuthGuard.canActivate, isAuthenticated =', authed, 'state?.url =', state?.url, 'router.url =', this.router.url, 'token =', this.authService.getToken());
-
-    if (authed) {
+    if (this.authService.isAuthenticated()) {
       return true;
     }
 
     const attemptedUrl = state?.url ?? this.router.url;
+    return this.router.createUrlTree(['/login'], { queryParams: { returnUrl: attemptedUrl } });
+  }
 
-    // A bare root visit (no login, no deep link) sends anonymous visitors to the
-    // public career portal instead of forcing a login form in their face.
-    if (attemptedUrl === '/') {
-      console.log('[DEBUG] AuthGuard redirecting to /careers');
-      return this.router.createUrlTree(['/careers']);
+  // Used on the guarded pages-module route in app.routes.ts instead of canActivate.
+  // canActivate can only redirect once a route is already selected; canMatch runs during
+  // route SELECTION, so returning false here (for the bare root URL) lets the Router fall
+  // through to the next sibling route — the public landing page — instead of resolving
+  // this branch's own internal '' -> /dashboard redirect and then bouncing to /login.
+  canMatch(_route: Route, segments: UrlSegment[]): boolean | UrlTree {
+    if (this.authService.isAuthenticated()) {
+      return true;
     }
 
-    console.log('[DEBUG] AuthGuard redirecting to /login, attemptedUrl =', attemptedUrl);
+    if (segments.length === 0) {
+      return false;
+    }
+
+    const attemptedUrl = '/' + segments.map((s) => s.path).join('/');
     return this.router.createUrlTree(['/login'], { queryParams: { returnUrl: attemptedUrl } });
   }
 }

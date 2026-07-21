@@ -5,10 +5,12 @@ import { AutoCompleteCompleteEvent } from 'primeng/autocomplete';
 import { IJobVacancyAttachmentResponse } from '@app/@core/interfaces/recruitment-management/job-vacancy-attachment.interface';
 import { IJobVacancyCreateRequest, IJobVacancyResponse, IJobVacancyUpdateRequest } from '@app/@core/interfaces/recruitment-management/job-vacancy.interface';
 import { IHiringPipelineLookupResponse } from '@app/@core/interfaces/recruitment-management/hiring-pipeline.interface';
+import { IAssessmentWorkflowLookupResponse } from '@app/@core/interfaces/recruitment-management/assessment-workflow.interface';
 import { BreadcrumbService } from '@app/@core/services';
 import { JobVacancyAttachmentService } from '@app/@core/services/recruitment/job-vacancy/job-vacancy-attachment.service';
 import { JobVacancyService } from '@app/@core/services/recruitment/job-vacancy/job-vacancy.service';
 import { HiringPipelineService } from '@app/@core/services/recruitment/hiring-pipeline/hiring-pipeline.service';
+import { AssessmentWorkflowService } from '@app/@core/services/recruitment/assessment-workflow/assessment-workflow.service';
 import { JobStatusEnum } from '@app/@core/enums/recruitment.enum';
 import { DateTimeUtility } from '@app/@core/utils/date-time.utility';
 import { Base_URL } from '@env/environment';
@@ -26,6 +28,7 @@ export class ManageJobVacancyComponent implements OnInit {
     private jobVacancyService: JobVacancyService,
     private jobVacancyAttachmentService: JobVacancyAttachmentService,
     private hiringPipelineService: HiringPipelineService,
+    private assessmentWorkflowService: AssessmentWorkflowService,
     private route: ActivatedRoute,
     private breadcrumbService: BreadcrumbService,
     private router: Router,
@@ -44,6 +47,7 @@ export class ManageJobVacancyComponent implements OnInit {
   currencyOptions = CurrencyOptions;
   currencySuggestions: string[] = [];
   hiringPipelineOptions: IHiringPipelineLookupResponse[] = [];
+  assessmentWorkflowOptions: IAssessmentWorkflowLookupResponse[] = [];
 
   // Attachments
   attachments: IJobVacancyAttachmentResponse[] = [];
@@ -66,6 +70,7 @@ export class ManageJobVacancyComponent implements OnInit {
   ngOnInit(): void {
     this.initForm();
     this.loadHiringPipelineOptions();
+    this.loadAssessmentWorkflowOptions();
 
     this.route.paramMap.subscribe((params) => {
       const idParam = params.get('id');
@@ -90,6 +95,17 @@ export class ManageJobVacancyComponent implements OnInit {
       },
       error: () => {
         this.hiringPipelineOptions = [];
+      },
+    });
+  }
+
+  private loadAssessmentWorkflowOptions(): void {
+    this.assessmentWorkflowService.getActiveLookup().subscribe({
+      next: (response) => {
+        this.assessmentWorkflowOptions = !response.hasError && response.content ? response.content : [];
+      },
+      error: () => {
+        this.assessmentWorkflowOptions = [];
       },
     });
   }
@@ -139,10 +155,8 @@ export class ManageJobVacancyComponent implements OnInit {
 
   private initForm(): void {
     this.jobVacancyForm = this.fb.group({
-      siteId: [null, [Validators.required]],
-      departmentId: [null],
-      designationId: [null],
       hiringPipelineId: [null, [Validators.required]],
+      assessmentWorkflowId: [null],
       title: [null, [Validators.required, Validators.maxLength(200), this.noWhitespaceOnly.bind(this)]],
       description: [null],
       requirements: [null],
@@ -274,10 +288,8 @@ export class ManageJobVacancyComponent implements OnInit {
 
   private getFieldDisplayName(fieldName: string): string {
     const displayNames: { [key: string]: string } = {
-      siteId: 'Site',
-      departmentId: 'Department',
-      designationId: 'Designation',
       hiringPipelineId: 'Hiring Pipeline',
+      assessmentWorkflowId: 'Assessment Workflow',
       title: 'Title',
       description: 'Description',
       requirements: 'Requirements',
@@ -314,12 +326,17 @@ export class ManageJobVacancyComponent implements OnInit {
     }
   }
 
+  // Site/Department/Designation ID inputs were removed from this form; the backend still
+  // requires a SiteId, so every vacancy created here is filed under this fixed default.
+  private static readonly DEFAULT_SITE_ID = 1;
+
   private buildRequestPayload(): IJobVacancyCreateRequest {
     const formValue = { ...this.jobVacancyForm.getRawValue() };
     delete formValue.status;
 
     return {
       ...formValue,
+      siteId: this.jobVacancyToEdit?.siteId ?? ManageJobVacancyComponent.DEFAULT_SITE_ID,
       postingDate: formValue.postingDate ? DateTimeUtility.formatDateForAPI(formValue.postingDate) : null,
       closingDate: formValue.closingDate ? DateTimeUtility.formatDateForAPI(formValue.closingDate) : null,
     };

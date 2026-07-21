@@ -15,6 +15,9 @@ export const ApplicationStatusTransitions: Record<ApplicationStatusEnum, Applica
   [ApplicationStatusEnum.Hired]: [],
   [ApplicationStatusEnum.Rejected]: [],
   [ApplicationStatusEnum.Withdrawn]: [],
+  // Not offered as a manual "next status" choice - only reachable via the dedicated Duplicates
+  // resolve flow (US-038 AC3), which records which application it's a duplicate of.
+  [ApplicationStatusEnum.DuplicateDismissed]: [],
 };
 
 export const StatusesRequiringReason: ApplicationStatusEnum[] = [ApplicationStatusEnum.Rejected, ApplicationStatusEnum.Withdrawn];

@@ -2,40 +2,98 @@
   <div>
     <p-floatlabel variant="in">
       <input pInputText inputId="email" formControlName="email" maxlength="200" class="w-full" [class.ng-invalid]="hasError('email')" [class.ng-dirty]="hasError('email')" (blur)="f['email'].markAsTouched()" />
-      <label for="email">Email *</label>
+      <label for="email">Email * <i *ngIf="identityFieldsLocked" class="fas fa-lock" pTooltip="Locked because you have a submitted application. Contact HR support to correct this." tooltipPosition="top"></i></label>
     </p-floatlabel>
     <div *ngIf="hasError('email')" class="invalid">{{ getErrorMessage('email') }}</div>
   </div>
 
   <div>
     <p-floatlabel variant="in">
-      <input pInputText inputId="phone" formControlName="phone" maxlength="50" class="w-full" [class.ng-invalid]="hasError('phone')" [class.ng-dirty]="hasError('phone')" (blur)="f['phone'].markAsTouched()" />
-      <label for="phone">Phone</label>
+      <p-select inputId="mobileOperator" [options]="mobileOperatorOptions" [appendTo]="'body'" [autoDisplayFirst]="false" optionLabel="label" optionValue="value" formControlName="mobileOperator" class="w-full"></p-select>
+      <label for="mobileOperator">Mobile Operator <i *ngIf="identityFieldsLocked" class="fas fa-lock" pTooltip="Locked because you have a submitted application. Contact HR support to correct this." tooltipPosition="top"></i></label>
     </p-floatlabel>
-    <div *ngIf="hasError('phone')" class="invalid">{{ getErrorMessage('phone') }}</div>
   </div>
 
-  <div class="sm:col-span-2">
+  <div>
     <p-floatlabel variant="in">
-      <textarea pInputText inputId="presentAddress" formControlName="presentAddress" class="w-full" rows="2"></textarea>
-      <label for="presentAddress">Present Address</label>
+      <input pInputText inputId="mobileNumber" formControlName="mobileNumber" maxlength="8" inputmode="numeric" class="w-full" [class.ng-invalid]="hasError('mobileNumber')" [class.ng-dirty]="hasError('mobileNumber')" (blur)="f['mobileNumber'].markAsTouched()" />
+      <label for="mobileNumber">Mobile Number (8 digits) <i *ngIf="identityFieldsLocked" class="fas fa-lock" pTooltip="Locked because you have a submitted application. Contact HR support to correct this." tooltipPosition="top"></i></label>
     </p-floatlabel>
-    <div *ngIf="hasError('presentAddress')" class="invalid">{{ getErrorMessage('presentAddress') }}</div>
+    <div *ngIf="hasError('mobileNumber')" class="invalid">{{ getErrorMessage('mobileNumber') }}</div>
   </div>
 
-  <div class="sm:col-span-2">
+  <h3 class="form-section-header">Present Address</h3>
+
+  <div>
     <p-floatlabel variant="in">
-      <textarea pInputText inputId="permanentAddress" formControlName="permanentAddress" class="w-full" rows="2"></textarea>
-      <label for="permanentAddress">Permanent Address</label>
+      <p-select inputId="presentDivisionId" [options]="divisionOptions" [appendTo]="'body'" [autoDisplayFirst]="false" optionLabel="name" optionValue="divisionId" formControlName="presentDivisionId" class="w-full" (onChange)="onDivisionChange('present', $event.value)"></p-select>
+      <label for="presentDivisionId">Current Division</label>
     </p-floatlabel>
-    <div *ngIf="hasError('permanentAddress')" class="invalid">{{ getErrorMessage('permanentAddress') }}</div>
   </div>
 
-  <div *ngIf="saveError" class="invalid sm:col-span-2">{{ saveError }}</div>
-  <div *ngIf="saveSuccess" class="success-message sm:col-span-2">Saved.</div>
+  <div>
+    <p-floatlabel variant="in">
+      <p-select inputId="presentDistrictId" [options]="presentDistrictOptions" [appendTo]="'body'" [autoDisplayFirst]="false" optionLabel="name" optionValue="districtId" formControlName="presentDistrictId" class="w-full" [disabled]="!f['presentDivisionId'].value" (onChange)="onDistrictChange('present', $event.value)"></p-select>
+      <label for="presentDistrictId">Current District</label>
+    </p-floatlabel>
+  </div>
 
-  <div class="sm:col-span-2">
-    <button pButton type="submit" [disabled]="saving">
+  <div>
+    <p-floatlabel variant="in">
+      <p-select inputId="presentThanaId" [options]="presentThanaOptions" [appendTo]="'body'" [autoDisplayFirst]="false" optionLabel="name" optionValue="thanaId" formControlName="presentThanaId" class="w-full" [disabled]="!f['presentDistrictId'].value"></p-select>
+      <label for="presentThanaId">Current Thana</label>
+    </p-floatlabel>
+  </div>
+
+  <div class="sm:col-span-2 lg:col-span-3 xl:col-span-4">
+    <p-floatlabel variant="in">
+      <textarea pInputText inputId="presentAddressDetail" formControlName="presentAddressDetail" class="w-full" rows="2"></textarea>
+      <label for="presentAddressDetail">Present Address (house/road, etc.)</label>
+    </p-floatlabel>
+    <div *ngIf="hasError('presentAddressDetail')" class="invalid">{{ getErrorMessage('presentAddressDetail') }}</div>
+  </div>
+
+  <h3 class="form-section-header">Home Address</h3>
+
+  <div>
+    <p-floatlabel variant="in">
+      <p-select inputId="homeDivisionId" [options]="divisionOptions" [appendTo]="'body'" [autoDisplayFirst]="false" optionLabel="name" optionValue="divisionId" formControlName="homeDivisionId" class="w-full" (onChange)="onDivisionChange('home', $event.value)"></p-select>
+      <label for="homeDivisionId">Home Division</label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel variant="in">
+      <p-select inputId="homeDistrictId" [options]="homeDistrictOptions" [appendTo]="'body'" [autoDisplayFirst]="false" optionLabel="name" optionValue="districtId" formControlName="homeDistrictId" class="w-full" [disabled]="!f['homeDivisionId'].value" (onChange)="onDistrictChange('home', $event.value)"></p-select>
+      <label for="homeDistrictId">Home District</label>
+    </p-floatlabel>
+  </div>
+
+  <div>
+    <p-floatlabel variant="in">
+      <p-select inputId="homeThanaId" [options]="homeThanaOptions" [appendTo]="'body'" [autoDisplayFirst]="false" optionLabel="name" optionValue="thanaId" formControlName="homeThanaId" class="w-full" [disabled]="!f['homeDistrictId'].value"></p-select>
+      <label for="homeThanaId">Home Thana</label>
+    </p-floatlabel>
+  </div>
+
+  <div class="sm:col-span-2 lg:col-span-3 xl:col-span-4 flex items-center gap-2">
+    <p-checkbox inputId="sameAsPresent" formControlName="sameAsPresent" [binary]="true"></p-checkbox>
+    <label for="sameAsPresent">Permanent address same as present address</label>
+  </div>
+
+  <div class="sm:col-span-2 lg:col-span-3 xl:col-span-4">
+    <p-floatlabel variant="in">
+      <textarea pInputText inputId="permanentAddressDetail" formControlName="permanentAddressDetail" class="w-full" rows="2"></textarea>
+      <label for="permanentAddressDetail">Permanent Address (house/road, etc.)</label>
+    </p-floatlabel>
+    <div *ngIf="hasError('permanentAddressDetail')" class="invalid">{{ getErrorMessage('permanentAddressDetail') }}</div>
+  </div>
+
+  <div *ngIf="saveError" class="invalid sm:col-span-2 lg:col-span-3 xl:col-span-4">{{ saveError }}</div>
+  <div *ngIf="saveSuccess" class="success-message sm:col-span-2 lg:col-span-3 xl:col-span-4">Saved.</div>
+
+  <div class="sm:col-span-2 lg:col-span-3 xl:col-span-4">
+    <button pButton type="submit" [disabled]="saving || form.pristine">
       <i class="fas fa-save"></i>
       <span>{{ saving ? 'Saving...' : 'Save' }}</span>
     </button>

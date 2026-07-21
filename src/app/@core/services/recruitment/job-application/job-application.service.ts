@@ -7,11 +7,13 @@ import {
   IJobApplicationBulkStatusUpdateRequest,
   IJobApplicationBulkStatusUpdateResponse,
   IJobApplicationDetail,
+  IJobApplicationDuplicateGroup,
+  IJobApplicationDuplicateResolveRequest,
   IJobApplicationListItem,
   IJobApplicationStatusUpdateRequest,
   IMyApplication,
 } from '@core/interfaces/recruitment-management/job-application.interface';
-import { IJobApplicationSubmitResponse } from '@core/interfaces/recruitment-management/career-portal.interface';
+import { IJobApplicationSubmitResponse, IJobEligibilityResponse } from '@core/interfaces/recruitment-management/career-portal.interface';
 import { IJobApplicationPipelineProgress, IPipelineStageProgressUpdateRequest } from '@core/interfaces/recruitment-management/pipeline-progress.interface';
 import { BASE_URL_Recruitment } from '@env/environment';
 
@@ -54,6 +56,7 @@ export class JobApplicationService {
     candidateName: string;
     candidateEmail: string;
     candidatePhone?: string;
+    candidateNationalId?: string;
     coverLetter?: string;
     resume: File;
   }) {
@@ -62,6 +65,7 @@ export class JobApplicationService {
     formData.append('candidateName', request.candidateName);
     formData.append('candidateEmail', request.candidateEmail);
     if (request.candidatePhone) formData.append('candidatePhone', request.candidatePhone);
+    if (request.candidateNationalId) formData.append('candidateNationalId', request.candidateNationalId);
     if (request.coverLetter) formData.append('coverLetter', request.coverLetter);
     formData.append('resume', request.resume, request.resume.name);
     return this.httpClient.post<ApiResponse<IJobApplicationSubmitResponse>>(`${this.API_URL}/apply-on-behalf`, formData);
@@ -77,6 +81,11 @@ export class JobApplicationService {
     return this.httpClient.patch<ApiResponse<void>>(`${this.API_URL}/my-applications/${jobApplicationId}/withdraw`, {});
   }
 
+  /** Real-time eligibility check for the current candidate against a job posting (US-024 AC2/AC3). */
+  checkEligibility(jobPostingId: number) {
+    return this.httpClient.get<ApiResponse<IJobEligibilityResponse>>(`${this.API_URL}/job-posting/${jobPostingId}/eligibility`);
+  }
+
   // ── Pipeline Progress Tracker (US-042) ──────────────────────────
 
   getPipelineProgress(jobApplicationId: number) {
@@ -85,5 +94,15 @@ export class JobApplicationService {
 
   updateStageProgress(jobApplicationId: number, pipelineStageId: number, request: IPipelineStageProgressUpdateRequest) {
     return this.httpClient.patch<ApiResponse<void>>(`${this.API_URL}/${jobApplicationId}/pipeline-progress/${pipelineStageId}`, request);
+  }
+
+  // ── Duplicate Detection (US-038) ─────────────────────────────────
+
+  getDuplicates(jobPostingId: number) {
+    return this.httpClient.get<ApiResponse<IJobApplicationDuplicateGroup[]>>(`${this.API_URL}/job-posting/${jobPostingId}/duplicates`);
+  }
+
+  resolveDuplicates(request: IJobApplicationDuplicateResolveRequest) {
+    return this.httpClient.patch<ApiResponse<void>>(`${this.API_URL}/duplicates/resolve`, request);
   }
 }
