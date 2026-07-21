@@ -62,6 +62,9 @@ import { RouteReusableStrategy } from './@core/helpers/route-reusable-strategy';
     providePrimeNG({
       theme: {
         preset: Aura,
+        options: {
+          darkModeSelector: '.dark',
+        },
       },
     }),
   ],
