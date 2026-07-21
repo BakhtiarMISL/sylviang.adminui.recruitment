@@ -55,10 +55,6 @@ const routes: Routes = [
       loadChildren: () => import('./candidate-recommendation-management/candidate-recommendation-management.module').then((m) => m.CandidateRecommendationManagementModule),
     },
     {
-      path: 'exam-halls',
-      loadChildren: () => import('./exam-hall-management/exam-hall-management.module').then((m) => m.ExamHallManagementModule),
-    },
-    {
       path: 'exam-questions',
       loadChildren: () => import('./exam-question-management/exam-question-management.module').then((m) => m.ExamQuestionManagementModule),
     },
