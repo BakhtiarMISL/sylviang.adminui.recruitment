@@ -19,9 +19,18 @@ import { CompletenessRingComponent } from './components/completeness-ring/comple
 import { FilterPanelComponent } from './components/filter-panel/filter-panel.component';
 import { PublicFooterComponent } from './components/public-footer/public-footer.component';
 import { PublicNavbarComponent } from './components/public-navbar/public-navbar.component';
+import { CountUpDirective } from './directives/count-up.directive';
+import { RevealOnScrollDirective } from './directives/reveal-on-scroll.directive';
 
 @NgModule({
-  declarations: [CompletenessRingComponent, FilterPanelComponent, PublicNavbarComponent, PublicFooterComponent],
+  declarations: [
+    CompletenessRingComponent,
+    FilterPanelComponent,
+    PublicNavbarComponent,
+    PublicFooterComponent,
+    RevealOnScrollDirective,
+    CountUpDirective,
+  ],
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -49,6 +58,8 @@ import { PublicNavbarComponent } from './components/public-navbar/public-navbar.
     FilterPanelComponent,
     PublicNavbarComponent,
     PublicFooterComponent,
+    RevealOnScrollDirective,
+    CountUpDirective,
     DatePickerModule,
     SelectModule,
     MultiSelectModule,
