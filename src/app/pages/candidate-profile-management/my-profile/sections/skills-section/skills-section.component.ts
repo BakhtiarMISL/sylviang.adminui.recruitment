@@ -18,6 +18,9 @@ import { ProficiencyLevelOptions } from './skills-section.component.constants';
 })
 export class SkillsSectionComponent implements OnInit {
   @Output() saved = new EventEmitter<void>();
+  // Lets the parent persist the current (post-Use/Dismiss) suggestion list so a page refresh
+  // can restore exactly what's left instead of resurrecting already-handled suggestions.
+  @Output() suggestionsChanged = new EventEmitter<string[]>();
 
   constructor(
     private fb: FormBuilder,
@@ -56,10 +59,12 @@ export class SkillsSectionComponent implements OnInit {
   useSkillSuggestion(skill: string, index: number): void {
     this.form.patchValue({ skillName: skill, skillLibraryItemId: null });
     this.prefillSkillSuggestions = this.prefillSkillSuggestions.filter((_, i) => i !== index);
+    this.suggestionsChanged.emit(this.prefillSkillSuggestions);
   }
 
   dismissSkillSuggestion(index: number): void {
     this.prefillSkillSuggestions = this.prefillSkillSuggestions.filter((_, i) => i !== index);
+    this.suggestionsChanged.emit(this.prefillSkillSuggestions);
   }
 
   // Bulk-saves every suggested skill directly (see EducationSectionComponent.useAllSuggestions
@@ -92,6 +97,7 @@ export class SkillsSectionComponent implements OnInit {
         this.savingAllSkills = false;
         const succeeded = new Set(results.filter((r) => r.succeeded).map((r) => r.skillName));
         this.prefillSkillSuggestions = this.prefillSkillSuggestions.filter((s) => !succeeded.has(s));
+        this.suggestionsChanged.emit(this.prefillSkillSuggestions);
         this.loadSkills();
         this.saved.emit();
       });

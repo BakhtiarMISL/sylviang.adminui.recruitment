@@ -18,6 +18,9 @@ import { catchError, concatMap, from, Observable, of, toArray } from 'rxjs';
 })
 export class WorkExperienceSectionComponent implements OnInit {
   @Output() saved = new EventEmitter<void>();
+  // Lets the parent persist the current (post-Use/Dismiss) suggestion list so a page refresh
+  // can restore exactly what's left instead of resurrecting already-handled suggestions.
+  @Output() suggestionsChanged = new EventEmitter<ICandidateResumeParsedWorkExperience[]>();
 
   constructor(
     private fb: FormBuilder,
@@ -68,10 +71,12 @@ export class WorkExperienceSectionComponent implements OnInit {
       location: suggestion.location,
     });
     this.prefillSuggestions = this.prefillSuggestions.filter((_, i) => i !== index);
+    this.suggestionsChanged.emit(this.prefillSuggestions);
   }
 
   dismissSuggestion(index: number): void {
     this.prefillSuggestions = this.prefillSuggestions.filter((_, i) => i !== index);
+    this.suggestionsChanged.emit(this.prefillSuggestions);
   }
 
   isSuggestionReady(suggestion: ICandidateResumeParsedWorkExperience): boolean {
@@ -114,6 +119,7 @@ export class WorkExperienceSectionComponent implements OnInit {
         this.savingAll = false;
         const succeeded = new Set(results.filter((r) => r.succeeded).map((r) => r.suggestion));
         this.prefillSuggestions = this.prefillSuggestions.filter((s) => !succeeded.has(s));
+        this.suggestionsChanged.emit(this.prefillSuggestions);
         this.loadWorkExperience();
         this.saved.emit();
       });

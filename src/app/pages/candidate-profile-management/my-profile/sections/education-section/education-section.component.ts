@@ -20,6 +20,9 @@ import { DivisionResultOptions, EducationLevelOptions, GradingSystemOptions } fr
 })
 export class EducationSectionComponent implements OnInit {
   @Output() saved = new EventEmitter<void>();
+  // Lets the parent persist the current (post-Use/Dismiss) suggestion list so a page refresh
+  // can restore exactly what's left instead of resurrecting already-handled suggestions.
+  @Output() suggestionsChanged = new EventEmitter<ICandidateResumeParsedEducation[]>();
 
   constructor(
     private fb: FormBuilder,
@@ -74,10 +77,12 @@ export class EducationSectionComponent implements OnInit {
       majorSubject: suggestion.majorSubject,
     });
     this.prefillSuggestions = this.prefillSuggestions.filter((_, i) => i !== index);
+    this.suggestionsChanged.emit(this.prefillSuggestions);
   }
 
   dismissSuggestion(index: number): void {
     this.prefillSuggestions = this.prefillSuggestions.filter((_, i) => i !== index);
+    this.suggestionsChanged.emit(this.prefillSuggestions);
   }
 
   isSuggestionReady(suggestion: ICandidateResumeParsedEducation): boolean {
@@ -120,6 +125,7 @@ export class EducationSectionComponent implements OnInit {
         this.savingAll = false;
         const succeeded = new Set(results.filter((r) => r.succeeded).map((r) => r.suggestion));
         this.prefillSuggestions = this.prefillSuggestions.filter((s) => !succeeded.has(s));
+        this.suggestionsChanged.emit(this.prefillSuggestions);
         this.loadEducation();
         this.saved.emit();
       });
