@@ -57,7 +57,7 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   sortBy = '';
   sortDirection = '';
   columns = AtsDashboardColumns;
-  filtersCollapsed = false;
+  filtersCollapsed = true;
 
   // Filters (US-035 AC2)
   filterJobPostingId: number | null = null;
@@ -135,6 +135,7 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     this.restoreFiltersFromSession();
     this.filterChange$.pipe(debounceTime(400)).subscribe(() => {
       this.currentPage = 1;
+      this.filtersCollapsed = true;
       this.saveFiltersToSession();
       this.loadApplications();
     });
@@ -195,6 +196,7 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   applyFilters(): void {
     this.currentPage = 1;
+    this.filtersCollapsed = true;
     this.saveFiltersToSession();
     this.loadApplications();
   }
@@ -385,14 +387,12 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
           this.totalRecords = 0;
         }
         this.loading = false;
-        this.filtersCollapsed = this.totalRecords > 0;
         this.cdr.detectChanges();
       },
       error: () => {
         this.applications = [];
         this.totalRecords = 0;
         this.loading = false;
-        this.filtersCollapsed = false;
         this.cdr.detectChanges();
       },
     });

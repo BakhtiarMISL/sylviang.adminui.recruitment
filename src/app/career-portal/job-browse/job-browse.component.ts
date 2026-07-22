@@ -42,7 +42,7 @@ export class JobBrowseComponent implements OnInit, AfterViewInit {
   experienceBucketOptions = ExperienceBucketOptions;
 
   columns = JobBrowseColumns;
-  filtersCollapsed = false;
+  filtersCollapsed = true;
 
   searchTerm = '';
   location = '';
@@ -66,6 +66,7 @@ export class JobBrowseComponent implements OnInit, AfterViewInit {
 
   applyFilters(): void {
     this.currentPage = 1;
+    this.filtersCollapsed = true;
     this.loadJobPostings();
   }
 
@@ -105,14 +106,12 @@ export class JobBrowseComponent implements OnInit, AfterViewInit {
           this.totalRecords = 0;
         }
         this.loading = false;
-        this.filtersCollapsed = this.totalRecords > 0;
         this.cdr.detectChanges();
       },
       error: () => {
         this.jobPostings = [];
         this.totalRecords = 0;
         this.loading = false;
-        this.filtersCollapsed = false;
         this.cdr.detectChanges();
       },
     });

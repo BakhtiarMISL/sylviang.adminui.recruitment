@@ -36,7 +36,7 @@ export class ExamQuestionListComponent implements OnInit {
   sortBy = '';
   sortDirection = '';
   searchTerm = '';
-  filtersCollapsed = false;
+  filtersCollapsed = true;
 
   filterQuestionGroupId: number | null = null;
   filterQuestionType: QuestionTypeEnum | null = null;
@@ -103,14 +103,12 @@ export class ExamQuestionListComponent implements OnInit {
           this.totalRecords = 0;
         }
         this.loading = false;
-        this.filtersCollapsed = this.totalRecords > 0;
         this.cdr.detectChanges();
       },
       error: () => {
         this.questions = [];
         this.totalRecords = 0;
         this.loading = false;
-        this.filtersCollapsed = false;
         this.cdr.detectChanges();
       },
     });
@@ -118,6 +116,7 @@ export class ExamQuestionListComponent implements OnInit {
 
   applySearch(): void {
     this.currentPage = 1;
+    this.filtersCollapsed = true;
     this.loadQuestions();
   }
 
@@ -129,6 +128,7 @@ export class ExamQuestionListComponent implements OnInit {
 
   applyFilters(): void {
     this.currentPage = 1;
+    this.filtersCollapsed = true;
     this.loadQuestions();
   }
 

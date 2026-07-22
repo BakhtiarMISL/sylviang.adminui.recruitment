@@ -37,7 +37,7 @@ export class CvBankSearchComponent implements OnInit {
   currentPage = 1;
   statusMessage = '';
   statusIsError = false;
-  filtersCollapsed = false;
+  filtersCollapsed = true;
 
   get skeletonItems() {
     return Array(this.rows)
@@ -51,6 +51,7 @@ export class CvBankSearchComponent implements OnInit {
 
   search(): void {
     this.currentPage = 1;
+    this.filtersCollapsed = true;
     this.loadResults();
   }
 
@@ -94,7 +95,6 @@ export class CvBankSearchComponent implements OnInit {
           }
           this.selectedResults = [];
           this.loading = false;
-          this.filtersCollapsed = this.totalRecords > 0;
           this.cdr.detectChanges();
         },
         error: () => {
