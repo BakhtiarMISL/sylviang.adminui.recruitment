@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { IJobEligibilityResponse, IPublicJobPostingResponse } from '@app/@core/interfaces/recruitment-management/career-portal.interface';
 import { CareerPortalService } from '@app/@core/services/recruitment/career-portal/career-portal.service';
 import { JobApplicationService } from '@app/@core/services/recruitment/job-application/job-application.service';
@@ -18,6 +18,7 @@ export class JobDetailComponent implements OnInit {
     private jobApplicationService: JobApplicationService,
     private authService: AuthService,
     private route: ActivatedRoute,
+    private router: Router,
     private cdr: ChangeDetectorRef,
   ) {}
 
@@ -81,6 +82,10 @@ export class JobDetailComponent implements OnInit {
 
   get isLoggedIn(): boolean {
     return this.authService.isAuthenticated();
+  }
+
+  goToLogin(): void {
+    this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
   }
 
   get hasEligibilityInfo(): boolean {

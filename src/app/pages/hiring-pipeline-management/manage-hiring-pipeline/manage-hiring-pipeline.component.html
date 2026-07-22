@@ -76,6 +76,19 @@
               <label [for]="'slaDays' + i">SLA</label>
             </p-floatlabel>
 
+            <p-floatlabel variant="in">
+              <p-inputnumber [inputId]="'maxMarks' + i" class="w-full" [(ngModel)]="stage.maxMarks" [ngModelOptions]="{ standalone: true }" [min]="0"></p-inputnumber>
+              <label [for]="'maxMarks' + i">Max Marks (if this stage is an assessment)</label>
+            </p-floatlabel>
+
+            <div>
+              <p-floatlabel variant="in">
+                <p-inputnumber [inputId]="'passMarks' + i" class="w-full" [(ngModel)]="stage.passMarks" [ngModelOptions]="{ standalone: true }" [min]="0"></p-inputnumber>
+                <label [for]="'passMarks' + i">Pass Marks</label>
+              </p-floatlabel>
+              <small class="text-red-500" *ngIf="marksAreInvalid(stage)">Pass marks must not exceed max marks.</small>
+            </div>
+
             <div class="flex items-center gap-2">
               <label [for]="'colorBadge' + i" class="text-sm text-gray-600">Color Badge</label>
               <input type="color" [id]="'colorBadge' + i" [(ngModel)]="stage.colorBadge" [ngModelOptions]="{ standalone: true }" class="h-9 w-14 cursor-pointer rounded border border-gray-300" />

@@ -28,13 +28,12 @@ export class ManageExamRoomComponent implements OnInit {
   examRoomId: number | null = null;
   venueName = '';
   errorMessage = '';
-  invigilatorEmployeeIds: number[] = [];
+  requiredInvigilatorCount = 0;
 
   ngOnInit(): void {
     this.roomForm = this.fb.group({
       roomName: [null, [Validators.required, Validators.maxLength(200)]],
       capacity: [null, [Validators.required, Validators.min(1)]],
-      notifyInvigilatorsOnAssign: [true],
     });
 
     this.route.paramMap.subscribe((params) => {
@@ -84,9 +83,8 @@ export class ManageExamRoomComponent implements OnInit {
           this.roomForm.patchValue({
             roomName: response.content.roomName,
             capacity: response.content.capacity,
-            notifyInvigilatorsOnAssign: response.content.notifyInvigilatorsOnAssign,
           });
-          this.invigilatorEmployeeIds = response.content.invigilatorEmployeeIds;
+          this.requiredInvigilatorCount = response.content.requiredInvigilatorCount;
         } else {
           this.router.navigate(['/exam-venues/exam-venue', this.examVenueId, 'rooms']);
         }
@@ -106,14 +104,8 @@ export class ManageExamRoomComponent implements OnInit {
     return !!(field && field.invalid && (field.dirty || field.touched || this.formSubmitted));
   }
 
-  onInvigilatorIdsBlur(event: Event): void {
-    const value = (event.target as HTMLInputElement).value;
-    this.invigilatorEmployeeIds = value
-      .split(',')
-      .map((s) => s.trim())
-      .filter(Boolean)
-      .map(Number)
-      .filter((n) => !isNaN(n));
+  incrementRequiredInvigilatorCount(): void {
+    this.requiredInvigilatorCount++;
   }
 
   onSubmit(): void {
@@ -128,8 +120,7 @@ export class ManageExamRoomComponent implements OnInit {
     const request = {
       roomName: this.roomForm.value.roomName,
       capacity: this.roomForm.value.capacity,
-      notifyInvigilatorsOnAssign: this.roomForm.value.notifyInvigilatorsOnAssign,
-      invigilatorEmployeeIds: this.invigilatorEmployeeIds,
+      requiredInvigilatorCount: this.requiredInvigilatorCount,
     };
 
     if (this.isEditMode && this.examRoomId) {

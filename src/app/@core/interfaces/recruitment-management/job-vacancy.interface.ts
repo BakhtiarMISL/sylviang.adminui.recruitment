@@ -23,7 +23,6 @@ export interface IJobVacancyCreateRequest {
   applicationFeeAmount?: number;
   applicationFeeCurrency?: string;
   hiringPipelineId: number;
-  assessmentWorkflowId?: number;
 }
 
 export interface IJobVacancyResponse extends IJobVacancyCreateRequest {
@@ -36,7 +35,6 @@ export interface IJobVacancyResponse extends IJobVacancyCreateRequest {
   totalApplications: number;
   isActive: boolean;
   hiringPipelineName?: string;
-  assessmentWorkflowName?: string;
 }
 
 export interface IJobVacancyUpdateRequest extends IJobVacancyCreateRequest {

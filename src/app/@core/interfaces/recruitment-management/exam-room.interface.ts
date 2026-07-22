@@ -1,8 +1,7 @@
 export interface IExamRoomRequest {
   roomName: string;
   capacity: number;
-  notifyInvigilatorsOnAssign: boolean;
-  invigilatorEmployeeIds: number[];
+  requiredInvigilatorCount: number;
 }
 
 export interface IExamRoomResponse {
@@ -10,7 +9,6 @@ export interface IExamRoomResponse {
   examVenueId: number;
   roomName: string;
   capacity: number;
-  notifyInvigilatorsOnAssign: boolean;
+  requiredInvigilatorCount: number;
   isActive: boolean;
-  invigilatorEmployeeIds: number[];
 }

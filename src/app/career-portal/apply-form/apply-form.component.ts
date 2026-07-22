@@ -1,6 +1,7 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { IJobApplicationSubmitResponse, IJobEligibilityResponse } from '@app/@core/interfaces/recruitment-management/career-portal.interface';
+import { CandidateProfileService } from '@app/@core/services/recruitment/candidate-profile/candidate-profile.service';
 import { CareerPortalService } from '@app/@core/services/recruitment/career-portal/career-portal.service';
 import { PaymentService } from '@app/@core/services/recruitment/payment/payment.service';
 import { RESUME_ALLOWED_EXTENSIONS, RESUME_MAX_SIZE_BYTES } from '../career-portal.constants';
@@ -11,7 +12,7 @@ import { RESUME_ALLOWED_EXTENSIONS, RESUME_MAX_SIZE_BYTES } from '../career-port
   templateUrl: './apply-form.component.html',
   styleUrl: './apply-form.component.scss',
 })
-export class ApplyFormComponent {
+export class ApplyFormComponent implements OnInit {
   @Input() jobPostingId!: number;
   @Input() eligibilityResult: IJobEligibilityResponse | null = null;
   acknowledgedIneligibility = false;
@@ -25,12 +26,33 @@ export class ApplyFormComponent {
     private fb: FormBuilder,
     private careerPortalService: CareerPortalService,
     private paymentService: PaymentService,
+    private candidateProfileService: CandidateProfileService,
   ) {
     this.applyForm = this.fb.group({
       candidateName: [null, [Validators.required]],
       candidateEmail: [null, [Validators.required, Validators.email]],
       candidatePhone: [null],
       coverLetter: [null],
+    });
+  }
+
+  // No guest apply - applying always requires a logged-in candidate account, so prefill from
+  // their own profile instead of forcing a blank form (same precedent as the internal apply form).
+  ngOnInit(): void {
+    this.candidateProfileService.getMyProfile().subscribe({
+      next: (response) => {
+        if (response && !response.hasError && response.content) {
+          const profile = response.content;
+          this.applyForm.patchValue({
+            candidateName: profile.fullName || null,
+            candidateEmail: profile.email || null,
+            candidatePhone: profile.phone || null,
+          });
+        }
+      },
+      // Prefill is a convenience, not a requirement - leave the form blank on failure rather
+      // than blocking the candidate from applying.
+      error: () => {},
     });
   }
 

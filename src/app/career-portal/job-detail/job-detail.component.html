@@ -68,7 +68,18 @@
 
       <section class="rounded-lg bg-white p-6 shadow-sm">
         <h2 class="mb-4 text-lg font-medium text-gray-900">Apply for this position</h2>
-        <app-apply-form [jobPostingId]="jobPosting.jobPostingId" [eligibilityResult]="eligibilityResult"></app-apply-form>
+        <app-apply-form *ngIf="isLoggedIn" [jobPostingId]="jobPosting.jobPostingId" [eligibilityResult]="eligibilityResult"></app-apply-form>
+        <div *ngIf="!isLoggedIn" class="rounded-md bg-gray-50 p-4 text-center">
+          <p class="mb-3 text-sm text-gray-700">You need a candidate account to apply for this position.</p>
+          <div class="flex justify-center gap-2">
+            <button pButton type="button" (click)="goToLogin()">
+              <span>Login to Apply</span>
+            </button>
+            <a [routerLink]="['/register']" pButton type="button" class="p-button-outlined">
+              <span>Create Account</span>
+            </a>
+          </div>
+        </div>
       </section>
     </div>
   </div>

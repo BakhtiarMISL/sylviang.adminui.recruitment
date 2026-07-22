@@ -16,20 +16,14 @@
         </p-floatlabel>
         <small class="text-red-500" *ngIf="hasError('capacity')">Capacity must be greater than zero.</small>
 
-        <p-floatlabel variant="in">
-          <input
-            pInputText
-            id="invigilatorEmployeeIds"
-            class="w-full"
-            [value]="invigilatorEmployeeIds.join(', ')"
-            (blur)="onInvigilatorIdsBlur($event)"
-          />
-          <label for="invigilatorEmployeeIds">Invigilator Employee IDs</label>
-        </p-floatlabel>
-
-        <div class="checkbox-container sm:col-span-2">
-          <p-checkbox inputId="notifyInvigilatorsOnAssign" formControlName="notifyInvigilatorsOnAssign" [binary]="true"></p-checkbox>
-          <label for="notifyInvigilatorsOnAssign">Notify invigilators when assigned</label>
+        <div class="flex flex-col gap-1">
+          <label>How many invigilator required</label>
+          <div class="flex items-center gap-3">
+            <span class="text-lg font-medium">{{ requiredInvigilatorCount }}</span>
+            <button pButton type="button" severity="secondary" size="small" (click)="incrementRequiredInvigilatorCount()">
+              <i class="fa fa-plus"></i>
+            </button>
+          </div>
         </div>
       </div>
 
