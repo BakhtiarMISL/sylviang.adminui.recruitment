@@ -94,10 +94,22 @@
         <span class="table-title-info" *ngIf="totalRecords > 0">({{ totalRecords }} total)</span>
       </h3>
 
-      <button pButton [disabled]="selectedResults.length === 0" (click)="addSelectedToTalentPool()">
-        <i class="fa fa-plus"></i>
-        <span>Add {{ selectedResults.length || '' }} to Talent Pool</span>
-      </button>
+      <div class="flex gap-2">
+        <button pButton severity="secondary" [disabled]="selectedResults.length === 0 || bulkDownloading" (click)="downloadSelectedCvs()">
+          <i class="fa" [class.fa-file-zipper]="!bulkDownloading" [class.fa-spinner]="bulkDownloading" [class.fa-spin]="bulkDownloading"></i>
+          <span>Download {{ selectedResults.length || '' }} CV(s)</span>
+        </button>
+
+        <button pButton severity="secondary" [disabled]="selectedResults.length === 0 || bulkExporting" (click)="exportSelectedToExcel()">
+          <i class="fa" [class.fa-file-excel]="!bulkExporting" [class.fa-spinner]="bulkExporting" [class.fa-spin]="bulkExporting"></i>
+          <span>Export to Excel</span>
+        </button>
+
+        <button pButton [disabled]="selectedResults.length === 0" (click)="addSelectedToTalentPool()">
+          <i class="fa fa-plus"></i>
+          <span>Add {{ selectedResults.length || '' }} to Talent Pool</span>
+        </button>
+      </div>
     </div>
 
     <div class="transition-all duration-500 ease-in-out">
@@ -128,6 +140,7 @@
             <th>Education</th>
             <th style="width: 8rem">Experience</th>
             <th style="width: 6rem">Relevance</th>
+            <th style="width: 4rem">CV</th>
           </tr>
         </ng-template>
 
@@ -136,6 +149,7 @@
             <tr>
               <td></td>
               <td><p-skeleton width="2rem" height="2rem" styleClass="!rounded-full"></p-skeleton></td>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
               <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
               <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
               <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
@@ -156,13 +170,30 @@
               <td>{{ candidate.educationSummary || '-' }}</td>
               <td>{{ candidate.totalExperienceYears }} yrs</td>
               <td>{{ candidate.relevanceScore }}</td>
+              <td>
+                <button
+                  pButton
+                  severity="secondary"
+                  [text]="true"
+                  [disabled]="downloadingCandidateId === candidate.candidateProfileId"
+                  (click)="downloadCv(candidate)"
+                  title="Download CV"
+                >
+                  <i
+                    class="fa"
+                    [class.fa-download]="downloadingCandidateId !== candidate.candidateProfileId"
+                    [class.fa-spinner]="downloadingCandidateId === candidate.candidateProfileId"
+                    [class.fa-spin]="downloadingCandidateId === candidate.candidateProfileId"
+                  ></i>
+                </button>
+              </td>
             </tr>
           }
         </ng-template>
 
         <ng-template pTemplate="emptymessage">
           <tr>
-            <td colspan="8" class="not-found">
+            <td colspan="9" class="not-found">
               <div>
                 <i class="fa fa-magnifying-glass-minus"></i>
                 <p>{{ hasSearched ? 'No candidates match this search' : 'Search the CV bank to see results' }}</p>
