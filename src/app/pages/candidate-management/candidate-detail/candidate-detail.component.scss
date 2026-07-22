@@ -62,7 +62,9 @@
 }
 
 .skill-chip {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   padding: 0.25rem 0.75rem;
   border-radius: 9999px;
   background: var(--p-primary-50, #ecfdf5);
@@ -70,7 +72,31 @@
   font-size: 0.8rem;
 }
 
+.skill-chip button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--p-red-500, #ef4444);
+  display: inline-flex;
+  align-items: center;
+}
+
 .success-message {
   color: var(--p-primary-color, green);
   font-size: 0.875rem;
+}
+
+.profile-type-badge {
+  margin-left: 0.5rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: #e5e7eb;
+  color: #374151;
+
+  &.internal {
+    background: #dbeafe;
+    color: #1e40af;
+  }
 }

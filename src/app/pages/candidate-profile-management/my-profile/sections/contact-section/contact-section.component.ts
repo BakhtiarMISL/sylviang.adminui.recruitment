@@ -1,7 +1,8 @@
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ICandidateProfileResponse } from '@app/@core/interfaces/recruitment-management/candidate-profile.interface';
+import { ICandidateProfileResponse, IDistrictResponse, IDivisionResponse, IThanaResponse } from '@app/@core/interfaces/recruitment-management/candidate-profile.interface';
 import { CandidateProfileService } from '@app/@core/services/recruitment/candidate-profile/candidate-profile.service';
+import { MobileOperatorOptions, MobileOperatorPrefixes } from './contact-section.component.constants';
 
 @Component({
   selector: 'app-contact-section',
@@ -9,7 +10,7 @@ import { CandidateProfileService } from '@app/@core/services/recruitment/candida
   templateUrl: './contact-section.component.html',
   styleUrl: './contact-section.component.scss',
 })
-export class ContactSectionComponent implements OnChanges {
+export class ContactSectionComponent implements OnInit, OnChanges {
   @Input() profile!: ICandidateProfileResponse;
   @Output() saved = new EventEmitter<void>();
 
@@ -19,9 +20,50 @@ export class ContactSectionComponent implements OnChanges {
   ) {
     this.form = this.fb.group({
       email: [null, [Validators.required, Validators.email, Validators.maxLength(200)]],
-      phone: [null, [Validators.maxLength(50)]],
-      presentAddress: [null, [Validators.maxLength(500)]],
-      permanentAddress: [null, [Validators.maxLength(500)]],
+      mobileOperator: [null],
+      mobileNumber: [null, [Validators.pattern(/^[0-9]{8}$/)]],
+
+      presentDivisionId: [null],
+      presentDistrictId: [null],
+      presentThanaId: [null],
+      presentAddressDetail: [null, [Validators.maxLength(500)]],
+
+      homeDivisionId: [null],
+      homeDistrictId: [null],
+      homeThanaId: [null],
+      permanentAddressDetail: [null, [Validators.maxLength(500)]],
+      sameAsPresent: [false],
+    });
+
+    // "Same as present" mirrors the whole Present Address group (Division/District/Thana +
+    // detail line) into Home Address, disabling Home so it can't drift out of sync while checked.
+    ['presentDivisionId', 'presentDistrictId', 'presentThanaId', 'presentAddressDetail'].forEach((presentField) => {
+      const homeField = presentField.replace('present', 'home');
+      this.form.get(presentField)!.valueChanges.subscribe((value) => {
+        if (this.form.get('sameAsPresent')!.value) {
+          this.form.get(homeField)!.setValue(value, { emitEvent: false });
+        }
+      });
+    });
+
+    this.form.get('sameAsPresent')!.valueChanges.subscribe((checked) => {
+      const homeFields = ['homeDivisionId', 'homeDistrictId', 'homeThanaId', 'permanentAddressDetail'];
+      if (checked) {
+        this.homeDistrictOptions = this.presentDistrictOptions;
+        this.homeThanaOptions = this.presentThanaOptions;
+        this.form.patchValue(
+          {
+            homeDivisionId: this.form.get('presentDivisionId')!.value,
+            homeDistrictId: this.form.get('presentDistrictId')!.value,
+            homeThanaId: this.form.get('presentThanaId')!.value,
+            permanentAddressDetail: this.form.get('presentAddressDetail')!.value,
+          },
+          { emitEvent: false },
+        );
+        homeFields.forEach((f) => this.form.get(f)!.disable({ emitEvent: false }));
+      } else {
+        homeFields.forEach((f) => this.form.get(f)!.enable({ emitEvent: false }));
+      }
     });
   }
 
@@ -31,11 +73,30 @@ export class ContactSectionComponent implements OnChanges {
   saveError = '';
   saveSuccess = false;
 
+  mobileOperatorOptions = MobileOperatorOptions;
+  divisionOptions: IDivisionResponse[] = [];
+  presentDistrictOptions: IDistrictResponse[] = [];
+  presentThanaOptions: IThanaResponse[] = [];
+  homeDistrictOptions: IDistrictResponse[] = [];
+  homeThanaOptions: IThanaResponse[] = [];
+
+  ngOnInit(): void {
+    this.candidateProfileService.getDivisions().subscribe({
+      next: (response) => {
+        this.divisionOptions = !response.hasError && response.content ? response.content : [];
+      },
+    });
+  }
+
   // See PersonalInfoSectionComponent.applyPrefill for why this bypasses the pristine guard.
-  applyPrefill(email?: string | null, phone?: string | null): void {
-    const patch: { email?: string; phone?: string } = {};
+  // Skipped entirely once locked (US-003 AC4) - patchValue would otherwise write into a disabled
+  // control, which the user can't see changing, only to have the eventual Save rejected.
+  applyPrefill(email?: string | null, phone?: string | null, presentAddress?: string | null): void {
+    if (this.identityFieldsLocked) return;
+    const patch: { email?: string; mobileNumber?: string; presentAddressDetail?: string } = {};
     if (email) patch.email = email;
-    if (phone) patch.phone = phone;
+    if (phone) patch.mobileNumber = phone.slice(-8);
+    if (presentAddress) patch.presentAddressDetail = presentAddress;
     if (Object.keys(patch).length > 0) this.form.patchValue(patch);
   }
 
@@ -44,12 +105,81 @@ export class ContactSectionComponent implements OnChanges {
     // so this fires on saves from sibling sections too. Skip re-patching once the user has
     // started editing here, or an in-progress edit in this section would be silently wiped.
     if (changes['profile'] && this.profile && this.form.pristine) {
-      this.form.patchValue({ ...this.profile });
+      this.form.patchValue({
+        ...this.profile,
+        mobileNumber: this.profile.phone ? this.profile.phone.slice(-8) : null,
+      });
+
+      if (this.profile.presentDivisionId) this.loadDistricts('present', this.profile.presentDivisionId);
+      if (this.profile.presentDistrictId) this.loadThanas('present', this.profile.presentDistrictId);
+      if (this.profile.homeDivisionId) this.loadDistricts('home', this.profile.homeDivisionId);
+      if (this.profile.homeDistrictId) this.loadThanas('home', this.profile.homeDistrictId);
     }
+
+    // US-003 AC4: Email/Phone are the candidate's application-matching identity - once they have
+    // a submitted application, changing either would orphan their own application history, so
+    // lock these fields (independent of the pristine guard above, which only gates re-patch).
+    if (changes['profile'] && this.profile) {
+      const lockMethod = this.profile.hasSubmittedApplication ? 'disable' : 'enable';
+      this.form.get('email')?.[lockMethod]({ emitEvent: false });
+      this.form.get('mobileOperator')?.[lockMethod]({ emitEvent: false });
+      this.form.get('mobileNumber')?.[lockMethod]({ emitEvent: false });
+    }
+  }
+
+  get identityFieldsLocked(): boolean {
+    return !!this.profile?.hasSubmittedApplication;
   }
 
   get f() {
     return this.form.controls;
+  }
+
+  // Cascading selects: choosing a Division unlocks/populates District, choosing a District
+  // unlocks/populates Thana. Changing an earlier level clears whatever was selected below it,
+  // since the previous District/Thana choice may no longer belong to the new Division/District.
+  onDivisionChange(section: 'present' | 'home', divisionId: number | null): void {
+    if (section === 'present') {
+      this.form.patchValue({ presentDistrictId: null, presentThanaId: null });
+      this.presentThanaOptions = [];
+      this.presentDistrictOptions = [];
+    } else {
+      this.form.patchValue({ homeDistrictId: null, homeThanaId: null });
+      this.homeThanaOptions = [];
+      this.homeDistrictOptions = [];
+    }
+    if (divisionId) this.loadDistricts(section, divisionId);
+  }
+
+  onDistrictChange(section: 'present' | 'home', districtId: number | null): void {
+    if (section === 'present') {
+      this.form.patchValue({ presentThanaId: null });
+      this.presentThanaOptions = [];
+    } else {
+      this.form.patchValue({ homeThanaId: null });
+      this.homeThanaOptions = [];
+    }
+    if (districtId) this.loadThanas(section, districtId);
+  }
+
+  private loadDistricts(section: 'present' | 'home', divisionId: number): void {
+    this.candidateProfileService.getDistricts(divisionId).subscribe({
+      next: (response) => {
+        const districts = !response.hasError && response.content ? response.content : [];
+        if (section === 'present') this.presentDistrictOptions = districts;
+        else this.homeDistrictOptions = districts;
+      },
+    });
+  }
+
+  private loadThanas(section: 'present' | 'home', districtId: number): void {
+    this.candidateProfileService.getThanas(districtId).subscribe({
+      next: (response) => {
+        const thanas = !response.hasError && response.content ? response.content : [];
+        if (section === 'present') this.presentThanaOptions = thanas;
+        else this.homeThanaOptions = thanas;
+      },
+    });
   }
 
   hasError(fieldName: string): boolean {
@@ -63,6 +193,7 @@ export class ContactSectionComponent implements OnChanges {
       if (field.errors['required']) return `${this.getFieldDisplayName(fieldName)} is required`;
       if (field.errors['email']) return `${this.getFieldDisplayName(fieldName)} must be a valid email address`;
       if (field.errors['maxlength']) return `${this.getFieldDisplayName(fieldName)} cannot exceed ${field.errors['maxlength'].requiredLength} characters`;
+      if (field.errors['pattern']) return `${this.getFieldDisplayName(fieldName)} must be exactly 8 digits`;
     }
     return '';
   }
@@ -70,9 +201,9 @@ export class ContactSectionComponent implements OnChanges {
   private getFieldDisplayName(fieldName: string): string {
     const displayNames: { [key: string]: string } = {
       email: 'Email',
-      phone: 'Phone',
-      presentAddress: 'Present Address',
-      permanentAddress: 'Permanent Address',
+      mobileNumber: 'Mobile number',
+      presentAddressDetail: 'Present Address',
+      permanentAddressDetail: 'Permanent Address',
     };
     return displayNames[fieldName] || fieldName;
   }
@@ -87,8 +218,16 @@ export class ContactSectionComponent implements OnChanges {
       return;
     }
 
+    const formValue = this.form.getRawValue();
+    const prefix = formValue.mobileOperator ? MobileOperatorPrefixes[formValue.mobileOperator] : '';
+    const request = {
+      ...formValue,
+      phone: formValue.mobileNumber ? `${prefix}${formValue.mobileNumber}` : null,
+    };
+    delete request.mobileNumber;
+
     this.saving = true;
-    this.candidateProfileService.updateContact(this.form.getRawValue()).subscribe({
+    this.candidateProfileService.updateContact(request).subscribe({
       next: (response) => {
         this.saving = false;
         if (response && !response.hasError) {

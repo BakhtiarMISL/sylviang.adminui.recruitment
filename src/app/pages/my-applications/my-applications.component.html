@@ -33,7 +33,7 @@
       </div>
 
       <div class="application-card-actions" *ngIf="application.canWithdraw">
-        <button pButton type="button" class="p-button-outlined p-button-danger p-button-sm" [disabled]="withdrawingId === application.jobApplicationId" (click)="confirmWithdraw($event, application)">
+        <button pButton type="button" severity="danger" [outlined]="true" size="small" [disabled]="withdrawingId === application.jobApplicationId" (click)="confirmWithdraw($event, application)">
           <i class="fa fa-ban"></i>
           <span>Withdraw Application</span>
         </button>

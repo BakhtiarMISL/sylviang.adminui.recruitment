@@ -1,0 +1,45 @@
+<footer class="relative bg-[#0f172a]">
+  <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#DC2626]/60 to-transparent"></div>
+
+  <div class="mx-auto flex max-w-[1240px] flex-col gap-6 px-4 py-12 sm:flex-row sm:items-start sm:justify-between sm:px-8">
+    <div>
+      <img src="assets/images/sylvia_logo.png" alt="Sylvia" class="mb-3 h-10 w-auto" />
+      <p class="max-w-xs text-sm text-[#94A3B8]">A product of Millennium Information Solution Ltd.</p>
+      <div class="mt-4 flex gap-3">
+        <a href="https://www.facebook.com/MISLBD.IBS/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"
+          class="flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-[#94A3B8] transition-colors hover:bg-[#DC2626] hover:text-white">
+          <i class="fa-brands fa-facebook-f"></i>
+        </a>
+        <a href="https://www.youtube.com/@millenniuminformationsolut6746" target="_blank" rel="noopener noreferrer" aria-label="YouTube"
+          class="flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-[#94A3B8] transition-colors hover:bg-[#DC2626] hover:text-white">
+          <i class="fa-brands fa-youtube"></i>
+        </a>
+        <a href="https://www.linkedin.com/company/millennium-information-solution-ltd./" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"
+          class="flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-[#94A3B8] transition-colors hover:bg-[#DC2626] hover:text-white">
+          <i class="fa-brands fa-linkedin-in"></i>
+        </a>
+        <a href="https://mislbd.com/" target="_blank" rel="noopener noreferrer" aria-label="Website"
+          class="flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-[#94A3B8] transition-colors hover:bg-[#DC2626] hover:text-white">
+          <i class="fa-solid fa-globe"></i>
+        </a>
+      </div>
+    </div>
+
+    <div class="flex gap-12 text-sm">
+      <div class="flex flex-col gap-2">
+        <span class="mb-1 font-semibold text-white">Company</span>
+        <a routerLink="/" fragment="about" class="w-fit text-[#94A3B8] transition-colors hover:text-white">About</a>
+        <a routerLink="/careers" class="w-fit text-[#94A3B8] transition-colors hover:text-white">Careers</a>
+      </div>
+      <div class="flex flex-col gap-2">
+        <span class="mb-1 font-semibold text-white">Account</span>
+        <a routerLink="/login" class="w-fit text-[#94A3B8] transition-colors hover:text-white">Login</a>
+        <a routerLink="/register" class="w-fit text-[#94A3B8] transition-colors hover:text-white">Register</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="border-t border-white/10 px-4 py-4 text-center text-xs text-[#94A3B8] sm:px-8">
+    &copy; {{ currentYear }} Millennium Information Solution Ltd. All rights reserved.
+  </div>
+</footer>

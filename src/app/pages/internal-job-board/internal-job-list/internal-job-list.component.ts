@@ -37,6 +37,7 @@ export class InternalJobListComponent implements OnInit, AfterViewInit {
 
   employmentTypeOptions = EmploymentTypeOptions;
   experienceBucketOptions = ExperienceBucketOptions;
+  filtersCollapsed = true;
 
   columns = InternalJobListColumns;
 
@@ -57,6 +58,7 @@ export class InternalJobListComponent implements OnInit, AfterViewInit {
 
   applyFilters(): void {
     this.currentPage = 1;
+    this.filtersCollapsed = true;
     this.loadJobPostings();
   }
 
@@ -67,6 +69,7 @@ export class InternalJobListComponent implements OnInit, AfterViewInit {
     this.employmentType = null;
     this.maxExperienceYears = null;
     this.currentPage = 1;
+    this.filtersCollapsed = false;
     this.loadJobPostings();
   }
 

@@ -18,10 +18,16 @@ import {
   ICandidateProfileResponse,
   ICandidateSkillCreateRequest,
   ICandidateSkillResponse,
+  ICandidateTagCreateRequest,
+  ICandidateTagResponse,
   ICandidateWorkExperienceCreateRequest,
   ICandidateWorkExperienceResponse,
   ICandidateWorkExperienceUpdateRequest,
+  IDistrictResponse,
+  IDivisionResponse,
   ISkillLibraryItemResponse,
+  IThanaResponse,
+  IUniversityLibraryItemResponse,
 } from '@core/interfaces/recruitment-management/candidate-profile.interface';
 import { BASE_URL_Recruitment } from '@env/environment';
 
@@ -45,6 +51,20 @@ export class CandidateProfileService {
     return this.httpClient.put<ApiResponse<void>>(`${this.API_URL}/me/contact`, request);
   }
 
+  // ── Address lookup (Division -> District -> Thana cascade) ───────
+
+  getDivisions() {
+    return this.httpClient.get<ApiResponse<IDivisionResponse[]>>(`${BASE_URL_Recruitment}/address-lookup/divisions`);
+  }
+
+  getDistricts(divisionId: number) {
+    return this.httpClient.get<ApiResponse<IDistrictResponse[]>>(`${BASE_URL_Recruitment}/address-lookup/districts`, { params: { divisionId } });
+  }
+
+  getThanas(districtId: number) {
+    return this.httpClient.get<ApiResponse<IThanaResponse[]>>(`${BASE_URL_Recruitment}/address-lookup/thanas`, { params: { districtId } });
+  }
+
   // ── Education ────────────────────────────────────────────────────
 
   getEducation() {
@@ -61,6 +81,10 @@ export class CandidateProfileService {
 
   deleteEducation(id: number) {
     return this.httpClient.delete<ApiResponse<void>>(`${this.API_URL}/me/education/${id}`);
+  }
+
+  getUniversityLibrary() {
+    return this.httpClient.get<ApiResponse<IUniversityLibraryItemResponse[]>>(`${BASE_URL_Recruitment}/university-library`);
   }
 
   // ── Work Experience ──────────────────────────────────────────────
@@ -203,5 +227,27 @@ export class CandidateProfileService {
 
   updateHrNotes(candidateProfileId: number, request: ICandidateProfileHrNotesUpdateRequest) {
     return this.httpClient.put<ApiResponse<void>>(`${this.API_URL}/${candidateProfileId}/hr-notes`, request);
+  }
+
+  markInternal(candidateProfileId: number) {
+    return this.httpClient.put<ApiResponse<void>>(`${this.API_URL}/${candidateProfileId}/mark-internal`, {});
+  }
+
+  // ── Tags (US-041, HR-only) ───────────────────────────────────────
+
+  getTagSuggestions(search: string) {
+    return this.httpClient.get<ApiResponse<string[]>>(`${this.API_URL}/tags/suggestions`, { params: { search } });
+  }
+
+  getTags(candidateProfileId: number) {
+    return this.httpClient.get<ApiResponse<ICandidateTagResponse[]>>(`${this.API_URL}/${candidateProfileId}/tags`);
+  }
+
+  addTag(candidateProfileId: number, request: ICandidateTagCreateRequest) {
+    return this.httpClient.post<ApiResponse<number>>(`${this.API_URL}/${candidateProfileId}/tags`, request);
+  }
+
+  deleteTag(candidateProfileId: number, candidateTagId: number) {
+    return this.httpClient.delete<ApiResponse<void>>(`${this.API_URL}/${candidateProfileId}/tags/${candidateTagId}`);
   }
 }
