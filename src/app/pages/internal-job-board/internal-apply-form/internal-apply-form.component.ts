@@ -113,11 +113,13 @@ export class InternalApplyFormComponent implements OnInit {
 
     if (!RESUME_ALLOWED_EXTENSIONS.includes(extension)) {
       this.fileError = `Resume must be one of: ${RESUME_ALLOWED_EXTENSIONS.join(', ')}`;
+      input.value = '';
       return;
     }
 
     if (file.size > RESUME_MAX_SIZE_BYTES) {
       this.fileError = 'Resume file size must not exceed 10MB';
+      input.value = '';
       return;
     }
 

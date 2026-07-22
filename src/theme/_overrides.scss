@@ -244,6 +244,29 @@
 .p-button-text.p-button-danger:not(:disabled):hover {
   @apply bg-danger-500 dark:bg-danger-700;
 }
+// Outlined buttons have a transparent/white fill - the global .p-button i,span rule above
+// forces white icon/text, which is invisible against that fill. Force the accent color back.
+.p-button-outlined {
+  @apply bg-transparent !important;
+  i,
+  span {
+    @apply text-current;
+  }
+}
+.p-button-outlined.p-button-danger {
+  @apply text-danger-500 border-danger-500 !important;
+  i,
+  span {
+    @apply text-danger-500 !important;
+  }
+}
+.p-button-outlined.p-button-danger:not(:disabled):hover {
+  @apply bg-danger-500 !important;
+  i,
+  span {
+    @apply text-white !important;
+  }
+}
 .p-button-secondary {
   @apply bg-neutral hover:bg-borderDark border-neutral text-white border-none !important;
 }
@@ -254,11 +277,12 @@
 // --------------------------------------------Dialog CSS Override--------------------------------------------
 .p-dialog {
   border: none !important;
+  @apply rounded-xl overflow-hidden;
   .p-dialog-header {
     @apply bg-light dark:bg-dark text-black dark:text-white rounded-t-xl px-5 pt-3 pb-0 z-20;
   }
   .p-dialog-content {
-    @apply bg-light dark:bg-dark text-black dark:text-white px-5 py-0;
+    @apply bg-light dark:bg-dark text-black dark:text-white px-5 py-0 rounded-b-xl;
     overflow: auto !important;
   }
   .p-dialog-footer {

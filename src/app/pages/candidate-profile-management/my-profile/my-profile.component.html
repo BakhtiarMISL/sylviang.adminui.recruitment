@@ -14,7 +14,6 @@
       <div class="profile-header-text">
         <span class="profile-header-title">
           Profile completeness
-          <span class="profile-type-badge" [class.internal]="profile.isInternal">{{ profile.isInternal ? 'Internal Candidate' : 'External Candidate' }}</span>
         </span>
         <span class="profile-header-subtitle">Fill out every section below to reach 100%.</span>
         <span class="profile-header-subtitle" *ngIf="profile.isInternal && (profile.departmentName || profile.designationName)">
@@ -36,7 +35,7 @@
           <small>PDF or DOCX</small>
         </span>
       </label>
-      <input id="resumeFile" type="file" (change)="onResumeFileSelected($event)" accept=".pdf,.docx" [disabled]="parsingResume" class="sr-only" />
+      <input id="resumeFile" type="file" (change)="onResumeFileSelected($event)" accept=".pdf,.docx" [disabled]="parsingResume" class="sr-only file-picker-input" />
 
       <div *ngIf="resumeError" class="invalid mt-2">{{ resumeError }}</div>
       <div *ngIf="resumeParsed" class="text-sm text-neutral mt-2">Resume parsed — check each section below for prefilled fields/suggestions.</div>

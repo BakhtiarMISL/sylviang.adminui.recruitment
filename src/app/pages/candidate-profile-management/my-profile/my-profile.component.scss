@@ -21,17 +21,3 @@
   color: var(--p-text-muted-color, #6b7280);
 }
 
-.profile-type-badge {
-  margin-left: 0.5rem;
-  padding: 0.1rem 0.5rem;
-  border-radius: 999px;
-  font-size: 0.7rem;
-  font-weight: 600;
-  background: #e5e7eb;
-  color: #374151;
-
-  &.internal {
-    background: #dbeafe;
-    color: #1e40af;
-  }
-}

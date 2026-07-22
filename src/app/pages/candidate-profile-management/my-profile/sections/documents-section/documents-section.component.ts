@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, ElementRef, EventEmitter, OnInit, Output, ViewChild } from '@angular/core';
 import { CandidateDocumentType, ICandidateDocumentResponse } from '@app/@core/interfaces/recruitment-management/candidate-profile.interface';
 import { CandidateProfileService } from '@app/@core/services/recruitment/candidate-profile/candidate-profile.service';
 import { Base_URL } from '@env/environment';
@@ -15,6 +15,7 @@ const DOCUMENT_MAX_SIZE_BYTES = 10 * 1024 * 1024;
 })
 export class DocumentsSectionComponent implements OnInit {
   @Output() saved = new EventEmitter<void>();
+  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
   constructor(private candidateProfileService: CandidateProfileService) {}
 
@@ -57,11 +58,13 @@ export class DocumentsSectionComponent implements OnInit {
 
     if (!DOCUMENT_ALLOWED_EXTENSIONS.includes(extension)) {
       this.fileError = `File must be one of: ${DOCUMENT_ALLOWED_EXTENSIONS.join(', ')}`;
+      input.value = '';
       return;
     }
 
     if (file.size > DOCUMENT_MAX_SIZE_BYTES) {
       this.fileError = 'File size must not exceed 10MB';
+      input.value = '';
       return;
     }
 
@@ -80,6 +83,7 @@ export class DocumentsSectionComponent implements OnInit {
         this.uploading = false;
         if (response && !response.hasError) {
           this.selectedFile = null;
+          if (this.fileInput) this.fileInput.nativeElement.value = '';
           this.loadDocuments();
           this.saved.emit();
         } else {

@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { UI_CONFIG } from '@app/@core/constants';
 import { DifficultyLevelEnum, QuestionTypeEnum } from '@app/@core/enums/recruitment.enum';
 import { IExamQuestionBulkImportResponse, IExamQuestionResponse } from '@app/@core/interfaces/recruitment-management/exam-question.interface';
@@ -48,6 +48,7 @@ export class ExamQuestionListComponent implements OnInit {
   difficultyLevelOptions = DifficultyLevelOptions;
   activeStatusOptions = ActiveStatusOptions;
 
+  @ViewChild('bulkImportFileInput') bulkImportFileInput!: ElementRef<HTMLInputElement>;
   showBulkImportDialog = false;
   bulkImportGroupId: number | null = null;
   bulkImportFile: File | null = null;
@@ -198,6 +199,7 @@ export class ExamQuestionListComponent implements OnInit {
     this.bulkImportFile = null;
     this.bulkImportError = '';
     this.bulkImportResult = null;
+    if (this.bulkImportFileInput) this.bulkImportFileInput.nativeElement.value = '';
     this.showBulkImportDialog = true;
   }
 

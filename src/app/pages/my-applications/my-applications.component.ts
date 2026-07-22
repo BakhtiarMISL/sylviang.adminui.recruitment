@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { BreadcrumbService } from '@app/@core/services';
 import { IMyApplication } from '@app/@core/interfaces/recruitment-management/job-application.interface';
 import { JobApplicationService } from '@app/@core/services/recruitment/job-application/job-application.service';
+import { PaymentService } from '@app/@core/services/recruitment/payment/payment.service';
 import { ToastService } from '@app/@core/services/misc/toast.service';
 import { ConfirmationService } from 'primeng/api';
 
@@ -14,6 +15,7 @@ import { ConfirmationService } from 'primeng/api';
 export class MyApplicationsComponent implements OnInit {
   constructor(
     private jobApplicationService: JobApplicationService,
+    private paymentService: PaymentService,
     private confirmationService: ConfirmationService,
     private toast: ToastService,
     private breadcrumbService: BreadcrumbService,
@@ -23,6 +25,7 @@ export class MyApplicationsComponent implements OnInit {
   loading = true;
   loadError = '';
   withdrawingId: number | null = null;
+  retryingPaymentId: number | null = null;
 
   ngOnInit(): void {
     this.breadcrumbService.setBreadcrumbs([
@@ -69,6 +72,24 @@ export class MyApplicationsComponent implements OnInit {
       acceptIcon: 'fa fa-check',
       rejectIcon: 'fa fa-times',
       accept: () => this.withdraw(application),
+    });
+  }
+
+  retryPayment(application: IMyApplication): void {
+    this.retryingPaymentId = application.jobApplicationId;
+    this.paymentService.initiatePayment(application.jobApplicationId).subscribe({
+      next: (response) => {
+        this.retryingPaymentId = null;
+        if (response && !response.hasError && response.content?.success && response.content.gatewayRedirectUrl) {
+          window.location.href = response.content.gatewayRedirectUrl;
+        } else {
+          this.toast.error({ detail: response?.content?.failureReason || response?.decentMessage || 'Could not start payment. Please try again.' });
+        }
+      },
+      error: (error) => {
+        this.retryingPaymentId = null;
+        this.toast.error({ detail: error?.error?.decentMessage || 'Could not start payment. Please try again.' });
+      },
     });
   }
 

@@ -31,7 +31,7 @@
         <small>PDF, JPG, PNG or DOCX</small>
       </span>
     </label>
-    <input id="documentFile" type="file" (change)="onFileSelected($event)" accept=".pdf,.jpg,.jpeg,.png,.docx" class="sr-only" />
+    <input #fileInput id="documentFile" type="file" (change)="onFileSelected($event)" accept=".pdf,.jpg,.jpeg,.png,.docx" class="sr-only file-picker-input" />
     <button pButton type="button" [disabled]="!selectedFile || uploading" (click)="upload()">
       <i class="fa fa-upload"></i>
       <span>{{ uploading ? 'Uploading...' : 'Upload' }}</span>

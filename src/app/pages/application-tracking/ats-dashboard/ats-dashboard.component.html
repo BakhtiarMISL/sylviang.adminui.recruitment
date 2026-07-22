@@ -44,7 +44,7 @@
       <label for="filterStatus">Status</label>
     </p-floatlabel>
 
-    <p-floatlabel variant="in">
+    <p-floatlabel variant="in" class="source-filter">
       <p-select
         inputId="filterSource"
         [options]="sourceOptions"
@@ -414,21 +414,25 @@
   </div>
 </p-dialog>
 
-<p-dialog header="Save Search" [(visible)]="saveSearchDialogVisible" [modal]="true" [style]="{ width: '28rem', maxWidth: '95vw' }">
+<p-dialog header="Save Search" [(visible)]="saveSearchDialogVisible" [modal]="true" [style]="{ width: '32rem', maxWidth: '95vw' }">
   <div class="save-search-form">
     <p-floatlabel variant="in">
       <input pInputText id="saveSearchName" [(ngModel)]="saveSearchName" class="w-full" />
       <label for="saveSearchName">Name</label>
     </p-floatlabel>
 
-    <p-checkbox [(ngModel)]="saveSearchIsShared" [binary]="true" inputId="saveSearchIsShared"></p-checkbox>
-    <label for="saveSearchIsShared">Share with HR team</label>
+    <div class="save-search-share">
+      <p-checkbox [(ngModel)]="saveSearchIsShared" [binary]="true" inputId="saveSearchIsShared"></p-checkbox>
+      <label for="saveSearchIsShared">Share with HR team</label>
+    </div>
+  </div>
 
+  <ng-template pTemplate="footer">
     <button pButton [disabled]="!saveSearchName.trim() || savingSearch" (click)="confirmSaveSearch()">
       <i class="fa fa-check"></i>
       <span>Save</span>
     </button>
-  </div>
+  </ng-template>
 </p-dialog>
 
 <p-dialog header="Manage Saved Searches" [(visible)]="manageSavedSearchesDialogVisible" [modal]="true" [style]="{ width: '36rem', maxWidth: '95vw' }">
@@ -457,7 +461,7 @@
       </ng-template>
     </div>
 
-    <div class="not-found" *ngIf="savedSearches.length === 0">
+    <div class="manage-saved-searches-empty" *ngIf="savedSearches.length === 0">
       <p>No saved searches yet.</p>
     </div>
   </div>

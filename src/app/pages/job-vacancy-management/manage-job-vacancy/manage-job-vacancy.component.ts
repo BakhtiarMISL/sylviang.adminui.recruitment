@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AutoCompleteCompleteEvent } from 'primeng/autocomplete';
@@ -50,6 +50,7 @@ export class ManageJobVacancyComponent implements OnInit {
   assessmentWorkflowOptions: IAssessmentWorkflowLookupResponse[] = [];
 
   // Attachments
+  @ViewChild('attachmentFileInput') attachmentFileInput!: ElementRef<HTMLInputElement>;
   attachments: IJobVacancyAttachmentResponse[] = [];
   loadingAttachments = false;
   uploadingAttachment = false;
@@ -415,6 +416,7 @@ export class ManageJobVacancyComponent implements OnInit {
         this.uploadingAttachment = false;
         if (response && !response.hasError) {
           this.selectedFile = null;
+          if (this.attachmentFileInput) this.attachmentFileInput.nativeElement.value = '';
           this.loadAttachments(this.jobPostingId!);
         } else {
           this.attachmentError = response?.decentMessage || 'Failed to upload attachment';
