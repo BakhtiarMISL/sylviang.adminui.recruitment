@@ -31,6 +31,10 @@ export interface ICvBankTalentPoolAddResponse {
   alreadyInPoolCount: number;
 }
 
+export interface ICvBankCvBulkRequest {
+  candidateProfileIds: number[];
+}
+
 export interface ICvBankTalentPoolEntryResponse {
   candidateProfileId: number;
   fullName: string;

@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ApplicationSourceEnum, EducationLevelEnum } from '@app/@core/enums/recruitment.enum';
 import { ICvBankSearchResultResponse } from '@app/@core/interfaces/recruitment-management/cv-bank.interface';
-import { CvBankService } from '@app/@core/services/recruitment/cv-bank/cv-bank.service';
+import { CvBankService, saveFileResponse } from '@app/@core/services/recruitment/cv-bank/cv-bank.service';
 import { UI_CONFIG } from '@app/@core/constants';
 import { Base_URL } from '@env/environment';
 
@@ -38,6 +38,9 @@ export class CvBankSearchComponent implements OnInit {
   statusMessage = '';
   statusIsError = false;
   filtersCollapsed = true;
+  downloadingCandidateId: number | null = null;
+  bulkDownloading = false;
+  bulkExporting = false;
 
   get skeletonItems() {
     return Array(this.rows)
@@ -148,5 +151,62 @@ export class CvBankSearchComponent implements OnInit {
           this.cdr.detectChanges();
         },
       });
+  }
+
+  downloadCv(candidate: ICvBankSearchResultResponse): void {
+    this.downloadingCandidateId = candidate.candidateProfileId;
+    this.cvBankService.downloadCv(candidate.candidateProfileId).subscribe({
+      next: (response) => {
+        saveFileResponse(response, `${candidate.fullName}_CV.pdf`);
+        this.downloadingCandidateId = null;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.statusIsError = true;
+        this.statusMessage = 'Failed to download CV.';
+        this.downloadingCandidateId = null;
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  downloadSelectedCvs(): void {
+    if (this.selectedResults.length === 0) return;
+
+    this.bulkDownloading = true;
+    const candidateProfileIds = this.selectedResults.map((r) => r.candidateProfileId);
+    this.cvBankService.bulkDownloadCv({ candidateProfileIds }).subscribe({
+      next: (response) => {
+        saveFileResponse(response, 'CV-Bank-Export.zip');
+        this.bulkDownloading = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.statusIsError = true;
+        this.statusMessage = 'Failed to download CVs.';
+        this.bulkDownloading = false;
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  exportSelectedToExcel(): void {
+    if (this.selectedResults.length === 0) return;
+
+    this.bulkExporting = true;
+    const candidateProfileIds = this.selectedResults.map((r) => r.candidateProfileId);
+    this.cvBankService.bulkExportExcel({ candidateProfileIds }).subscribe({
+      next: (response) => {
+        saveFileResponse(response, 'CV-Bank-Export.xlsx');
+        this.bulkExporting = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.statusIsError = true;
+        this.statusMessage = 'Failed to export to Excel.';
+        this.bulkExporting = false;
+        this.cdr.detectChanges();
+      },
+    });
   }
 }

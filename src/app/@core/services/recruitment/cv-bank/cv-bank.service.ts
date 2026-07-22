@@ -1,9 +1,10 @@
-import { HttpClient, HttpContext } from '@angular/common/http';
+import { HttpClient, HttpContext, HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ApiResponse } from '@core/interfaces/ApiResponse';
 import { PaginatedResponse } from '@core/interfaces/PaginatedResponse';
 import { DISABLE_TOAST } from '@core/constants/http-context';
 import {
+  ICvBankCvBulkRequest,
   ICvBankSearchRequest,
   ICvBankSearchResultResponse,
   ICvBankTalentPoolAddRequest,
@@ -39,4 +40,40 @@ export class CvBankService {
   removeFromTalentPool(candidateProfileId: number) {
     return this.httpClient.delete<ApiResponse<void>>(`${this.API_URL}/talent-pool/${candidateProfileId}`);
   }
+
+  // Standardized CV, generated from the candidate's profile data - not their uploaded resume file.
+  downloadCv(candidateProfileId: number) {
+    return this.httpClient.get(`${this.API_URL}/${candidateProfileId}/cv/download`, {
+      responseType: 'blob',
+      observe: 'response',
+    });
+  }
+
+  bulkDownloadCv(request: ICvBankCvBulkRequest) {
+    return this.httpClient.post(`${this.API_URL}/cv/bulk-download`, request, {
+      responseType: 'blob',
+      observe: 'response',
+    });
+  }
+
+  bulkExportExcel(request: ICvBankCvBulkRequest) {
+    return this.httpClient.post(`${this.API_URL}/cv/bulk-export-excel`, request, {
+      responseType: 'blob',
+      observe: 'response',
+    });
+  }
+}
+
+/** Saves a blob HttpResponse to disk using its Content-Disposition filename, falling back to `fallbackFileName`. */
+export function saveFileResponse(response: HttpResponse<Blob>, fallbackFileName: string): void {
+  const contentDisposition = response.headers.get('content-disposition') || '';
+  const match = /filename="?([^";]+)"?/i.exec(contentDisposition);
+  const fileName = match ? match[1] : fallbackFileName;
+
+  const url = window.URL.createObjectURL(response.body as Blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = fileName;
+  anchor.click();
+  window.URL.revokeObjectURL(url);
 }
