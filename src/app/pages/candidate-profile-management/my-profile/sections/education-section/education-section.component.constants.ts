@@ -23,3 +23,10 @@ export const DivisionResultOptions = [
   { label: 'Second Division', value: 'Second' },
   { label: 'Third Division', value: 'Third' },
 ];
+
+// Standard Bangladeshi scales: SSC/HSC GPA is out of 5.00, university CGPA is out of 4.00.
+// Division has no numeric scale (it's a First/Second/Third dropdown, not a Result number).
+export const GradingSystemScale: Partial<Record<GradingSystemEnum, number>> = {
+  [GradingSystemEnum.GPA]: 5.0,
+  [GradingSystemEnum.CGPA]: 4.0,
+};

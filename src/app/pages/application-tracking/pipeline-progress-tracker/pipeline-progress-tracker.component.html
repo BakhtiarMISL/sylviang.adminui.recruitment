@@ -25,7 +25,7 @@
       <span class="recommendation-meta">No final selection recommendation yet.</span>
     </ng-template>
 
-    <button pButton type="button" class="p-button-outlined p-button-sm" [disabled]="!canRecommend()" (click)="openRecommendDialog()">
+    <button pButton type="button" [outlined]="true" size="small" [disabled]="!canRecommend()" (click)="openRecommendDialog()">
       <i class="fa fa-star"></i>
       <span>Recommend for Final Selection</span>
     </button>
@@ -51,7 +51,7 @@
         <div class="stage-field notes" *ngIf="stage.notes">{{ stage.notes }}</div>
         <div class="stage-field text-sm text-neutral" *ngIf="stage.lastUpdatedByUserName">Last updated by {{ stage.lastUpdatedByUserName }}</div>
 
-        <button pButton type="button" class="p-button-outlined p-button-sm edit-btn" (click)="startEdit(stage)">
+        <button pButton type="button" class="edit-btn" [outlined]="true" size="small" (click)="startEdit(stage)">
           <i class="fa fa-pen"></i>
           <span>Update</span>
         </button>

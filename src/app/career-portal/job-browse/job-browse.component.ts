@@ -28,19 +28,20 @@ export class JobBrowseComponent implements OnInit, AfterViewInit {
   }
 
   jobPostings: IPublicJobPostingResponse[] = [];
-  sortedColumn: string = '';
   loading = false;
   totalRecords = 0;
   UI_CONFIG = UI_CONFIG;
   rows = UI_CONFIG.defaultPageSize;
   currentPage = 1;
 
-  sortBy: string = '';
-  sortDirection: string = '';
+  sortField: string | null = null;
+  sortDirection: 'asc' | 'desc' = 'asc';
 
   employmentTypeOptions = EmploymentTypeOptions;
   experienceBucketOptions = ExperienceBucketOptions;
 
+  sortOptions = JobBrowseColumns.filter((col) => col.sortable !== false).map((col) => ({ label: col.label, value: col.field }));
+  // Table view (logged-in / Shell-nested) sorts via column header click instead of the card view's dropdown.
   columns = JobBrowseColumns;
   filtersCollapsed = true;
 
@@ -92,8 +93,8 @@ export class JobBrowseComponent implements OnInit, AfterViewInit {
       ...(this.departmentId !== null && this.departmentId !== undefined && { departmentId: this.departmentId }),
       ...(this.employmentType && { employmentType: this.employmentType }),
       ...(this.maxExperienceYears !== null && this.maxExperienceYears !== undefined && { maxExperienceYears: this.maxExperienceYears }),
-      ...(this.sortBy && { sortBy: this.sortBy }),
-      ...(this.sortDirection && { sortDirection: this.sortDirection }),
+      ...(this.sortField && { sortBy: this.sortField }),
+      ...(this.sortField && { sortDirection: this.sortDirection }),
     };
 
     this.careerPortalService.getJobPostings(params).subscribe({
@@ -123,9 +124,19 @@ export class JobBrowseComponent implements OnInit, AfterViewInit {
     this.loadJobPostings();
   }
 
-  onSort(event: SortEvent) {
-    this.sortedColumn = event.field || '';
-    this.sortBy = event.field || '';
+  onSortChange(): void {
+    this.currentPage = 1;
+    this.loadJobPostings();
+  }
+
+  toggleSortDirection(): void {
+    this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    this.currentPage = 1;
+    this.loadJobPostings();
+  }
+
+  onSort(event: SortEvent): void {
+    this.sortField = event.field || null;
     this.sortDirection = event.order === 1 ? 'asc' : 'desc';
     this.currentPage = 1;
     this.loadJobPostings();

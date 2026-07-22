@@ -134,7 +134,7 @@
     <ng-template #resultInput>
       <p-floatlabel variant="in">
         <input pInputText inputId="result" formControlName="result" maxlength="50" class="w-full" [class.ng-invalid]="hasError('result')" [class.ng-dirty]="hasError('result')" (blur)="f['result'].markAsTouched()" />
-        <label for="result">Result *</label>
+        <label for="result">Result *{{ resultScale ? ' (out of ' + (resultScale | number: '1.2-2') + ')' : '' }}</label>
       </p-floatlabel>
     </ng-template>
     <div *ngIf="hasError('result')" class="invalid">{{ getErrorMessage('result') }}</div>

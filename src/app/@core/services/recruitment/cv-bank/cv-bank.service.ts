@@ -1,7 +1,8 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpContext } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ApiResponse } from '@core/interfaces/ApiResponse';
 import { PaginatedResponse } from '@core/interfaces/PaginatedResponse';
+import { DISABLE_TOAST } from '@core/constants/http-context';
 import {
   ICvBankSearchRequest,
   ICvBankSearchResultResponse,
@@ -19,8 +20,12 @@ export class CvBankService {
 
   API_URL = BASE_URL_Recruitment + '/cv-bank';
 
+  // POST only because the boolean query/filters need a request body - this is a read/search
+  // operation (runs on page load and every page change), not a save, so it must never toast.
   search(request: ICvBankSearchRequest) {
-    return this.httpClient.post<ApiResponse<PaginatedResponse<ICvBankSearchResultResponse[]>>>(`${this.API_URL}/search`, request);
+    return this.httpClient.post<ApiResponse<PaginatedResponse<ICvBankSearchResultResponse[]>>>(`${this.API_URL}/search`, request, {
+      context: new HttpContext().set(DISABLE_TOAST, true),
+    });
   }
 
   addToTalentPool(request: ICvBankTalentPoolAddRequest) {

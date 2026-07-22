@@ -53,32 +53,32 @@
     <div *ngIf="hasError('presentAddressDetail')" class="invalid">{{ getErrorMessage('presentAddressDetail') }}</div>
   </div>
 
-  <h3 class="form-section-header">Home Address</h3>
+  <div class="sm:col-span-2 lg:col-span-3 xl:col-span-4 flex items-center gap-2">
+    <p-checkbox inputId="sameAsPresent" formControlName="sameAsPresent" [binary]="true"></p-checkbox>
+    <label for="sameAsPresent">Permanent address same as present address</label>
+  </div>
+
+  <h3 class="form-section-header">Permanent Address</h3>
 
   <div>
     <p-floatlabel variant="in">
       <p-select inputId="homeDivisionId" [options]="divisionOptions" [appendTo]="'body'" [autoDisplayFirst]="false" optionLabel="name" optionValue="divisionId" formControlName="homeDivisionId" class="w-full" (onChange)="onDivisionChange('home', $event.value)"></p-select>
-      <label for="homeDivisionId">Home Division</label>
+      <label for="homeDivisionId">Permanent Division</label>
     </p-floatlabel>
   </div>
 
   <div>
     <p-floatlabel variant="in">
       <p-select inputId="homeDistrictId" [options]="homeDistrictOptions" [appendTo]="'body'" [autoDisplayFirst]="false" optionLabel="name" optionValue="districtId" formControlName="homeDistrictId" class="w-full" [disabled]="!f['homeDivisionId'].value" (onChange)="onDistrictChange('home', $event.value)"></p-select>
-      <label for="homeDistrictId">Home District</label>
+      <label for="homeDistrictId">Permanent District</label>
     </p-floatlabel>
   </div>
 
   <div>
     <p-floatlabel variant="in">
       <p-select inputId="homeThanaId" [options]="homeThanaOptions" [appendTo]="'body'" [autoDisplayFirst]="false" optionLabel="name" optionValue="thanaId" formControlName="homeThanaId" class="w-full" [disabled]="!f['homeDistrictId'].value"></p-select>
-      <label for="homeThanaId">Home Thana</label>
+      <label for="homeThanaId">Permanent Thana</label>
     </p-floatlabel>
-  </div>
-
-  <div class="sm:col-span-2 lg:col-span-3 xl:col-span-4 flex items-center gap-2">
-    <p-checkbox inputId="sameAsPresent" formControlName="sameAsPresent" [binary]="true"></p-checkbox>
-    <label for="sameAsPresent">Permanent address same as present address</label>
   </div>
 
   <div class="sm:col-span-2 lg:col-span-3 xl:col-span-4">

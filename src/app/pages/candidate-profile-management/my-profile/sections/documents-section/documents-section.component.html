@@ -1,4 +1,6 @@
 <div class="form-container">
+  <h3 class="form-section-header">Uploaded Documents</h3>
+
   <div class="sm:col-span-2" *ngIf="loading">Loading documents...</div>
 
   <div class="sm:col-span-2 text-sm text-neutral" *ngIf="!loading && items.length === 0">No documents uploaded yet.</div>
@@ -15,6 +17,10 @@
       </button>
     </div>
   </div>
+</div>
+
+<div class="form-container">
+  <h3 class="form-section-header">Upload New Document</h3>
 
   <div>
     <p-floatlabel variant="in">

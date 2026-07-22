@@ -46,29 +46,29 @@
 </section>
 
 <section class="page-container" *ngIf="!loading && profile">
-  <p-accordion [multiple]="true" [value]="['0', '1', '2', '3', '4', '5', '6', '7']">
-    <p-accordion-tab header="Personal Info" value="0">
+  <p-accordion [activeIndex]="0">
+    <p-accordion-tab header="Personal Info">
       <app-personal-info-section [profile]="profile" (saved)="onSectionSaved()"></app-personal-info-section>
     </p-accordion-tab>
-    <p-accordion-tab header="Contact" value="1">
+    <p-accordion-tab header="Contact">
       <app-contact-section [profile]="profile" (saved)="onSectionSaved()"></app-contact-section>
     </p-accordion-tab>
-    <p-accordion-tab header="Education" value="2">
+    <p-accordion-tab header="Education">
       <app-education-section (saved)="onSectionSaved()" (suggestionsChanged)="onEducationSuggestionsChanged($event)"></app-education-section>
     </p-accordion-tab>
-    <p-accordion-tab header="Work Experience" value="3">
+    <p-accordion-tab header="Work Experience">
       <app-work-experience-section (saved)="onSectionSaved()" (suggestionsChanged)="onWorkExperienceSuggestionsChanged($event)"></app-work-experience-section>
     </p-accordion-tab>
-    <p-accordion-tab header="Skills" value="4">
+    <p-accordion-tab header="Skills">
       <app-skills-section (saved)="onSectionSaved()" (suggestionsChanged)="onSkillSuggestionsChanged($event)"></app-skills-section>
     </p-accordion-tab>
-    <p-accordion-tab header="Certifications" value="5">
+    <p-accordion-tab header="Certifications">
       <app-certifications-section (saved)="onSectionSaved()"></app-certifications-section>
     </p-accordion-tab>
-    <p-accordion-tab header="Photo & Signature" value="6">
+    <p-accordion-tab header="Photo & Signature">
       <app-photo-signature-upload [profile]="profile" (saved)="onSectionSaved()"></app-photo-signature-upload>
     </p-accordion-tab>
-    <p-accordion-tab header="Documents" value="7">
+    <p-accordion-tab header="Documents">
       <app-documents-section (saved)="onSectionSaved()"></app-documents-section>
     </p-accordion-tab>
   </p-accordion>

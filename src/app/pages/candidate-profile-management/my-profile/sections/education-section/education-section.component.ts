@@ -1,5 +1,5 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { ApiResponse } from '@core/interfaces/ApiResponse';
 import {
   ICandidateEducationCreateRequest,
@@ -8,9 +8,10 @@ import {
   IUniversityLibraryItemResponse,
 } from '@app/@core/interfaces/recruitment-management/candidate-profile.interface';
 import { CandidateProfileService } from '@app/@core/services/recruitment/candidate-profile/candidate-profile.service';
+import { GradingSystemEnum } from '@app/@core/enums/recruitment.enum';
 import { catchError, concatMap, from, Observable, of, toArray } from 'rxjs';
 import { AutoCompleteCompleteEvent, AutoCompleteSelectEvent } from 'primeng/autocomplete';
-import { DivisionResultOptions, EducationLevelOptions, GradingSystemOptions } from './education-section.component.constants';
+import { DivisionResultOptions, EducationLevelOptions, GradingSystemOptions, GradingSystemScale } from './education-section.component.constants';
 
 @Component({
   selector: 'app-education-section',
@@ -190,6 +191,36 @@ export class EducationSectionComponent implements OnInit {
   // vs a First/Second/Third dropdown) - the previously entered value no longer applies either way.
   onGradingSystemChange(): void {
     this.form.patchValue({ result: null });
+    this.updateResultValidators();
+  }
+
+  // "out of 4.00" / "out of 5.00" hint next to the Result field - null for Division (dropdown,
+  // no numeric scale) or when no grading system is selected yet.
+  get resultScale(): number | null {
+    const gradingSystem = this.f['gradingSystem'].value as GradingSystemEnum | null;
+    return gradingSystem ? (GradingSystemScale[gradingSystem] ?? null) : null;
+  }
+
+  // Re-applies Result's validators to match the current grading system's scale (e.g. rejects a
+  // CGPA above 4.00) - called whenever gradingSystem changes, including patching in an existing
+  // entry to edit, since that doesn't fire the select's (onChange).
+  private updateResultValidators(): void {
+    const validators = [Validators.required, Validators.maxLength(50)];
+    const scale = this.resultScale;
+    if (scale) validators.push(this.resultScaleValidator(scale));
+    const resultControl = this.form.get('result')!;
+    resultControl.setValidators(validators);
+    resultControl.updateValueAndValidity();
+  }
+
+  private resultScaleValidator(scale: number): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      if (control.value === null || control.value === '') return null;
+      const value = parseFloat(control.value);
+      if (isNaN(value)) return { invalidNumber: true };
+      if (value < 0 || value > scale) return { maxScale: { max: scale } };
+      return null;
+    };
   }
 
   get f() {
@@ -208,6 +239,8 @@ export class EducationSectionComponent implements OnInit {
       if (field.errors['maxlength']) return `${this.getFieldDisplayName(fieldName)} cannot exceed ${field.errors['maxlength'].requiredLength} characters`;
       if (field.errors['min']) return `${this.getFieldDisplayName(fieldName)} must be ${field.errors['min'].min} or greater`;
       if (field.errors['max']) return `${this.getFieldDisplayName(fieldName)} cannot exceed ${field.errors['max'].max}`;
+      if (field.errors['invalidNumber']) return `${this.getFieldDisplayName(fieldName)} must be a number`;
+      if (field.errors['maxScale']) return `${this.getFieldDisplayName(fieldName)} cannot exceed ${field.errors['maxScale'].max.toFixed(2)}`;
     }
     return '';
   }
@@ -230,6 +263,9 @@ export class EducationSectionComponent implements OnInit {
     this.formSubmitted = false;
     this.saveError = '';
     this.form.reset();
+    // form.reset() clears values but not a previously set() validator - a leftover CGPA/GPA
+    // scale validator from editing another entry must not carry over to a fresh Add.
+    this.updateResultValidators();
     this.showForm = true;
   }
 
@@ -238,6 +274,7 @@ export class EducationSectionComponent implements OnInit {
     this.formSubmitted = false;
     this.saveError = '';
     this.form.patchValue(item);
+    this.updateResultValidators();
     this.showForm = true;
   }
 

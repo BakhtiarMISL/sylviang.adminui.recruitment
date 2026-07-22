@@ -60,7 +60,7 @@
 }
 
 .table-container {
-  @apply rounded-lg shadow-sm border border-borderLight dark:border-borderDark;
+  @apply rounded-lg shadow-md border border-borderLight dark:border-borderDark bg-light dark:bg-dark;
 }
 
 .table-title {

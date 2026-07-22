@@ -6,6 +6,7 @@ import { ButtonModule } from 'primeng/button';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
+import { PaginatorModule } from 'primeng/paginator';
 import { SelectModule } from 'primeng/select';
 import { SkeletonModule } from 'primeng/skeleton';
 import { TableModule } from 'primeng/table';
@@ -32,6 +33,7 @@ import { PaymentResultComponent } from './payment-result/payment-result.componen
     SelectModule,
     FloatLabelModule,
     SkeletonModule,
+    PaginatorModule,
     TableModule,
     TextareaModule,
   ],
