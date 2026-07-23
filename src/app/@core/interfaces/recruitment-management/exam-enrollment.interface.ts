@@ -52,3 +52,14 @@ export interface IExamScoreBulkUploadResponse {
   failedCount: number;
   errors: IExamScoreBulkUploadRowError[];
 }
+
+export interface IExamAdmitCardDistributeBulkResponse {
+  totalCount: number;
+  emailSentCount: number;
+  smsSentCount: number;
+}
+
+export interface IExamResultsBulkMoveStageRequest {
+  examEnrollmentIds: number[];
+  pipelineStageId: number;
+}

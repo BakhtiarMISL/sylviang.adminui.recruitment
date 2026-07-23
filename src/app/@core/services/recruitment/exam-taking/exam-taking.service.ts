@@ -28,4 +28,12 @@ export class ExamTakingService {
   submitExam(examEnrollmentId: number, request: IExamSubmitRequest) {
     return this.httpClient.post<ApiResponse<IExamSubmitResultResponse>>(`${this.API_URL}/enrollments/${examEnrollmentId}/submit`, request);
   }
+
+  /** Admit card PDF for one of the candidate's own enrollments (US-057 AC4). */
+  downloadMyAdmitCard(examEnrollmentId: number) {
+    return this.httpClient.get(`${this.API_URL}/enrollments/${examEnrollmentId}/admit-card/download`, {
+      responseType: 'blob',
+      observe: 'response',
+    });
+  }
 }

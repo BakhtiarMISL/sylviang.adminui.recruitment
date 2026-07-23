@@ -65,6 +65,17 @@
         <span>Download Seat Plan Excel</span>
       </button>
     </div>
+
+    <div class="mt-4 flex flex-wrap gap-2">
+      <button pButton severity="secondary" [loading]="distributingAdmitCards" (click)="confirmDistributeAdmitCards($event)">
+        <i class="fa fa-paper-plane"></i>
+        <span>Send Admit Cards</span>
+      </button>
+      <button pButton severity="secondary" [disabled]="downloadingAdmitCardsZip" (click)="downloadAdmitCardsZip()">
+        <i class="fa" [class.fa-file-zipper]="!downloadingAdmitCardsZip" [class.fa-spinner]="downloadingAdmitCardsZip" [class.fa-spin]="downloadingAdmitCardsZip"></i>
+        <span>Download All Admit Cards (ZIP)</span>
+      </button>
+    </div>
   </div>
 
   <!-- Roster -->
@@ -74,7 +85,19 @@
         Enrolled Candidates
         <span class="table-title-info" *ngIf="enrollments.length > 0">({{ enrollments.length }} total)</span>
       </h3>
-      <div class="flex gap-2">
+      <div class="flex flex-wrap gap-2 items-center">
+        <p-select
+          [options]="[{ label: 'All', value: 'All' }, { label: 'Pass', value: 'Pass' }, { label: 'Fail', value: 'Fail' }]"
+          [(ngModel)]="passFilter"
+          [ngModelOptions]="{ standalone: true }"
+          optionLabel="label"
+          optionValue="value"
+          [appendTo]="'body'"
+        ></p-select>
+        <button pButton severity="secondary" [loading]="downloadingResultsExcel" (click)="downloadResultsExcel()">
+          <i class="fa fa-file-excel"></i>
+          <span>Export Results</span>
+        </button>
         <button pButton severity="secondary" [loading]="downloadingScoreTemplate" (click)="downloadScoreTemplate()">
           <i class="fa fa-download"></i>
           <span>Download Score Template</span>
@@ -86,25 +109,57 @@
       </div>
     </div>
 
+    <div *ngIf="selectedEnrollments.length > 0" class="flex flex-wrap items-center gap-2 border-b border-gray-200 p-3 dark:border-gray-700">
+      <span class="text-sm">{{ selectedEnrollments.length }} passing candidate(s) selected</span>
+      <p-floatlabel variant="in" class="w-56">
+        <p-select
+          inputId="bulkMoveStageId"
+          class="w-full"
+          [options]="pipelineStages"
+          [(ngModel)]="selectedTargetStageId"
+          [ngModelOptions]="{ standalone: true }"
+          optionLabel="name"
+          optionValue="pipelineStageId"
+          [appendTo]="'body'"
+          [autoDisplayFirst]="false"
+        ></p-select>
+        <label for="bulkMoveStageId">Target Stage</label>
+      </p-floatlabel>
+      <button pButton [disabled]="!canBulkMoveToStage" [loading]="bulkMovingToStage" (click)="bulkMoveToStage()">
+        <i class="fa fa-forward"></i>
+        <span>Move to Stage</span>
+      </button>
+    </div>
+
     <div *ngIf="loadingEnrollments" class="space-y-3 p-4">
       <p-skeleton height="3rem" *ngFor="let i of skeletonItems"></p-skeleton>
     </div>
 
-    <p-table *ngIf="!loadingEnrollments" [value]="enrollments" dataKey="examEnrollmentId" [responsiveLayout]="'scroll'">
+    <p-table
+      *ngIf="!loadingEnrollments"
+      [value]="filteredEnrollments"
+      [(selection)]="selectedEnrollments"
+      dataKey="examEnrollmentId"
+      [responsiveLayout]="'scroll'"
+      sortField="score"
+      [sortOrder]="-1"
+    >
       <ng-template pTemplate="header">
         <tr>
-          <th>Candidate Name</th>
+          <th style="width: 3rem"><p-tableHeaderCheckbox></p-tableHeaderCheckbox></th>
+          <th pSortableColumn="candidateName">Candidate Name <p-sortIcon field="candidateName"></p-sortIcon></th>
           <th>Seat</th>
           <th>Room</th>
           <th>Email Status</th>
           <th>SMS Status</th>
-          <th>Score</th>
+          <th pSortableColumn="score">Score <p-sortIcon field="score"></p-sortIcon></th>
           <th style="width: 12rem">Actions</th>
         </tr>
       </ng-template>
 
       <ng-template pTemplate="body" let-enrollment>
         <tr>
+          <td><p-tableCheckbox [value]="enrollment" [disabled]="!isRowSelectable(enrollment)"></p-tableCheckbox></td>
           <td>{{ enrollment.candidateName }}</td>
           <td>{{ enrollment.seatNumber || '-' }}</td>
           <td>{{ enrollment.examRoomName || '-' }}</td>
@@ -196,7 +251,7 @@
 
       <ng-template pTemplate="emptymessage">
         <tr>
-          <td colspan="7" class="not-found">
+          <td colspan="8" class="not-found">
             <div>
               <i class="fa fa-magnifying-glass-minus"></i>
               <p>No candidates enrolled yet.</p>
