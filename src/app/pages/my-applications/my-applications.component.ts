@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { BreadcrumbService } from '@app/@core/services';
 import { ExamAttemptStatusEnum, ExamTypeEnum } from '@app/@core/enums/recruitment.enum';
 import { IMyApplication } from '@app/@core/interfaces/recruitment-management/job-application.interface';
 import { IMyExamEnrollmentResponse } from '@app/@core/interfaces/recruitment-management/exam-taking.interface';
 import { JobApplicationService } from '@app/@core/services/recruitment/job-application/job-application.service';
 import { ExamTakingService } from '@app/@core/services/recruitment/exam-taking/exam-taking.service';
+import { saveFileResponse } from '@app/@core/services/recruitment/cv-bank/cv-bank.service';
 import { ToastService } from '@app/@core/services/misc/toast.service';
 import { ConfirmationService } from 'primeng/api';
 
@@ -21,6 +22,7 @@ export class MyApplicationsComponent implements OnInit {
     private confirmationService: ConfirmationService,
     private toast: ToastService,
     private breadcrumbService: BreadcrumbService,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   readonly ExamTypeEnum = ExamTypeEnum;
@@ -31,6 +33,7 @@ export class MyApplicationsComponent implements OnInit {
   loading = true;
   loadError = '';
   withdrawingId: number | null = null;
+  downloadingAdmitCardId: number | null = null;
 
   ngOnInit(): void {
     this.breadcrumbService.setBreadcrumbs([
@@ -95,6 +98,22 @@ export class MyApplicationsComponent implements OnInit {
       acceptIcon: 'fa fa-check',
       rejectIcon: 'fa fa-times',
       accept: () => this.withdraw(application),
+    });
+  }
+
+  downloadAdmitCard(exam: IMyExamEnrollmentResponse): void {
+    this.downloadingAdmitCardId = exam.examEnrollmentId;
+    this.examTakingService.downloadMyAdmitCard(exam.examEnrollmentId).subscribe({
+      next: (response) => {
+        saveFileResponse(response, `AdmitCard-${exam.examTitle}.pdf`);
+        this.downloadingAdmitCardId = null;
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        this.downloadingAdmitCardId = null;
+        this.toast.error({ detail: error?.error?.decentMessage || 'Failed to download admit card.' });
+        this.cdr.detectChanges();
+      },
     });
   }
 

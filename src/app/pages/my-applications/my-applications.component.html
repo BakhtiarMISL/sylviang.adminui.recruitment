@@ -46,6 +46,15 @@
             <a *ngIf="exam.attemptStatus === ExamAttemptStatusEnum.Submitted" [routerLink]="['/exam-attempt', exam.examEnrollmentId]" class="exam-action-link">View Status</a>
           </ng-container>
           <span *ngIf="exam.examType === ExamTypeEnum.InPerson" class="text-sm text-neutral">Scheduled</span>
+          <button
+            type="button"
+            class="exam-action-link"
+            [disabled]="downloadingAdmitCardId === exam.examEnrollmentId"
+            (click)="downloadAdmitCard(exam)"
+          >
+            <i class="fa" [class.fa-download]="downloadingAdmitCardId !== exam.examEnrollmentId" [class.fa-spinner]="downloadingAdmitCardId === exam.examEnrollmentId" [class.fa-spin]="downloadingAdmitCardId === exam.examEnrollmentId"></i>
+            Download Admit Card
+          </button>
         </div>
       </div>
 
