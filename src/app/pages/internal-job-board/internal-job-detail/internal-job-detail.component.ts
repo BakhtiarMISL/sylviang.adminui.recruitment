@@ -1,8 +1,11 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { IPublicJobPostingResponse } from '@app/@core/interfaces/recruitment-management/career-portal.interface';
+import { IJobEligibilityResponse, IPublicJobPostingResponse } from '@app/@core/interfaces/recruitment-management/career-portal.interface';
 import { InternalJobBoardService } from '@app/@core/services/recruitment/internal-job-board/internal-job-board.service';
+import { JobApplicationService } from '@app/@core/services/recruitment/job-application/job-application.service';
 import { BreadcrumbService } from '@app/@core/services';
+import { AuthService } from '@core/services/auth/auth.service';
+import { UserRoleEnum } from '@core/enums/user-role.enum';
 
 @Component({
   selector: 'app-internal-job-detail',
@@ -13,6 +16,8 @@ import { BreadcrumbService } from '@app/@core/services';
 export class InternalJobDetailComponent implements OnInit {
   constructor(
     private internalJobBoardService: InternalJobBoardService,
+    private jobApplicationService: JobApplicationService,
+    private authService: AuthService,
     private route: ActivatedRoute,
     private breadcrumbService: BreadcrumbService,
     private cdr: ChangeDetectorRef,
@@ -21,6 +26,7 @@ export class InternalJobDetailComponent implements OnInit {
   jobPosting: IPublicJobPostingResponse | null = null;
   loading = true;
   notFound = false;
+  eligibilityResult: IJobEligibilityResponse | null = null;
 
   ngOnInit(): void {
     this.route.paramMap.subscribe((params) => {
@@ -50,10 +56,12 @@ export class InternalJobDetailComponent implements OnInit {
   private loadJobPosting(id: number): void {
     this.loading = true;
     this.notFound = false;
+    this.eligibilityResult = null;
     this.internalJobBoardService.getJobPostingById(id).subscribe({
       next: (response) => {
         if (!response.hasError && response.content) {
           this.jobPosting = response.content;
+          this.checkEligibility(id);
         } else {
           this.notFound = true;
         }
@@ -64,6 +72,22 @@ export class InternalJobDetailComponent implements OnInit {
         this.notFound = true;
         this.loading = false;
         this.cdr.detectChanges();
+      },
+    });
+  }
+
+  private checkEligibility(jobPostingId: number): void {
+    if (!this.authService.isAuthenticated() || this.authService.getRole() !== UserRoleEnum.Candidate) return;
+
+    this.jobApplicationService.checkEligibility(jobPostingId).subscribe({
+      next: (response) => {
+        if (!response.hasError && response.content) {
+          this.eligibilityResult = response.content;
+          this.cdr.detectChanges();
+        }
+      },
+      error: () => {
+        // Eligibility is a nice-to-have on top of the static summary - don't block the page on failure.
       },
     });
   }

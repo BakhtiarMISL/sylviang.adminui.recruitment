@@ -1,0 +1,21 @@
+:host {
+  display: block;
+}
+
+// The p-floatlabel "in" variant expects its label to float up on focus/fill,
+// but that relies on PrimeNG's own CSS layer winning over app-global styles -
+// unreliable here, so this pins the label as a normal static label above the
+// input instead of fighting the float animation.
+::ng-deep .form-container .p-floatlabel {
+  label {
+    position: static !important;
+    display: block !important;
+    transform: none !important;
+    font-size: 14px !important;
+    margin-bottom: 0.5rem;
+  }
+
+  input {
+    margin-top: 0;
+  }
+}

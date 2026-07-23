@@ -1,0 +1,13 @@
+.file-picker-input {
+  // A screen-reader-only input remains positioned in the page flow. Browsers
+  // scroll its nearest overflow container when returning from the file picker.
+  // Keeping it fixed in the viewport prevents that automatic scroll.
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+}

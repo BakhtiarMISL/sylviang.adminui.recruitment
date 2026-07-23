@@ -125,7 +125,11 @@ export class ManageHiringPipelineComponent implements OnInit {
   }
 
   stageIsInvalid(stage: IPipelineStage): boolean {
-    return !stage.name?.trim() || !stage.stageType?.trim();
+    return !stage.name?.trim() || !stage.stageType?.trim() || this.marksAreInvalid(stage);
+  }
+
+  marksAreInvalid(stage: IPipelineStage): boolean {
+    return stage.maxMarks != null && stage.passMarks != null && stage.passMarks > stage.maxMarks;
   }
 
   get hasInvalidStages(): boolean {
@@ -142,7 +146,7 @@ export class ManageHiringPipelineComponent implements OnInit {
     }
 
     if (this.hasInvalidStages) {
-      this.errorMessage = 'Every stage needs a name and a stage type, and the pipeline needs at least one stage.';
+      this.errorMessage = 'Every stage needs a name and a stage type, pass marks must not exceed max marks, and the pipeline needs at least one stage.';
       return;
     }
 

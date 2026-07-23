@@ -2,6 +2,7 @@ import { AfterViewInit, ChangeDetectorRef, Component, OnInit } from '@angular/co
 import { IPublicJobPostingResponse } from '@app/@core/interfaces/recruitment-management/career-portal.interface';
 import { CareerPortalService } from '@app/@core/services/recruitment/career-portal/career-portal.service';
 import { UI_CONFIG } from '@app/@core/constants';
+import { AuthService } from '@core/services/auth/auth.service';
 import { SortEvent } from 'primeng/api';
 import { EmploymentTypeOptions, ExperienceBucketOptions } from '../career-portal.constants';
 import { JobBrowseColumns } from './job-browse.component.constants';
@@ -15,24 +16,34 @@ import { JobBrowseColumns } from './job-browse.component.constants';
 export class JobBrowseComponent implements OnInit, AfterViewInit {
   constructor(
     private careerPortalService: CareerPortalService,
+    private authService: AuthService,
     private cdr: ChangeDetectorRef,
   ) {}
 
+  // Reached both pre-login (top-level /careers, standalone public layout) and post-login
+  // (same module nested under Shell, see pages-routing.module.ts) - suppress the page's own
+  // public navbar in the latter case so it doesn't stack with Shell's sidebar/header.
+  get isLoggedIn(): boolean {
+    return this.authService.isAuthenticated();
+  }
+
   jobPostings: IPublicJobPostingResponse[] = [];
-  sortedColumn: string = '';
   loading = false;
   totalRecords = 0;
   UI_CONFIG = UI_CONFIG;
   rows = UI_CONFIG.defaultPageSize;
   currentPage = 1;
 
-  sortBy: string = '';
-  sortDirection: string = '';
+  sortField: string | null = null;
+  sortDirection: 'asc' | 'desc' = 'asc';
 
   employmentTypeOptions = EmploymentTypeOptions;
   experienceBucketOptions = ExperienceBucketOptions;
 
+  sortOptions = JobBrowseColumns.filter((col) => col.sortable !== false).map((col) => ({ label: col.label, value: col.field }));
+  // Table view (logged-in / Shell-nested) sorts via column header click instead of the card view's dropdown.
   columns = JobBrowseColumns;
+  filtersCollapsed = true;
 
   searchTerm = '';
   location = '';
@@ -56,6 +67,7 @@ export class JobBrowseComponent implements OnInit, AfterViewInit {
 
   applyFilters(): void {
     this.currentPage = 1;
+    this.filtersCollapsed = true;
     this.loadJobPostings();
   }
 
@@ -66,6 +78,7 @@ export class JobBrowseComponent implements OnInit, AfterViewInit {
     this.employmentType = null;
     this.maxExperienceYears = null;
     this.currentPage = 1;
+    this.filtersCollapsed = false;
     this.loadJobPostings();
   }
 
@@ -80,8 +93,8 @@ export class JobBrowseComponent implements OnInit, AfterViewInit {
       ...(this.departmentId !== null && this.departmentId !== undefined && { departmentId: this.departmentId }),
       ...(this.employmentType && { employmentType: this.employmentType }),
       ...(this.maxExperienceYears !== null && this.maxExperienceYears !== undefined && { maxExperienceYears: this.maxExperienceYears }),
-      ...(this.sortBy && { sortBy: this.sortBy }),
-      ...(this.sortDirection && { sortDirection: this.sortDirection }),
+      ...(this.sortField && { sortBy: this.sortField }),
+      ...(this.sortField && { sortDirection: this.sortDirection }),
     };
 
     this.careerPortalService.getJobPostings(params).subscribe({
@@ -111,9 +124,19 @@ export class JobBrowseComponent implements OnInit, AfterViewInit {
     this.loadJobPostings();
   }
 
-  onSort(event: SortEvent) {
-    this.sortedColumn = event.field || '';
-    this.sortBy = event.field || '';
+  onSortChange(): void {
+    this.currentPage = 1;
+    this.loadJobPostings();
+  }
+
+  toggleSortDirection(): void {
+    this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    this.currentPage = 1;
+    this.loadJobPostings();
+  }
+
+  onSort(event: SortEvent): void {
+    this.sortField = event.field || null;
     this.sortDirection = event.order === 1 ? 'asc' : 'desc';
     this.currentPage = 1;
     this.loadJobPostings();

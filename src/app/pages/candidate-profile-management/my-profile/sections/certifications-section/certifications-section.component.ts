@@ -121,11 +121,13 @@ export class CertificationsSectionComponent implements OnInit {
 
     if (!CERTIFICATE_ALLOWED_EXTENSIONS.includes(extension)) {
       this.fileError = `Certificate file must be one of: ${CERTIFICATE_ALLOWED_EXTENSIONS.join(', ')}`;
+      input.value = '';
       return;
     }
 
     if (file.size > CERTIFICATE_MAX_SIZE_BYTES) {
       this.fileError = 'Certificate file size must not exceed 10MB';
+      input.value = '';
       return;
     }
 
