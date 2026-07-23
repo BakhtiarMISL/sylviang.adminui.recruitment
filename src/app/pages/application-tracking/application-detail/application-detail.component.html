@@ -1,7 +1,5 @@
-<section class="page-container">
+<section class="page-container" *ngIf="loading || loadError">
   <div class="form-container">
-    <h3 class="form-section-header">Application Detail</h3>
-
     <div class="sm:col-span-2" *ngIf="loading">Loading...</div>
     <div class="sm:col-span-2 invalid" *ngIf="loadError">{{ loadError }}</div>
   </div>
@@ -10,12 +8,12 @@
 <ng-container *ngIf="!loading && application">
   <section class="page-container">
     <div class="form-container">
-      <div><span class="field-label">Candidate Name</span><div>{{ application.candidateName }}</div></div>
-      <div><span class="field-label">Job Title</span><div>{{ application.jobPostingTitle || '-' }}</div></div>
-      <div><span class="field-label">Email</span><div>{{ application.candidateEmail || '-' }}</div></div>
-      <div><span class="field-label">Phone</span><div>{{ application.candidatePhone || '-' }}</div></div>
-      <div><span class="field-label">Source / Candidate Type</span><div>{{ formatEnumLabel(application.source) }}</div></div>
-      <div><span class="field-label">Applied Date</span><div>{{ application.appliedDate ? (application.appliedDate | date: 'dd-MMM-yyyy') : '-' }}</div></div>
+      <div><span class="field-label">Candidate Name</span><div class="field-value">{{ application.candidateName }}</div></div>
+      <div><span class="field-label">Job Title</span><div class="field-value">{{ application.jobPostingTitle || '-' }}</div></div>
+      <div><span class="field-label">Email</span><div class="field-value">{{ application.candidateEmail || '-' }}</div></div>
+      <div><span class="field-label">Phone</span><div class="field-value">{{ application.candidatePhone || '-' }}</div></div>
+      <div><span class="field-label">Source / Candidate Type</span><div class="field-value">{{ formatEnumLabel(application.source) }}</div></div>
+      <div><span class="field-label">Applied Date</span><div class="field-value">{{ application.appliedDate ? (application.appliedDate | date: 'dd-MMM-yyyy') : '-' }}</div></div>
       <div><span class="field-label">Current Status</span><div><span class="status-badge">{{ formatEnumLabel(application.applicationStatus) }}</span></div></div>
       <div *ngIf="application.resumeUrl">
         <span class="field-label">CV</span>
@@ -23,7 +21,7 @@
       </div>
       <div class="sm:col-span-2" *ngIf="application.coverLetter">
         <span class="field-label">Cover Letter</span>
-        <div>{{ application.coverLetter }}</div>
+        <div class="field-value">{{ application.coverLetter }}</div>
       </div>
     </div>
   </section>
@@ -37,10 +35,10 @@
     <div class="form-container">
       <h3 class="form-section-header">Update Status</h3>
 
-      <div *ngIf="updateError" class="invalid sm:col-span-2">{{ updateError }}</div>
-      <div *ngIf="updateSuccess" class="success-message sm:col-span-2">Status updated.</div>
+      <div *ngIf="updateError" class="invalid sm:col-span-2 lg:col-span-3 xl:col-span-4">{{ updateError }}</div>
+      <div *ngIf="updateSuccess" class="success-message sm:col-span-2 lg:col-span-3 xl:col-span-4">Status updated.</div>
 
-      <div class="sm:col-span-2 text-sm text-neutral" *ngIf="nextStatusOptions.length === 0">
+      <div class="sm:col-span-2 lg:col-span-3 xl:col-span-4 text-sm text-neutral" *ngIf="nextStatusOptions.length === 0">
         No further transitions available from {{ formatEnumLabel(application.applicationStatus) }}.
       </div>
 
@@ -78,11 +76,11 @@
           </p-floatlabel>
         </div>
 
-        <div class="sm:col-span-2">
+        <div class="sm:col-span-2 lg:col-span-3 xl:col-span-4">
           <textarea pInputText [(ngModel)]="note" rows="3" class="w-full" maxlength="2000" placeholder="Private note (visible only to HR/Admin)"></textarea>
         </div>
 
-        <div class="sm:col-span-2">
+        <div class="sm:col-span-2 lg:col-span-3 xl:col-span-4">
           <button pButton type="button" [disabled]="!canUpdateStatus() || updating" (click)="updateStatus()">
             <i class="fas fa-save"></i>
             <span>{{ updating ? 'Updating...' : 'Update Status' }}</span>

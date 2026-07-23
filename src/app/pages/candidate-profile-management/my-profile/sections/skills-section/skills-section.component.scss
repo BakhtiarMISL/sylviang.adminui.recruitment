@@ -20,3 +20,12 @@
   display: flex;
   flex-wrap: wrap;
 }
+
+.suggestion-chip {
+  background: var(--white, #fff);
+  border: 1px dashed var(--primary-300, #7dd3fc);
+
+  a {
+    cursor: pointer;
+  }
+}
