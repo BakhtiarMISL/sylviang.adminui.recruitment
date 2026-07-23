@@ -144,3 +144,9 @@ export enum InterviewStatusEnum {
   Completed = 'Completed',
   NoShow = 'NoShow',
 }
+
+export enum InterviewResultEnum {
+  Pending = 'Pending',
+  Passed = 'Passed',
+  Failed = 'Failed',
+}

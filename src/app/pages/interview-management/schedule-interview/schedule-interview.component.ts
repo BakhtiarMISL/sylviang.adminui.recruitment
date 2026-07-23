@@ -5,12 +5,14 @@ import { UI_CONFIG } from '@app/@core/constants';
 import { ApplicationStatusEnum, InterviewTypeEnum } from '@app/@core/enums/recruitment.enum';
 import { IInterviewRoomResponse } from '@app/@core/interfaces/recruitment-management/interview-room.interface';
 import { IInterviewVenueLookupResponse } from '@app/@core/interfaces/recruitment-management/interview-venue.interface';
+import { IInterviewRoundConfigResponse } from '@app/@core/interfaces/recruitment-management/interview-round-config.interface';
 import { IJobApplicationListItem } from '@app/@core/interfaces/recruitment-management/job-application.interface';
 import { IJobVacancyResponse } from '@app/@core/interfaces/recruitment-management/job-vacancy.interface';
 import { BreadcrumbService } from '@app/@core/services';
 import { InterviewService } from '@app/@core/services/recruitment/interview/interview.service';
 import { InterviewRoomService } from '@app/@core/services/recruitment/interview-room/interview-room.service';
 import { InterviewVenueService } from '@app/@core/services/recruitment/interview-venue/interview-venue.service';
+import { InterviewRoundConfigService } from '@app/@core/services/recruitment/interview-round-config/interview-round-config.service';
 import { JobApplicationService } from '@app/@core/services/recruitment/job-application/job-application.service';
 import { JobVacancyService } from '@app/@core/services/recruitment/job-vacancy/job-vacancy.service';
 import { ToastService } from '@app/@core/services/misc/toast.service';
@@ -28,6 +30,7 @@ export class ScheduleInterviewComponent implements OnInit {
     private interviewService: InterviewService,
     private interviewVenueService: InterviewVenueService,
     private interviewRoomService: InterviewRoomService,
+    private interviewRoundConfigService: InterviewRoundConfigService,
     private jobVacancyService: JobVacancyService,
     private jobApplicationService: JobApplicationService,
     private toast: ToastService,
@@ -47,6 +50,7 @@ export class ScheduleInterviewComponent implements OnInit {
   jobPostings: IJobVacancyResponse[] = [];
   interviewVenues: IInterviewVenueLookupResponse[] = [];
   interviewRooms: IInterviewRoomResponse[] = [];
+  roundConfigs: IInterviewRoundConfigResponse[] = [];
 
   // Candidate picker - stays disabled/empty until a job posting is picked. Multi-select: 1
   // candidate selected => single schedule, 2+ => bulk schedule staggered by duration+gap.
@@ -81,6 +85,7 @@ export class ScheduleInterviewComponent implements OnInit {
       durationMinutes: [30, [Validators.required, Validators.min(1)]],
       gapMinutes: [15, [Validators.required, Validators.min(0)]],
       round: [1, [Validators.required, Validators.min(1)]],
+      interviewRoundConfigId: [null],
       panelistEmployeeIdsText: [null],
       notes: [null],
     });
@@ -164,8 +169,39 @@ export class ScheduleInterviewComponent implements OnInit {
     this.candidates = [];
     this.candidatesTotalRecords = 0;
     this.candidateCurrentPage = 1;
+    this.roundConfigs = [];
+    this.scheduleForm.get('interviewRoundConfigId')?.setValue(null);
+    this.scheduleForm.get('round')?.enable({ emitEvent: false });
+
     if (this.scheduleForm.value.jobPostingId) {
       this.loadCandidates();
+      this.loadRoundConfigs();
+    }
+  }
+
+  private loadRoundConfigs(): void {
+    const jobPostingId = this.scheduleForm.value.jobPostingId;
+    if (!jobPostingId) return;
+
+    this.interviewRoundConfigService.getAllByJobPosting(jobPostingId).subscribe({
+      next: (response) => {
+        this.roundConfigs = !response.hasError && response.content ? response.content : [];
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  onRoundConfigChange(): void {
+    const roundConfigId = this.scheduleForm.value.interviewRoundConfigId;
+    const roundControl = this.scheduleForm.get('round');
+    if (!roundConfigId) {
+      roundControl?.enable({ emitEvent: false });
+      return;
+    }
+    const config = this.roundConfigs.find((r) => r.interviewRoundConfigId === roundConfigId);
+    if (config) {
+      roundControl?.setValue(config.sequence);
+      roundControl?.disable({ emitEvent: false });
     }
   }
 
@@ -256,7 +292,8 @@ export class ScheduleInterviewComponent implements OnInit {
         meetingLink: this.isInPerson ? null : this.scheduleForm.value.meetingLink,
         scheduledStartAt: startIso,
         scheduledEndAt,
-        round: this.scheduleForm.value.round,
+        round: this.scheduleForm.get('round')?.value,
+        interviewRoundConfigId: this.scheduleForm.value.interviewRoundConfigId,
         panelistEmployeeIds,
         notes: this.scheduleForm.value.notes,
       };
@@ -286,7 +323,8 @@ export class ScheduleInterviewComponent implements OnInit {
         startAt: startIso,
         durationMinutes: this.scheduleForm.value.durationMinutes,
         gapMinutes: this.scheduleForm.value.gapMinutes,
-        round: this.scheduleForm.value.round,
+        round: this.scheduleForm.get('round')?.value,
+        interviewRoundConfigId: this.scheduleForm.value.interviewRoundConfigId,
         panelistEmployeeIds,
         notes: this.scheduleForm.value.notes,
       };

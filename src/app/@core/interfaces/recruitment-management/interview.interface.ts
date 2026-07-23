@@ -1,4 +1,4 @@
-import { InterviewStatusEnum, InterviewTypeEnum, NotificationStatusEnum } from '@core/enums/recruitment.enum';
+import { InterviewResultEnum, InterviewStatusEnum, InterviewTypeEnum, NotificationStatusEnum } from '@core/enums/recruitment.enum';
 
 export interface IInterviewScheduleRequest {
   jobApplicationId: number;
@@ -10,6 +10,7 @@ export interface IInterviewScheduleRequest {
   scheduledStartAt: string;
   scheduledEndAt: string;
   round: number;
+  interviewRoundConfigId?: number | null;
   panelistEmployeeIds: number[];
   notes?: string | null;
 }
@@ -25,6 +26,7 @@ export interface IInterviewBulkScheduleRequest {
   durationMinutes: number;
   gapMinutes: number;
   round: number;
+  interviewRoundConfigId?: number | null;
   panelistEmployeeIds: number[];
   notes?: string | null;
 }
@@ -52,6 +54,10 @@ export interface IInterviewBulkCancelRequest {
   cancellationReason: string;
 }
 
+export interface IInterviewMarkResultRequest {
+  result: InterviewResultEnum;
+}
+
 export interface IInterviewResponse {
   interviewId: number;
   jobApplicationId: number;
@@ -67,6 +73,9 @@ export interface IInterviewResponse {
   scheduledStartAt: string;
   scheduledEndAt: string;
   round: number;
+  interviewRoundConfigId?: number | null;
+  roundConfigName?: string | null;
+  result: InterviewResultEnum;
   status: InterviewStatusEnum;
   cancellationReason?: string | null;
   panelistEmployeeIds: number[];

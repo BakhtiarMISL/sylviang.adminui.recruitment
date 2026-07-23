@@ -113,6 +113,25 @@
           <small class="text-red-500" *ngIf="hasError('gapMinutes')">Gap cannot be negative.</small>
         </div>
 
+        <div *ngIf="roundConfigs.length > 0">
+          <p-floatlabel variant="in">
+            <p-select
+              inputId="interviewRoundConfigId"
+              class="w-full"
+              [options]="roundConfigs"
+              formControlName="interviewRoundConfigId"
+              optionLabel="name"
+              optionValue="interviewRoundConfigId"
+              [showClear]="true"
+              [appendTo]="'body'"
+              [autoDisplayFirst]="false"
+              (onChange)="onRoundConfigChange()"
+              (onClear)="onRoundConfigChange()"
+            ></p-select>
+            <label for="interviewRoundConfigId">Interview Round (configured)</label>
+          </p-floatlabel>
+        </div>
+
         <div>
           <p-floatlabel variant="in">
             <p-inputnumber inputId="round" class="w-full" formControlName="round" [min]="1"></p-inputnumber>

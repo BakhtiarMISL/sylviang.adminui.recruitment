@@ -7,6 +7,7 @@ import {
   IInterviewBulkRescheduleRequest,
   IInterviewBulkScheduleRequest,
   IInterviewCancelRequest,
+  IInterviewMarkResultRequest,
   IInterviewRescheduleRequest,
   IInterviewResponse,
   IInterviewScheduleRequest,
@@ -55,5 +56,9 @@ export class InterviewService {
 
   bulkCancel(request: IInterviewBulkCancelRequest) {
     return this.httpClient.patch<ApiResponse<void>>(`${this.API_URL}/bulk/cancel`, request);
+  }
+
+  markResult(interviewId: number, request: IInterviewMarkResultRequest) {
+    return this.httpClient.patch<ApiResponse<void>>(`${this.API_URL}/${interviewId}/result`, request);
   }
 }

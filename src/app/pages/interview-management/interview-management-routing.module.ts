@@ -7,6 +7,7 @@ import { ScheduleInterviewComponent } from './schedule-interview/schedule-interv
 import { InterviewDetailComponent } from './interview-detail/interview-detail.component';
 import { EvaluateInterviewComponent } from './evaluate-interview/evaluate-interview.component';
 import { InterviewResultsComponent } from './interview-results/interview-results.component';
+import { InterviewRoundConfigComponent } from './interview-round-config/interview-round-config.component';
 
 const roleData = { roles: [UserRoleEnum.Admin, UserRoleEnum.HR] };
 
@@ -38,6 +39,12 @@ const routes: Routes = [
   {
     path: 'interview/:id/results',
     component: InterviewResultsComponent,
+    canActivate: [RoleGuard],
+    data: roleData,
+  },
+  {
+    path: 'interview-round-config/:jobPostingId',
+    component: InterviewRoundConfigComponent,
     canActivate: [RoleGuard],
     data: roleData,
   },

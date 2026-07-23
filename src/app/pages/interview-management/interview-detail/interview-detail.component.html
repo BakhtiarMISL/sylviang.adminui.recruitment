@@ -17,7 +17,7 @@
         <h4 class="text-lg font-medium text-gray-900 dark:text-white">{{ interview.candidateName }}</h4>
         <p class="text-sm text-gray-600 dark:text-gray-300">
           {{ interview.scheduledStartAt | date: 'dd-MMM-yyyy HH:mm' }} - {{ interview.scheduledEndAt | date: 'HH:mm' }}
-          &middot; {{ interview.interviewType }} &middot; Round {{ interview.round }}
+          &middot; {{ interview.interviewType }} &middot; Round {{ interview.round }}{{ interview.roundConfigName ? ' (' + interview.roundConfigName + ')' : '' }}
         </p>
         <p class="text-sm text-gray-600 dark:text-gray-300" *ngIf="interview.interviewType === InterviewTypeEnum.InPerson">
           Venue: {{ interview.venueName || '-' }} &middot; Room: {{ interview.roomName || '-' }}
@@ -42,6 +42,16 @@
           }"
         >
           {{ interview.status }}
+        </span>
+        <span
+          *ngIf="interview.result !== InterviewResultEnum.Pending"
+          class="rounded-full px-2 py-0.5 text-xs font-medium"
+          [ngClass]="{
+            'bg-green-100 text-green-700': interview.result === InterviewResultEnum.Passed,
+            'bg-red-100 text-red-700': interview.result === InterviewResultEnum.Failed,
+          }"
+        >
+          Result: {{ interview.result }}
         </span>
         <span
           class="rounded-full px-2 py-0.5 text-xs font-medium"
@@ -75,6 +85,10 @@
       <button pButton *ngIf="!isCancelled" severity="danger" (click)="openCancelDialog()">
         <i class="fa fa-ban"></i>
         <span>Cancel</span>
+      </button>
+      <button pButton *ngIf="!isCancelled" severity="success" (click)="openMarkResultDialog()">
+        <i class="fa fa-flag-checkered"></i>
+        <span>Mark Result</span>
       </button>
       <button pButton severity="secondary" [routerLink]="['/interviews/interview', interviewId, 'evaluate']">
         <i class="fa fa-star"></i>
@@ -138,6 +152,43 @@
       </button>
       <button pButton type="button" severity="secondary" (click)="closeCancelDialog()">
         <span>Close</span>
+      </button>
+    </div>
+  </div>
+</p-dialog>
+
+<p-dialog header="Mark Interview Result" [(visible)]="markResultDialogVisible" [modal]="true" [style]="{ width: '24rem', maxWidth: '95vw' }" (onHide)="closeMarkResultDialog()">
+  <div class="flex flex-col gap-3">
+    <p class="text-sm text-gray-600 dark:text-gray-300">Also marks the interview as Completed.</p>
+
+    <div class="flex gap-2">
+      <button
+        pButton
+        type="button"
+        [severity]="markResultValue === InterviewResultEnum.Passed ? 'success' : 'secondary'"
+        (click)="markResultValue = InterviewResultEnum.Passed"
+      >
+        <i class="fa fa-check"></i>
+        <span>Passed</span>
+      </button>
+      <button
+        pButton
+        type="button"
+        [severity]="markResultValue === InterviewResultEnum.Failed ? 'danger' : 'secondary'"
+        (click)="markResultValue = InterviewResultEnum.Failed"
+      >
+        <i class="fa fa-xmark"></i>
+        <span>Failed</span>
+      </button>
+    </div>
+
+    <div class="flex gap-2 pb-2">
+      <button pButton [disabled]="!canSaveMarkResult" [loading]="markResultSaving" (click)="saveMarkResult()">
+        <i class="fa fa-save"></i>
+        <span>Save</span>
+      </button>
+      <button pButton type="button" severity="secondary" (click)="closeMarkResultDialog()">
+        <span>Cancel</span>
       </button>
     </div>
   </div>

@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { InterviewStatusEnum, InterviewTypeEnum } from '@app/@core/enums/recruitment.enum';
+import { InterviewResultEnum, InterviewStatusEnum, InterviewTypeEnum } from '@app/@core/enums/recruitment.enum';
 import { IInterviewResponse } from '@app/@core/interfaces/recruitment-management/interview.interface';
 import { BreadcrumbService } from '@app/@core/services';
 import { InterviewService } from '@app/@core/services/recruitment/interview/interview.service';
@@ -26,6 +26,7 @@ export class InterviewDetailComponent implements OnInit {
 
   readonly InterviewTypeEnum = InterviewTypeEnum;
   readonly InterviewStatusEnum = InterviewStatusEnum;
+  readonly InterviewResultEnum = InterviewResultEnum;
 
   interviewId!: number;
   interview: IInterviewResponse | null = null;
@@ -40,6 +41,11 @@ export class InterviewDetailComponent implements OnInit {
   cancelDialogVisible = false;
   cancelReason = '';
   cancelSaving = false;
+
+  // Mark Result dialog
+  markResultDialogVisible = false;
+  markResultValue: InterviewResultEnum | null = null;
+  markResultSaving = false;
 
   ngOnInit(): void {
     this.route.paramMap.subscribe((params) => {
@@ -167,6 +173,44 @@ export class InterviewDetailComponent implements OnInit {
       error: (error) => {
         this.cancelSaving = false;
         this.toast.error({ detail: error?.error?.decentMessage || 'Failed to cancel interview.' });
+      },
+    });
+  }
+
+  // ── Mark Result ──────────────────────────────────────────────────
+
+  openMarkResultDialog(): void {
+    this.markResultValue = null;
+    this.markResultDialogVisible = true;
+  }
+
+  closeMarkResultDialog(): void {
+    this.markResultDialogVisible = false;
+    this.markResultValue = null;
+  }
+
+  get canSaveMarkResult(): boolean {
+    return !!this.markResultValue && !this.markResultSaving;
+  }
+
+  saveMarkResult(): void {
+    if (!this.markResultValue) return;
+
+    this.markResultSaving = true;
+    this.interviewService.markResult(this.interviewId, { result: this.markResultValue }).subscribe({
+      next: (response) => {
+        this.markResultSaving = false;
+        if (response.hasError) {
+          this.toast.error({ detail: response?.decentMessage || 'Failed to mark interview result.' });
+        } else {
+          this.toast.success({ detail: 'Interview result recorded.' });
+          this.closeMarkResultDialog();
+          this.loadInterview();
+        }
+      },
+      error: (error) => {
+        this.markResultSaving = false;
+        this.toast.error({ detail: error?.error?.decentMessage || 'Failed to mark interview result.' });
       },
     });
   }

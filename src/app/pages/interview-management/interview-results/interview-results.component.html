@@ -51,7 +51,7 @@
         </span>
       </div>
 
-      <table class="mt-3 w-full text-sm">
+      <table class="mt-3 w-full text-sm criteria-table">
         <thead>
           <tr class="text-left text-gray-600 dark:text-gray-300">
             <th class="pb-1">Criterion</th>
@@ -61,9 +61,9 @@
         </thead>
         <tbody>
           <tr *ngFor="let score of evaluation.scores">
-            <td class="py-0.5 text-gray-900 dark:text-white">{{ score.criterionName }}</td>
-            <td class="py-0.5 text-gray-600 dark:text-gray-300">{{ score.weight }}</td>
-            <td class="py-0.5 text-gray-600 dark:text-gray-300">{{ score.score }} / {{ score.maxScore }}</td>
+            <td class="py-0.5 text-gray-900 dark:text-white" data-label="Criterion">{{ score.criterionName }}</td>
+            <td class="py-0.5 text-gray-600 dark:text-gray-300" data-label="Weight">{{ score.weight }}</td>
+            <td class="py-0.5 text-gray-600 dark:text-gray-300" data-label="Score">{{ score.score }} / {{ score.maxScore }}</td>
           </tr>
         </tbody>
       </table>

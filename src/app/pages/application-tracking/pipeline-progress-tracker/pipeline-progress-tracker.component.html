@@ -45,8 +45,9 @@
 
       <div *ngFor="let interview of interviews" class="stage-field" style="justify-content: space-between; display: flex; width: 100%">
         <span>
-          Round {{ interview.round }} &middot; {{ interview.interviewType }} &middot;
-          {{ interview.scheduledStartAt | date: 'dd-MMM-yyyy HH:mm' }} &middot; {{ interview.status }}
+          Round {{ interview.round }}{{ interview.roundConfigName ? ' (' + interview.roundConfigName + ')' : '' }} &middot;
+          {{ interview.interviewType }} &middot; {{ interview.scheduledStartAt | date: 'dd-MMM-yyyy HH:mm' }} &middot; {{ interview.status }}
+          <ng-container *ngIf="interview.result !== 'Pending'"> &middot; Result: {{ interview.result }}</ng-container>
         </span>
         <a [routerLink]="['/interviews/interview', interview.interviewId]">View</a>
       </div>

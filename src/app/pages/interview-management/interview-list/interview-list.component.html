@@ -40,7 +40,56 @@
       </h3>
     </div>
 
-    <div class="transition-all duration-500 ease-in-out">
+    <!-- US-072: phone-width viewers get a stacked card list instead of a horizontally-scrolling
+         table - the table's columns just don't fit a phone screen usably. -->
+    <div *ngIf="isMobile" class="space-y-3">
+      <div *ngIf="loading" class="space-y-3">
+        <p-skeleton height="5rem" *ngFor="let i of skeletonItems"></p-skeleton>
+      </div>
+
+      <div *ngIf="!loading && interviews.length === 0" class="not-found">
+        <i class="fa fa-magnifying-glass-minus"></i>
+        <p>No interviews scheduled yet</p>
+      </div>
+
+      <div
+        *ngFor="let interview of interviews"
+        class="cursor-pointer rounded-lg bg-white p-4 shadow-sm dark:bg-dark"
+        (click)="openDetail(interview)"
+      >
+        <div class="flex items-start justify-between gap-2">
+          <h4 class="text-base font-medium text-gray-900 dark:text-white">{{ interview.candidateName }}</h4>
+          <span
+            class="rounded-full px-2 py-0.5 text-xs font-medium"
+            [ngClass]="{
+              'bg-blue-100 text-blue-700': interview.status === 'Scheduled' || interview.status === 'Rescheduled',
+              'bg-red-100 text-red-700': interview.status === 'Cancelled' || interview.status === 'NoShow',
+              'bg-green-100 text-green-700': interview.status === 'Completed',
+            }"
+          >
+            {{ interview.status }}
+          </span>
+        </div>
+        <p class="text-sm text-gray-600 dark:text-gray-300">
+          {{ interview.scheduledStartAt | date: 'dd-MMM-yyyy HH:mm' }} &middot; {{ interview.interviewType }} &middot; Round {{ interview.round }}
+        </p>
+        <p class="text-sm text-gray-600 dark:text-gray-300">
+          {{ interview.interviewType === 'InPerson' ? (interview.venueName || '-') + ' / ' + (interview.roomName || '-') : (interview.meetingLink || '-') }}
+        </p>
+      </div>
+
+      <div *ngIf="!loading && totalRecords > rows" class="flex items-center justify-between gap-2 pt-2">
+        <button pButton type="button" severity="secondary" [disabled]="currentPage === 1" (click)="goToMobilePage(currentPage - 1)">
+          <i class="fa fa-chevron-left"></i>
+        </button>
+        <span class="text-sm text-gray-600 dark:text-gray-300">Page {{ currentPage }} of {{ totalMobilePages }}</span>
+        <button pButton type="button" severity="secondary" [disabled]="currentPage >= totalMobilePages" (click)="goToMobilePage(currentPage + 1)">
+          <i class="fa fa-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="!isMobile" class="transition-all duration-500 ease-in-out">
       <p-table
         [value]="loading ? skeletonItems : interviews"
         dataKey="interviewId"

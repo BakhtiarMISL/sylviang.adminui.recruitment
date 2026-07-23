@@ -20,6 +20,7 @@ import { ScheduleInterviewComponent } from './schedule-interview/schedule-interv
 import { InterviewDetailComponent } from './interview-detail/interview-detail.component';
 import { EvaluateInterviewComponent } from './evaluate-interview/evaluate-interview.component';
 import { InterviewResultsComponent } from './interview-results/interview-results.component';
+import { InterviewRoundConfigComponent } from './interview-round-config/interview-round-config.component';
 
 @NgModule({
   declarations: [
@@ -28,6 +29,7 @@ import { InterviewResultsComponent } from './interview-results/interview-results
     InterviewDetailComponent,
     EvaluateInterviewComponent,
     InterviewResultsComponent,
+    InterviewRoundConfigComponent,
   ],
   imports: [
     CommonModule,

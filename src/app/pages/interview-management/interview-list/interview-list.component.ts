@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, HostListener, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { UI_CONFIG } from '@app/@core/constants';
 import { InterviewStatusEnum } from '@app/@core/enums/recruitment.enum';
@@ -34,6 +34,16 @@ export class InterviewListComponent implements OnInit {
   filterStatus: InterviewStatusEnum | null = null;
   filtersCollapsed = true;
 
+  // US-072: below this width, the table becomes an unusable horizontal-scroll strip on a phone -
+  // same isMobile + resize-listener idiom as the app shell (shell.component.ts), just a narrower
+  // breakpoint since this is a page-level content switch, not the app-wide sidebar collapse.
+  isMobile = false;
+
+  @HostListener('window:resize')
+  checkScreenSize(): void {
+    this.isMobile = window.innerWidth < 768;
+  }
+
   get skeletonItems() {
     return Array(this.rows)
       .fill({})
@@ -41,6 +51,7 @@ export class InterviewListComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.checkScreenSize();
     this.breadcrumbService.setBreadcrumbs([
       { title: 'Recruitment', icon: 'fa-solid fa-briefcase', href: '/interviews/interview-list' },
       { title: 'Interviews', icon: 'fa-solid fa-people-arrows', href: '/interviews/interview-list' },
@@ -94,6 +105,16 @@ export class InterviewListComponent implements OnInit {
   onPageChange(event: any): void {
     this.currentPage = Math.floor(event.first / event.rows) + 1;
     this.rows = event.rows;
+    this.loadInterviews();
+  }
+
+  get totalMobilePages(): number {
+    return Math.max(1, Math.ceil(this.totalRecords / this.rows));
+  }
+
+  goToMobilePage(page: number): void {
+    if (page < 1 || page > this.totalMobilePages) return;
+    this.currentPage = page;
     this.loadInterviews();
   }
 
