@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ExamTypeEnum } from '@app/@core/enums/recruitment.enum';
-import { IExamEnrollmentResponse } from '@app/@core/interfaces/recruitment-management/exam-enrollment.interface';
+import { IExamEnrollmentResponse, IExamScoreBulkUploadResponse } from '@app/@core/interfaces/recruitment-management/exam-enrollment.interface';
 import { IExamResponse } from '@app/@core/interfaces/recruitment-management/exam.interface';
 import { IExamRoomResponse } from '@app/@core/interfaces/recruitment-management/exam-room.interface';
 import { BreadcrumbService } from '@app/@core/services';
@@ -49,6 +49,20 @@ export class ExamDetailComponent implements OnInit {
   reassignSeatNumber = '';
   reassignRooms: IExamRoomResponse[] = [];
   reassignSaving = false;
+
+  // Single-row score upload dialog (US-059 AC1)
+  scoreUploadDialogVisible = false;
+  scoreUploadEnrollment: IExamEnrollmentResponse | null = null;
+  scoreUploadValue: number | null = null;
+  scoreUploadSaving = false;
+
+  // Bulk score upload dialog (US-059 AC2)
+  downloadingScoreTemplate = false;
+  bulkScoreDialogVisible = false;
+  bulkScoreFile: File | null = null;
+  bulkScoreLoading = false;
+  bulkScoreError = '';
+  bulkScoreResult: IExamScoreBulkUploadResponse | null = null;
 
   get skeletonItems() {
     return Array(3)
@@ -258,5 +272,107 @@ export class ExamDetailComponent implements OnInit {
           this.toast.error({ detail: error?.error?.decentMessage || 'Failed to reassign seat.' });
         },
       });
+  }
+
+  // ── Score upload (single row, US-059 AC1) ─────────────────────────
+
+  openScoreUploadDialog(enrollment: IExamEnrollmentResponse): void {
+    this.scoreUploadEnrollment = enrollment;
+    this.scoreUploadValue = enrollment.score ?? null;
+    this.scoreUploadDialogVisible = true;
+  }
+
+  closeScoreUploadDialog(): void {
+    this.scoreUploadDialogVisible = false;
+    this.scoreUploadEnrollment = null;
+    this.scoreUploadValue = null;
+  }
+
+  get canSaveScoreUpload(): boolean {
+    return this.scoreUploadValue != null && this.scoreUploadValue >= 0 && !this.scoreUploadSaving;
+  }
+
+  saveScoreUpload(): void {
+    if (!this.scoreUploadEnrollment || this.scoreUploadValue == null) return;
+
+    this.scoreUploadSaving = true;
+    this.examService.uploadScore(this.examId, this.scoreUploadEnrollment.examEnrollmentId, this.scoreUploadValue).subscribe({
+      next: (response) => {
+        this.scoreUploadSaving = false;
+        if (response.hasError) {
+          this.toast.error({ detail: response?.decentMessage || 'Failed to upload score.' });
+        } else {
+          this.toast.success({ detail: 'Score uploaded.' });
+          this.closeScoreUploadDialog();
+          this.loadEnrollments();
+        }
+      },
+      error: (error) => {
+        this.scoreUploadSaving = false;
+        this.toast.error({ detail: error?.error?.decentMessage || 'Failed to upload score.' });
+      },
+    });
+  }
+
+  // ── Bulk score upload (US-059 AC2) ────────────────────────────────
+
+  downloadScoreTemplate(): void {
+    this.downloadingScoreTemplate = true;
+    this.examService.downloadScoreUploadTemplate(this.examId).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `ExamScoreUploadTemplate-${this.examId}.xlsx`;
+        link.click();
+        window.URL.revokeObjectURL(url);
+        this.downloadingScoreTemplate = false;
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        this.downloadingScoreTemplate = false;
+        this.toast.error({ detail: error?.error?.decentMessage || 'Failed to download score template.' });
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  openBulkScoreDialog(): void {
+    this.bulkScoreFile = null;
+    this.bulkScoreError = '';
+    this.bulkScoreResult = null;
+    this.bulkScoreDialogVisible = true;
+  }
+
+  onBulkScoreFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.bulkScoreFile = input.files && input.files.length > 0 ? input.files[0] : null;
+  }
+
+  submitBulkScoreUpload(): void {
+    this.bulkScoreError = '';
+    if (!this.bulkScoreFile) {
+      this.bulkScoreError = 'Select an XLSX or CSV file to upload.';
+      return;
+    }
+
+    this.bulkScoreLoading = true;
+    this.bulkScoreResult = null;
+
+    this.examService.bulkUploadScores(this.examId, this.bulkScoreFile).subscribe({
+      next: (response) => {
+        this.bulkScoreLoading = false;
+        if (response && !response.hasError && response.content) {
+          this.bulkScoreResult = response.content;
+          this.loadEnrollments();
+        } else {
+          this.bulkScoreError = response?.decentMessage || 'Failed to upload scores.';
+        }
+      },
+      error: (error) => {
+        this.bulkScoreLoading = false;
+        this.bulkScoreError = error?.error?.decentMessage || 'Failed to upload scores.';
+      },
+    });
   }
 }

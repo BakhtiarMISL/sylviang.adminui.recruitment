@@ -3,7 +3,10 @@ import { Injectable } from '@angular/core';
 import { ApiResponse } from '@core/interfaces/ApiResponse';
 import { PaginatedResponse } from '@core/interfaces/PaginatedResponse';
 import { IExamCreateRequest, IExamResponse } from '@core/interfaces/recruitment-management/exam.interface';
-import { IExamEnrollmentResponse } from '@core/interfaces/recruitment-management/exam-enrollment.interface';
+import {
+  IExamEnrollmentResponse,
+  IExamScoreBulkUploadResponse,
+} from '@core/interfaces/recruitment-management/exam-enrollment.interface';
 import { BASE_URL_Recruitment } from '@env/environment';
 
 @Injectable({
@@ -61,5 +64,20 @@ export class ExamService {
       responseType: 'blob',
       observe: 'response',
     });
+  }
+
+  /** Raw XLSX bytes (US-059 AC2) - not ApiResponse-wrapped, the endpoint returns a binary file. */
+  downloadScoreUploadTemplate(examId: number) {
+    return this.httpClient.get(`${this.API_URL}/${examId}/score-upload-template`, { responseType: 'blob' });
+  }
+
+  bulkUploadScores(examId: number, file: File) {
+    const formData = new FormData();
+    formData.append('file', file, file.name);
+    return this.httpClient.post<ApiResponse<IExamScoreBulkUploadResponse>>(`${this.API_URL}/${examId}/score-upload/bulk`, formData);
+  }
+
+  uploadScore(examId: number, enrollmentId: number, score: number) {
+    return this.httpClient.patch<ApiResponse<void>>(`${this.API_URL}/${examId}/enrollments/${enrollmentId}/score`, { score });
   }
 }

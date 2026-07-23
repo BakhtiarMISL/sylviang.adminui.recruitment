@@ -74,6 +74,16 @@
         Enrolled Candidates
         <span class="table-title-info" *ngIf="enrollments.length > 0">({{ enrollments.length }} total)</span>
       </h3>
+      <div class="flex gap-2">
+        <button pButton severity="secondary" [loading]="downloadingScoreTemplate" (click)="downloadScoreTemplate()">
+          <i class="fa fa-download"></i>
+          <span>Download Score Template</span>
+        </button>
+        <button pButton severity="secondary" (click)="openBulkScoreDialog()">
+          <i class="fa fa-file-import"></i>
+          <span>Bulk Upload Scores</span>
+        </button>
+      </div>
     </div>
 
     <div *ngIf="loadingEnrollments" class="space-y-3 p-4">
@@ -88,6 +98,7 @@
           <th>Room</th>
           <th>Email Status</th>
           <th>SMS Status</th>
+          <th>Score</th>
           <th style="width: 12rem">Actions</th>
         </tr>
       </ng-template>
@@ -137,6 +148,20 @@
             </span>
           </td>
           <td>
+            <div *ngIf="enrollment.score != null" class="flex flex-col">
+              <span
+                class="rounded-full px-2 py-0.5 text-xs font-medium w-fit"
+                [ngClass]="enrollment.isPassed ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
+              >
+                {{ enrollment.score }} / {{ exam?.totalMarks }} &middot; {{ enrollment.isPassed ? 'Pass' : 'Fail' }}
+              </span>
+              <span class="text-xs text-gray-500" [title]="enrollment.scoredAt ? (enrollment.scoredAt | date: 'dd-MMM-yyyy HH:mm') : ''">
+                {{ enrollment.scoreSource === 'AutoScored' ? 'Auto-scored' : 'By ' + (enrollment.scoredByUserName || 'HR') }}
+              </span>
+            </div>
+            <span *ngIf="enrollment.score == null" class="text-xs text-gray-400">Not scored</span>
+          </td>
+          <td>
             <div class="flex items-center gap-2">
               <button
                 *ngIf="exam?.examType === ExamTypeEnum.InPerson"
@@ -146,6 +171,9 @@
                 (click)="openReassignDialog(enrollment)"
               >
                 <i class="fa fa-arrows-turn-right"></i>
+              </button>
+              <button type="button" class="text-primary" title="Upload Score" (click)="openScoreUploadDialog(enrollment)">
+                <i class="fa fa-pen-to-square"></i>
               </button>
               <button
                 type="button"
@@ -168,7 +196,7 @@
 
       <ng-template pTemplate="emptymessage">
         <tr>
-          <td colspan="6" class="not-found">
+          <td colspan="7" class="not-found">
             <div>
               <i class="fa fa-magnifying-glass-minus"></i>
               <p>No candidates enrolled yet.</p>
@@ -211,6 +239,63 @@
       </button>
       <button pButton type="button" severity="secondary" (click)="closeReassignDialog()">
         <span>Cancel</span>
+      </button>
+    </div>
+  </div>
+</p-dialog>
+
+<p-dialog header="Upload Score" [(visible)]="scoreUploadDialogVisible" [modal]="true" [style]="{ width: '24rem', maxWidth: '95vw' }" (onHide)="closeScoreUploadDialog()">
+  <div *ngIf="scoreUploadEnrollment" class="flex flex-col gap-3">
+    <p class="text-sm text-gray-600 dark:text-gray-300">{{ scoreUploadEnrollment.candidateName }} &middot; out of {{ exam?.totalMarks }}</p>
+
+    <p-floatlabel variant="in">
+      <p-inputnumber inputId="scoreUploadValue" class="w-full" [(ngModel)]="scoreUploadValue" [ngModelOptions]="{ standalone: true }" [min]="0" [max]="exam?.totalMarks || 0"></p-inputnumber>
+      <label for="scoreUploadValue">Score</label>
+    </p-floatlabel>
+
+    <div class="flex gap-2 pb-2">
+      <button pButton [disabled]="!canSaveScoreUpload" [loading]="scoreUploadSaving" (click)="saveScoreUpload()">
+        <i class="fa fa-save"></i>
+        <span>Save</span>
+      </button>
+      <button pButton type="button" severity="secondary" (click)="closeScoreUploadDialog()">
+        <span>Cancel</span>
+      </button>
+    </div>
+  </div>
+</p-dialog>
+
+<p-dialog header="Bulk Upload Scores" [(visible)]="bulkScoreDialogVisible" [modal]="true" [style]="{ width: '32rem', maxWidth: '95vw' }">
+  <div class="flex flex-col gap-3">
+    <p class="text-sm text-gray-600 dark:text-gray-300">
+      Download the template, fill in the Score column for each candidate, then upload it here. Scores must be between 0 and {{ exam?.totalMarks }}.
+    </p>
+    <div>
+      <label for="bulkScoreFile" class="upload-dropzone">
+        <i class="fas fa-file-arrow-up"></i>
+        <span class="upload-dropzone-text"><strong>{{ bulkScoreFile?.name || 'Click to select an XLSX or CSV file' }}</strong></span>
+      </label>
+      <input id="bulkScoreFile" type="file" accept=".xlsx,.csv" (change)="onBulkScoreFileSelected($event)" class="sr-only" />
+    </div>
+    <small class="text-red-500" *ngIf="bulkScoreError">{{ bulkScoreError }}</small>
+    <div *ngIf="bulkScoreResult" class="rounded-md border border-gray-200 p-3">
+      <p class="font-medium">Upload Summary</p>
+      <p>Total Rows: {{ bulkScoreResult.totalRows }}</p>
+      <p class="text-green-700">Updated: {{ bulkScoreResult.updatedCount }}</p>
+      <p class="text-red-600" *ngIf="bulkScoreResult.failedCount > 0">Failed: {{ bulkScoreResult.failedCount }}</p>
+      <div *ngIf="bulkScoreResult.errors.length > 0" class="mt-2 max-h-48 overflow-y-auto">
+        <div *ngFor="let error of bulkScoreResult.errors" class="border-t border-gray-100 py-1 text-xs">
+          <strong>Row {{ error.rowNumber }}:</strong> {{ error.message }}
+        </div>
+      </div>
+    </div>
+    <div class="flex gap-2 pb-3">
+      <button pButton [loading]="bulkScoreLoading" (click)="submitBulkScoreUpload()">
+        <i class="fa fa-upload"></i>
+        <span>Upload</span>
+      </button>
+      <button pButton type="button" severity="secondary" (click)="bulkScoreDialogVisible = false">
+        <span>Close</span>
       </button>
     </div>
   </div>

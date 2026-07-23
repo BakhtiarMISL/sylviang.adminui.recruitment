@@ -119,3 +119,15 @@ export enum NotificationStatusEnum {
   Failed = 'Failed',
   Skipped = 'Skipped',
 }
+
+/** How an ExamEnrollment's Score/IsPassed was set (US-058/US-059). */
+export enum ScoreSourceEnum {
+  AutoScored = 'AutoScored',
+  ManualUpload = 'ManualUpload',
+}
+
+export enum ExamAttemptStatusEnum {
+  NotStarted = 'NotStarted',
+  InProgress = 'InProgress',
+  Submitted = 'Submitted',
+}

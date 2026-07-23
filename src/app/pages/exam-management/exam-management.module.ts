@@ -4,6 +4,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { SharedModule } from '@app/shared/shared.module';
 import { ButtonModule } from 'primeng/button';
+import { CheckboxModule } from 'primeng/checkbox';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DialogModule } from 'primeng/dialog';
 import { FloatLabelModule } from 'primeng/floatlabel';
@@ -28,6 +29,7 @@ import { ExamDetailComponent } from './exam-detail/exam-detail.component';
     ConfirmDialogModule,
     DialogModule,
     ButtonModule,
+    CheckboxModule,
     InputTextModule,
     InputNumberModule,
     FloatLabelModule,

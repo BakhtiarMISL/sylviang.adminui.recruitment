@@ -80,6 +80,7 @@ export class ScheduleExamComponent implements OnInit {
       examType: [ExamTypeEnum.InPerson, [Validators.required]],
       examVenueId: [null],
       questionGroupId: [null],
+      showResultsToCandidate: [false],
     });
 
     this.onExamTypeChange();
@@ -233,6 +234,7 @@ export class ScheduleExamComponent implements OnInit {
       examType: this.examForm.value.examType,
       examVenueId: this.isInPerson ? this.examForm.value.examVenueId : null,
       questionGroupId: this.isInPerson ? null : this.examForm.value.questionGroupId,
+      showResultsToCandidate: this.isInPerson ? false : !!this.examForm.value.showResultsToCandidate,
     };
 
     this.submitting = true;

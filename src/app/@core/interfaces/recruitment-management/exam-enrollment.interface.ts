@@ -1,4 +1,4 @@
-import { NotificationStatusEnum } from '@app/@core/enums/recruitment.enum';
+import { NotificationStatusEnum, ScoreSourceEnum } from '@app/@core/enums/recruitment.enum';
 
 export interface IExamEnrollmentResponse {
   examEnrollmentId: number;
@@ -20,9 +20,35 @@ export interface IExamEnrollmentResponse {
 
   smsNotificationStatus: NotificationStatusEnum;
   smsLoggedAt?: string | null;
+
+  startedAt?: string | null;
+  submittedAt?: string | null;
+  attemptStatus: string;
+
+  score?: number | null;
+  isPassed?: boolean | null;
+  scoreSource?: ScoreSourceEnum | null;
+  scoredAt?: string | null;
+  scoredByUserName?: string | null;
 }
 
 export interface IExamEnrollmentReassignSeatRequest {
   examRoomId: number;
   seatNumber: string;
+}
+
+export interface IExamScoreUploadRequest {
+  score: number;
+}
+
+export interface IExamScoreBulkUploadRowError {
+  rowNumber: number;
+  message: string;
+}
+
+export interface IExamScoreBulkUploadResponse {
+  totalRows: number;
+  updatedCount: number;
+  failedCount: number;
+  errors: IExamScoreBulkUploadRowError[];
 }

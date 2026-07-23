@@ -123,6 +123,11 @@
           </p-floatlabel>
           <small class="text-red-500" *ngIf="hasError('questionGroupId')">Question group is required.</small>
         </div>
+
+        <div *ngIf="!isInPerson" class="flex items-center gap-2 sm:col-span-2">
+          <p-checkbox inputId="showResultsToCandidate" formControlName="showResultsToCandidate" [binary]="true"></p-checkbox>
+          <label for="showResultsToCandidate" class="text-sm text-gray-700 dark:text-gray-300">Show results to candidate immediately after submission</label>
+        </div>
       </div>
     </div>
 

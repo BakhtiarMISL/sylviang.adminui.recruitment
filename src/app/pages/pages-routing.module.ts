@@ -74,6 +74,12 @@ const routes: Routes = [
       loadChildren: () => import('./my-applications/my-applications.module').then((m) => m.MyApplicationsModule),
     },
     {
+      // Candidate-facing online exam attempt (US-058), reached via a button on My Applications -
+      // kept separate from the HR-only 'exams' module below, which is RoleGuard-gated.
+      path: 'exam-attempt',
+      loadChildren: () => import('./exam-attempt/exam-attempt.module').then((m) => m.ExamAttemptModule),
+    },
+    {
       path: 'account-settings',
       loadChildren: () => import('./account-settings-management/account-settings-management.module').then((m) => m.AccountSettingsManagementModule),
     },

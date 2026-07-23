@@ -10,6 +10,7 @@ export interface IExamCreateRequest {
   examType: ExamTypeEnum;
   examVenueId?: number | null;
   questionGroupId?: number | null;
+  showResultsToCandidate: boolean;
 }
 
 export interface IExamResponse {
@@ -27,4 +28,5 @@ export interface IExamResponse {
   questionGroupName?: string | null;
   seatPlanGeneratedAt?: string | null;
   isActive: boolean;
+  showResultsToCandidate: boolean;
 }
