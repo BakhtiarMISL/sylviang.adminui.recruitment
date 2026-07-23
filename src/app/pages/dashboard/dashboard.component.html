@@ -83,6 +83,14 @@
       </div>
     </a>
 
+    <a *ngIf="role === UserRoleEnum.Admin || role === UserRoleEnum.HR" routerLink="/exam-questions/exam-question-list" class="quick-link-card">
+      <div class="quick-link-icon"><i class="fa-solid fa-circle-question text-xl text-primary"></i></div>
+      <div>
+        <p class="font-semibold text-dark dark:text-white">Exam Questions</p>
+        <p class="text-sm text-neutral dark:text-white/50">Manage question groups &amp; exam question bank</p>
+      </div>
+    </a>
+
     <a *ngIf="role === UserRoleEnum.Candidate" routerLink="/candidate-profile" class="quick-link-card">
       <div class="quick-link-icon"><i class="fa-solid fa-id-card text-xl text-primary"></i></div>
       <div>

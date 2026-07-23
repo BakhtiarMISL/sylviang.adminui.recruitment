@@ -45,6 +45,7 @@ export enum ApplicationStatusEnum {
   Hired = 'Hired',
   Rejected = 'Rejected',
   Withdrawn = 'Withdrawn',
+  DuplicateDismissed = 'DuplicateDismissed',
 }
 
 export enum StageProgressStatusEnum {
@@ -66,4 +67,42 @@ export enum CriterionTypeEnum {
 export enum FilterCombinatorEnum {
   And = 'And',
   Or = 'Or',
+}
+
+export enum HrOverrideDecisionEnum {
+  Approved = 'Approved',
+  Rejected = 'Rejected',
+}
+
+export enum StageTypeEnum {
+  WrittenTest = 'WrittenTest',
+  AptitudeTest = 'AptitudeTest',
+  PsychometricTest = 'PsychometricTest',
+  GroupDiscussion = 'GroupDiscussion',
+  PracticalAssessment = 'PracticalAssessment',
+}
+
+export enum RecommendationStatusEnum {
+  Pending = 'Pending',
+  Accepted = 'Accepted',
+  Rejected = 'Rejected',
+}
+
+export enum QuestionTypeEnum {
+  McqSingle = 'McqSingle',
+  McqMultiple = 'McqMultiple',
+  TrueFalse = 'TrueFalse',
+  Subjective = 'Subjective',
+}
+
+export enum DifficultyLevelEnum {
+  Easy = 'Easy',
+  Medium = 'Medium',
+  Hard = 'Hard',
+}
+
+export enum GradingSystemEnum {
+  GPA = 'GPA',
+  CGPA = 'CGPA',
+  Division = 'Division',
 }

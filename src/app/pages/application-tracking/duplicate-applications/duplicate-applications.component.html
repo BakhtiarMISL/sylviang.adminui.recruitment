@@ -1,0 +1,63 @@
+<section class="page-container">
+  <div class="flex justify-between items-center">
+    <h3 class="form-section-header">Duplicate Applications - {{ jobPostingTitle }}</h3>
+    <button pButton type="button" class="p-button-secondary" (click)="backToDashboard()">
+      <i class="fa fa-arrow-left"></i>
+      <span>Back to Dashboard</span>
+    </button>
+  </div>
+
+  <p-skeleton *ngIf="loading" height="8rem" styleClass="mb-3"></p-skeleton>
+
+  <div *ngIf="!loading && rows.length === 0" class="helper-text">
+    No duplicate applications detected for this vacancy.
+  </div>
+
+  <div *ngFor="let row of rows; let i = index" class="duplicate-group">
+    <div class="duplicate-group-header">
+      <span>Matched on: {{ row.group.matchedOn.join(', ') }}</span>
+      <button
+        pButton
+        type="button"
+        [disabled]="!row.primaryId || resolvingIndex === i"
+        (click)="resolve(row, i, $event)"
+      >
+        <i class="fa fa-check-double"></i>
+        <span>{{ resolvingIndex === i ? 'Resolving...' : 'Keep Primary, Dismiss Others' }}</span>
+      </button>
+    </div>
+
+    <p-table [value]="row.group.applications" [tableStyle]="{ 'min-width': '50rem' }">
+      <ng-template pTemplate="header">
+        <tr>
+          <th></th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>National ID</th>
+          <th>Source</th>
+          <th>Status</th>
+          <th>Applied Date</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-application>
+        <tr>
+          <td>
+            <p-radio-button
+              [name]="'primary-' + i"
+              [value]="application.jobApplicationId"
+              [(ngModel)]="row.primaryId"
+            ></p-radio-button>
+          </td>
+          <td>{{ application.candidateName }}</td>
+          <td>{{ application.candidateEmail || '-' }}</td>
+          <td>{{ application.candidatePhone || '-' }}</td>
+          <td>{{ application.candidateNationalId || '-' }}</td>
+          <td>{{ application.source }}</td>
+          <td>{{ application.applicationStatus }}</td>
+          <td>{{ application.appliedDate ? (application.appliedDate | date: 'dd-MMM-yy') : '-' }}</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</section>

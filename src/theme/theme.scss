@@ -5,7 +5,12 @@
 
 // For Example
 // Custom Input Fields Global Styles
-label {
+//
+// Excludes PrimeNG's p-floatlabel: PrimeNG v19 ships its component CSS inside
+// `@layer primeng`, so any unlayered rule here wins over it regardless of
+// specificity - a bare `label` selector was clobbering p-floatlabel's
+// position/color/font-size and permanently disabling the floating animation.
+label:not(.p-floatlabel label) {
   display: block;
   color: var(--text-color-dark);
   font-size: 14px;
@@ -70,16 +75,26 @@ textarea {
 }
 
 // set color of all text elements
-label,
+label:not(.p-floatlabel label),
 p,
 span,
 a,
+strong,
+small,
+li,
 h1,
 h2,
 h3,
 h4,
 h5,
 h6 {
+  color: var(--text-color-dark);
+}
+
+// value text in label/value detail views (e.g. field-label + field-value pairs)
+// plain divs are excluded from the rule above and were rendering with no
+// explicit color, so give them one instead of relying on inheritance
+.field-value {
   color: var(--text-color-dark);
 }
 
