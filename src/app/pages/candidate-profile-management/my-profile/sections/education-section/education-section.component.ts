@@ -7,6 +7,8 @@ import {
   ICandidateResumeParsedEducation,
   IDegreeResponse,
   IEducationBoardResponse,
+  IMajorSubjectSscHscResponse,
+  IMajorSubjectUniversityResponse,
   IUniversityLibraryItemResponse,
 } from '@app/@core/interfaces/recruitment-management/candidate-profile.interface';
 import { CandidateProfileService } from '@app/@core/services/recruitment/candidate-profile/candidate-profile.service';
@@ -22,6 +24,11 @@ const BOARD_APPLICABLE_POSITIONS = [1, 2];
 
 // Minimum characters typed before the University autocomplete shows any suggestion.
 const UNIVERSITY_MIN_QUERY_LENGTH = 3;
+
+// Frontend-only sentinel appended to both Major Subject dropdowns - not a seeded row in either
+// lookup table, so Admin can't accidentally rename/delete the "Other" affordance itself.
+const MAJOR_SUBJECT_OTHER_ID = -1;
+const MAJOR_SUBJECT_OTHER_LABEL = 'Other (please specify)';
 
 @Component({
   selector: 'app-education-section',
@@ -48,7 +55,9 @@ export class EducationSectionComponent implements OnInit {
       passingYear: [null, [Validators.required, Validators.min(1950), Validators.max(new Date().getFullYear())]],
       gradingSystem: [null],
       result: [null, [Validators.required, Validators.maxLength(50)]],
-      majorSubject: [null, [Validators.maxLength(200)]],
+      majorSubjectSscHscId: [null],
+      majorSubjectUniversityId: [null],
+      majorSubjectOtherText: [null, [Validators.maxLength(200)]],
     });
   }
 
@@ -69,6 +78,9 @@ export class EducationSectionComponent implements OnInit {
 
   degrees: IDegreeResponse[] = [];
   educationBoards: IEducationBoardResponse[] = [];
+  majorSubjectsSscHsc: IMajorSubjectSscHscResponse[] = [];
+  majorSubjectsUniversity: IMajorSubjectUniversityResponse[] = [];
+  readonly MAJOR_SUBJECT_OTHER_ID = MAJOR_SUBJECT_OTHER_ID;
 
   // Best-effort suggestions from a parsed resume (see MyProfileComponent.onResumeParsed).
   // Nothing here is saved automatically - clicking "Use" only opens the add form pre-filled
@@ -83,6 +95,8 @@ export class EducationSectionComponent implements OnInit {
   useSuggestion(suggestion: ICandidateResumeParsedEducation, index: number): void {
     this.startAdd();
     const matchedDegree = this.matchDegree(suggestion.degreeTitle);
+    const isSscHscLevel = !!matchedDegree && BOARD_APPLICABLE_POSITIONS.includes(matchedDegree.position);
+    const matchedMajorSubject = this.matchMajorSubject(suggestion.majorSubject, isSscHscLevel);
     this.form.patchValue({
       degreeId: matchedDegree?.degreeId ?? null,
       institution: suggestion.institution,
@@ -90,7 +104,8 @@ export class EducationSectionComponent implements OnInit {
       universityLibraryItemId: suggestion.universityLibraryItemId,
       passingYear: suggestion.passingYear,
       result: suggestion.result,
-      majorSubject: suggestion.majorSubject,
+      majorSubjectSscHscId: isSscHscLevel ? (matchedMajorSubject?.id ?? null) : null,
+      majorSubjectUniversityId: !isSscHscLevel ? (matchedMajorSubject?.id ?? null) : null,
     });
     this.prefillSuggestions = this.prefillSuggestions.filter((_, i) => i !== index);
     this.suggestionsChanged.emit(this.prefillSuggestions);
@@ -103,6 +118,21 @@ export class EducationSectionComponent implements OnInit {
     if (!degreeTitle) return undefined;
     const text = degreeTitle.toLowerCase();
     return this.degrees.find((d) => text.includes(d.name.toLowerCase()) || text.includes(d.fullName.toLowerCase()));
+  }
+
+  // Same best-effort substring match as matchDegree, against whichever Major Subject list
+  // applies for the matched Degree's level. No match leaves the dropdown empty for manual pick
+  // (never silently wrong) - the raw suggested text is not carried over as free text since the
+  // field is a dropdown now, not a text input.
+  private matchMajorSubject(majorSubjectText: string | null | undefined, isSscHscLevel: boolean): { id: number } | undefined {
+    if (!majorSubjectText) return undefined;
+    const text = majorSubjectText.toLowerCase();
+    if (isSscHscLevel) {
+      const match = this.majorSubjectsSscHsc.find((m) => text.includes(m.name.toLowerCase()));
+      return match ? { id: match.majorSubjectSscHscId } : undefined;
+    }
+    const universityMatch = this.majorSubjectsUniversity.find((m) => text.includes(m.name.toLowerCase()));
+    return universityMatch ? { id: universityMatch.majorSubjectUniversityId } : undefined;
   }
 
   dismissSuggestion(index: number): void {
@@ -129,14 +159,18 @@ export class EducationSectionComponent implements OnInit {
     from(ready)
       .pipe(
         concatMap((suggestion) => {
+          const matchedDegree = this.matchDegree(suggestion.degreeTitle)!;
+          const isSscHscLevel = BOARD_APPLICABLE_POSITIONS.includes(matchedDegree.position);
+          const matchedMajorSubject = this.matchMajorSubject(suggestion.majorSubject, isSscHscLevel);
           const request: ICandidateEducationCreateRequest = {
-            degreeId: this.matchDegree(suggestion.degreeTitle)!.degreeId,
+            degreeId: matchedDegree.degreeId,
             institution: suggestion.institution!,
             universityLibraryItemId: suggestion.universityLibraryItemId,
             educationLevel: suggestion.educationLevel ?? null,
             passingYear: suggestion.passingYear!,
             result: suggestion.result!,
-            majorSubject: suggestion.majorSubject ?? null,
+            majorSubjectSscHscId: isSscHscLevel ? (matchedMajorSubject?.id ?? null) : null,
+            majorSubjectUniversityId: !isSscHscLevel ? (matchedMajorSubject?.id ?? null) : null,
           };
           // Each suggestion succeeds/fails independently - one bad entry must not block the rest.
           return this.candidateProfileService.addEducation(request).pipe(
@@ -167,13 +201,20 @@ export class EducationSectionComponent implements OnInit {
     this.candidateProfileService.getEducationBoards().subscribe({
       next: (response) => (this.educationBoards = !response.hasError && response.content ? response.content : []),
     });
+    this.candidateProfileService.getMajorSubjectsSscHsc().subscribe({
+      next: (response) => (this.majorSubjectsSscHsc = !response.hasError && response.content ? response.content : []),
+    });
+    this.candidateProfileService.getMajorSubjectsUniversity().subscribe({
+      next: (response) => (this.majorSubjectsUniversity = !response.hasError && response.content ? response.content : []),
+    });
   }
 
   degreeLabel(degreeId: number): string {
     return this.degrees.find((d) => d.degreeId === degreeId)?.name ?? '';
   }
 
-  // Board only makes sense for SSC/HSC-equivalent degrees (see BOARD_APPLICABLE_POSITIONS).
+  // Board (and, identically, which Major Subject list applies) only makes sense relative to
+  // SSC/HSC-equivalent degrees (see BOARD_APPLICABLE_POSITIONS).
   get showBoardField(): boolean {
     const degreeId = this.f['degreeId'].value;
     if (!degreeId) return false;
@@ -181,10 +222,35 @@ export class EducationSectionComponent implements OnInit {
     return !!degree && BOARD_APPLICABLE_POSITIONS.includes(degree.position);
   }
 
+  // Options for whichever Major Subject dropdown is currently shown, with the frontend-only
+  // "Other (please specify)" sentinel appended - never seeded as a real row (see
+  // MAJOR_SUBJECT_OTHER_ID).
+  get majorSubjectSscHscOptions(): IMajorSubjectSscHscResponse[] {
+    return [...this.majorSubjectsSscHsc, { majorSubjectSscHscId: MAJOR_SUBJECT_OTHER_ID, name: MAJOR_SUBJECT_OTHER_LABEL }];
+  }
+
+  get majorSubjectUniversityOptions(): IMajorSubjectUniversityResponse[] {
+    return [...this.majorSubjectsUniversity, { majorSubjectUniversityId: MAJOR_SUBJECT_OTHER_ID, name: MAJOR_SUBJECT_OTHER_LABEL }];
+  }
+
+  get showMajorSubjectOtherInput(): boolean {
+    const value = this.showBoardField ? this.f['majorSubjectSscHscId'].value : this.f['majorSubjectUniversityId'].value;
+    return value === MAJOR_SUBJECT_OTHER_ID;
+  }
+
+  onMajorSubjectChange(): void {
+    if (!this.showMajorSubjectOtherInput) {
+      this.form.patchValue({ majorSubjectOtherText: null });
+    }
+  }
+
   onDegreeChange(): void {
     if (!this.showBoardField) {
-      this.form.patchValue({ educationBoardId: null });
+      this.form.patchValue({ educationBoardId: null, majorSubjectSscHscId: null });
+    } else {
+      this.form.patchValue({ majorSubjectUniversityId: null });
     }
+    this.form.patchValue({ majorSubjectOtherText: null });
   }
 
   loadEducation(): void {
@@ -308,7 +374,7 @@ export class EducationSectionComponent implements OnInit {
       passingYear: 'Passing Year',
       gradingSystem: 'Grading System',
       result: 'Result',
-      majorSubject: 'Major Subject',
+      majorSubjectOtherText: 'Major Subject',
     };
     return displayNames[fieldName] || fieldName;
   }

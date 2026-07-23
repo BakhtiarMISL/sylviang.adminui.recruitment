@@ -164,12 +164,57 @@
     <div *ngIf="hasError('result')" class="invalid">{{ getErrorMessage('result') }}</div>
   </div>
 
-  <div>
+  <div *ngIf="showBoardField">
     <p-floatlabel variant="in">
-      <input pInputText inputId="majorSubject" formControlName="majorSubject" maxlength="200" class="w-full" [class.ng-invalid]="hasError('majorSubject')" [class.ng-dirty]="hasError('majorSubject')" (blur)="f['majorSubject'].markAsTouched()" />
-      <label for="majorSubject">Major Subject</label>
+      <p-select
+        inputId="majorSubjectSscHscId"
+        [options]="majorSubjectSscHscOptions"
+        [appendTo]="'body'"
+        [autoDisplayFirst]="false"
+        optionLabel="name"
+        optionValue="majorSubjectSscHscId"
+        formControlName="majorSubjectSscHscId"
+        class="w-full"
+        (onChange)="onMajorSubjectChange()"
+      ></p-select>
+      <label for="majorSubjectSscHscId">Major Subject</label>
     </p-floatlabel>
-    <div *ngIf="hasError('majorSubject')" class="invalid">{{ getErrorMessage('majorSubject') }}</div>
+  </div>
+
+  <div *ngIf="!showBoardField">
+    <p-floatlabel variant="in">
+      <p-select
+        inputId="majorSubjectUniversityId"
+        [options]="majorSubjectUniversityOptions"
+        [filter]="true"
+        filterBy="name"
+        [appendTo]="'body'"
+        [autoDisplayFirst]="false"
+        optionLabel="name"
+        optionValue="majorSubjectUniversityId"
+        formControlName="majorSubjectUniversityId"
+        class="w-full"
+        (onChange)="onMajorSubjectChange()"
+      ></p-select>
+      <label for="majorSubjectUniversityId">Major Subject</label>
+    </p-floatlabel>
+  </div>
+
+  <div *ngIf="showMajorSubjectOtherInput">
+    <p-floatlabel variant="in">
+      <input
+        pInputText
+        inputId="majorSubjectOtherText"
+        formControlName="majorSubjectOtherText"
+        maxlength="200"
+        class="w-full"
+        [class.ng-invalid]="hasError('majorSubjectOtherText')"
+        [class.ng-dirty]="hasError('majorSubjectOtherText')"
+        (blur)="f['majorSubjectOtherText'].markAsTouched()"
+      />
+      <label for="majorSubjectOtherText">Please specify Major Subject</label>
+    </p-floatlabel>
+    <div *ngIf="hasError('majorSubjectOtherText')" class="invalid">{{ getErrorMessage('majorSubjectOtherText') }}</div>
   </div>
 
   <div *ngIf="saveError" class="invalid sm:col-span-2">{{ saveError }}</div>
