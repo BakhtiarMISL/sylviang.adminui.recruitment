@@ -1,0 +1,43 @@
+<section class="page-container">
+  <form [formGroup]="roomForm" (ngSubmit)="onSubmit()">
+    <div class="table-container mb-4 p-4">
+      <h3 class="table-title mb-3">{{ isEditMode ? 'Edit Room' : 'Add Room' }}{{ venueName ? ' — ' + venueName : '' }}</h3>
+
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <p-floatlabel variant="in">
+          <input pInputText id="roomName" class="w-full" formControlName="roomName" />
+          <label for="roomName">Room Name</label>
+        </p-floatlabel>
+        <small class="text-red-500" *ngIf="hasError('roomName')">Room name is required.</small>
+
+        <p-floatlabel variant="in">
+          <p-inputnumber inputId="capacity" class="w-full" formControlName="capacity" [min]="1"></p-inputnumber>
+          <label for="capacity">Capacity</label>
+        </p-floatlabel>
+        <small class="text-red-500" *ngIf="hasError('capacity')">Capacity must be greater than zero.</small>
+
+        <div class="flex flex-col gap-1">
+          <label>How many invigilator required</label>
+          <div class="flex items-center gap-3">
+            <span class="text-lg font-medium">{{ requiredInvigilatorCount }}</span>
+            <button pButton type="button" severity="secondary" size="small" (click)="incrementRequiredInvigilatorCount()">
+              <i class="fa fa-plus"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <small class="mt-3 block text-red-500" *ngIf="errorMessage">{{ errorMessage }}</small>
+
+      <div class="mt-4 flex gap-2">
+        <button pButton type="submit">
+          <i class="fa fa-save"></i>
+          <span>{{ isEditMode ? 'Save Changes' : 'Create Room' }}</span>
+        </button>
+        <button pButton type="button" severity="secondary" [routerLink]="['/exam-venues/exam-venue', examVenueId, 'rooms']">
+          <span>Cancel</span>
+        </button>
+      </div>
+    </div>
+  </form>
+</section>

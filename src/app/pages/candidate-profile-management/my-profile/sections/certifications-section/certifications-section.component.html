@@ -24,7 +24,7 @@
   </div>
 
   <div class="sm:col-span-2" *ngIf="!showForm">
-    <button pButton severity="secondary" type="button" (click)="startAdd()">
+    <button pButton type="button" (click)="startAdd()">
       <i class="fas fa-plus"></i>
       <span>Add Certification</span>
     </button>
@@ -59,14 +59,14 @@
 
   <div>
     <p-floatlabel variant="in">
-      <p-datepicker inputId="issueDate" formControlName="issueDate" dateFormat="dd-M-yy" [showIcon]="true" styleClass="w-full"></p-datepicker>
+      <p-datepicker inputId="issueDate" formControlName="issueDate" dateFormat="dd-M-yy" [showIcon]="true" [appendTo]="'body'" styleClass="w-full"></p-datepicker>
       <label for="issueDate">Issue Date</label>
     </p-floatlabel>
   </div>
 
   <div>
     <p-floatlabel variant="in">
-      <p-datepicker inputId="expiryDate" formControlName="expiryDate" dateFormat="dd-M-yy" [showIcon]="true" styleClass="w-full"></p-datepicker>
+      <p-datepicker inputId="expiryDate" formControlName="expiryDate" dateFormat="dd-M-yy" [showIcon]="true" [appendTo]="'body'" styleClass="w-full"></p-datepicker>
       <label for="expiryDate">Expiry Date</label>
     </p-floatlabel>
   </div>
@@ -95,7 +95,7 @@
   <div *ngIf="saveError" class="invalid sm:col-span-2">{{ saveError }}</div>
 
   <div class="sm:col-span-2 flex gap-3">
-    <button pButton type="submit" [disabled]="saving">
+    <button pButton type="submit" [disabled]="saving || form.pristine">
       <i class="fas fa-save"></i>
       <span>{{ saving ? 'Saving...' : 'Save' }}</span>
     </button>

@@ -4,5 +4,6 @@ export const CandidateDocumentTypeOptions: { label: string; value: CandidateDocu
   { label: 'NID', value: 'NID' },
   { label: 'Education Certificate', value: 'EducationCertificate' },
   { label: 'Experience Letter', value: 'ExperienceLetter' },
+  { label: 'Resume', value: 'Resume' },
   { label: 'Other', value: 'Other' },
 ];
