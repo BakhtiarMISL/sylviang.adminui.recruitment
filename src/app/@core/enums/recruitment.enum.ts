@@ -131,3 +131,16 @@ export enum ExamAttemptStatusEnum {
   InProgress = 'InProgress',
   Submitted = 'Submitted',
 }
+
+export enum InterviewTypeEnum {
+  InPerson = 'InPerson',
+  Virtual = 'Virtual',
+}
+
+export enum InterviewStatusEnum {
+  Scheduled = 'Scheduled',
+  Rescheduled = 'Rescheduled',
+  Cancelled = 'Cancelled',
+  Completed = 'Completed',
+  NoShow = 'NoShow',
+}

@@ -31,6 +31,28 @@
     </button>
   </div>
 
+  <div class="recommendation-panel" *ngIf="!loading && (hasInterviewStage || interviews.length > 0)">
+    <div class="recommendation-status">
+      <div class="flex items-center justify-between gap-3">
+        <span class="recommendation-status-label">Interviews</span>
+        <button pButton type="button" [outlined]="true" size="small" [routerLink]="['/interviews/schedule-interview']">
+          <i class="fa fa-plus"></i>
+          <span>Schedule Interview</span>
+        </button>
+      </div>
+
+      <span class="recommendation-meta" *ngIf="!loadingInterviews && interviews.length === 0">No interviews scheduled yet.</span>
+
+      <div *ngFor="let interview of interviews" class="stage-field" style="justify-content: space-between; display: flex; width: 100%">
+        <span>
+          Round {{ interview.round }} &middot; {{ interview.interviewType }} &middot;
+          {{ interview.scheduledStartAt | date: 'dd-MMM-yyyy HH:mm' }} &middot; {{ interview.status }}
+        </span>
+        <a [routerLink]="['/interviews/interview', interview.interviewId]">View</a>
+      </div>
+    </div>
+  </div>
+
   <div class="tracker-row" *ngIf="!loading && !loadError && progress && progress.hasPipeline">
     <div class="stage-card" *ngFor="let stage of progress.stages" [ngClass]="'status-' + stage.status">
       <div class="stage-card-header">

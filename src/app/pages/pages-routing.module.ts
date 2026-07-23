@@ -99,6 +99,14 @@ const routes: Routes = [
       path: 'master-data',
       loadChildren: () => import('./master-data-management/master-data-management.module').then((m) => m.MasterDataManagementModule),
     },
+    {
+      path: 'interview-venues',
+      loadChildren: () => import('./interview-venue-management/interview-venue-management.module').then((m) => m.InterviewVenueManagementModule),
+    },
+    {
+      path: 'interviews',
+      loadChildren: () => import('./interview-management/interview-management.module').then((m) => m.InterviewManagementModule),
+    },
   ]),
 ];
 

@@ -1,0 +1,114 @@
+<section class="page-container">
+  <div class="flex justify-between items-center gap-3 flex-wrap">
+    <h3 class="table-title">Interviews</h3>
+    <button pButton [routerLink]="['/interviews/schedule-interview']">
+      <i class="fa fa-plus"></i>
+      <span>Schedule Interview</span>
+    </button>
+  </div>
+
+  <app-filter-panel [(collapsed)]="filtersCollapsed">
+    <div class="filter-bar">
+      <p-floatlabel variant="in">
+        <p-select
+          inputId="filterStatus"
+          class="w-full"
+          [options]="statusOptions"
+          [(ngModel)]="filterStatus"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+          [appendTo]="'body'"
+          (onChange)="applyFilters()"
+          (onClear)="applyFilters()"
+        ></p-select>
+        <label for="filterStatus">Status</label>
+      </p-floatlabel>
+
+      <button pButton severity="secondary" (click)="resetFilters()">
+        <i class="fa fa-times"></i>
+        <span>Reset</span>
+      </button>
+    </div>
+  </app-filter-panel>
+
+  <div class="table-container">
+    <div class="table-title-container">
+      <h3 class="table-title">
+        Interview Table
+        <span class="table-title-info" *ngIf="totalRecords > 0">({{ totalRecords }} total)</span>
+      </h3>
+    </div>
+
+    <div class="transition-all duration-500 ease-in-out">
+      <p-table
+        [value]="loading ? skeletonItems : interviews"
+        dataKey="interviewId"
+        [paginator]="true"
+        [rows]="rows"
+        [first]="(currentPage - 1) * rows"
+        [rowsPerPageOptions]="UI_CONFIG.pageSizeOptions"
+        [totalRecords]="totalRecords"
+        (onPage)="onPageChange($event)"
+        [lazy]="true"
+        [loading]="false"
+        scrollHeight="flex"
+        [responsiveLayout]="'scroll'"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} interviews"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            @for (col of columns; track col.field) {
+              <th [style.width]="col.width">{{ col.label }}</th>
+            }
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-interview>
+          @if (loading) {
+            <tr>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+            </tr>
+          } @else {
+            <tr class="cursor-pointer" (click)="openDetail(interview)">
+              <td>{{ interview.candidateName }}</td>
+              <td>{{ interview.interviewType }}</td>
+              <td>{{ interview.interviewType === 'InPerson' ? (interview.venueName || '-') + ' / ' + (interview.roomName || '-') : (interview.meetingLink || '-') }}</td>
+              <td>{{ interview.scheduledStartAt | date: 'dd-MMM-yyyy HH:mm' }}</td>
+              <td>{{ interview.round }}</td>
+              <td>
+                <span
+                  class="rounded-full px-2 py-0.5 text-xs font-medium"
+                  [ngClass]="{
+                    'bg-blue-100 text-blue-700': interview.status === 'Scheduled' || interview.status === 'Rescheduled',
+                    'bg-red-100 text-red-700': interview.status === 'Cancelled' || interview.status === 'NoShow',
+                    'bg-green-100 text-green-700': interview.status === 'Completed',
+                  }"
+                >
+                  {{ interview.status }}
+                </span>
+              </td>
+            </tr>
+          }
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="6" class="not-found">
+              <div>
+                <i class="fa fa-magnifying-glass-minus"></i>
+                <p>No interviews scheduled yet</p>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+</section>

@@ -88,6 +88,18 @@ export const webSidebarMenuItems: IMenuItem[] = [
         active: false,
         icon: 'fa-solid fa-file-pen',
       },
+      {
+        href: '/interview-venues/interview-venue-list',
+        title: 'Interview Venues',
+        active: false,
+        icon: 'fa-solid fa-door-open',
+      },
+      {
+        href: '/interviews/interview-list',
+        title: 'Interviews',
+        active: false,
+        icon: 'fa-solid fa-people-arrows',
+      },
     ],
   },
   {
