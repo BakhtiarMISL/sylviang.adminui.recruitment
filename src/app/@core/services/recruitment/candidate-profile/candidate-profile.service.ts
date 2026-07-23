@@ -30,6 +30,8 @@ import {
   IDivisionResponse,
   IEducationBoardResponse,
   IGenderResponse,
+  IMajorSubjectSscHscResponse,
+  IMajorSubjectUniversityResponse,
   IMaritalStatusResponse,
   IReligionResponse,
   ISkillLibraryItemResponse,
@@ -100,6 +102,14 @@ export class CandidateProfileService {
 
   getEducationBoards() {
     return this.httpClient.get<ApiResponse<IEducationBoardResponse[]>>(`${BASE_URL_Recruitment}/education-board`);
+  }
+
+  getMajorSubjectsSscHsc() {
+    return this.httpClient.get<ApiResponse<IMajorSubjectSscHscResponse[]>>(`${BASE_URL_Recruitment}/major-subject-ssc-hsc`);
+  }
+
+  getMajorSubjectsUniversity() {
+    return this.httpClient.get<ApiResponse<IMajorSubjectUniversityResponse[]>>(`${BASE_URL_Recruitment}/major-subject-university`);
   }
 
   // ── Dynamic dropdown lookups (Personal Info / Contact) ────────────

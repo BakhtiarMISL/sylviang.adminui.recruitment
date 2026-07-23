@@ -102,4 +102,22 @@ export const MASTER_DATA_CONFIGS: Record<string, IMasterDataEntityConfig> = {
     icon: 'fa-solid fa-droplet',
     fields: [{ key: 'name', label: 'Name', type: 'text', required: true, maxLength: 10 }],
   },
+  'major-subject-ssc-hsc': {
+    routeKey: 'major-subject-ssc-hsc',
+    apiPath: 'major-subject-ssc-hsc',
+    idField: 'majorSubjectSscHscId',
+    title: 'Major Subjects (SSC/HSC)',
+    singularLabel: 'Major Subject (SSC/HSC)',
+    icon: 'fa-solid fa-book',
+    fields: [{ key: 'name', label: 'Name', type: 'text', required: true, maxLength: 100 }],
+  },
+  'major-subject-university': {
+    routeKey: 'major-subject-university',
+    apiPath: 'major-subject-university',
+    idField: 'majorSubjectUniversityId',
+    title: 'Major Subjects (University)',
+    singularLabel: 'Major Subject (University)',
+    icon: 'fa-solid fa-book-open',
+    fields: [{ key: 'name', label: 'Name', type: 'text', required: true, maxLength: 150 }],
+  },
 };

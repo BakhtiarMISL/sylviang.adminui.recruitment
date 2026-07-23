@@ -179,6 +179,18 @@ export const webSidebarMenuItems: IMenuItem[] = [
         icon: 'fa-solid fa-place-of-worship',
       },
       {
+        href: '/master-data/major-subject-ssc-hsc-list',
+        title: 'Major Subjects (SSC/HSC)',
+        active: false,
+        icon: 'fa-solid fa-book',
+      },
+      {
+        href: '/master-data/major-subject-university-list',
+        title: 'Major Subjects (University)',
+        active: false,
+        icon: 'fa-solid fa-book-open',
+      },
+      {
         href: '/master-data/blood-group-list',
         title: 'Blood Groups',
         active: false,

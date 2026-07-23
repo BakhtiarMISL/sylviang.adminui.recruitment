@@ -70,7 +70,9 @@ export interface ICandidateEducationCreateRequest {
   passingYear: number;
   gradingSystem?: string | null;
   result: string;
-  majorSubject?: string | null;
+  majorSubjectSscHscId?: number | null;
+  majorSubjectUniversityId?: number | null;
+  majorSubjectOtherText?: string | null;
 }
 
 export type ICandidateEducationUpdateRequest = ICandidateEducationCreateRequest;
@@ -107,6 +109,16 @@ export interface ICountryResponse {
 
 export interface IGenderResponse {
   genderId: number;
+  name: string;
+}
+
+export interface IMajorSubjectSscHscResponse {
+  majorSubjectSscHscId: number;
+  name: string;
+}
+
+export interface IMajorSubjectUniversityResponse {
+  majorSubjectUniversityId: number;
   name: string;
 }
 
