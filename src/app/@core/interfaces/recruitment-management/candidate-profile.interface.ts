@@ -3,20 +3,20 @@ import type { ITalentPoolBadgeResponse } from './talent-pool.interface';
 export interface ICandidateProfilePersonalInfoUpdateRequest {
   fullName: string;
   dateOfBirth?: string | null;
-  gender?: string | null;
+  genderId?: number | null;
   nationalId?: string | null;
   fatherName?: string | null;
   motherName?: string | null;
-  maritalStatus?: string | null;
-  religion?: string | null;
+  maritalStatusId?: number | null;
+  religionId?: number | null;
   nationality?: string | null;
-  bloodGroup?: string | null;
+  bloodGroupId?: number | null;
 }
 
 export interface ICandidateProfileContactUpdateRequest {
   email: string;
   phone?: string | null;
-  mobileOperator?: string | null;
+  countryId?: number | null;
 
   presentDivisionId?: number | null;
   presentDistrictId?: number | null;
@@ -62,7 +62,8 @@ export interface ICandidateProfileResponse extends ICandidateProfilePersonalInfo
 }
 
 export interface ICandidateEducationCreateRequest {
-  degreeTitle: string;
+  degreeId: number;
+  educationBoardId?: number | null;
   institution: string;
   universityLibraryItemId?: number | null;
   educationLevel?: string | null;
@@ -82,6 +83,46 @@ export interface IUniversityLibraryItemResponse {
   universityLibraryItemId: number;
   name: string;
   code: string;
+}
+
+export interface IDegreeResponse {
+  degreeId: number;
+  name: string;
+  fullName: string;
+  position: number;
+}
+
+export interface IEducationBoardResponse {
+  educationBoardId: number;
+  code: string;
+  name: string;
+}
+
+export interface ICountryResponse {
+  countryId: number;
+  name: string;
+  code: string;
+  dialCode: string;
+}
+
+export interface IGenderResponse {
+  genderId: number;
+  name: string;
+}
+
+export interface IMaritalStatusResponse {
+  maritalStatusId: number;
+  name: string;
+}
+
+export interface IReligionResponse {
+  religionId: number;
+  name: string;
+}
+
+export interface IBloodGroupResponse {
+  bloodGroupId: number;
+  name: string;
 }
 
 export interface ICandidateWorkExperienceCreateRequest {

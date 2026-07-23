@@ -1,9 +1,15 @@
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ICandidateProfileResponse } from '@app/@core/interfaces/recruitment-management/candidate-profile.interface';
+import {
+  IBloodGroupResponse,
+  ICandidateProfileResponse,
+  IGenderResponse,
+  IMaritalStatusResponse,
+  IReligionResponse,
+} from '@app/@core/interfaces/recruitment-management/candidate-profile.interface';
 import { CandidateProfileService } from '@app/@core/services/recruitment/candidate-profile/candidate-profile.service';
 import { DateTimeUtility } from '@app/@core/utils/date-time.utility';
-import { BloodGroupOptions, GenderOptions, MaritalStatusOptions, NationalityOptions, ReligionOptions } from './personal-info-section.component.constants';
+import { NationalityOptions } from './personal-info-section.component.constants';
 
 @Component({
   selector: 'app-personal-info-section',
@@ -11,7 +17,7 @@ import { BloodGroupOptions, GenderOptions, MaritalStatusOptions, NationalityOpti
   templateUrl: './personal-info-section.component.html',
   styleUrl: './personal-info-section.component.scss',
 })
-export class PersonalInfoSectionComponent implements OnChanges {
+export class PersonalInfoSectionComponent implements OnInit, OnChanges {
   @Input() profile!: ICandidateProfileResponse;
   @Output() saved = new EventEmitter<void>();
 
@@ -22,22 +28,37 @@ export class PersonalInfoSectionComponent implements OnChanges {
     this.form = this.fb.group({
       fullName: [null, [Validators.required, Validators.maxLength(200)]],
       dateOfBirth: [null],
-      gender: [null],
+      genderId: [null],
       nationalId: [null, [Validators.maxLength(50)]],
       fatherName: [null, [Validators.maxLength(200)]],
       motherName: [null, [Validators.maxLength(200)]],
-      maritalStatus: [null],
-      religion: [null],
+      maritalStatusId: [null],
+      religionId: [null],
       nationality: [null, [Validators.maxLength(100)]],
-      bloodGroup: [null],
+      bloodGroupId: [null],
     });
   }
 
-  genderOptions = GenderOptions;
-  maritalStatusOptions = MaritalStatusOptions;
-  religionOptions = ReligionOptions;
-  bloodGroupOptions = BloodGroupOptions;
+  genderOptions: IGenderResponse[] = [];
+  maritalStatusOptions: IMaritalStatusResponse[] = [];
+  religionOptions: IReligionResponse[] = [];
+  bloodGroupOptions: IBloodGroupResponse[] = [];
   nationalityOptions = NationalityOptions;
+
+  ngOnInit(): void {
+    this.candidateProfileService.getGenders().subscribe({
+      next: (response) => (this.genderOptions = !response.hasError && response.content ? response.content : []),
+    });
+    this.candidateProfileService.getMaritalStatuses().subscribe({
+      next: (response) => (this.maritalStatusOptions = !response.hasError && response.content ? response.content : []),
+    });
+    this.candidateProfileService.getReligions().subscribe({
+      next: (response) => (this.religionOptions = !response.hasError && response.content ? response.content : []),
+    });
+    this.candidateProfileService.getBloodGroups().subscribe({
+      next: (response) => (this.bloodGroupOptions = !response.hasError && response.content ? response.content : []),
+    });
+  }
 
   form: FormGroup;
   formSubmitted = false;
@@ -48,6 +69,10 @@ export class PersonalInfoSectionComponent implements OnChanges {
   // Called explicitly from a resume upload action (MyProfileComponent), not from ngOnChanges -
   // an intentional "prefill from resume" action should override, even if the user has already
   // started editing here. Nothing is saved; the user still reviews and hits Save.
+  //
+  // Resume parsing returns Gender/Religion/MaritalStatus as best-effort plain text (e.g. "Male"),
+  // not an id - these are dynamic admin-managed dropdowns now, so match the guessed text against
+  // whichever options have already loaded (case-insensitive) and only patch if found.
   applyPrefill(fullName?: string | null, dateOfBirth?: string | null, gender?: string | null, religion?: string | null, maritalStatus?: string | null): void {
     if (fullName) {
       this.form.patchValue({ fullName });
@@ -55,15 +80,20 @@ export class PersonalInfoSectionComponent implements OnChanges {
     if (dateOfBirth) {
       this.form.patchValue({ dateOfBirth: new Date(dateOfBirth) });
     }
-    if (gender) {
-      this.form.patchValue({ gender });
-    }
-    if (religion) {
-      this.form.patchValue({ religion });
-    }
-    if (maritalStatus) {
-      this.form.patchValue({ maritalStatus });
-    }
+    const genderId = this.findIdByName(this.genderOptions, 'genderId', gender);
+    if (genderId) this.form.patchValue({ genderId });
+
+    const religionId = this.findIdByName(this.religionOptions, 'religionId', religion);
+    if (religionId) this.form.patchValue({ religionId });
+
+    const maritalStatusId = this.findIdByName(this.maritalStatusOptions, 'maritalStatusId', maritalStatus);
+    if (maritalStatusId) this.form.patchValue({ maritalStatusId });
+  }
+
+  private findIdByName(options: { name: string }[], idField: string, name?: string | null): number | null {
+    if (!name) return null;
+    const match = options.find((o) => o.name?.toLowerCase() === name.toLowerCase());
+    return match ? ((match as unknown as Record<string, number>)[idField] ?? null) : null;
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -111,14 +141,14 @@ export class PersonalInfoSectionComponent implements OnChanges {
     const displayNames: { [key: string]: string } = {
       fullName: 'Full Name',
       dateOfBirth: 'Date of Birth',
-      gender: 'Gender',
+      genderId: 'Gender',
       nationalId: 'National ID',
       fatherName: "Father's Name",
       motherName: "Mother's Name",
-      maritalStatus: 'Marital Status',
-      religion: 'Religion',
+      maritalStatusId: 'Marital Status',
+      religionId: 'Religion',
       nationality: 'Nationality',
-      bloodGroup: 'Blood Group',
+      bloodGroupId: 'Blood Group',
     };
     return displayNames[fieldName] || fieldName;
   }

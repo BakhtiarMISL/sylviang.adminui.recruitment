@@ -1,7 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AutoCompleteCompleteEvent } from 'primeng/autocomplete';
-import { ICandidateProfileDetailResponse, ICandidateTagResponse } from '@app/@core/interfaces/recruitment-management/candidate-profile.interface';
+import {
+  IBloodGroupResponse,
+  ICandidateProfileDetailResponse,
+  ICandidateTagResponse,
+  IDegreeResponse,
+  IGenderResponse,
+  IMaritalStatusResponse,
+  IReligionResponse,
+} from '@app/@core/interfaces/recruitment-management/candidate-profile.interface';
 import { CandidateProfileService } from '@app/@core/services/recruitment/candidate-profile/candidate-profile.service';
 import { BreadcrumbService } from '@app/@core/services';
 import { Base_URL } from '@env/environment';
@@ -23,6 +31,14 @@ export class CandidateDetailComponent implements OnInit {
   profile: ICandidateProfileDetailResponse | null = null;
   loading = true;
   loadError = '';
+
+  // Dynamic admin-managed lookups (see @app/pages/master-data-management) - the profile response
+  // only carries Ids now, so this read-only view resolves them to display names itself.
+  private genders: IGenderResponse[] = [];
+  private maritalStatuses: IMaritalStatusResponse[] = [];
+  private religions: IReligionResponse[] = [];
+  private bloodGroups: IBloodGroupResponse[] = [];
+  private degrees: IDegreeResponse[] = [];
 
   hrNotes = '';
   savingNotes = false;
@@ -47,6 +63,31 @@ export class CandidateDetailComponent implements OnInit {
     ]);
     this.loadProfile();
     this.loadTags();
+    this.candidateProfileService.getGenders().subscribe({ next: (r) => (this.genders = !r.hasError && r.content ? r.content : []) });
+    this.candidateProfileService.getMaritalStatuses().subscribe({ next: (r) => (this.maritalStatuses = !r.hasError && r.content ? r.content : []) });
+    this.candidateProfileService.getReligions().subscribe({ next: (r) => (this.religions = !r.hasError && r.content ? r.content : []) });
+    this.candidateProfileService.getBloodGroups().subscribe({ next: (r) => (this.bloodGroups = !r.hasError && r.content ? r.content : []) });
+    this.candidateProfileService.getDegrees().subscribe({ next: (r) => (this.degrees = !r.hasError && r.content ? r.content : []) });
+  }
+
+  genderName(id?: number | null): string {
+    return this.genders.find((g) => g.genderId === id)?.name ?? '';
+  }
+
+  maritalStatusName(id?: number | null): string {
+    return this.maritalStatuses.find((m) => m.maritalStatusId === id)?.name ?? '';
+  }
+
+  religionName(id?: number | null): string {
+    return this.religions.find((r) => r.religionId === id)?.name ?? '';
+  }
+
+  bloodGroupName(id?: number | null): string {
+    return this.bloodGroups.find((b) => b.bloodGroupId === id)?.name ?? '';
+  }
+
+  degreeName(id?: number | null): string {
+    return this.degrees.find((d) => d.degreeId === id)?.name ?? '';
   }
 
   loadProfile(): void {

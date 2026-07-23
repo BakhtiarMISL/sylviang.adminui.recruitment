@@ -44,13 +44,14 @@
       <h3 class="form-section-header">Personal Info</h3>
 
       <div><span class="field-label">Date of Birth</span><div class="field-value">{{ profile.dateOfBirth ? (profile.dateOfBirth | date: 'dd-MMM-yyyy') : '-' }}</div></div>
-      <div><span class="field-label">Gender</span><div class="field-value">{{ profile.gender || '-' }}</div></div>
+      <div><span class="field-label">Gender</span><div class="field-value">{{ genderName(profile.genderId) || '-' }}</div></div>
       <div><span class="field-label">National ID</span><div class="field-value">{{ profile.nationalId || '-' }}</div></div>
       <div><span class="field-label">Father's Name</span><div class="field-value">{{ profile.fatherName || '-' }}</div></div>
       <div><span class="field-label">Mother's Name</span><div class="field-value">{{ profile.motherName || '-' }}</div></div>
-      <div><span class="field-label">Marital Status</span><div class="field-value">{{ profile.maritalStatus || '-' }}</div></div>
-      <div><span class="field-label">Religion</span><div class="field-value">{{ profile.religion || '-' }}</div></div>
+      <div><span class="field-label">Marital Status</span><div class="field-value">{{ maritalStatusName(profile.maritalStatusId) || '-' }}</div></div>
+      <div><span class="field-label">Religion</span><div class="field-value">{{ religionName(profile.religionId) || '-' }}</div></div>
       <div><span class="field-label">Nationality</span><div class="field-value">{{ profile.nationality || '-' }}</div></div>
+      <div><span class="field-label">Blood Group</span><div class="field-value">{{ bloodGroupName(profile.bloodGroupId) || '-' }}</div></div>
     </div>
   </section>
 
@@ -71,7 +72,7 @@
       <div class="sm:col-span-2" *ngIf="profile.educations.length > 0">
         <div class="list-row" *ngFor="let edu of profile.educations">
           <div>
-            <strong>{{ edu.degreeTitle }}</strong> <span>— {{ edu.institution }}</span>
+            <strong>{{ degreeName(edu.degreeId) }}</strong> <span>— {{ edu.institution }}</span>
             <span class="text-sm text-neutral ml-2">{{ edu.passingYear }}, {{ edu.result }}</span>
           </div>
         </div>

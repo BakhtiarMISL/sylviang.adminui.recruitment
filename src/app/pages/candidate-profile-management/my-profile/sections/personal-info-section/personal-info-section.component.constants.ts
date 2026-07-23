@@ -1,35 +1,5 @@
-import { BloodGroupEnum, GenderEnum, MaritalStatusEnum, ReligionEnum } from '@app/@core/enums/recruitment.enum';
-
-export const GenderOptions = [
-  { label: 'Male', value: GenderEnum.Male },
-  { label: 'Female', value: GenderEnum.Female },
-  { label: 'Other', value: GenderEnum.Other },
-];
-
-export const MaritalStatusOptions = [
-  { label: 'Single', value: MaritalStatusEnum.Single },
-  { label: 'Married', value: MaritalStatusEnum.Married },
-  { label: 'Other', value: MaritalStatusEnum.Other },
-];
-
-export const ReligionOptions = [
-  { label: 'Islam', value: ReligionEnum.Islam },
-  { label: 'Hinduism', value: ReligionEnum.Hinduism },
-  { label: 'Christianity', value: ReligionEnum.Christianity },
-  { label: 'Buddhism', value: ReligionEnum.Buddhism },
-  { label: 'Other', value: ReligionEnum.Other },
-];
-
-export const BloodGroupOptions = [
-  { label: 'A+', value: BloodGroupEnum.APositive },
-  { label: 'A-', value: BloodGroupEnum.ANegative },
-  { label: 'B+', value: BloodGroupEnum.BPositive },
-  { label: 'B-', value: BloodGroupEnum.BNegative },
-  { label: 'AB+', value: BloodGroupEnum.ABPositive },
-  { label: 'AB-', value: BloodGroupEnum.ABNegative },
-  { label: 'O+', value: BloodGroupEnum.OPositive },
-  { label: 'O-', value: BloodGroupEnum.ONegative },
-];
+// Gender/MaritalStatus/Religion/BloodGroup options are no longer hardcoded here - they're
+// dynamic admin-managed dropdowns loaded from the API (see PersonalInfoSectionComponent.ngOnInit).
 
 // Common countries first (Bangladesh default, since candidates are overwhelmingly local),
 // remainder alphabetical - a plain string list, not a backend enum, since nationality has no

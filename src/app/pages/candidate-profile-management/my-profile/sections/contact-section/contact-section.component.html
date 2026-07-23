@@ -9,15 +9,18 @@
 
   <div>
     <p-floatlabel variant="in">
-      <p-select inputId="mobileOperator" [options]="mobileOperatorOptions" [appendTo]="'body'" [autoDisplayFirst]="false" optionLabel="label" optionValue="value" formControlName="mobileOperator" class="w-full"></p-select>
-      <label for="mobileOperator">Mobile Operator <i *ngIf="identityFieldsLocked" class="fas fa-lock" pTooltip="Locked because you have a submitted application. Contact HR support to correct this." tooltipPosition="top"></i></label>
+      <p-select inputId="countryId" [options]="countryOptions" [filter]="true" filterBy="name,code,dialCode" [appendTo]="'body'" [autoDisplayFirst]="false" optionLabel="name" optionValue="countryId" formControlName="countryId" class="w-full">
+        <ng-template let-country pTemplate="item">{{ country.code }}: {{ country.dialCode }} - {{ country.name }}</ng-template>
+        <ng-template let-country pTemplate="selectedItem">{{ country.code }}: {{ country.dialCode }}</ng-template>
+      </p-select>
+      <label for="countryId">Country Code <i *ngIf="identityFieldsLocked" class="fas fa-lock" pTooltip="Locked because you have a submitted application. Contact HR support to correct this." tooltipPosition="top"></i></label>
     </p-floatlabel>
   </div>
 
   <div>
     <p-floatlabel variant="in">
-      <input pInputText inputId="mobileNumber" formControlName="mobileNumber" maxlength="8" inputmode="numeric" class="w-full" [class.ng-invalid]="hasError('mobileNumber')" [class.ng-dirty]="hasError('mobileNumber')" (blur)="f['mobileNumber'].markAsTouched()" />
-      <label for="mobileNumber">Mobile Number (8 digits) <i *ngIf="identityFieldsLocked" class="fas fa-lock" pTooltip="Locked because you have a submitted application. Contact HR support to correct this." tooltipPosition="top"></i></label>
+      <input pInputText inputId="mobileNumber" formControlName="mobileNumber" maxlength="15" inputmode="numeric" class="w-full" [class.ng-invalid]="hasError('mobileNumber')" [class.ng-dirty]="hasError('mobileNumber')" (blur)="f['mobileNumber'].markAsTouched()" />
+      <label for="mobileNumber">Mobile Number <i *ngIf="identityFieldsLocked" class="fas fa-lock" pTooltip="Locked because you have a submitted application. Contact HR support to correct this." tooltipPosition="top"></i></label>
     </p-floatlabel>
     <div *ngIf="hasError('mobileNumber')" class="invalid">{{ getErrorMessage('mobileNumber') }}</div>
   </div>

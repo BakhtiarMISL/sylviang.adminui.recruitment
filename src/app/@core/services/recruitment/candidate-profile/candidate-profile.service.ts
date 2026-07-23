@@ -4,6 +4,7 @@ import { ApiResponse } from '@core/interfaces/ApiResponse';
 import { PaginatedResponse } from '@core/interfaces/PaginatedResponse';
 import {
   CandidateDocumentType,
+  IBloodGroupResponse,
   ICandidateCertificationResponse,
   ICandidateDocumentResponse,
   ICandidateProfileDetailResponse,
@@ -23,8 +24,14 @@ import {
   ICandidateWorkExperienceCreateRequest,
   ICandidateWorkExperienceResponse,
   ICandidateWorkExperienceUpdateRequest,
+  ICountryResponse,
+  IDegreeResponse,
   IDistrictResponse,
   IDivisionResponse,
+  IEducationBoardResponse,
+  IGenderResponse,
+  IMaritalStatusResponse,
+  IReligionResponse,
   ISkillLibraryItemResponse,
   IThanaResponse,
   IUniversityLibraryItemResponse,
@@ -85,6 +92,36 @@ export class CandidateProfileService {
 
   getUniversityLibrary() {
     return this.httpClient.get<ApiResponse<IUniversityLibraryItemResponse[]>>(`${BASE_URL_Recruitment}/university-library`);
+  }
+
+  getDegrees() {
+    return this.httpClient.get<ApiResponse<IDegreeResponse[]>>(`${BASE_URL_Recruitment}/degree`);
+  }
+
+  getEducationBoards() {
+    return this.httpClient.get<ApiResponse<IEducationBoardResponse[]>>(`${BASE_URL_Recruitment}/education-board`);
+  }
+
+  // ── Dynamic dropdown lookups (Personal Info / Contact) ────────────
+
+  getCountries() {
+    return this.httpClient.get<ApiResponse<ICountryResponse[]>>(`${BASE_URL_Recruitment}/country`);
+  }
+
+  getGenders() {
+    return this.httpClient.get<ApiResponse<IGenderResponse[]>>(`${BASE_URL_Recruitment}/gender`);
+  }
+
+  getMaritalStatuses() {
+    return this.httpClient.get<ApiResponse<IMaritalStatusResponse[]>>(`${BASE_URL_Recruitment}/marital-status`);
+  }
+
+  getReligions() {
+    return this.httpClient.get<ApiResponse<IReligionResponse[]>>(`${BASE_URL_Recruitment}/religion`);
+  }
+
+  getBloodGroups() {
+    return this.httpClient.get<ApiResponse<IBloodGroupResponse[]>>(`${BASE_URL_Recruitment}/blood-group`);
   }
 
   // ── Work Experience ──────────────────────────────────────────────

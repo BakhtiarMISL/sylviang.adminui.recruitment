@@ -85,6 +85,10 @@ const routes: Routes = [
       path: 'application-settings',
       loadChildren: () => import('./application-settings-management/application-settings-management.module').then((m) => m.ApplicationSettingsManagementModule),
     },
+    {
+      path: 'master-data',
+      loadChildren: () => import('./master-data-management/master-data-management.module').then((m) => m.MasterDataManagementModule),
+    },
   ]),
 ];
 

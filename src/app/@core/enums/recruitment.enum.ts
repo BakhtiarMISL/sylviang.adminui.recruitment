@@ -101,46 +101,6 @@ export enum DifficultyLevelEnum {
   Hard = 'Hard',
 }
 
-export enum GenderEnum {
-  Male = 'Male',
-  Female = 'Female',
-  Other = 'Other',
-}
-
-export enum MaritalStatusEnum {
-  Single = 'Single',
-  Married = 'Married',
-  Other = 'Other',
-}
-
-export enum ReligionEnum {
-  Islam = 'Islam',
-  Hinduism = 'Hinduism',
-  Christianity = 'Christianity',
-  Buddhism = 'Buddhism',
-  Other = 'Other',
-}
-
-export enum BloodGroupEnum {
-  APositive = 'APositive',
-  ANegative = 'ANegative',
-  BPositive = 'BPositive',
-  BNegative = 'BNegative',
-  ABPositive = 'ABPositive',
-  ABNegative = 'ABNegative',
-  OPositive = 'OPositive',
-  ONegative = 'ONegative',
-}
-
-export enum MobileOperatorEnum {
-  Grameenphone = 'Grameenphone',
-  Banglalink = 'Banglalink',
-  Robi = 'Robi',
-  Airtel = 'Airtel',
-  Teletalk = 'Teletalk',
-  Other = 'Other',
-}
-
 export enum GradingSystemEnum {
   GPA = 'GPA',
   CGPA = 'CGPA',

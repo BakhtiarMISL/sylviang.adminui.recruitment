@@ -1,8 +1,7 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ICandidateProfileResponse, IDistrictResponse, IDivisionResponse, IThanaResponse } from '@app/@core/interfaces/recruitment-management/candidate-profile.interface';
+import { ICandidateProfileResponse, ICountryResponse, IDistrictResponse, IDivisionResponse, IThanaResponse } from '@app/@core/interfaces/recruitment-management/candidate-profile.interface';
 import { CandidateProfileService } from '@app/@core/services/recruitment/candidate-profile/candidate-profile.service';
-import { MobileOperatorOptions, MobileOperatorPrefixes } from './contact-section.component.constants';
 
 @Component({
   selector: 'app-contact-section',
@@ -20,8 +19,8 @@ export class ContactSectionComponent implements OnInit, OnChanges {
   ) {
     this.form = this.fb.group({
       email: [null, [Validators.required, Validators.email, Validators.maxLength(200)]],
-      mobileOperator: [null],
-      mobileNumber: [null, [Validators.pattern(/^[0-9]{8}$/)]],
+      countryId: [null],
+      mobileNumber: [null, [Validators.pattern(/^[0-9]{6,15}$/)]],
 
       presentDivisionId: [null],
       presentDistrictId: [null],
@@ -73,7 +72,7 @@ export class ContactSectionComponent implements OnInit, OnChanges {
   saveError = '';
   saveSuccess = false;
 
-  mobileOperatorOptions = MobileOperatorOptions;
+  countryOptions: ICountryResponse[] = [];
   divisionOptions: IDivisionResponse[] = [];
   presentDistrictOptions: IDistrictResponse[] = [];
   presentThanaOptions: IThanaResponse[] = [];
@@ -86,6 +85,11 @@ export class ContactSectionComponent implements OnInit, OnChanges {
         this.divisionOptions = !response.hasError && response.content ? response.content : [];
       },
     });
+    this.candidateProfileService.getCountries().subscribe({
+      next: (response) => {
+        this.countryOptions = !response.hasError && response.content ? response.content : [];
+      },
+    });
   }
 
   // See PersonalInfoSectionComponent.applyPrefill for why this bypasses the pristine guard.
@@ -95,7 +99,7 @@ export class ContactSectionComponent implements OnInit, OnChanges {
     if (this.identityFieldsLocked) return;
     const patch: { email?: string; mobileNumber?: string; presentAddressDetail?: string } = {};
     if (email) patch.email = email;
-    if (phone) patch.mobileNumber = phone.slice(-8);
+    if (phone) patch.mobileNumber = phone;
     if (presentAddress) patch.presentAddressDetail = presentAddress;
     if (Object.keys(patch).length > 0) this.form.patchValue(patch);
   }
@@ -107,7 +111,7 @@ export class ContactSectionComponent implements OnInit, OnChanges {
     if (changes['profile'] && this.profile && this.form.pristine) {
       this.form.patchValue({
         ...this.profile,
-        mobileNumber: this.profile.phone ? this.profile.phone.slice(-8) : null,
+        mobileNumber: this.profile.phone || null,
       });
 
       if (this.profile.presentDivisionId) this.loadDistricts('present', this.profile.presentDivisionId);
@@ -122,7 +126,7 @@ export class ContactSectionComponent implements OnInit, OnChanges {
     if (changes['profile'] && this.profile) {
       const lockMethod = this.profile.hasSubmittedApplication ? 'disable' : 'enable';
       this.form.get('email')?.[lockMethod]({ emitEvent: false });
-      this.form.get('mobileOperator')?.[lockMethod]({ emitEvent: false });
+      this.form.get('countryId')?.[lockMethod]({ emitEvent: false });
       this.form.get('mobileNumber')?.[lockMethod]({ emitEvent: false });
     }
   }
@@ -193,7 +197,7 @@ export class ContactSectionComponent implements OnInit, OnChanges {
       if (field.errors['required']) return `${this.getFieldDisplayName(fieldName)} is required`;
       if (field.errors['email']) return `${this.getFieldDisplayName(fieldName)} must be a valid email address`;
       if (field.errors['maxlength']) return `${this.getFieldDisplayName(fieldName)} cannot exceed ${field.errors['maxlength'].requiredLength} characters`;
-      if (field.errors['pattern']) return `${this.getFieldDisplayName(fieldName)} must be exactly 8 digits`;
+      if (field.errors['pattern']) return `${this.getFieldDisplayName(fieldName)} must be 6-15 digits`;
     }
     return '';
   }
@@ -219,10 +223,9 @@ export class ContactSectionComponent implements OnInit, OnChanges {
     }
 
     const formValue = this.form.getRawValue();
-    const prefix = formValue.mobileOperator ? MobileOperatorPrefixes[formValue.mobileOperator] : '';
     const request = {
       ...formValue,
-      phone: formValue.mobileNumber ? `${prefix}${formValue.mobileNumber}` : null,
+      phone: formValue.mobileNumber || null,
     };
     delete request.mobileNumber;
 

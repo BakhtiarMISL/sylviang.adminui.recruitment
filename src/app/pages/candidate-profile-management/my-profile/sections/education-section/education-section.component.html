@@ -6,7 +6,7 @@
   <div class="sm:col-span-2" *ngIf="!loading">
     <div class="list-row" *ngFor="let item of items">
       <div>
-        <strong>{{ item.degreeTitle }}</strong> <span>— {{ item.institution }} ({{ item.passingYear }}, {{ item.result }})</span>
+        <strong>{{ degreeLabel(item.degreeId) }}</strong> <span>— {{ item.institution }} ({{ item.passingYear }}, {{ item.result }})</span>
       </div>
       <div class="list-row-actions">
         <button pButton severity="secondary" type="button" (click)="startEdit(item)">
@@ -70,10 +70,33 @@
 <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-container" *ngIf="showForm">
   <div>
     <p-floatlabel variant="in">
-      <input pInputText inputId="degreeTitle" formControlName="degreeTitle" maxlength="200" class="w-full" [class.ng-invalid]="hasError('degreeTitle')" [class.ng-dirty]="hasError('degreeTitle')" (blur)="f['degreeTitle'].markAsTouched()" />
-      <label for="degreeTitle">Degree Title *</label>
+      <p-select
+        inputId="degreeId"
+        [options]="degrees"
+        [filter]="true"
+        filterBy="name,fullName"
+        [appendTo]="'body'"
+        [autoDisplayFirst]="false"
+        optionLabel="name"
+        optionValue="degreeId"
+        formControlName="degreeId"
+        class="w-full"
+        [class.ng-invalid]="hasError('degreeId')"
+        [class.ng-dirty]="hasError('degreeId')"
+        (onChange)="onDegreeChange()"
+      >
+        <ng-template let-degree pTemplate="item">{{ degree.name }} - {{ degree.fullName }}</ng-template>
+      </p-select>
+      <label for="degreeId">Degree *</label>
     </p-floatlabel>
-    <div *ngIf="hasError('degreeTitle')" class="invalid">{{ getErrorMessage('degreeTitle') }}</div>
+    <div *ngIf="hasError('degreeId')" class="invalid">{{ getErrorMessage('degreeId') }}</div>
+  </div>
+
+  <div *ngIf="showBoardField">
+    <p-floatlabel variant="in">
+      <p-select inputId="educationBoardId" [options]="educationBoards" [filter]="true" filterBy="name,code" [appendTo]="'body'" [autoDisplayFirst]="false" optionLabel="name" optionValue="educationBoardId" formControlName="educationBoardId" class="w-full"></p-select>
+      <label for="educationBoardId">Board</label>
+    </p-floatlabel>
   </div>
 
   <div>
@@ -82,6 +105,7 @@
         inputId="institution"
         formControlName="institution"
         [suggestions]="universitySuggestions"
+        [minLength]="3"
         (completeMethod)="filterUniversity($event)"
         (onSelect)="onUniversitySelect($event)"
         (input)="onInstitutionInput()"
@@ -99,7 +123,7 @@
           <span>{{ university.name }} ({{ university.code }})</span>
         </ng-template>
       </p-autocomplete>
-      <label for="institution">Institution *</label>
+      <label for="institution">Institution * (type 3+ characters for university suggestions)</label>
     </p-floatlabel>
     <div *ngIf="hasError('institution')" class="invalid">{{ getErrorMessage('institution') }}</div>
   </div>

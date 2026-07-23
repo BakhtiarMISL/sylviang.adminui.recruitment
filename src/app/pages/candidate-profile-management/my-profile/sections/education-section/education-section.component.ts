@@ -5,6 +5,8 @@ import {
   ICandidateEducationCreateRequest,
   ICandidateEducationResponse,
   ICandidateResumeParsedEducation,
+  IDegreeResponse,
+  IEducationBoardResponse,
   IUniversityLibraryItemResponse,
 } from '@app/@core/interfaces/recruitment-management/candidate-profile.interface';
 import { CandidateProfileService } from '@app/@core/services/recruitment/candidate-profile/candidate-profile.service';
@@ -12,6 +14,14 @@ import { GradingSystemEnum } from '@app/@core/enums/recruitment.enum';
 import { catchError, concatMap, from, Observable, of, toArray } from 'rxjs';
 import { AutoCompleteCompleteEvent, AutoCompleteSelectEvent } from 'primeng/autocomplete';
 import { DivisionResultOptions, EducationLevelOptions, GradingSystemOptions, GradingSystemScale } from './education-section.component.constants';
+
+// Degrees whose Position is in this set are SSC/HSC-equivalent (see Degree.Position on the
+// backend) - the Board dropdown only makes sense for those, matching the company's reference
+// Millennium HR system where Board is tied to that same equivalence grouping.
+const BOARD_APPLICABLE_POSITIONS = [1, 2];
+
+// Minimum characters typed before the University autocomplete shows any suggestion.
+const UNIVERSITY_MIN_QUERY_LENGTH = 3;
 
 @Component({
   selector: 'app-education-section',
@@ -30,7 +40,8 @@ export class EducationSectionComponent implements OnInit {
     private candidateProfileService: CandidateProfileService,
   ) {
     this.form = this.fb.group({
-      degreeTitle: [null, [Validators.required, Validators.maxLength(200)]],
+      degreeId: [null, [Validators.required]],
+      educationBoardId: [null],
       institution: [null, [Validators.required, Validators.maxLength(200)]],
       universityLibraryItemId: [null],
       educationLevel: [null],
@@ -56,6 +67,9 @@ export class EducationSectionComponent implements OnInit {
   universityLibrary: IUniversityLibraryItemResponse[] = [];
   universitySuggestions: IUniversityLibraryItemResponse[] = [];
 
+  degrees: IDegreeResponse[] = [];
+  educationBoards: IEducationBoardResponse[] = [];
+
   // Best-effort suggestions from a parsed resume (see MyProfileComponent.onResumeParsed).
   // Nothing here is saved automatically - clicking "Use" only opens the add form pre-filled
   // so the candidate reviews/corrects and hits Save themselves.
@@ -68,8 +82,9 @@ export class EducationSectionComponent implements OnInit {
 
   useSuggestion(suggestion: ICandidateResumeParsedEducation, index: number): void {
     this.startAdd();
+    const matchedDegree = this.matchDegree(suggestion.degreeTitle);
     this.form.patchValue({
-      degreeTitle: suggestion.degreeTitle,
+      degreeId: matchedDegree?.degreeId ?? null,
       institution: suggestion.institution,
       educationLevel: suggestion.educationLevel ?? null,
       universityLibraryItemId: suggestion.universityLibraryItemId,
@@ -81,13 +96,22 @@ export class EducationSectionComponent implements OnInit {
     this.suggestionsChanged.emit(this.prefillSuggestions);
   }
 
+  // Resume parsing only returns a free-text degree guess (e.g. "BSc in CSE") - Degree is now a
+  // dynamic dropdown, so best-effort match it against the loaded Degree list by substring on
+  // either side. No match means the candidate must pick the Degree manually before saving.
+  private matchDegree(degreeTitle?: string | null): IDegreeResponse | undefined {
+    if (!degreeTitle) return undefined;
+    const text = degreeTitle.toLowerCase();
+    return this.degrees.find((d) => text.includes(d.name.toLowerCase()) || text.includes(d.fullName.toLowerCase()));
+  }
+
   dismissSuggestion(index: number): void {
     this.prefillSuggestions = this.prefillSuggestions.filter((_, i) => i !== index);
     this.suggestionsChanged.emit(this.prefillSuggestions);
   }
 
   isSuggestionReady(suggestion: ICandidateResumeParsedEducation): boolean {
-    return !!(suggestion.degreeTitle && suggestion.institution && suggestion.passingYear && suggestion.result);
+    return !!(suggestion.degreeTitle && this.matchDegree(suggestion.degreeTitle) && suggestion.institution && suggestion.passingYear && suggestion.result);
   }
 
   hasReadySuggestions(): boolean {
@@ -106,7 +130,7 @@ export class EducationSectionComponent implements OnInit {
       .pipe(
         concatMap((suggestion) => {
           const request: ICandidateEducationCreateRequest = {
-            degreeTitle: suggestion.degreeTitle!,
+            degreeId: this.matchDegree(suggestion.degreeTitle)!.degreeId,
             institution: suggestion.institution!,
             universityLibraryItemId: suggestion.universityLibraryItemId,
             educationLevel: suggestion.educationLevel ?? null,
@@ -137,6 +161,30 @@ export class EducationSectionComponent implements OnInit {
   ngOnInit(): void {
     this.loadEducation();
     this.loadUniversityLibrary();
+    this.candidateProfileService.getDegrees().subscribe({
+      next: (response) => (this.degrees = !response.hasError && response.content ? response.content : []),
+    });
+    this.candidateProfileService.getEducationBoards().subscribe({
+      next: (response) => (this.educationBoards = !response.hasError && response.content ? response.content : []),
+    });
+  }
+
+  degreeLabel(degreeId: number): string {
+    return this.degrees.find((d) => d.degreeId === degreeId)?.name ?? '';
+  }
+
+  // Board only makes sense for SSC/HSC-equivalent degrees (see BOARD_APPLICABLE_POSITIONS).
+  get showBoardField(): boolean {
+    const degreeId = this.f['degreeId'].value;
+    if (!degreeId) return false;
+    const degree = this.degrees.find((d) => d.degreeId === degreeId);
+    return !!degree && BOARD_APPLICABLE_POSITIONS.includes(degree.position);
+  }
+
+  onDegreeChange(): void {
+    if (!this.showBoardField) {
+      this.form.patchValue({ educationBoardId: null });
+    }
   }
 
   loadEducation(): void {
@@ -166,6 +214,12 @@ export class EducationSectionComponent implements OnInit {
 
   filterUniversity(event: AutoCompleteCompleteEvent): void {
     const query = event.query.trim().toLowerCase();
+    // Only start suggesting once the candidate has typed a few characters, rather than matching
+    // on every single keystroke from the first letter.
+    if (query.length < UNIVERSITY_MIN_QUERY_LENGTH) {
+      this.universitySuggestions = [];
+      return;
+    }
     this.universitySuggestions = this.universityLibrary.filter((u) => u.name.toLowerCase().includes(query) || u.code.toLowerCase().includes(query));
   }
 
@@ -247,7 +301,8 @@ export class EducationSectionComponent implements OnInit {
 
   private getFieldDisplayName(fieldName: string): string {
     const displayNames: { [key: string]: string } = {
-      degreeTitle: 'Degree Title',
+      degreeId: 'Degree',
+      educationBoardId: 'Board',
       institution: 'Institution',
       educationLevel: 'Education Level',
       passingYear: 'Passing Year',

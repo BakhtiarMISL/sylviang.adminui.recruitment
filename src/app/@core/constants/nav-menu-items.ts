@@ -124,4 +124,60 @@ export const webSidebarMenuItems: IMenuItem[] = [
     icon: 'fa-solid fa-sliders',
     roles: [UserRoleEnum.Admin],
   },
+  {
+    title: 'System Administration',
+    active: false,
+    icon: 'fa-solid fa-gears',
+    roles: [UserRoleEnum.Admin],
+    subItems: [
+      {
+        href: '/master-data/country-list',
+        title: 'Countries',
+        active: false,
+        icon: 'fa-solid fa-earth-asia',
+      },
+      {
+        href: '/master-data/education-board-list',
+        title: 'Education Boards',
+        active: false,
+        icon: 'fa-solid fa-landmark',
+      },
+      {
+        href: '/master-data/degree-list',
+        title: 'Degrees',
+        active: false,
+        icon: 'fa-solid fa-graduation-cap',
+      },
+      {
+        href: '/master-data/university-list',
+        title: 'Universities',
+        active: false,
+        icon: 'fa-solid fa-building-columns',
+      },
+      {
+        href: '/master-data/gender-list',
+        title: 'Genders',
+        active: false,
+        icon: 'fa-solid fa-venus-mars',
+      },
+      {
+        href: '/master-data/marital-status-list',
+        title: 'Marital Statuses',
+        active: false,
+        icon: 'fa-solid fa-ring',
+      },
+      {
+        href: '/master-data/religion-list',
+        title: 'Religions',
+        active: false,
+        icon: 'fa-solid fa-place-of-worship',
+      },
+      {
+        href: '/master-data/blood-group-list',
+        title: 'Blood Groups',
+        active: false,
+        icon: 'fa-solid fa-droplet',
+      },
+    ],
+  },
 ];
