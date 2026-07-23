@@ -82,6 +82,12 @@ export const webSidebarMenuItems: IMenuItem[] = [
         active: false,
         icon: 'fa-solid fa-building',
       },
+      {
+        href: '/exams/exam-list',
+        title: 'Exams',
+        active: false,
+        icon: 'fa-solid fa-file-pen',
+      },
     ],
   },
   {

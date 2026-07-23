@@ -106,3 +106,16 @@ export enum GradingSystemEnum {
   CGPA = 'CGPA',
   Division = 'Division',
 }
+
+export enum ExamTypeEnum {
+  InPerson = 'InPerson',
+  Online = 'Online',
+}
+
+/** Delivery status for a single ExamEnrollment's email/SMS notification. */
+export enum NotificationStatusEnum {
+  Pending = 'Pending',
+  Sent = 'Sent',
+  Failed = 'Failed',
+  Skipped = 'Skipped',
+}

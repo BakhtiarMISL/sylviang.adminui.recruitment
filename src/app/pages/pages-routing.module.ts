@@ -82,6 +82,10 @@ const routes: Routes = [
       loadChildren: () => import('./exam-venue-management/exam-venue-management.module').then((m) => m.ExamVenueManagementModule),
     },
     {
+      path: 'exams',
+      loadChildren: () => import('./exam-management/exam-management.module').then((m) => m.ExamManagementModule),
+    },
+    {
       path: 'application-settings',
       loadChildren: () => import('./application-settings-management/application-settings-management.module').then((m) => m.ApplicationSettingsManagementModule),
     },

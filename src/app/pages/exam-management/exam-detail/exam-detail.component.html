@@ -1,0 +1,217 @@
+<section class="page-container">
+  <div class="flex justify-between items-center gap-3 mb-4">
+    <h3 class="table-title">Exam Detail</h3>
+    <button pButton severity="secondary" [routerLink]="['/exams/exam-list']">
+      <i class="fa fa-arrow-left"></i>
+      <span>Back to Exams</span>
+    </button>
+  </div>
+
+  <div *ngIf="loadingExam" class="space-y-3">
+    <p-skeleton height="6rem"></p-skeleton>
+  </div>
+
+  <!-- Exam Summary Card -->
+  <div *ngIf="!loadingExam && exam" class="table-container mb-4 p-4">
+    <div class="flex flex-wrap items-start justify-between gap-3">
+      <div>
+        <h4 class="text-lg font-medium text-gray-900 dark:text-white">{{ exam.title }}</h4>
+        <p class="text-sm text-gray-600 dark:text-gray-300">
+          {{ exam.scheduledStartAt | date: 'dd-MMM-yyyy HH:mm' }} &middot; {{ exam.durationMinutes }} min &middot; {{ exam.examType }}
+        </p>
+        <p class="text-sm text-gray-600 dark:text-gray-300">
+          <ng-container *ngIf="exam.examType === ExamTypeEnum.InPerson">Venue: {{ exam.examVenueName || '-' }}</ng-container>
+          <ng-container *ngIf="exam.examType !== ExamTypeEnum.InPerson">Question Group: {{ exam.questionGroupName || '-' }}</ng-container>
+        </p>
+        <p class="text-sm text-gray-600 dark:text-gray-300">Total Marks: {{ exam.totalMarks }} &middot; Pass Marks: {{ exam.passMarks }}</p>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <span
+          class="rounded-full px-2 py-0.5 text-xs font-medium"
+          [ngClass]="exam.seatPlanGeneratedAt ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'"
+        >
+          {{ exam.seatPlanGeneratedAt ? 'Seat Plan Generated' : 'Seat Plan Not Generated' }}
+        </span>
+      </div>
+    </div>
+
+    <div *ngIf="exam.examType === ExamTypeEnum.InPerson" class="mt-4 flex flex-wrap gap-2">
+      <button pButton [loading]="generatingSeatPlan" (click)="generateSeatPlan($event)">
+        <i class="fa fa-chair"></i>
+        <span>{{ exam.seatPlanGeneratedAt ? 'Regenerate Seat Plan' : 'Generate Seat Plan' }}</span>
+      </button>
+      <button
+        pButton
+        severity="secondary"
+        [disabled]="!exam.seatPlanGeneratedAt || downloadingSeatPlanPdf"
+        (click)="downloadSeatPlanPdf()"
+      >
+        <i class="fa" [class.fa-file-pdf]="!downloadingSeatPlanPdf" [class.fa-spinner]="downloadingSeatPlanPdf" [class.fa-spin]="downloadingSeatPlanPdf"></i>
+        <span>Download Seat Plan PDF</span>
+      </button>
+      <button
+        pButton
+        severity="secondary"
+        [disabled]="!exam.seatPlanGeneratedAt || downloadingSeatPlanExcel"
+        (click)="downloadSeatPlanExcel()"
+      >
+        <i
+          class="fa"
+          [class.fa-file-excel]="!downloadingSeatPlanExcel"
+          [class.fa-spinner]="downloadingSeatPlanExcel"
+          [class.fa-spin]="downloadingSeatPlanExcel"
+        ></i>
+        <span>Download Seat Plan Excel</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Roster -->
+  <div class="table-container">
+    <div class="table-title-container">
+      <h3 class="table-title">
+        Enrolled Candidates
+        <span class="table-title-info" *ngIf="enrollments.length > 0">({{ enrollments.length }} total)</span>
+      </h3>
+    </div>
+
+    <div *ngIf="loadingEnrollments" class="space-y-3 p-4">
+      <p-skeleton height="3rem" *ngFor="let i of skeletonItems"></p-skeleton>
+    </div>
+
+    <p-table *ngIf="!loadingEnrollments" [value]="enrollments" dataKey="examEnrollmentId" [responsiveLayout]="'scroll'">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Candidate Name</th>
+          <th>Seat</th>
+          <th>Room</th>
+          <th>Email Status</th>
+          <th>SMS Status</th>
+          <th style="width: 12rem">Actions</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-enrollment>
+        <tr>
+          <td>{{ enrollment.candidateName }}</td>
+          <td>{{ enrollment.seatNumber || '-' }}</td>
+          <td>{{ enrollment.examRoomName || '-' }}</td>
+          <td>
+            <span
+              class="rounded-full px-2 py-0.5 text-xs font-medium"
+              [ngClass]="{
+                'bg-green-100 text-green-700': enrollment.emailNotificationStatus === 'Sent',
+                'bg-red-100 text-red-700': enrollment.emailNotificationStatus === 'Failed',
+                'bg-gray-100 text-gray-600': enrollment.emailNotificationStatus === 'Pending' || enrollment.emailNotificationStatus === 'Skipped',
+              }"
+              [title]="enrollment.emailFailureReason || ''"
+            >
+              <i
+                class="fa"
+                [class.fa-check]="enrollment.emailNotificationStatus === 'Sent'"
+                [class.fa-xmark]="enrollment.emailNotificationStatus === 'Failed'"
+                [class.fa-clock]="enrollment.emailNotificationStatus === 'Pending'"
+                [class.fa-ban]="enrollment.emailNotificationStatus === 'Skipped'"
+              ></i>
+              {{ enrollment.emailNotificationStatus }}
+            </span>
+          </td>
+          <td>
+            <span
+              class="rounded-full px-2 py-0.5 text-xs font-medium"
+              [ngClass]="{
+                'bg-green-100 text-green-700': enrollment.smsNotificationStatus === 'Sent',
+                'bg-red-100 text-red-700': enrollment.smsNotificationStatus === 'Failed',
+                'bg-gray-100 text-gray-600': enrollment.smsNotificationStatus === 'Pending' || enrollment.smsNotificationStatus === 'Skipped',
+              }"
+            >
+              <i
+                class="fa"
+                [class.fa-check]="enrollment.smsNotificationStatus === 'Sent'"
+                [class.fa-xmark]="enrollment.smsNotificationStatus === 'Failed'"
+                [class.fa-clock]="enrollment.smsNotificationStatus === 'Pending'"
+                [class.fa-ban]="enrollment.smsNotificationStatus === 'Skipped'"
+              ></i>
+              {{ enrollment.smsNotificationStatus }}
+            </span>
+          </td>
+          <td>
+            <div class="flex items-center gap-2">
+              <button
+                *ngIf="exam?.examType === ExamTypeEnum.InPerson"
+                type="button"
+                class="text-primary"
+                title="Reassign Seat"
+                (click)="openReassignDialog(enrollment)"
+              >
+                <i class="fa fa-arrows-turn-right"></i>
+              </button>
+              <button
+                type="button"
+                class="text-primary"
+                title="Download Admit Card"
+                [disabled]="downloadingAdmitCardId === enrollment.examEnrollmentId"
+                (click)="downloadAdmitCard(enrollment)"
+              >
+                <i
+                  class="fa"
+                  [class.fa-download]="downloadingAdmitCardId !== enrollment.examEnrollmentId"
+                  [class.fa-spinner]="downloadingAdmitCardId === enrollment.examEnrollmentId"
+                  [class.fa-spin]="downloadingAdmitCardId === enrollment.examEnrollmentId"
+                ></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="6" class="not-found">
+            <div>
+              <i class="fa fa-magnifying-glass-minus"></i>
+              <p>No candidates enrolled yet.</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</section>
+
+<p-dialog header="Reassign Seat" [(visible)]="reassignDialogVisible" [modal]="true" [style]="{ width: '28rem', maxWidth: '95vw' }" (onHide)="closeReassignDialog()">
+  <div *ngIf="reassignEnrollment" class="flex flex-col gap-3">
+    <p class="text-sm text-gray-600 dark:text-gray-300">{{ reassignEnrollment.candidateName }}</p>
+
+    <p-floatlabel variant="in">
+      <p-select
+        inputId="reassignExamRoomId"
+        class="w-full"
+        [options]="reassignRooms"
+        [(ngModel)]="reassignExamRoomId"
+        [ngModelOptions]="{ standalone: true }"
+        optionLabel="roomName"
+        optionValue="examRoomId"
+        [appendTo]="'body'"
+        [autoDisplayFirst]="false"
+      ></p-select>
+      <label for="reassignExamRoomId">Exam Room</label>
+    </p-floatlabel>
+
+    <p-floatlabel variant="in">
+      <input pInputText id="reassignSeatNumber" class="w-full" [(ngModel)]="reassignSeatNumber" [ngModelOptions]="{ standalone: true }" />
+      <label for="reassignSeatNumber">Seat Number</label>
+    </p-floatlabel>
+
+    <div class="flex gap-2 pb-2">
+      <button pButton [disabled]="!canSaveReassign" [loading]="reassignSaving" (click)="saveReassign()">
+        <i class="fa fa-save"></i>
+        <span>Save</span>
+      </button>
+      <button pButton type="button" severity="secondary" (click)="closeReassignDialog()">
+        <span>Cancel</span>
+      </button>
+    </div>
+  </div>
+</p-dialog>
