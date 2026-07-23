@@ -100,6 +100,12 @@ export const webSidebarMenuItems: IMenuItem[] = [
         active: false,
         icon: 'fa-solid fa-people-arrows',
       },
+      {
+        href: '/scorecards/scorecard-list',
+        title: 'Scorecard Templates',
+        active: false,
+        icon: 'fa-solid fa-clipboard-list',
+      },
     ],
   },
   {

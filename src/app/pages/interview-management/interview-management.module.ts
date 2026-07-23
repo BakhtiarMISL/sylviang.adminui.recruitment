@@ -10,15 +10,25 @@ import { DialogModule } from 'primeng/dialog';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
+import { SelectModule } from 'primeng/select';
 import { SkeletonModule } from 'primeng/skeleton';
 import { TableModule } from 'primeng/table';
+import { TextareaModule } from 'primeng/textarea';
 import { InterviewManagementRoutingModule } from './interview-management-routing.module';
 import { InterviewListComponent } from './interview-list/interview-list.component';
 import { ScheduleInterviewComponent } from './schedule-interview/schedule-interview.component';
 import { InterviewDetailComponent } from './interview-detail/interview-detail.component';
+import { EvaluateInterviewComponent } from './evaluate-interview/evaluate-interview.component';
+import { InterviewResultsComponent } from './interview-results/interview-results.component';
 
 @NgModule({
-  declarations: [InterviewListComponent, ScheduleInterviewComponent, InterviewDetailComponent],
+  declarations: [
+    InterviewListComponent,
+    ScheduleInterviewComponent,
+    InterviewDetailComponent,
+    EvaluateInterviewComponent,
+    InterviewResultsComponent,
+  ],
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -35,6 +45,8 @@ import { InterviewDetailComponent } from './interview-detail/interview-detail.co
     FloatLabelModule,
     SkeletonModule,
     TableModule,
+    SelectModule,
+    TextareaModule,
   ],
 })
 export class InterviewManagementModule {}

@@ -1,0 +1,88 @@
+<section class="page-container">
+  <form [formGroup]="scorecardForm" (ngSubmit)="onSubmit()">
+    <div class="table-container mb-4 p-4">
+      <h3 class="table-title mb-3">{{ isEditMode ? 'Edit Scorecard' : 'Add Scorecard' }}</h3>
+
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <p-floatlabel variant="in">
+          <input pInputText id="name" class="w-full" formControlName="name" />
+          <label for="name">Scorecard Name</label>
+        </p-floatlabel>
+        <small class="text-red-500" *ngIf="hasError('name')">Scorecard name is required.</small>
+
+        <p-floatlabel variant="in">
+          <input pInputText id="description" class="w-full" formControlName="description" />
+          <label for="description">Description</label>
+        </p-floatlabel>
+        <small class="text-red-500" *ngIf="hasError('description')">Description is too long.</small>
+      </div>
+    </div>
+
+    <div class="table-container mb-4 p-4">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="table-title">Criteria</h3>
+        <span class="text-sm text-gray-600 dark:text-gray-300">Total weight: {{ totalWeight }}</span>
+      </div>
+
+      <div class="space-y-3">
+        <div
+          *ngFor="let criterion of criteria; let i = index"
+          class="grid grid-cols-1 items-end gap-3 rounded-md border border-gray-200 p-3 dark:border-gray-700 sm:grid-cols-12"
+        >
+          <div class="sm:col-span-5">
+            <p-floatlabel variant="in">
+              <input pInputText class="w-full" [(ngModel)]="criterion.name" [ngModelOptions]="{ standalone: true }" />
+              <label>Criterion Name</label>
+            </p-floatlabel>
+          </div>
+          <div class="sm:col-span-3">
+            <p-floatlabel variant="in">
+              <p-inputnumber
+                class="w-full"
+                [(ngModel)]="criterion.weight"
+                [ngModelOptions]="{ standalone: true }"
+                [min]="0"
+                [maxFractionDigits]="2"
+              ></p-inputnumber>
+              <label>Weight</label>
+            </p-floatlabel>
+          </div>
+          <div class="sm:col-span-3">
+            <p-floatlabel variant="in">
+              <p-inputnumber
+                class="w-full"
+                [(ngModel)]="criterion.maxScore"
+                [ngModelOptions]="{ standalone: true }"
+                [min]="0"
+                [maxFractionDigits]="2"
+              ></p-inputnumber>
+              <label>Max Score</label>
+            </p-floatlabel>
+          </div>
+          <div class="sm:col-span-1">
+            <button pButton type="button" severity="danger" [disabled]="criteria.length === 1" (click)="removeCriterion(i)">
+              <i class="fa fa-trash"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <button pButton type="button" severity="secondary" class="mt-3" (click)="addCriterion()">
+        <i class="fa fa-plus"></i>
+        <span>Add Criterion</span>
+      </button>
+    </div>
+
+    <small class="mt-3 block text-red-500" *ngIf="errorMessage">{{ errorMessage }}</small>
+
+    <div class="mt-4 flex gap-2">
+      <button pButton type="submit">
+        <i class="fa fa-save"></i>
+        <span>{{ isEditMode ? 'Save Changes' : 'Create Scorecard' }}</span>
+      </button>
+      <button pButton type="button" severity="secondary" [routerLink]="['/scorecards/scorecard-list']">
+        <span>Cancel</span>
+      </button>
+    </div>
+  </form>
+</section>

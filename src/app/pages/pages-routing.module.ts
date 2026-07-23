@@ -107,6 +107,10 @@ const routes: Routes = [
       path: 'interviews',
       loadChildren: () => import('./interview-management/interview-management.module').then((m) => m.InterviewManagementModule),
     },
+    {
+      path: 'scorecards',
+      loadChildren: () => import('./scorecard-management/scorecard-management.module').then((m) => m.ScorecardManagementModule),
+    },
   ]),
 ];
 

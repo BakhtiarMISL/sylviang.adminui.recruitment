@@ -67,14 +67,22 @@
       </div>
     </div>
 
-    <div class="mt-4 flex flex-wrap gap-2" *ngIf="!isCancelled">
-      <button pButton (click)="openRescheduleDialog()">
+    <div class="mt-4 flex flex-wrap gap-2">
+      <button pButton *ngIf="!isCancelled" (click)="openRescheduleDialog()">
         <i class="fa fa-calendar-days"></i>
         <span>Reschedule</span>
       </button>
-      <button pButton severity="danger" (click)="openCancelDialog()">
+      <button pButton *ngIf="!isCancelled" severity="danger" (click)="openCancelDialog()">
         <i class="fa fa-ban"></i>
         <span>Cancel</span>
+      </button>
+      <button pButton severity="secondary" [routerLink]="['/interviews/interview', interviewId, 'evaluate']">
+        <i class="fa fa-star"></i>
+        <span>Evaluate</span>
+      </button>
+      <button pButton severity="secondary" [routerLink]="['/interviews/interview', interviewId, 'results']">
+        <i class="fa fa-chart-simple"></i>
+        <span>View Results</span>
       </button>
     </div>
   </div>
