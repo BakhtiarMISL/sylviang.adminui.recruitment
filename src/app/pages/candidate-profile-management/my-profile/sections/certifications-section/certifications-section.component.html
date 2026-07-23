@@ -87,7 +87,7 @@
         <small>PDF, DOC or DOCX</small>
       </span>
     </label>
-    <input id="certificationFile" type="file" (change)="onFileSelected($event)" accept=".pdf,.doc,.docx" class="sr-only" />
+    <input id="certificationFile" type="file" (change)="onFileSelected($event)" accept=".pdf,.doc,.docx" class="sr-only file-picker-input" />
   </div>
   <div *ngIf="fileError" class="invalid sm:col-span-2">{{ fileError }}</div>
 

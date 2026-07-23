@@ -59,6 +59,20 @@
   }
 }
 
+// Native file pickers focus their input after the chooser closes. Keep hidden
+// file inputs out of scrollable page layouts so that focus cannot jump a panel
+// to the bottom of the page.
+.file-picker-input {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 1px !important;
+  height: 1px !important;
+  margin: 0 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
 .table-container {
   @apply rounded-lg shadow-md border border-borderLight dark:border-borderDark bg-light dark:bg-dark;
 }

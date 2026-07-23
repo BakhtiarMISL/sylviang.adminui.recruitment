@@ -47,14 +47,14 @@
 
   <div>
     <label for="resume" class="mb-1 block text-sm text-gray-700">Resume *</label>
-    <label for="resume" class="upload-dropzone">
+    <label for="resume" class="upload-dropzone" (click)="rememberFilePickerScrollPosition()">
       <i class="fas fa-file-arrow-up"></i>
       <span class="upload-dropzone-text">
         <strong>{{ selectedFile?.name || 'Click to upload your resume' }}</strong>
         <small>PDF, DOC or DOCX, up to 10MB</small>
       </span>
     </label>
-    <input type="file" id="resume" accept=".pdf,.doc,.docx" (change)="onFileSelected($event)" class="sr-only" />
+    <input type="file" id="resume" accept=".pdf,.doc,.docx" (change)="onFileSelected($event)" class="sr-only file-picker-input" />
     <div *ngIf="fileError" class="invalid mt-2">{{ fileError }}</div>
   </div>
 
@@ -70,7 +70,7 @@
   </div>
 
   <div>
-    <button pButton type="submit" [disabled]="submitting || applyForm.pristine || (needsAcknowledgement && !acknowledgedIneligibility)">
+    <button pButton type="submit" [disabled]="submitting || !selectedFile || (needsAcknowledgement && !acknowledgedIneligibility)">
       <i class="fa fa-paper-plane"></i>
       <span>{{ submitting ? 'Submitting...' : 'Submit Application' }}</span>
     </button>

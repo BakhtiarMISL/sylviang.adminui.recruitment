@@ -18,6 +18,11 @@
   }
 }
 
+.source-filter {
+  flex: 1 1 16rem;
+  min-width: 16rem;
+}
+
 .active-filter-chips {
   display: flex;
   flex-wrap: wrap;
@@ -77,19 +82,31 @@
 
 .save-search-form {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.75rem;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 0.5rem 0 1rem;
+}
 
-  > p-floatlabel {
-    flex: 1 1 100%;
-  }
+.save-search-share {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
 }
 
 .manage-saved-searches {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+}
+
+.manage-saved-searches-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem 0;
+  text-align: center;
+  color: var(--text-color-secondary, #6b7280);
 }
 
 .manage-saved-search-row {

@@ -64,6 +64,8 @@ export class ApplyFormComponent implements OnInit {
   submitError = '';
   submitted = false;
   submitResult: IJobApplicationSubmitResponse | null = null;
+  private filePickerScrollPosition: { x: number; y: number } | null = null;
+  private filePickerScrollContainer: HTMLElement | null = null;
   // EP-17: true when the application was saved but the SSLCommerz redirect couldn't be started
   // (gateway outage at submit time) - the candidate can retry from here.
   paymentPending = false;
@@ -98,8 +100,17 @@ export class ApplyFormComponent implements OnInit {
     return displayNames[fieldName] || fieldName;
   }
 
+  rememberFilePickerScrollPosition(): void {
+    this.filePickerScrollContainer = this.findFilePickerScrollContainer();
+    this.filePickerScrollPosition = this.filePickerScrollContainer
+      ? { x: this.filePickerScrollContainer.scrollLeft, y: this.filePickerScrollContainer.scrollTop }
+      : { x: window.scrollX, y: window.scrollY };
+  }
+
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
+    input.blur();
+    this.restoreFilePickerScrollPosition();
     this.fileError = '';
     this.selectedFile = null;
 
@@ -110,15 +121,51 @@ export class ApplyFormComponent implements OnInit {
 
     if (!RESUME_ALLOWED_EXTENSIONS.includes(extension)) {
       this.fileError = `Resume must be one of: ${RESUME_ALLOWED_EXTENSIONS.join(', ')}`;
+      input.value = '';
       return;
     }
 
     if (file.size > RESUME_MAX_SIZE_BYTES) {
       this.fileError = 'Resume file size must not exceed 10MB';
+      input.value = '';
       return;
     }
 
     this.selectedFile = file;
+  }
+
+  private restoreFilePickerScrollPosition(): void {
+    const position = this.filePickerScrollPosition;
+    const scrollContainer = this.filePickerScrollContainer;
+    this.filePickerScrollPosition = null;
+    this.filePickerScrollContainer = null;
+
+    if (!position) return;
+
+    // Browsers focus a hidden file input after the chooser closes, which can
+    // scroll the entire page to the bottom. Restore where the candidate was.
+    requestAnimationFrame(() => {
+      if (scrollContainer) {
+        scrollContainer.scrollLeft = position.x;
+        scrollContainer.scrollTop = position.y;
+      } else {
+        window.scrollTo(position.x, position.y);
+      }
+    });
+  }
+
+  private findFilePickerScrollContainer(): HTMLElement | null {
+    let element = document.getElementById('resume')?.parentElement;
+
+    while (element) {
+      const overflowY = window.getComputedStyle(element).overflowY;
+      if ((overflowY === 'auto' || overflowY === 'scroll') && element.scrollHeight > element.clientHeight) {
+        return element;
+      }
+      element = element.parentElement;
+    }
+
+    return null;
   }
 
   onSubmit(): void {

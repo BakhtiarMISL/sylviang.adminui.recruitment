@@ -225,7 +225,7 @@
           <strong>{{ bulkImportFile?.name || 'Click to select an XLSX or CSV file' }}</strong>
         </span>
       </label>
-      <input id="bulkImportFile" type="file" accept=".xlsx,.csv" (change)="onBulkImportFileSelected($event)" class="sr-only" />
+      <input #bulkImportFileInput id="bulkImportFile" type="file" accept=".xlsx,.csv" (change)="onBulkImportFileSelected($event)" class="sr-only file-picker-input" />
     </div>
 
     <small class="text-red-500" *ngIf="bulkImportError">{{ bulkImportError }}</small>

@@ -19,7 +19,7 @@
           <small>JPG or PNG, up to 2MB</small>
         </span>
       </label>
-      <input id="photoFile" type="file" (change)="onPhotoSelected($event)" accept=".jpg,.jpeg,.png" [disabled]="uploadingPhoto" class="sr-only" />
+      <input id="photoFile" type="file" (change)="onPhotoSelected($event)" accept=".jpg,.jpeg,.png" [disabled]="uploadingPhoto" class="sr-only file-picker-input" />
 
       <div *ngIf="photoError" class="invalid mt-2">{{ photoError }}</div>
       <button *ngIf="account.profilePhotoPath" pButton severity="danger" type="button" (click)="deletePhoto()" class="mt-3">

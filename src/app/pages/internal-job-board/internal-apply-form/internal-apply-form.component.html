@@ -54,7 +54,7 @@
         <small>PDF only, up to 10MB</small>
       </span>
     </label>
-    <input type="file" id="resume" accept=".pdf" (change)="onFileSelected($event)" class="sr-only" />
+    <input type="file" id="resume" accept=".pdf" (change)="onFileSelected($event)" class="sr-only file-picker-input" />
     <div *ngIf="fileError" class="invalid mt-2">{{ fileError }}</div>
   </div>
 

@@ -26,7 +26,7 @@ input[type="number"],
 input[type="password"],
 input[type="date"],
 input[type="search"],
-input[type="file"],
+input[type="file"]:not(.sr-only),
 input[type="url"],
 input[type="time"],
 textarea {
