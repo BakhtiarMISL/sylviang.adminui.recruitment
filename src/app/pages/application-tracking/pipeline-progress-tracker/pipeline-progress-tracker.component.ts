@@ -1,6 +1,10 @@
 import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
-import { StageProgressStatusEnum } from '@app/@core/enums/recruitment.enum';
+import { RecommendationStatusEnum, StageProgressStatusEnum } from '@app/@core/enums/recruitment.enum';
+import { ICandidateRecommendationResponse } from '@app/@core/interfaces/recruitment-management/candidate-recommendation.interface';
+import { IInterviewResponse } from '@app/@core/interfaces/recruitment-management/interview.interface';
 import { IJobApplicationPipelineProgress, IPipelineStageProgress } from '@app/@core/interfaces/recruitment-management/pipeline-progress.interface';
+import { CandidateRecommendationService } from '@app/@core/services/recruitment/candidate-recommendation/candidate-recommendation.service';
+import { InterviewService } from '@app/@core/services/recruitment/interview/interview.service';
 import { JobApplicationService } from '@app/@core/services/recruitment/job-application/job-application.service';
 import { ToastService } from '@app/@core/services/misc/toast.service';
 
@@ -20,6 +24,8 @@ interface StageEditState {
 export class PipelineProgressTrackerComponent implements OnInit, OnChanges {
   constructor(
     private jobApplicationService: JobApplicationService,
+    private candidateRecommendationService: CandidateRecommendationService,
+    private interviewService: InterviewService,
     private toast: ToastService,
   ) {}
 
@@ -35,14 +41,50 @@ export class PipelineProgressTrackerComponent implements OnInit, OnChanges {
   editState: StageEditState | null = null;
   saving = false;
 
+  // Final selection recommendation (US-049)
+  recommendation: ICandidateRecommendationResponse | null = null;
+  recommendDialogVisible = false;
+  recommendJustification = '';
+  submittingRecommendation = false;
+
+  // EP-08: interviews scheduled for this job application - not scoped per stage since the
+  // schedule-interview form doesn't set PipelineStageId (soft ref, optional), so shown as one
+  // flat list rather than attached to a specific stage card.
+  interviews: IInterviewResponse[] = [];
+  loadingInterviews = false;
+
   ngOnInit(): void {
     this.load();
+    this.loadRecommendation();
+    this.loadInterviews();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['jobApplicationId'] && !changes['jobApplicationId'].firstChange) {
       this.load();
+      this.loadRecommendation();
+      this.loadInterviews();
     }
+  }
+
+  get hasInterviewStage(): boolean {
+    return !!this.progress?.stages?.some((s) => (s.stageType || '').toLowerCase().includes('interview'));
+  }
+
+  loadInterviews(): void {
+    if (!this.jobApplicationId) return;
+
+    this.loadingInterviews = true;
+    this.interviewService.getByJobApplication(this.jobApplicationId).subscribe({
+      next: (response) => {
+        this.interviews = response && !response.hasError && response.content ? response.content : [];
+        this.loadingInterviews = false;
+      },
+      error: () => {
+        this.interviews = [];
+        this.loadingInterviews = false;
+      },
+    });
   }
 
   load(): void {
@@ -113,5 +155,44 @@ export class PipelineProgressTrackerComponent implements OnInit, OnChanges {
           this.toast.error({ detail: error?.error?.decentMessage || 'Failed to update stage.' });
         },
       });
+  }
+
+  // ── Final selection recommendation (US-049) ─────────────────────
+
+  loadRecommendation(): void {
+    if (!this.jobApplicationId) return;
+
+    this.candidateRecommendationService.getLatest(this.jobApplicationId).subscribe({
+      next: (response) => {
+        this.recommendation = response && !response.hasError ? response.content : null;
+      },
+    });
+  }
+
+  canRecommend(): boolean {
+    return !this.recommendation || this.recommendation.status !== RecommendationStatusEnum.Pending;
+  }
+
+  openRecommendDialog(): void {
+    this.recommendJustification = '';
+    this.recommendDialogVisible = true;
+  }
+
+  confirmRecommend(): void {
+    if (!this.recommendJustification.trim()) return;
+
+    this.submittingRecommendation = true;
+    this.candidateRecommendationService.create(this.jobApplicationId, { justification: this.recommendJustification.trim() }).subscribe({
+      next: () => {
+        this.submittingRecommendation = false;
+        this.recommendDialogVisible = false;
+        this.toast.success({ detail: 'Recommendation submitted for review.' });
+        this.loadRecommendation();
+      },
+      error: (error) => {
+        this.submittingRecommendation = false;
+        this.toast.error({ detail: error?.error?.decentMessage || 'Failed to submit recommendation.' });
+      },
+    });
   }
 }

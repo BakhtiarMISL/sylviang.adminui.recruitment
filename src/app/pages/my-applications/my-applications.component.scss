@@ -12,8 +12,14 @@
 
 .application-card {
   border: 1px solid var(--surface-200, #e5e7eb);
-  border-radius: 0.75rem;
+  border-radius: 0.5rem;
   padding: 1rem 1.25rem;
+  background-color: #ffffff;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+:host-context(.dark) .application-card {
+  background-color: #1f2937;
 }
 
 .application-card-header {
@@ -74,6 +80,17 @@
 
   i {
     color: var(--primary-color, #4338ca);
+  }
+}
+
+.exam-action-link {
+  margin-left: auto;
+  color: var(--primary-color, #4338ca);
+  font-weight: 500;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
   }
 }
 

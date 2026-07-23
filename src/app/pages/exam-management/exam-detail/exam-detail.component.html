@@ -1,0 +1,302 @@
+<section class="page-container">
+  <div class="flex justify-between items-center gap-3 mb-4">
+    <h3 class="table-title">Exam Detail</h3>
+    <button pButton severity="secondary" [routerLink]="['/exams/exam-list']">
+      <i class="fa fa-arrow-left"></i>
+      <span>Back to Exams</span>
+    </button>
+  </div>
+
+  <div *ngIf="loadingExam" class="space-y-3">
+    <p-skeleton height="6rem"></p-skeleton>
+  </div>
+
+  <!-- Exam Summary Card -->
+  <div *ngIf="!loadingExam && exam" class="table-container mb-4 p-4">
+    <div class="flex flex-wrap items-start justify-between gap-3">
+      <div>
+        <h4 class="text-lg font-medium text-gray-900 dark:text-white">{{ exam.title }}</h4>
+        <p class="text-sm text-gray-600 dark:text-gray-300">
+          {{ exam.scheduledStartAt | date: 'dd-MMM-yyyy HH:mm' }} &middot; {{ exam.durationMinutes }} min &middot; {{ exam.examType }}
+        </p>
+        <p class="text-sm text-gray-600 dark:text-gray-300">
+          <ng-container *ngIf="exam.examType === ExamTypeEnum.InPerson">Venue: {{ exam.examVenueName || '-' }}</ng-container>
+          <ng-container *ngIf="exam.examType !== ExamTypeEnum.InPerson">Question Group: {{ exam.questionGroupName || '-' }}</ng-container>
+        </p>
+        <p class="text-sm text-gray-600 dark:text-gray-300">Total Marks: {{ exam.totalMarks }} &middot; Pass Marks: {{ exam.passMarks }}</p>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <span
+          class="rounded-full px-2 py-0.5 text-xs font-medium"
+          [ngClass]="exam.seatPlanGeneratedAt ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'"
+        >
+          {{ exam.seatPlanGeneratedAt ? 'Seat Plan Generated' : 'Seat Plan Not Generated' }}
+        </span>
+      </div>
+    </div>
+
+    <div *ngIf="exam.examType === ExamTypeEnum.InPerson" class="mt-4 flex flex-wrap gap-2">
+      <button pButton [loading]="generatingSeatPlan" (click)="generateSeatPlan($event)">
+        <i class="fa fa-chair"></i>
+        <span>{{ exam.seatPlanGeneratedAt ? 'Regenerate Seat Plan' : 'Generate Seat Plan' }}</span>
+      </button>
+      <button
+        pButton
+        severity="secondary"
+        [disabled]="!exam.seatPlanGeneratedAt || downloadingSeatPlanPdf"
+        (click)="downloadSeatPlanPdf()"
+      >
+        <i class="fa" [class.fa-file-pdf]="!downloadingSeatPlanPdf" [class.fa-spinner]="downloadingSeatPlanPdf" [class.fa-spin]="downloadingSeatPlanPdf"></i>
+        <span>Download Seat Plan PDF</span>
+      </button>
+      <button
+        pButton
+        severity="secondary"
+        [disabled]="!exam.seatPlanGeneratedAt || downloadingSeatPlanExcel"
+        (click)="downloadSeatPlanExcel()"
+      >
+        <i
+          class="fa"
+          [class.fa-file-excel]="!downloadingSeatPlanExcel"
+          [class.fa-spinner]="downloadingSeatPlanExcel"
+          [class.fa-spin]="downloadingSeatPlanExcel"
+        ></i>
+        <span>Download Seat Plan Excel</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Roster -->
+  <div class="table-container">
+    <div class="table-title-container">
+      <h3 class="table-title">
+        Enrolled Candidates
+        <span class="table-title-info" *ngIf="enrollments.length > 0">({{ enrollments.length }} total)</span>
+      </h3>
+      <div class="flex gap-2">
+        <button pButton severity="secondary" [loading]="downloadingScoreTemplate" (click)="downloadScoreTemplate()">
+          <i class="fa fa-download"></i>
+          <span>Download Score Template</span>
+        </button>
+        <button pButton severity="secondary" (click)="openBulkScoreDialog()">
+          <i class="fa fa-file-import"></i>
+          <span>Bulk Upload Scores</span>
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="loadingEnrollments" class="space-y-3 p-4">
+      <p-skeleton height="3rem" *ngFor="let i of skeletonItems"></p-skeleton>
+    </div>
+
+    <p-table *ngIf="!loadingEnrollments" [value]="enrollments" dataKey="examEnrollmentId" [responsiveLayout]="'scroll'">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Candidate Name</th>
+          <th>Seat</th>
+          <th>Room</th>
+          <th>Email Status</th>
+          <th>SMS Status</th>
+          <th>Score</th>
+          <th style="width: 12rem">Actions</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-enrollment>
+        <tr>
+          <td>{{ enrollment.candidateName }}</td>
+          <td>{{ enrollment.seatNumber || '-' }}</td>
+          <td>{{ enrollment.examRoomName || '-' }}</td>
+          <td>
+            <span
+              class="rounded-full px-2 py-0.5 text-xs font-medium"
+              [ngClass]="{
+                'bg-green-100 text-green-700': enrollment.emailNotificationStatus === 'Sent',
+                'bg-red-100 text-red-700': enrollment.emailNotificationStatus === 'Failed',
+                'bg-gray-100 text-gray-600': enrollment.emailNotificationStatus === 'Pending' || enrollment.emailNotificationStatus === 'Skipped',
+              }"
+              [title]="enrollment.emailFailureReason || ''"
+            >
+              <i
+                class="fa"
+                [class.fa-check]="enrollment.emailNotificationStatus === 'Sent'"
+                [class.fa-xmark]="enrollment.emailNotificationStatus === 'Failed'"
+                [class.fa-clock]="enrollment.emailNotificationStatus === 'Pending'"
+                [class.fa-ban]="enrollment.emailNotificationStatus === 'Skipped'"
+              ></i>
+              {{ enrollment.emailNotificationStatus }}
+            </span>
+          </td>
+          <td>
+            <span
+              class="rounded-full px-2 py-0.5 text-xs font-medium"
+              [ngClass]="{
+                'bg-green-100 text-green-700': enrollment.smsNotificationStatus === 'Sent',
+                'bg-red-100 text-red-700': enrollment.smsNotificationStatus === 'Failed',
+                'bg-gray-100 text-gray-600': enrollment.smsNotificationStatus === 'Pending' || enrollment.smsNotificationStatus === 'Skipped',
+              }"
+            >
+              <i
+                class="fa"
+                [class.fa-check]="enrollment.smsNotificationStatus === 'Sent'"
+                [class.fa-xmark]="enrollment.smsNotificationStatus === 'Failed'"
+                [class.fa-clock]="enrollment.smsNotificationStatus === 'Pending'"
+                [class.fa-ban]="enrollment.smsNotificationStatus === 'Skipped'"
+              ></i>
+              {{ enrollment.smsNotificationStatus }}
+            </span>
+          </td>
+          <td>
+            <div *ngIf="enrollment.score != null" class="flex flex-col">
+              <span
+                class="rounded-full px-2 py-0.5 text-xs font-medium w-fit"
+                [ngClass]="enrollment.isPassed ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
+              >
+                {{ enrollment.score }} / {{ exam?.totalMarks }} &middot; {{ enrollment.isPassed ? 'Pass' : 'Fail' }}
+              </span>
+              <span class="text-xs text-gray-500" [title]="enrollment.scoredAt ? (enrollment.scoredAt | date: 'dd-MMM-yyyy HH:mm') : ''">
+                {{ enrollment.scoreSource === 'AutoScored' ? 'Auto-scored' : 'By ' + (enrollment.scoredByUserName || 'HR') }}
+              </span>
+            </div>
+            <span *ngIf="enrollment.score == null" class="text-xs text-gray-400">Not scored</span>
+          </td>
+          <td>
+            <div class="flex items-center gap-2">
+              <button
+                *ngIf="exam?.examType === ExamTypeEnum.InPerson"
+                type="button"
+                class="text-primary"
+                title="Reassign Seat"
+                (click)="openReassignDialog(enrollment)"
+              >
+                <i class="fa fa-arrows-turn-right"></i>
+              </button>
+              <button type="button" class="text-primary" title="Upload Score" (click)="openScoreUploadDialog(enrollment)">
+                <i class="fa fa-pen-to-square"></i>
+              </button>
+              <button
+                type="button"
+                class="text-primary"
+                title="Download Admit Card"
+                [disabled]="downloadingAdmitCardId === enrollment.examEnrollmentId"
+                (click)="downloadAdmitCard(enrollment)"
+              >
+                <i
+                  class="fa"
+                  [class.fa-download]="downloadingAdmitCardId !== enrollment.examEnrollmentId"
+                  [class.fa-spinner]="downloadingAdmitCardId === enrollment.examEnrollmentId"
+                  [class.fa-spin]="downloadingAdmitCardId === enrollment.examEnrollmentId"
+                ></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="7" class="not-found">
+            <div>
+              <i class="fa fa-magnifying-glass-minus"></i>
+              <p>No candidates enrolled yet.</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</section>
+
+<p-dialog header="Reassign Seat" [(visible)]="reassignDialogVisible" [modal]="true" [style]="{ width: '28rem', maxWidth: '95vw' }" (onHide)="closeReassignDialog()">
+  <div *ngIf="reassignEnrollment" class="flex flex-col gap-3">
+    <p class="text-sm text-gray-600 dark:text-gray-300">{{ reassignEnrollment.candidateName }}</p>
+
+    <p-floatlabel variant="in">
+      <p-select
+        inputId="reassignExamRoomId"
+        class="w-full"
+        [options]="reassignRooms"
+        [(ngModel)]="reassignExamRoomId"
+        [ngModelOptions]="{ standalone: true }"
+        optionLabel="roomName"
+        optionValue="examRoomId"
+        [appendTo]="'body'"
+        [autoDisplayFirst]="false"
+      ></p-select>
+      <label for="reassignExamRoomId">Exam Room</label>
+    </p-floatlabel>
+
+    <p-floatlabel variant="in">
+      <input pInputText id="reassignSeatNumber" class="w-full" [(ngModel)]="reassignSeatNumber" [ngModelOptions]="{ standalone: true }" />
+      <label for="reassignSeatNumber">Seat Number</label>
+    </p-floatlabel>
+
+    <div class="flex gap-2 pb-2">
+      <button pButton [disabled]="!canSaveReassign" [loading]="reassignSaving" (click)="saveReassign()">
+        <i class="fa fa-save"></i>
+        <span>Save</span>
+      </button>
+      <button pButton type="button" severity="secondary" (click)="closeReassignDialog()">
+        <span>Cancel</span>
+      </button>
+    </div>
+  </div>
+</p-dialog>
+
+<p-dialog header="Upload Score" [(visible)]="scoreUploadDialogVisible" [modal]="true" [style]="{ width: '24rem', maxWidth: '95vw' }" (onHide)="closeScoreUploadDialog()">
+  <div *ngIf="scoreUploadEnrollment" class="flex flex-col gap-3">
+    <p class="text-sm text-gray-600 dark:text-gray-300">{{ scoreUploadEnrollment.candidateName }} &middot; out of {{ exam?.totalMarks }}</p>
+
+    <p-floatlabel variant="in">
+      <p-inputnumber inputId="scoreUploadValue" class="w-full" [(ngModel)]="scoreUploadValue" [ngModelOptions]="{ standalone: true }" [min]="0" [max]="exam?.totalMarks || 0"></p-inputnumber>
+      <label for="scoreUploadValue">Score</label>
+    </p-floatlabel>
+
+    <div class="flex gap-2 pb-2">
+      <button pButton [disabled]="!canSaveScoreUpload" [loading]="scoreUploadSaving" (click)="saveScoreUpload()">
+        <i class="fa fa-save"></i>
+        <span>Save</span>
+      </button>
+      <button pButton type="button" severity="secondary" (click)="closeScoreUploadDialog()">
+        <span>Cancel</span>
+      </button>
+    </div>
+  </div>
+</p-dialog>
+
+<p-dialog header="Bulk Upload Scores" [(visible)]="bulkScoreDialogVisible" [modal]="true" [style]="{ width: '32rem', maxWidth: '95vw' }">
+  <div class="flex flex-col gap-3">
+    <p class="text-sm text-gray-600 dark:text-gray-300">
+      Download the template, fill in the Score column for each candidate, then upload it here. Scores must be between 0 and {{ exam?.totalMarks }}.
+    </p>
+    <div>
+      <label for="bulkScoreFile" class="upload-dropzone">
+        <i class="fas fa-file-arrow-up"></i>
+        <span class="upload-dropzone-text"><strong>{{ bulkScoreFile?.name || 'Click to select an XLSX or CSV file' }}</strong></span>
+      </label>
+      <input id="bulkScoreFile" type="file" accept=".xlsx,.csv" (change)="onBulkScoreFileSelected($event)" class="sr-only" />
+    </div>
+    <small class="text-red-500" *ngIf="bulkScoreError">{{ bulkScoreError }}</small>
+    <div *ngIf="bulkScoreResult" class="rounded-md border border-gray-200 p-3">
+      <p class="font-medium">Upload Summary</p>
+      <p>Total Rows: {{ bulkScoreResult.totalRows }}</p>
+      <p class="text-green-700">Updated: {{ bulkScoreResult.updatedCount }}</p>
+      <p class="text-red-600" *ngIf="bulkScoreResult.failedCount > 0">Failed: {{ bulkScoreResult.failedCount }}</p>
+      <div *ngIf="bulkScoreResult.errors.length > 0" class="mt-2 max-h-48 overflow-y-auto">
+        <div *ngFor="let error of bulkScoreResult.errors" class="border-t border-gray-100 py-1 text-xs">
+          <strong>Row {{ error.rowNumber }}:</strong> {{ error.message }}
+        </div>
+      </div>
+    </div>
+    <div class="flex gap-2 pb-3">
+      <button pButton [loading]="bulkScoreLoading" (click)="submitBulkScoreUpload()">
+        <i class="fa fa-upload"></i>
+        <span>Upload</span>
+      </button>
+      <button pButton type="button" severity="secondary" (click)="bulkScoreDialogVisible = false">
+        <span>Close</span>
+      </button>
+    </div>
+  </div>
+</p-dialog>

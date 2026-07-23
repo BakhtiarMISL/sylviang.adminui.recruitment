@@ -1,0 +1,109 @@
+<div class="auto-shortlist">
+  <div class="auto-shortlist-controls">
+    <p-floatlabel variant="in">
+      <p-inputnumber inputId="cutoffScore" [(ngModel)]="cutoffScore" (ngModelChange)="onCutoffChange()" [min]="0" [max]="100" suffix=" / 100" class="w-full"></p-inputnumber>
+      <label for="cutoffScore">Cutoff Score</label>
+    </p-floatlabel>
+
+    <button pButton type="button" [disabled]="running" (click)="runShortlisting($event)">
+      <i class="fa fa-robot"></i>
+      <span>{{ run ? 'Re-run Shortlisting' : 'Run Shortlisting' }}</span>
+    </button>
+
+    <button pButton type="button" severity="success" [disabled]="!canApply() || applying" (click)="applyDecisions($event)">
+      <i class="fa fa-check"></i>
+      <span>Apply Decisions</span>
+    </button>
+  </div>
+
+  <div class="auto-shortlist-meta" *ngIf="run">
+    <span>Provider: {{ run.provider }}</span>
+    <span>Run at: {{ run.runAt | date: 'dd-MMM-yyyy, h:mm a' }}</span>
+    <span>{{ run.totalScored }} scored, {{ run.totalFailed }} failed, {{ run.totalApplications }} total</span>
+  </div>
+
+  <div *ngIf="loading" class="auto-shortlist-loading">
+    <p-skeleton height="2.5rem" *ngFor="let i of [1, 2, 3]" styleClass="mb-2"></p-skeleton>
+  </div>
+
+  <div class="not-found" *ngIf="!loading && !run">
+    <i class="fa fa-magnifying-glass-minus"></i>
+    <p>No shortlisting run yet. Click "Run Shortlisting" to score every applicant against this vacancy.</p>
+  </div>
+
+  <p-table *ngIf="!loading && run" [value]="sortedResults" dataKey="autoShortlistResultId">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Candidate</th>
+        <th style="width: 6rem">Score</th>
+        <th style="width: 8rem">Status</th>
+        <th style="width: 12rem">Match Details</th>
+        <th>Explanation</th>
+        <th style="width: 10rem">Decision</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-result>
+      <tr>
+        <td>{{ result.candidateName }}</td>
+        <td>{{ result.score ?? '-' }}</td>
+        <td>
+          <span class="status-badge" [class.status-badge-shortlisted]="result.finalIncluded" [class.status-badge-failed]="result.scoringFailed">
+            {{ result.scoringFailed ? 'Scoring Failed' : result.finalIncluded ? 'Pass' : 'Fail' }}
+          </span>
+          <span class="override-badge" *ngIf="result.hrOverrideDecision">(HR: {{ result.hrOverrideDecision }})</span>
+        </td>
+        <td>
+          <div class="match-details" *ngIf="result.experienceBand || result.matchedSkills.length > 0">
+            <span class="experience-band" *ngIf="result.experienceBand">{{ result.experienceBand }}</span>
+            <span class="skill-tag" *ngFor="let skill of result.matchedSkills">{{ skill }}</span>
+          </div>
+        </td>
+        <td>
+          <span *ngIf="result.explanation" [pTooltip]="result.explanation" tooltipPosition="top" class="explanation-text">{{ result.explanation }}</span>
+          <span *ngIf="!result.explanation && result.scoringError" class="explanation-error">{{ result.scoringError }}</span>
+        </td>
+        <td>
+          <button (click)="overrideRow(result, HrOverrideDecisionEnum.Approved)" class="text-primary decision-btn" pTooltip="Approve">
+            <i class="fa fa-check"></i>
+          </button>
+          <button (click)="overrideRow(result, HrOverrideDecisionEnum.Rejected)" class="text-primary decision-btn ml-2" pTooltip="Reject">
+            <i class="fa fa-times"></i>
+          </button>
+          <button (click)="overrideRow(result, null)" class="text-primary decision-btn ml-2" pTooltip="Reset to auto" *ngIf="result.hrOverrideDecision">
+            <i class="fa fa-rotate-left"></i>
+          </button>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="6" class="not-found">
+          <p>No applications for this vacancy.</p>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<p-dialog header="AI Shortlisting Applied" [(visible)]="applySummaryVisible" [modal]="true" [style]="{ width: '28rem', maxWidth: '95vw' }">
+  <div class="apply-summary" *ngIf="applySummary as summary">
+    <div class="apply-summary-row">
+      <span>Total Processed</span>
+      <strong>{{ summary.totalProcessed }}</strong>
+    </div>
+    <div class="apply-summary-row">
+      <span>Total Shortlisted</span>
+      <strong>{{ summary.totalShortlisted }}</strong>
+    </div>
+    <div class="apply-summary-row">
+      <span>Total Failed</span>
+      <strong>{{ summary.totalFailed }}</strong>
+    </div>
+
+    <ul class="apply-summary-failures" *ngIf="summary.failures.length > 0">
+      <li *ngFor="let failure of summary.failures">Application #{{ failure.jobApplicationId }}: {{ failure.reason }}</li>
+    </ul>
+  </div>
+</p-dialog>

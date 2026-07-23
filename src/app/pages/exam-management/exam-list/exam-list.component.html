@@ -1,0 +1,124 @@
+<section class="page-container">
+  <div class="flex justify-between items-center gap-3 flex-wrap">
+    <h3 class="table-title">Exams</h3>
+    <button pButton [routerLink]="['/exams/schedule-exam']">
+      <i class="fa fa-plus"></i>
+      <span>Schedule Exam</span>
+    </button>
+  </div>
+
+  <app-filter-panel [(collapsed)]="filtersCollapsed">
+    <div class="filter-bar">
+      <p-floatlabel variant="in">
+        <p-select
+          inputId="filterExamType"
+          class="w-full"
+          [options]="examTypeOptions"
+          [(ngModel)]="filterExamType"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+          [appendTo]="'body'"
+          (onChange)="applyFilters()"
+          (onClear)="applyFilters()"
+        ></p-select>
+        <label for="filterExamType">Type</label>
+      </p-floatlabel>
+
+      <button pButton severity="secondary" (click)="resetFilters()">
+        <i class="fa fa-times"></i>
+        <span>Reset</span>
+      </button>
+    </div>
+  </app-filter-panel>
+
+  <div class="table-container">
+    <div class="table-title-container">
+      <h3 class="table-title">
+        Exam Table
+        <span class="table-title-info" *ngIf="totalRecords > 0">({{ totalRecords }} total)</span>
+      </h3>
+    </div>
+
+    <div class="transition-all duration-500 ease-in-out">
+      <p-table
+        [value]="loading ? skeletonItems : exams"
+        dataKey="examId"
+        (onSort)="onSort($event)"
+        [paginator]="true"
+        [rows]="rows"
+        [first]="(currentPage - 1) * rows"
+        [rowsPerPageOptions]="UI_CONFIG.pageSizeOptions"
+        [totalRecords]="totalRecords"
+        (onPage)="onPageChange($event)"
+        [lazy]="true"
+        [loading]="false"
+        scrollHeight="flex"
+        [responsiveLayout]="'scroll'"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} exams"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            @for (col of columns; track col.field) {
+              <th [pSortableColumn]="col.sortable !== false ? col.field : null" [style.width]="col.width" class="group">
+                <div class="flex items-center gap-2">
+                  {{ col.label }}
+                  @if (col.sortable !== false) {
+                    <span
+                      class="transition-opacity duration-150"
+                      [ngClass]="{
+                        'opacity-100': sortedColumn === col.field,
+                        'opacity-0 group-hover:opacity-100': sortedColumn !== col.field,
+                      }"
+                    >
+                      <p-sortIcon [field]="col.field"></p-sortIcon>
+                    </span>
+                  }
+                </div>
+              </th>
+            }
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-exam>
+          @if (loading) {
+            <tr>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+            </tr>
+          } @else {
+            <tr class="cursor-pointer" (click)="openDetail(exam)">
+              <td>{{ exam.title }}</td>
+              <td>{{ exam.scheduledStartAt | date: 'dd-MMM-yyyy HH:mm' }}</td>
+              <td>{{ exam.examType }}</td>
+              <td>{{ exam.examType === 'InPerson' ? (exam.examVenueName || '-') : 'Online' }}</td>
+              <td>
+                <span
+                  class="rounded-full px-2 py-0.5 text-xs font-medium"
+                  [ngClass]="exam.seatPlanGeneratedAt ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'"
+                >
+                  {{ exam.seatPlanGeneratedAt ? 'Generated' : 'Not Generated' }}
+                </span>
+              </td>
+            </tr>
+          }
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="5" class="not-found">
+              <div>
+                <i class="fa fa-magnifying-glass-minus"></i>
+                <p>No exams scheduled yet</p>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+</section>

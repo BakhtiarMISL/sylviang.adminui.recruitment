@@ -1,7 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { BreadcrumbService } from '@app/@core/services';
+import { ExamAttemptStatusEnum, ExamTypeEnum } from '@app/@core/enums/recruitment.enum';
 import { IMyApplication } from '@app/@core/interfaces/recruitment-management/job-application.interface';
+import { IMyExamEnrollmentResponse } from '@app/@core/interfaces/recruitment-management/exam-taking.interface';
 import { JobApplicationService } from '@app/@core/services/recruitment/job-application/job-application.service';
+import { ExamTakingService } from '@app/@core/services/recruitment/exam-taking/exam-taking.service';
 import { ToastService } from '@app/@core/services/misc/toast.service';
 import { ConfirmationService } from 'primeng/api';
 
@@ -14,12 +17,17 @@ import { ConfirmationService } from 'primeng/api';
 export class MyApplicationsComponent implements OnInit {
   constructor(
     private jobApplicationService: JobApplicationService,
+    private examTakingService: ExamTakingService,
     private confirmationService: ConfirmationService,
     private toast: ToastService,
     private breadcrumbService: BreadcrumbService,
   ) {}
 
+  readonly ExamTypeEnum = ExamTypeEnum;
+  readonly ExamAttemptStatusEnum = ExamAttemptStatusEnum;
+
   applications: IMyApplication[] = [];
+  exams: IMyExamEnrollmentResponse[] = [];
   loading = true;
   loadError = '';
   withdrawingId: number | null = null;
@@ -33,6 +41,7 @@ export class MyApplicationsComponent implements OnInit {
       },
     ]);
     this.loadApplications();
+    this.loadExams();
   }
 
   loadApplications(): void {
@@ -52,6 +61,23 @@ export class MyApplicationsComponent implements OnInit {
         this.loadError = error?.error?.decentMessage || 'Failed to load your applications.';
       },
     });
+  }
+
+  // US-058 AC1: exams are fetched separately from applications - own feature slice, own
+  // failure mode. A failure here shouldn't block the applications list from rendering.
+  loadExams(): void {
+    this.examTakingService.getMyEnrollments().subscribe({
+      next: (response) => {
+        this.exams = response && !response.hasError ? response.content || [] : [];
+      },
+      error: () => {
+        this.exams = [];
+      },
+    });
+  }
+
+  examsFor(jobApplicationId: number): IMyExamEnrollmentResponse[] {
+    return this.exams.filter((e) => e.jobApplicationId === jobApplicationId);
   }
 
   formatEnumLabel(value: string | null | undefined): string {

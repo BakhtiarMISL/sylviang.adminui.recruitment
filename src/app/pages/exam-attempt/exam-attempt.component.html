@@ -1,0 +1,108 @@
+<section class="page-container exam-attempt">
+  <div *ngIf="phase === 'loading'" class="space-y-3">
+    <p-skeleton height="6rem"></p-skeleton>
+    <p-skeleton height="10rem"></p-skeleton>
+  </div>
+
+  <div *ngIf="phase === 'error'" class="invalid">{{ errorMessage }}</div>
+
+  <!-- Not started: instructions screen -->
+  <div *ngIf="phase === 'notStarted' && myExam" class="table-container p-4">
+    <h3 class="table-title mb-2">{{ myExam.examTitle }}</h3>
+    <p class="text-sm text-gray-600 dark:text-gray-300">Duration: {{ myExam.durationMinutes }} minutes &middot; Total Marks: {{ myExam.totalMarks }} &middot; Pass Marks: {{ myExam.passMarks }}</p>
+
+    <div class="instructions mt-4">
+      <h5>Before you start</h5>
+      <ul>
+        <li>Once started, a countdown timer begins and the exam auto-submits when time expires.</li>
+        <li>You cannot go back and change an answer after you move past a question or submit.</li>
+        <li>Make sure you have a stable connection before starting.</li>
+      </ul>
+    </div>
+
+    <button pButton class="mt-4" [loading]="starting" (click)="startExam()">
+      <i class="fa fa-play"></i>
+      <span>Start Exam</span>
+    </button>
+  </div>
+
+  <!-- In progress: question form -->
+  <div *ngIf="phase === 'inProgress' && paper" class="exam-attempt-inprogress">
+    <div class="exam-attempt-header table-container p-4 mb-4">
+      <h3 class="table-title">{{ paper.examTitle }}</h3>
+      <span class="countdown" [class.countdown-warning]="remainingSeconds <= 60">
+        <i class="fa fa-clock"></i>
+        {{ remainingTimeLabel }}
+      </span>
+    </div>
+
+    <div class="table-container p-4 mb-3" *ngFor="let question of paper.questions; let i = index">
+      <p class="question-text"><strong>Q{{ i + 1 }}.</strong> {{ question.questionText }} <span class="text-xs text-gray-500">({{ question.marks }} marks)</span></p>
+
+      <div class="options" *ngIf="question.questionType === QuestionTypeEnum.McqSingle || question.questionType === QuestionTypeEnum.TrueFalse">
+        <div class="option-row" *ngFor="let option of question.options">
+          <p-radiobutton
+            [name]="'q' + question.examQuestionId"
+            [inputId]="'opt' + option.examQuestionOptionId"
+            [value]="option.examQuestionOptionId"
+            [ngModel]="isSingleSelected(question.examQuestionId, option.examQuestionOptionId) ? option.examQuestionOptionId : null"
+            (ngModelChange)="selectSingleOption(question.examQuestionId, option.examQuestionOptionId)"
+          ></p-radiobutton>
+          <label [for]="'opt' + option.examQuestionOptionId">{{ option.optionText }}</label>
+        </div>
+      </div>
+
+      <div class="options" *ngIf="question.questionType === QuestionTypeEnum.McqMultiple">
+        <div class="option-row" *ngFor="let option of question.options">
+          <p-checkbox
+            [inputId]="'opt' + option.examQuestionOptionId"
+            [binary]="true"
+            [ngModel]="isMultiSelected(question.examQuestionId, option.examQuestionOptionId)"
+            (ngModelChange)="toggleMultiOption(question.examQuestionId, option.examQuestionOptionId)"
+          ></p-checkbox>
+          <label [for]="'opt' + option.examQuestionOptionId">{{ option.optionText }}</label>
+        </div>
+      </div>
+
+      <div *ngIf="question.questionType === QuestionTypeEnum.Subjective">
+        <textarea
+          pTextarea
+          class="w-full"
+          rows="4"
+          [ngModel]="getAnswerText(question.examQuestionId)"
+          (ngModelChange)="setAnswerText(question.examQuestionId, $event)"
+        ></textarea>
+      </div>
+    </div>
+
+    <button pButton severity="danger" [loading]="submitting" (click)="confirmSubmit($event)">
+      <i class="fa fa-paper-plane"></i>
+      <span>Submit Exam</span>
+    </button>
+  </div>
+
+  <!-- Submitted -->
+  <div *ngIf="phase === 'submitted'" class="table-container p-4 text-center">
+    <i class="fa fa-circle-check text-4xl text-green-600"></i>
+    <h3 class="table-title mt-2">Exam Submitted</h3>
+
+    <p *ngIf="submitResult" class="text-sm text-gray-600 dark:text-gray-300">Reference Number: {{ submitResult.referenceNumber }}</p>
+
+    <ng-container *ngIf="(submitResult && submitResult.resultsVisible) || (myExam && myExam.resultsVisible)">
+      <p class="mt-2 text-lg font-medium">
+        Score: {{ (submitResult ? submitResult.score : myExam?.score) }} / {{ myExam?.totalMarks }} &middot;
+        <span [ngClass]="(submitResult ? submitResult.isPassed : myExam?.isPassed) ? 'text-green-600' : 'text-red-600'">
+          {{ (submitResult ? submitResult.isPassed : myExam?.isPassed) ? 'Pass' : 'Fail' }}
+        </span>
+      </p>
+    </ng-container>
+    <p *ngIf="!(submitResult && submitResult.resultsVisible) && !(myExam && myExam.resultsVisible)" class="mt-2 text-sm text-gray-600 dark:text-gray-300">
+      Your results will be shared by HR once reviewed.
+    </p>
+
+    <button pButton severity="secondary" class="mt-4" [routerLink]="['/my-applications']">
+      <i class="fa fa-arrow-left"></i>
+      <span>Back to My Applications</span>
+    </button>
+  </div>
+</section>
