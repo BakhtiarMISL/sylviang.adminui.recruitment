@@ -6,6 +6,8 @@ import { ILoginRequest } from '@core/interfaces/auth/login-request.interface';
 import { ILoginResponse } from '@core/interfaces/auth/login-response.interface';
 import { IRegisterRequest } from '@core/interfaces/auth/register-request.interface';
 import { IRegisterResponse } from '@core/interfaces/auth/register-response.interface';
+import { IVerifyOtpRequest } from '@core/interfaces/auth/verify-otp-request.interface';
+import { IResendOtpRequest } from '@core/interfaces/auth/resend-otp-request.interface';
 import { UserRoleEnum } from '@core/enums/user-role.enum';
 import { BASE_URL_Recruitment } from '@env/environment';
 import { BehaviorSubject, Observable } from 'rxjs';
@@ -42,11 +44,27 @@ export class AuthService {
   login(request: ILoginRequest): Observable<ApiResponse<ILoginResponse>> {
     return this.httpClient.post<ApiResponse<ILoginResponse>>(`${this.API_URL}/login`, request).pipe(
       tap((response) => {
+        // EP-09 Feature 2: requiresOtp means there's nothing usable to persist yet - the real
+        // token only arrives after verifyOtp() succeeds.
+        if (response.content && !response.content.requiresOtp) {
+          this.persistSession(response.content);
+        }
+      }),
+    );
+  }
+
+  verifyOtp(request: IVerifyOtpRequest): Observable<ApiResponse<ILoginResponse>> {
+    return this.httpClient.post<ApiResponse<ILoginResponse>>(`${this.API_URL}/verify-otp`, request).pipe(
+      tap((response) => {
         if (response.content) {
           this.persistSession(response.content);
         }
       }),
     );
+  }
+
+  resendOtp(request: IResendOtpRequest): Observable<ApiResponse<void>> {
+    return this.httpClient.post<ApiResponse<void>>(`${this.API_URL}/resend-otp`, request);
   }
 
   register(request: IRegisterRequest): Observable<ApiResponse<IRegisterResponse>> {

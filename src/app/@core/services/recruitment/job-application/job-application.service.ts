@@ -4,6 +4,8 @@ import { ApiResponse } from '@core/interfaces/ApiResponse';
 import { PaginatedResponse } from '@core/interfaces/PaginatedResponse';
 import {
   IApplicationStatusReason,
+  IJobApplicationBulkNotifyRequest,
+  IJobApplicationBulkNotifyResponse,
   IJobApplicationBulkStatusUpdateRequest,
   IJobApplicationBulkStatusUpdateResponse,
   IJobApplicationDetail,
@@ -48,6 +50,11 @@ export class JobApplicationService {
 
   bulkUpdateStatus(request: IJobApplicationBulkStatusUpdateRequest) {
     return this.httpClient.patch<ApiResponse<IJobApplicationBulkStatusUpdateResponse>>(`${this.API_URL}/bulk-status`, request);
+  }
+
+  /** EP-09 US-076: re-dispatch a chosen event's notification across a batch of applications. */
+  bulkNotify(request: IJobApplicationBulkNotifyRequest) {
+    return this.httpClient.post<ApiResponse<IJobApplicationBulkNotifyResponse>>(`${this.API_URL}/bulk-notify`, request);
   }
 
   /** HR applies on a candidate's behalf (US-034) - multipart, same shape as the career-portal apply flow. */

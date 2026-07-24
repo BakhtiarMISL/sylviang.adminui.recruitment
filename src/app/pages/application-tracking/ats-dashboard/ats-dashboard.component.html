@@ -272,6 +272,26 @@
       <i class="fa fa-check"></i>
       <span>Apply to {{ selectedCount() }} Selected</span>
     </button>
+
+    <p-floatlabel variant="in">
+      <p-select
+        inputId="bulkNotifyEvent"
+        [options]="bulkNotifyEventOptions"
+        [(ngModel)]="bulkNotifyEvent"
+        optionLabel="label"
+        optionValue="value"
+        [appendTo]="'body'"
+        [autoDisplayFirst]="false"
+        [showClear]="true"
+        class="w-full"
+      ></p-select>
+      <label for="bulkNotifyEvent">Notify Event</label>
+    </p-floatlabel>
+
+    <button pButton severity="info" [disabled]="!bulkNotifyEvent || bulkNotifying" (click)="notifySelected($event)">
+      <i class="fa fa-bell"></i>
+      <span>Notify {{ selectedCount() }} Selected</span>
+    </button>
   </div>
 
   <div class="table-container">

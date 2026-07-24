@@ -112,6 +112,22 @@ export interface IJobApplicationBulkStatusUpdateResponse {
   failed: IJobApplicationBulkStatusUpdateFailure[];
 }
 
+/** EP-09 US-076: re-send a chosen event's notification across a batch of applications. */
+export interface IJobApplicationBulkNotifyRequest {
+  jobApplicationIds: number[];
+  recruitmentEvent: string;
+}
+
+export interface IJobApplicationBulkNotifyFailure {
+  jobApplicationId: number;
+  reason: string;
+}
+
+export interface IJobApplicationBulkNotifyResponse {
+  succeededIds: number[];
+  failed: IJobApplicationBulkNotifyFailure[];
+}
+
 export interface IMyApplicationInterview {
   interviewId: number;
   scheduledDate?: string;

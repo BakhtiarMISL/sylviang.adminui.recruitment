@@ -6,4 +6,9 @@ export interface ILoginResponse {
   username: string;
   displayName: string;
   role: string;
+  /** EP-09 Feature 2: true when token/refreshToken are withheld pending OTP verification
+   * (candidate login only, gate enabled). False - the default - for every other login. */
+  requiresOtp?: boolean;
+  /** Opaque id to pass to verify-otp/resend-otp. Only set when requiresOtp is true. */
+  challengeId?: string;
 }

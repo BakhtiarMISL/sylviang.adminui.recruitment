@@ -1,6 +1,6 @@
 import { AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { ApplicationSourceEnum, ApplicationStatusEnum, EducationLevelEnum } from '@app/@core/enums/recruitment.enum';
+import { ApplicationSourceEnum, ApplicationStatusEnum, EducationLevelEnum, RecruitmentEventEnum } from '@app/@core/enums/recruitment.enum';
 import { ISkillLibraryItemResponse } from '@app/@core/interfaces/recruitment-management/candidate-profile.interface';
 import { IAtsDashboardFilterParams, IApplicationStatusReason, IJobApplicationListItem } from '@app/@core/interfaces/recruitment-management/job-application.interface';
 import { IJobVacancyResponse } from '@app/@core/interfaces/recruitment-management/job-vacancy.interface';
@@ -89,6 +89,16 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   bulkReasonOptions: IApplicationStatusReason[] = [];
   bulkStatusOptions = ApplicationStatusOptions;
   bulkApplying = false;
+
+  // Bulk notify (EP-09 US-076) - only the events US-075 actually dispatches on are offered here.
+  bulkNotifyEvent: RecruitmentEventEnum | null = null;
+  bulkNotifying = false;
+  bulkNotifyEventOptions = [
+    { label: 'Application Submitted', value: RecruitmentEventEnum.ApplicationSubmitted },
+    { label: 'Application Status Changed', value: RecruitmentEventEnum.ApplicationStatusChanged },
+    { label: 'Application Withdrawn', value: RecruitmentEventEnum.ApplicationWithdrawn },
+    { label: 'Candidate Action Required', value: RecruitmentEventEnum.CandidateActionRequired },
+  ];
 
   // Bulk selection across pages (US-047 AC5)
   selectAllMatchingActive = false;
@@ -191,6 +201,7 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     this.bulkToStatus = null;
     this.bulkReasonId = null;
     this.bulkNote = '';
+    this.bulkNotifyEvent = null;
     this.cdr.detectChanges();
   }
 
@@ -773,6 +784,44 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
               this.toast.error({ detail: error?.error?.decentMessage || 'Failed to update applications.' });
             },
           });
+      },
+    });
+  }
+
+  // ── Bulk notify (EP-09 US-076) ───────────────────────────────────
+
+  notifySelected(event: Event): void {
+    if (!this.bulkNotifyEvent) return;
+    const ids = this.getSelectedIds();
+    if (ids.length === 0) return;
+
+    this.confirmationService.confirm({
+      target: event.target as EventTarget,
+      message: `Re-send the "${this.formatEnumLabel(this.bulkNotifyEvent)}" notification for ${ids.length} application(s)?`,
+      header: 'Confirm Bulk Notify',
+      acceptButtonStyleClass: 'p-button-primary',
+      rejectButtonStyleClass: 'p-button-secondary',
+      acceptIcon: 'fa fa-check',
+      rejectIcon: 'fa fa-times',
+      accept: () => {
+        this.bulkNotifying = true;
+
+        this.jobApplicationService.bulkNotify({ jobApplicationIds: ids, recruitmentEvent: this.bulkNotifyEvent! }).subscribe({
+          next: (response) => {
+            this.bulkNotifying = false;
+            const result = response?.content;
+            if (result && result.failed.length > 0) {
+              this.toast.warn({ detail: `${result.succeededIds.length} notified, ${result.failed.length} failed.` });
+            } else {
+              this.toast.success({ detail: 'Notifications sent.' });
+            }
+            this.bulkNotifyEvent = null;
+          },
+          error: (error) => {
+            this.bulkNotifying = false;
+            this.toast.error({ detail: error?.error?.decentMessage || 'Failed to send notifications.' });
+          },
+        });
       },
     });
   }
