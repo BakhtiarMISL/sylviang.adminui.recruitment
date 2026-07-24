@@ -100,6 +100,10 @@ const routes: Routes = [
       loadChildren: () => import('./master-data-management/master-data-management.module').then((m) => m.MasterDataManagementModule),
     },
     {
+      path: 'notification-management',
+      loadChildren: () => import('./notification-management/notification-management.module').then((m) => m.NotificationManagementModule),
+    },
+    {
       path: 'interview-venues',
       loadChildren: () => import('./interview-venue-management/interview-venue-management.module').then((m) => m.InterviewVenueManagementModule),
     },

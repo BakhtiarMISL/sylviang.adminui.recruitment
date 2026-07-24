@@ -150,3 +150,32 @@ export enum InterviewResultEnum {
   Passed = 'Passed',
   Failed = 'Failed',
 }
+
+/** EP-09: recruitment event a NotificationTemplate can be mapped to via EventTemplateMapping. */
+export enum RecruitmentEventEnum {
+  ApplicationSubmitted = 'ApplicationSubmitted',
+  ApplicationWithdrawn = 'ApplicationWithdrawn',
+  ApplicationStatusChanged = 'ApplicationStatusChanged',
+  CandidateActionRequired = 'CandidateActionRequired',
+  InterviewScheduled = 'InterviewScheduled',
+  InterviewRescheduled = 'InterviewRescheduled',
+  InterviewCancelled = 'InterviewCancelled',
+  ExamEnrolled = 'ExamEnrolled',
+  AdmitCardIssued = 'AdmitCardIssued',
+  ExamResultPublished = 'ExamResultPublished',
+  AccountCreatedOtp = 'AccountCreatedOtp',
+}
+
+/** EP-09: delivery channel a NotificationTemplate is written for. */
+export enum NotificationChannelEnum {
+  Email = 'Email',
+  Sms = 'Sms',
+  InApp = 'InApp',
+  Push = 'Push',
+}
+
+/** EP-09: which audience an EventTemplateMapping targets. */
+export enum NotificationRecipientTypeEnum {
+  Candidate = 'Candidate',
+  AdminHr = 'AdminHr',
+}

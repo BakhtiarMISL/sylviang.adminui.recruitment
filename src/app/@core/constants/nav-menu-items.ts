@@ -214,6 +214,18 @@ export const webSidebarMenuItems: IMenuItem[] = [
         active: false,
         icon: 'fa-solid fa-droplet',
       },
+      {
+        href: '/notification-management/notification-template-list',
+        title: 'Notification Templates',
+        active: false,
+        icon: 'fa-solid fa-envelope-open-text',
+      },
+      {
+        href: '/notification-management/event-template-mapping-list',
+        title: 'Event → Template Mapping',
+        active: false,
+        icon: 'fa-solid fa-diagram-project',
+      },
     ],
   },
 ];
