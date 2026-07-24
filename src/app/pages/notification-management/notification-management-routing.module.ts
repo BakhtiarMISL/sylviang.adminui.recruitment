@@ -6,8 +6,10 @@ import { NotificationTemplateListComponent } from './notification-template-list/
 import { NotificationTemplateFormComponent } from './notification-template-form/notification-template-form.component';
 import { EventTemplateMappingListComponent } from './event-template-mapping-list/event-template-mapping-list.component';
 import { EventTemplateMappingFormComponent } from './event-template-mapping-form/event-template-mapping-form.component';
+import { NotificationLogListComponent } from './notification-log-list/notification-log-list.component';
 
 const roleData = { roles: [UserRoleEnum.Admin] };
+const hrRoleData = { roles: [UserRoleEnum.Admin, UserRoleEnum.HR] };
 
 const routes: Routes = [
   {
@@ -45,6 +47,12 @@ const routes: Routes = [
     component: EventTemplateMappingFormComponent,
     canActivate: [RoleGuard],
     data: roleData,
+  },
+  {
+    path: 'notification-log-list',
+    component: NotificationLogListComponent,
+    canActivate: [RoleGuard],
+    data: hrRoleData,
   },
 ];
 

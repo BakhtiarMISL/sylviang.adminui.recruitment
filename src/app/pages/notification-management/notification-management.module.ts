@@ -15,6 +15,7 @@ import { NotificationTemplateListComponent } from './notification-template-list/
 import { NotificationTemplateFormComponent } from './notification-template-form/notification-template-form.component';
 import { EventTemplateMappingListComponent } from './event-template-mapping-list/event-template-mapping-list.component';
 import { EventTemplateMappingFormComponent } from './event-template-mapping-form/event-template-mapping-form.component';
+import { NotificationLogListComponent } from './notification-log-list/notification-log-list.component';
 
 @NgModule({
   declarations: [
@@ -22,6 +23,7 @@ import { EventTemplateMappingFormComponent } from './event-template-mapping-form
     NotificationTemplateFormComponent,
     EventTemplateMappingListComponent,
     EventTemplateMappingFormComponent,
+    NotificationLogListComponent,
   ],
   imports: [
     CommonModule,
