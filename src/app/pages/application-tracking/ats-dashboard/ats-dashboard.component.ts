@@ -1,13 +1,15 @@
 import { AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { ApplicationSourceEnum, ApplicationStatusEnum, EducationLevelEnum } from '@app/@core/enums/recruitment.enum';
+import { ApplicationSourceEnum, ApplicationStatusEnum, EducationLevelEnum, RecruitmentEventEnum } from '@app/@core/enums/recruitment.enum';
 import { ISkillLibraryItemResponse } from '@app/@core/interfaces/recruitment-management/candidate-profile.interface';
 import { IAtsDashboardFilterParams, IApplicationStatusReason, IJobApplicationListItem } from '@app/@core/interfaces/recruitment-management/job-application.interface';
 import { IJobVacancyResponse } from '@app/@core/interfaces/recruitment-management/job-vacancy.interface';
+import { ISavedSearchFilterSnapshot, ISavedSearchLookupResponse } from '@app/@core/interfaces/recruitment-management/saved-search.interface';
 import { IShortlistFilterApplyResponse, IShortlistFilterLookupResponse } from '@app/@core/interfaces/recruitment-management/shortlist-filter.interface';
 import { CandidateProfileService } from '@app/@core/services/recruitment/candidate-profile/candidate-profile.service';
 import { JobApplicationService } from '@app/@core/services/recruitment/job-application/job-application.service';
 import { JobVacancyService } from '@app/@core/services/recruitment/job-vacancy/job-vacancy.service';
+import { SavedSearchService } from '@app/@core/services/recruitment/saved-search/saved-search.service';
 import { ShortlistFilterService } from '@app/@core/services/recruitment/shortlist-filter/shortlist-filter.service';
 import { ToastService } from '@app/@core/services/misc/toast.service';
 import { UI_CONFIG } from '@app/@core/constants';
@@ -31,6 +33,7 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     private jobApplicationService: JobApplicationService,
     private jobVacancyService: JobVacancyService,
     private shortlistFilterService: ShortlistFilterService,
+    private savedSearchService: SavedSearchService,
     private candidateProfileService: CandidateProfileService,
     private cdr: ChangeDetectorRef,
     private confirmationService: ConfirmationService,
@@ -54,6 +57,7 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   sortBy = '';
   sortDirection = '';
   columns = AtsDashboardColumns;
+  filtersCollapsed = true;
 
   // Filters (US-035 AC2)
   filterJobPostingId: number | null = null;
@@ -70,9 +74,11 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   filterLocation: string | null = null;
   filterMinAge: number | null = null;
   filterMaxAge: number | null = null;
+  filterTags: string[] = [];
 
   educationLevelOptions = Object.values(EducationLevelEnum).map((value) => ({ label: value, value }));
   skillLibrary: ISkillLibraryItemResponse[] = [];
+  tagSuggestions: string[] = [];
 
   private filterChange$ = new Subject<void>();
 
@@ -83,6 +89,16 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   bulkReasonOptions: IApplicationStatusReason[] = [];
   bulkStatusOptions = ApplicationStatusOptions;
   bulkApplying = false;
+
+  // Bulk notify (EP-09 US-076) - only the events US-075 actually dispatches on are offered here.
+  bulkNotifyEvent: RecruitmentEventEnum | null = null;
+  bulkNotifying = false;
+  bulkNotifyEventOptions = [
+    { label: 'Application Submitted', value: RecruitmentEventEnum.ApplicationSubmitted },
+    { label: 'Application Status Changed', value: RecruitmentEventEnum.ApplicationStatusChanged },
+    { label: 'Application Withdrawn', value: RecruitmentEventEnum.ApplicationWithdrawn },
+    { label: 'Candidate Action Required', value: RecruitmentEventEnum.CandidateActionRequired },
+  ];
 
   // Bulk selection across pages (US-047 AC5)
   selectAllMatchingActive = false;
@@ -101,6 +117,24 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   shortlistApplySummary: IShortlistFilterApplyResponse | null = null;
   shortlistApplySummaryVisible = false;
 
+  // AI-Powered Auto-Shortlisting (US-046)
+  autoShortlistDialogVisible = false;
+
+  // Saved search bookmarks (US-048)
+  savedSearches: ISavedSearchLookupResponse[] = [];
+  selectedSavedSearchId: number | null = null;
+  applyingSavedSearch = false;
+
+  saveSearchDialogVisible = false;
+  saveSearchName = '';
+  saveSearchIsShared = false;
+  savingSearch = false;
+
+  manageSavedSearchesDialogVisible = false;
+  editingSavedSearchId: number | null = null;
+  editingSavedSearchName = '';
+  editingSavedSearchIsShared = false;
+
   get skeletonItems() {
     return Array(this.rows)
       .fill({})
@@ -111,6 +145,7 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     this.restoreFiltersFromSession();
     this.filterChange$.pipe(debounceTime(400)).subscribe(() => {
       this.currentPage = 1;
+      this.filtersCollapsed = true;
       this.saveFiltersToSession();
       this.loadApplications();
     });
@@ -118,7 +153,9 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     this.loadJobPostings();
     this.loadApplications();
     this.loadShortlistFilters();
+    this.loadSavedSearches();
     this.loadSkillLibrary();
+    this.loadTagSuggestions();
     this.isLoading = false;
   }
 
@@ -134,6 +171,15 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     this.candidateProfileService.getSkillLibrary().subscribe({
       next: (response) => {
         this.skillLibrary = response && !response.hasError && response.content ? response.content : [];
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  private loadTagSuggestions(): void {
+    this.candidateProfileService.getTagSuggestions('').subscribe({
+      next: (response) => {
+        this.tagSuggestions = response && !response.hasError && response.content ? response.content : [];
         this.cdr.detectChanges();
       },
     });
@@ -155,11 +201,13 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     this.bulkToStatus = null;
     this.bulkReasonId = null;
     this.bulkNote = '';
+    this.bulkNotifyEvent = null;
     this.cdr.detectChanges();
   }
 
   applyFilters(): void {
     this.currentPage = 1;
+    this.filtersCollapsed = true;
     this.saveFiltersToSession();
     this.loadApplications();
   }
@@ -172,6 +220,7 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     this.filterDateTo = null;
     this.resetCandidateAttributeFilters();
     this.currentPage = 1;
+    this.filtersCollapsed = false;
     this.saveFiltersToSession();
     this.loadApplications();
   }
@@ -184,6 +233,7 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     this.filterLocation = null;
     this.filterMinAge = null;
     this.filterMaxAge = null;
+    this.filterTags = [];
   }
 
   /** Candidate-attribute filters real-time apply (US-050 AC3) - debounced via filterChange$. */
@@ -206,6 +256,7 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
       ...(this.filterLocation && { location: this.filterLocation }),
       ...(this.filterMinAge != null && { minAge: this.filterMinAge }),
       ...(this.filterMaxAge != null && { maxAge: this.filterMaxAge }),
+      ...(this.filterTags.length > 0 && { tags: this.filterTags }),
     };
   }
 
@@ -230,6 +281,7 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.filterMinAge != null || this.filterMaxAge != null) {
       chips.push({ key: 'filterAge', label: `Age: ${this.filterMinAge ?? 0}-${this.filterMaxAge ?? '∞'}` });
     }
+    if (this.filterTags.length > 0) chips.push({ key: 'filterTags', label: `Tags: ${this.filterTags.join(', ')}` });
     return chips;
   }
 
@@ -268,6 +320,9 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
         this.filterMinAge = null;
         this.filterMaxAge = null;
         break;
+      case 'filterTags':
+        this.filterTags = [];
+        break;
     }
     this.currentPage = 1;
     this.saveFiltersToSession();
@@ -290,6 +345,7 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
       filterLocation: this.filterLocation,
       filterMinAge: this.filterMinAge,
       filterMaxAge: this.filterMaxAge,
+      filterTags: this.filterTags,
     };
     sessionStorage.setItem(FILTER_SESSION_KEY, JSON.stringify(state));
   }
@@ -312,6 +368,7 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
       this.filterLocation = state.filterLocation ?? null;
       this.filterMinAge = state.filterMinAge ?? null;
       this.filterMaxAge = state.filterMaxAge ?? null;
+      this.filterTags = state.filterTags ?? [];
     } catch {
       sessionStorage.removeItem(FILTER_SESSION_KEY);
     }
@@ -375,9 +432,19 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     this.router.navigate(['/applications', application.jobApplicationId]);
   }
 
+  viewDuplicates(): void {
+    if (!this.filterJobPostingId) return;
+    const title = this.jobPostings.find((p) => p.jobPostingId === this.filterJobPostingId)?.title;
+    this.router.navigate(['/applications/duplicates', this.filterJobPostingId], { queryParams: title ? { title } : {} });
+  }
+
   openPipelineTracker(application: IJobApplicationListItem): void {
     this.pipelineDialogApplicationId = application.jobApplicationId;
     this.pipelineDialogVisible = true;
+  }
+
+  openAutoShortlistDialog(): void {
+    this.autoShortlistDialogVisible = true;
   }
 
   loadShortlistFilters(): void {
@@ -423,6 +490,158 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
               this.toast.error({ detail: error?.error?.decentMessage || 'Failed to apply shortlist filter.' });
             },
           });
+      },
+    });
+  }
+
+  // ── Saved search bookmarks (US-048) ─────────────────────────────
+
+  loadSavedSearches(): void {
+    this.savedSearchService.getLookup().subscribe({
+      next: (response) => {
+        this.savedSearches = response && !response.hasError && response.content ? response.content : [];
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  private currentFilterSnapshot(): ISavedSearchFilterSnapshot {
+    return {
+      filterJobPostingId: this.filterJobPostingId,
+      filterStatus: this.filterStatus,
+      filterSource: this.filterSource,
+      filterDateFrom: this.filterDateFrom ? this.filterDateFrom.toISOString() : null,
+      filterDateTo: this.filterDateTo ? this.filterDateTo.toISOString() : null,
+      filterMinEducationLevel: this.filterMinEducationLevel,
+      filterMinExperienceYears: this.filterMinExperienceYears,
+      filterMaxExperienceYears: this.filterMaxExperienceYears,
+      filterSkills: this.filterSkills,
+      filterLocation: this.filterLocation,
+      filterMinAge: this.filterMinAge,
+      filterMaxAge: this.filterMaxAge,
+    };
+  }
+
+  openSaveSearchDialog(): void {
+    this.saveSearchName = '';
+    this.saveSearchIsShared = false;
+    this.saveSearchDialogVisible = true;
+  }
+
+  confirmSaveSearch(): void {
+    if (!this.saveSearchName.trim()) return;
+
+    this.savingSearch = true;
+    this.savedSearchService
+      .create({
+        name: this.saveSearchName.trim(),
+        isShared: this.saveSearchIsShared,
+        filterJson: JSON.stringify(this.currentFilterSnapshot()),
+      })
+      .subscribe({
+        next: () => {
+          this.savingSearch = false;
+          this.saveSearchDialogVisible = false;
+          this.toast.success({ detail: 'Search saved.' });
+          this.loadSavedSearches();
+        },
+        error: (error) => {
+          this.savingSearch = false;
+          this.toast.error({ detail: error?.error?.decentMessage || 'Failed to save search.' });
+        },
+      });
+  }
+
+  canApplySavedSearch(): boolean {
+    return !!this.selectedSavedSearchId;
+  }
+
+  applySavedSearch(): void {
+    const search = this.savedSearches.find((s) => s.savedSearchId === this.selectedSavedSearchId);
+    if (!search) return;
+
+    try {
+      const snapshot: ISavedSearchFilterSnapshot = JSON.parse(search.filterJson);
+      this.filterJobPostingId = snapshot.filterJobPostingId ?? null;
+      this.filterStatus = snapshot.filterStatus ?? null;
+      this.filterSource = snapshot.filterSource ?? null;
+      this.filterDateFrom = snapshot.filterDateFrom ? new Date(snapshot.filterDateFrom) : null;
+      this.filterDateTo = snapshot.filterDateTo ? new Date(snapshot.filterDateTo) : null;
+      this.filterMinEducationLevel = snapshot.filterMinEducationLevel ?? null;
+      this.filterMinExperienceYears = snapshot.filterMinExperienceYears ?? null;
+      this.filterMaxExperienceYears = snapshot.filterMaxExperienceYears ?? null;
+      this.filterSkills = snapshot.filterSkills ?? [];
+      this.filterLocation = snapshot.filterLocation ?? null;
+      this.filterMinAge = snapshot.filterMinAge ?? null;
+      this.filterMaxAge = snapshot.filterMaxAge ?? null;
+    } catch {
+      this.toast.error({ detail: 'This saved search is corrupted and could not be applied.' });
+      return;
+    }
+
+    this.currentPage = 1;
+    this.saveFiltersToSession();
+    this.loadApplications();
+  }
+
+  openManageSavedSearchesDialog(): void {
+    this.cancelEditSavedSearch();
+    this.manageSavedSearchesDialogVisible = true;
+  }
+
+  startEditSavedSearch(search: ISavedSearchLookupResponse): void {
+    this.editingSavedSearchId = search.savedSearchId;
+    this.editingSavedSearchName = search.name;
+    this.editingSavedSearchIsShared = search.isShared;
+  }
+
+  cancelEditSavedSearch(): void {
+    this.editingSavedSearchId = null;
+    this.editingSavedSearchName = '';
+    this.editingSavedSearchIsShared = false;
+  }
+
+  confirmEditSavedSearch(search: ISavedSearchLookupResponse): void {
+    if (!this.editingSavedSearchName.trim()) return;
+
+    this.savedSearchService
+      .update(search.savedSearchId, {
+        name: this.editingSavedSearchName.trim(),
+        isShared: this.editingSavedSearchIsShared,
+        filterJson: search.filterJson,
+      })
+      .subscribe({
+        next: () => {
+          this.toast.success({ detail: 'Saved search updated.' });
+          this.cancelEditSavedSearch();
+          this.loadSavedSearches();
+        },
+        error: (error) => {
+          this.toast.error({ detail: error?.error?.decentMessage || 'Failed to update saved search.' });
+        },
+      });
+  }
+
+  deleteSavedSearch(search: ISavedSearchLookupResponse, event: Event): void {
+    this.confirmationService.confirm({
+      target: event.target as EventTarget,
+      message: `Are you sure you want to delete saved search: ${search.name}?`,
+      header: 'Delete Confirmation',
+      acceptButtonStyleClass: 'p-button-danger',
+      rejectButtonStyleClass: 'p-button-secondary',
+      acceptIcon: 'fa fa-check',
+      rejectIcon: 'fa fa-times',
+      accept: () => {
+        this.savedSearchService.delete(search.savedSearchId).subscribe({
+          next: () => {
+            if (this.selectedSavedSearchId === search.savedSearchId) this.selectedSavedSearchId = null;
+            this.toast.success({ detail: 'Saved search deleted.' });
+            this.loadSavedSearches();
+          },
+          error: (error) => {
+            this.toast.error({ detail: error?.error?.decentMessage || 'Failed to delete saved search.' });
+          },
+        });
       },
     });
   }
@@ -565,6 +784,44 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
               this.toast.error({ detail: error?.error?.decentMessage || 'Failed to update applications.' });
             },
           });
+      },
+    });
+  }
+
+  // ── Bulk notify (EP-09 US-076) ───────────────────────────────────
+
+  notifySelected(event: Event): void {
+    if (!this.bulkNotifyEvent) return;
+    const ids = this.getSelectedIds();
+    if (ids.length === 0) return;
+
+    this.confirmationService.confirm({
+      target: event.target as EventTarget,
+      message: `Re-send the "${this.formatEnumLabel(this.bulkNotifyEvent)}" notification for ${ids.length} application(s)?`,
+      header: 'Confirm Bulk Notify',
+      acceptButtonStyleClass: 'p-button-primary',
+      rejectButtonStyleClass: 'p-button-secondary',
+      acceptIcon: 'fa fa-check',
+      rejectIcon: 'fa fa-times',
+      accept: () => {
+        this.bulkNotifying = true;
+
+        this.jobApplicationService.bulkNotify({ jobApplicationIds: ids, recruitmentEvent: this.bulkNotifyEvent! }).subscribe({
+          next: (response) => {
+            this.bulkNotifying = false;
+            const result = response?.content;
+            if (result && result.failed.length > 0) {
+              this.toast.warn({ detail: `${result.succeededIds.length} notified, ${result.failed.length} failed.` });
+            } else {
+              this.toast.success({ detail: 'Notifications sent.' });
+            }
+            this.bulkNotifyEvent = null;
+          },
+          error: (error) => {
+            this.bulkNotifying = false;
+            this.toast.error({ detail: error?.error?.decentMessage || 'Failed to send notifications.' });
+          },
+        });
       },
     });
   }

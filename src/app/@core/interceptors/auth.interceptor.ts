@@ -11,7 +11,9 @@ export class AuthInterceptor implements HttpInterceptor {
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const token = this.authService.getToken();
-    if (!token) {
+    // Public/anonymous endpoints (career portal) must be hit without auth — attaching a
+    // stale/expired token here risks the backend rejecting a genuinely public request.
+    if (!token || request.url.includes('/career-portal')) {
       return next.handle(request);
     }
 
