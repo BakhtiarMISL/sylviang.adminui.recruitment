@@ -32,7 +32,15 @@ export class DocumentTrackingListComponent implements OnInit {
   filterAcceptanceStatus: DocumentAcceptanceStatusEnum | null = null;
 
   documentTypeOptions = Object.values(DocumentTypeEnum)
-    .filter((value) => value === DocumentTypeEnum.OfferLetter || value === DocumentTypeEnum.AppointmentLetter)
+    .filter((value) =>
+      [
+        DocumentTypeEnum.OfferLetter,
+        DocumentTypeEnum.AppointmentLetter,
+        DocumentTypeEnum.JoiningBooklet,
+        DocumentTypeEnum.MedicalReferral,
+        DocumentTypeEnum.TargetLetter,
+      ].includes(value),
+    )
     .map((value) => ({ label: value, value }));
   acceptanceStatusOptions = Object.values(DocumentAcceptanceStatusEnum).map((value) => ({ label: value, value }));
 

@@ -34,6 +34,14 @@
         <i class="fa fa-list"></i>
         <span>View Offer Letters</span>
       </a>
+      <a pButton size="small" severity="secondary" [routerLink]="['/document-management/manage-medical-letter']" [queryParams]="{ jobApplicationId: jobApplicationId }">
+        <i class="fa fa-file-medical"></i>
+        <span>Generate Medical Letter</span>
+      </a>
+      <a pButton size="small" severity="secondary" [routerLink]="['/document-management/manage-target-letter']" [queryParams]="{ jobApplicationId: jobApplicationId }">
+        <i class="fa fa-bullseye"></i>
+        <span>Generate Target Letter</span>
+      </a>
     </div>
   </section>
 

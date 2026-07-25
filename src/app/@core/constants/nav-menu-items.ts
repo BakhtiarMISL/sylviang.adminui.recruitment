@@ -257,6 +257,12 @@ export const webSidebarMenuItems: IMenuItem[] = [
         active: false,
         icon: 'fa-solid fa-list-check',
       },
+      {
+        href: '/document-management/joining-booklet-list',
+        title: 'Joining Booklets',
+        active: false,
+        icon: 'fa-solid fa-book',
+      },
     ],
   },
 ];

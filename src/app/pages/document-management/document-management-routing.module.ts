@@ -9,6 +9,10 @@ import { OfferLetterFormComponent } from './offer-letter-form/offer-letter-form.
 import { AppointmentLetterListComponent } from './appointment-letter-list/appointment-letter-list.component';
 import { AppointmentLetterFormComponent } from './appointment-letter-form/appointment-letter-form.component';
 import { DocumentTrackingListComponent } from './document-tracking-list/document-tracking-list.component';
+import { JoiningBookletListComponent } from './joining-booklet-list/joining-booklet-list.component';
+import { JoiningBookletBatchGenerateComponent } from './joining-booklet-batch-generate/joining-booklet-batch-generate.component';
+import { MedicalLetterFormComponent } from './medical-letter-form/medical-letter-form.component';
+import { TargetLetterFormComponent } from './target-letter-form/target-letter-form.component';
 
 const roleData = { roles: [UserRoleEnum.Admin] };
 
@@ -58,6 +62,30 @@ const routes: Routes = [
   {
     path: 'document-tracking-list',
     component: DocumentTrackingListComponent,
+    canActivate: [RoleGuard],
+    data: roleData,
+  },
+  {
+    path: 'joining-booklet-list',
+    component: JoiningBookletListComponent,
+    canActivate: [RoleGuard],
+    data: roleData,
+  },
+  {
+    path: 'joining-booklet-batch-generate',
+    component: JoiningBookletBatchGenerateComponent,
+    canActivate: [RoleGuard],
+    data: roleData,
+  },
+  {
+    path: 'manage-medical-letter',
+    component: MedicalLetterFormComponent,
+    canActivate: [RoleGuard],
+    data: roleData,
+  },
+  {
+    path: 'manage-target-letter',
+    component: TargetLetterFormComponent,
     canActivate: [RoleGuard],
     data: roleData,
   },

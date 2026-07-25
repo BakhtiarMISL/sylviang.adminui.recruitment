@@ -19,6 +19,10 @@ import { OfferLetterFormComponent } from './offer-letter-form/offer-letter-form.
 import { AppointmentLetterListComponent } from './appointment-letter-list/appointment-letter-list.component';
 import { AppointmentLetterFormComponent } from './appointment-letter-form/appointment-letter-form.component';
 import { DocumentTrackingListComponent } from './document-tracking-list/document-tracking-list.component';
+import { JoiningBookletListComponent } from './joining-booklet-list/joining-booklet-list.component';
+import { JoiningBookletBatchGenerateComponent } from './joining-booklet-batch-generate/joining-booklet-batch-generate.component';
+import { MedicalLetterFormComponent } from './medical-letter-form/medical-letter-form.component';
+import { TargetLetterFormComponent } from './target-letter-form/target-letter-form.component';
 
 @NgModule({
   declarations: [
@@ -29,6 +33,10 @@ import { DocumentTrackingListComponent } from './document-tracking-list/document
     AppointmentLetterListComponent,
     AppointmentLetterFormComponent,
     DocumentTrackingListComponent,
+    JoiningBookletListComponent,
+    JoiningBookletBatchGenerateComponent,
+    MedicalLetterFormComponent,
+    TargetLetterFormComponent,
   ],
   imports: [
     CommonModule,
