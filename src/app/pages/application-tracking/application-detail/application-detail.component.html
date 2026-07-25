@@ -24,6 +24,17 @@
         <div class="field-value">{{ application.coverLetter }}</div>
       </div>
     </div>
+
+    <div class="mt-3 flex gap-2">
+      <a pButton size="small" severity="secondary" [routerLink]="['/document-management/manage-offer-letter']" [queryParams]="{ jobApplicationId: jobApplicationId }">
+        <i class="fa fa-file-signature"></i>
+        <span>Generate Offer Letter</span>
+      </a>
+      <a pButton size="small" severity="secondary" [routerLink]="['/document-management/offer-letter-list']" [queryParams]="{ jobApplicationId: jobApplicationId }">
+        <i class="fa fa-list"></i>
+        <span>View Offer Letters</span>
+      </a>
+    </div>
   </section>
 
   <section class="page-container">

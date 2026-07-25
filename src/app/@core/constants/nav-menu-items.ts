@@ -226,6 +226,18 @@ export const webSidebarMenuItems: IMenuItem[] = [
         active: false,
         icon: 'fa-solid fa-diagram-project',
       },
+      {
+        href: '/document-management/document-template-list',
+        title: 'Document Templates',
+        active: false,
+        icon: 'fa-solid fa-file-lines',
+      },
+      {
+        href: '/document-management/offer-letter-list',
+        title: 'Offer Letters',
+        active: false,
+        icon: 'fa-solid fa-file-signature',
+      },
     ],
   },
 ];

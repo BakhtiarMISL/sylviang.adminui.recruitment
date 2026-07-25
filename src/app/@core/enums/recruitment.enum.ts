@@ -179,3 +179,23 @@ export enum NotificationRecipientTypeEnum {
   Candidate = 'Candidate',
   AdminHr = 'AdminHr',
 }
+
+/** EP-10: the kind of letter/document a DocumentTemplate is written for. */
+export enum DocumentTypeEnum {
+  OfferLetter = 'OfferLetter',
+  AppointmentLetter = 'AppointmentLetter',
+  JoiningBooklet = 'JoiningBooklet',
+  MedicalReferral = 'MedicalReferral',
+  TargetLetter = 'TargetLetter',
+  RejectionLetter = 'RejectionLetter',
+  ExperienceCertificate = 'ExperienceCertificate',
+  RelievingLetter = 'RelievingLetter',
+}
+
+/** EP-10 US-081: lifecycle of a single generated OfferLetter. */
+export enum OfferLetterStatusEnum {
+  Generated = 'Generated',
+  Sent = 'Sent',
+  Accepted = 'Accepted',
+  Declined = 'Declined',
+}
