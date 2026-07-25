@@ -136,6 +136,13 @@ export const webSidebarMenuItems: IMenuItem[] = [
     roles: [UserRoleEnum.Candidate],
   },
   {
+    href: '/candidate-profile/offer-letters',
+    title: 'My Offer Letters',
+    active: false,
+    icon: 'fa-solid fa-file-signature',
+    roles: [UserRoleEnum.Candidate],
+  },
+  {
     href: '/account-settings',
     title: 'Account Settings',
     active: false,
@@ -237,6 +244,18 @@ export const webSidebarMenuItems: IMenuItem[] = [
         title: 'Offer Letters',
         active: false,
         icon: 'fa-solid fa-file-signature',
+      },
+      {
+        href: '/document-management/appointment-letter-list',
+        title: 'Appointment Letters',
+        active: false,
+        icon: 'fa-solid fa-file-contract',
+      },
+      {
+        href: '/document-management/document-tracking-list',
+        title: 'Document Tracking',
+        active: false,
+        icon: 'fa-solid fa-list-check',
       },
     ],
   },

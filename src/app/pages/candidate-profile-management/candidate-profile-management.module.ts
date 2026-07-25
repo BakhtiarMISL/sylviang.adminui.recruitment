@@ -9,14 +9,18 @@ import { AutoCompleteModule } from 'primeng/autocomplete';
 import { ButtonModule } from 'primeng/button';
 import { CheckboxModule } from 'primeng/checkbox';
 import { DatePickerModule } from 'primeng/datepicker';
+import { DialogModule } from 'primeng/dialog';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { SkeletonModule } from 'primeng/skeleton';
+import { TableModule } from 'primeng/table';
 import { TextareaModule } from 'primeng/textarea';
 import { CandidateProfileManagementRoutingModule } from './candidate-profile-management-routing.module';
 import { MyProfileComponent } from './my-profile/my-profile.component';
+import { MyOfferLettersComponent } from './my-offer-letters/my-offer-letters.component';
+import { MyOfferLetterDetailComponent } from './my-offer-letter-detail/my-offer-letter-detail.component';
 import { PersonalInfoSectionComponent } from './my-profile/sections/personal-info-section/personal-info-section.component';
 import { ContactSectionComponent } from './my-profile/sections/contact-section/contact-section.component';
 import { EducationSectionComponent } from './my-profile/sections/education-section/education-section.component';
@@ -37,6 +41,8 @@ import { PhotoSignatureUploadComponent } from './my-profile/photo-signature-uplo
     CertificationsSectionComponent,
     DocumentsSectionComponent,
     PhotoSignatureUploadComponent,
+    MyOfferLettersComponent,
+    MyOfferLetterDetailComponent,
   ],
   imports: [
     CommonModule,
@@ -57,6 +63,8 @@ import { PhotoSignatureUploadComponent } from './my-profile/photo-signature-uplo
     CheckboxModule,
     InputNumberModule,
     AutoCompleteModule,
+    TableModule,
+    DialogModule,
   ],
 })
 export class CandidateProfileManagementModule {}

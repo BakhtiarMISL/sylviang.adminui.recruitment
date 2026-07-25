@@ -32,8 +32,9 @@
         <th>Offered Salary</th>
         <th>Joining Date</th>
         <th>Status</th>
+        <th>Decision</th>
         <th>Generated At</th>
-        <th style="width: 8rem">Actions</th>
+        <th style="width: 14rem">Actions</th>
       </tr>
     </ng-template>
     <ng-template pTemplate="body" let-item>
@@ -43,11 +44,25 @@
         <td>{{ item.offeredSalary | number: '1.2-2' }}</td>
         <td>{{ item.joiningDate | date: 'dd-MMM-yyyy' }}</td>
         <td>{{ item.status }}</td>
-        <td>{{ item.generatedAt | date: 'dd-MMM-yyyy HH:mm' }}</td>
         <td>
+          <span *ngIf="item.decisionAt">{{ item.decisionAt | date: 'dd-MMM-yyyy HH:mm' }}</span>
+          <div class="text-xs text-red-500" *ngIf="item.declineReason">{{ item.declineReason }}</div>
+        </td>
+        <td>{{ item.generatedAt | date: 'dd-MMM-yyyy HH:mm' }}</td>
+        <td class="flex gap-2">
           <a pButton size="small" severity="secondary" [href]="getPdfUrl(item)" target="_blank" rel="noopener noreferrer">
             <i class="fa fa-download"></i>
             <span>PDF</span>
+          </a>
+          <a
+            pButton
+            size="small"
+            *ngIf="item.status === 'Accepted'"
+            [routerLink]="['/document-management/manage-appointment-letter']"
+            [queryParams]="{ offerLetterId: item.offerLetterId }"
+          >
+            <i class="fa fa-file-contract"></i>
+            <span>Appointment Letter</span>
           </a>
         </td>
       </tr>

@@ -16,9 +16,20 @@ import { DocumentTemplateListComponent } from './document-template-list/document
 import { DocumentTemplateFormComponent } from './document-template-form/document-template-form.component';
 import { OfferLetterListComponent } from './offer-letter-list/offer-letter-list.component';
 import { OfferLetterFormComponent } from './offer-letter-form/offer-letter-form.component';
+import { AppointmentLetterListComponent } from './appointment-letter-list/appointment-letter-list.component';
+import { AppointmentLetterFormComponent } from './appointment-letter-form/appointment-letter-form.component';
+import { DocumentTrackingListComponent } from './document-tracking-list/document-tracking-list.component';
 
 @NgModule({
-  declarations: [DocumentTemplateListComponent, DocumentTemplateFormComponent, OfferLetterListComponent, OfferLetterFormComponent],
+  declarations: [
+    DocumentTemplateListComponent,
+    DocumentTemplateFormComponent,
+    OfferLetterListComponent,
+    OfferLetterFormComponent,
+    AppointmentLetterListComponent,
+    AppointmentLetterFormComponent,
+    DocumentTrackingListComponent,
+  ],
   imports: [
     CommonModule,
     ReactiveFormsModule,

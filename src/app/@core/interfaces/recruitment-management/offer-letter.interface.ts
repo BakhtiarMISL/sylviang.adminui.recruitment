@@ -24,4 +24,10 @@ export interface IOfferLetterResponse {
   generatedPdfPath: string;
   status: OfferLetterStatusEnum;
   generatedAt: string;
+  decisionAt?: string;
+  declineReason?: string;
+}
+
+export interface IOfferLetterDeclineRequest {
+  reason: string;
 }

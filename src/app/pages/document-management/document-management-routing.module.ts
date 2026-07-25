@@ -6,6 +6,9 @@ import { DocumentTemplateListComponent } from './document-template-list/document
 import { DocumentTemplateFormComponent } from './document-template-form/document-template-form.component';
 import { OfferLetterListComponent } from './offer-letter-list/offer-letter-list.component';
 import { OfferLetterFormComponent } from './offer-letter-form/offer-letter-form.component';
+import { AppointmentLetterListComponent } from './appointment-letter-list/appointment-letter-list.component';
+import { AppointmentLetterFormComponent } from './appointment-letter-form/appointment-letter-form.component';
+import { DocumentTrackingListComponent } from './document-tracking-list/document-tracking-list.component';
 
 const roleData = { roles: [UserRoleEnum.Admin] };
 
@@ -37,6 +40,24 @@ const routes: Routes = [
   {
     path: 'manage-offer-letter',
     component: OfferLetterFormComponent,
+    canActivate: [RoleGuard],
+    data: roleData,
+  },
+  {
+    path: 'appointment-letter-list',
+    component: AppointmentLetterListComponent,
+    canActivate: [RoleGuard],
+    data: roleData,
+  },
+  {
+    path: 'manage-appointment-letter',
+    component: AppointmentLetterFormComponent,
+    canActivate: [RoleGuard],
+    data: roleData,
+  },
+  {
+    path: 'document-tracking-list',
+    component: DocumentTrackingListComponent,
     canActivate: [RoleGuard],
     data: roleData,
   },

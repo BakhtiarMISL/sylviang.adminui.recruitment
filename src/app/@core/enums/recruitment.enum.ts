@@ -164,6 +164,10 @@ export enum RecruitmentEventEnum {
   AdmitCardIssued = 'AdmitCardIssued',
   ExamResultPublished = 'ExamResultPublished',
   AccountCreatedOtp = 'AccountCreatedOtp',
+  OfferLetterAvailable = 'OfferLetterAvailable',
+  OfferAccepted = 'OfferAccepted',
+  OfferDeclined = 'OfferDeclined',
+  AppointmentLetterGenerated = 'AppointmentLetterGenerated',
 }
 
 /** EP-09: delivery channel a NotificationTemplate is written for. */
@@ -198,4 +202,12 @@ export enum OfferLetterStatusEnum {
   Sent = 'Sent',
   Accepted = 'Accepted',
   Declined = 'Declined',
+}
+
+/** EP-10 US-085: unified acceptance status on the document-tracking dashboard. */
+export enum DocumentAcceptanceStatusEnum {
+  Pending = 'Pending',
+  Accepted = 'Accepted',
+  Declined = 'Declined',
+  NotApplicable = 'NotApplicable',
 }
