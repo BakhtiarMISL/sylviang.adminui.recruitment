@@ -71,6 +71,12 @@ export const webSidebarMenuItems: IMenuItem[] = [
         icon: 'fa-solid fa-user-group',
       },
       {
+        href: '/final-selection-pool/final-selection-pool-list',
+        title: 'Final Selection Pool',
+        active: false,
+        icon: 'fa-solid fa-clipboard-check',
+      },
+      {
         href: '/applications',
         title: 'ATS Dashboard',
         active: false,
@@ -140,6 +146,13 @@ export const webSidebarMenuItems: IMenuItem[] = [
     title: 'My Offer Letters',
     active: false,
     icon: 'fa-solid fa-file-signature',
+    roles: [UserRoleEnum.Candidate],
+  },
+  {
+    href: '/candidate-profile/pre-boarding',
+    title: 'Pre-Boarding',
+    active: false,
+    icon: 'fa-solid fa-clipboard-list',
     roles: [UserRoleEnum.Candidate],
   },
   {

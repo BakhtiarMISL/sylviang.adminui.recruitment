@@ -211,3 +211,9 @@ export enum DocumentAcceptanceStatusEnum {
   Declined = 'Declined',
   NotApplicable = 'NotApplicable',
 }
+
+/** EP-12 US-095: lifecycle of a candidate's pre-boarding submission. */
+export enum PreBoardingSubmissionStatusEnum {
+  Draft = 'Draft',
+  Submitted = 'Submitted',
+}

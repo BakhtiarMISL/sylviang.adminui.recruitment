@@ -1,0 +1,75 @@
+<section class="page-container">
+  <div class="flex justify-between items-center gap-3 mb-4">
+    <h3 class="table-title">Final Selection Pool</h3>
+  </div>
+
+  <small class="mb-3 block text-red-500" *ngIf="errorMessage">{{ errorMessage }}</small>
+
+  <div *ngIf="loading" class="space-y-3">
+    <p-skeleton height="3rem" *ngFor="let i of skeletonItems"></p-skeleton>
+  </div>
+
+  <div *ngIf="!loading && items.length === 0" class="table-container">
+    <div class="not-found">
+      <i class="fa fa-user-group"></i>
+      <p>No candidates in the final selection pool yet. Entries are created automatically when a candidate accepts an offer letter.</p>
+    </div>
+  </div>
+
+  <p-table *ngIf="!loading && items.length > 0" [value]="items" styleClass="p-datatable-sm">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Candidate</th>
+        <th>Designation</th>
+        <th>Joining Date</th>
+        <th>Batch</th>
+        <th>Pre-Boarding</th>
+        <th>Joined</th>
+        <th style="width: 14rem">Actions</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-item>
+      <tr>
+        <td>{{ item.candidateName }}</td>
+        <td>{{ item.designation }}</td>
+        <td>{{ item.joiningDate | date: 'dd-MMM-yyyy' }}</td>
+        <td>{{ item.batchLabel || '-' }}</td>
+        <td>{{ item.preBoardingStatus || 'Not started' }}</td>
+        <td>{{ item.hasJoined ? 'Yes' : 'No' }}</td>
+        <td class="flex gap-2">
+          <button pButton size="small" severity="secondary" (click)="openEditDialog(item)">
+            <i class="fa fa-edit"></i>
+            <span>Batch</span>
+          </button>
+          <button pButton size="small" *ngIf="!item.hasJoined" (click)="markJoined(item)">
+            <i class="fa fa-check"></i>
+            <span>Mark Joined</span>
+          </button>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</section>
+
+<p-dialog header="Update Batch" [(visible)]="editDialogVisible" [modal]="true" [style]="{ width: '28rem' }">
+  <div class="form-container">
+    <p-floatlabel variant="in" class="sm:col-span-2">
+      <input type="text" pInputText id="batchLabel" class="w-full" [(ngModel)]="editBatchLabel" name="batchLabel" />
+      <label for="batchLabel">Batch Label</label>
+    </p-floatlabel>
+
+    <p-floatlabel variant="in" class="sm:col-span-2">
+      <p-datepicker inputId="joiningDate" class="w-full" [(ngModel)]="editJoiningDate" dateFormat="dd-mm-yy" [appendTo]="'body'"></p-datepicker>
+      <label for="joiningDate">Joining Date</label>
+    </p-floatlabel>
+
+    <div *ngIf="saveError" class="invalid sm:col-span-2">{{ saveError }}</div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <button pButton severity="secondary" (click)="editDialogVisible = false">Cancel</button>
+    <button pButton [disabled]="saving || !editJoiningDate" (click)="saveBatch()">
+      {{ saving ? 'Saving...' : 'Save' }}
+    </button>
+  </ng-template>
+</p-dialog>

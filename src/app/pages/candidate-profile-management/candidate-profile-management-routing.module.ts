@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { MyProfileComponent } from './my-profile/my-profile.component';
 import { MyOfferLettersComponent } from './my-offer-letters/my-offer-letters.component';
 import { MyOfferLetterDetailComponent } from './my-offer-letter-detail/my-offer-letter-detail.component';
+import { PreBoardingFormComponent } from './pre-boarding-form/pre-boarding-form.component';
 
 // Intentionally no RoleGuard / canActivate / data:{roles} here, matching
 // internal-job-board-routing.module.ts - reachable by any authenticated role. An
@@ -19,6 +20,10 @@ const routes: Routes = [
   {
     path: 'offer-letters/:id',
     component: MyOfferLetterDetailComponent,
+  },
+  {
+    path: 'pre-boarding',
+    component: PreBoardingFormComponent,
   },
 ];
 

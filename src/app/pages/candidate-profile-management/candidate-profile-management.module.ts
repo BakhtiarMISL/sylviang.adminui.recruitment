@@ -29,6 +29,7 @@ import { SkillsSectionComponent } from './my-profile/sections/skills-section/ski
 import { CertificationsSectionComponent } from './my-profile/sections/certifications-section/certifications-section.component';
 import { DocumentsSectionComponent } from './my-profile/sections/documents-section/documents-section.component';
 import { PhotoSignatureUploadComponent } from './my-profile/photo-signature-upload/photo-signature-upload.component';
+import { PreBoardingFormComponent } from './pre-boarding-form/pre-boarding-form.component';
 
 @NgModule({
   declarations: [
@@ -43,6 +44,7 @@ import { PhotoSignatureUploadComponent } from './my-profile/photo-signature-uplo
     PhotoSignatureUploadComponent,
     MyOfferLettersComponent,
     MyOfferLetterDetailComponent,
+    PreBoardingFormComponent,
   ],
   imports: [
     CommonModule,

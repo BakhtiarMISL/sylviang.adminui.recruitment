@@ -35,6 +35,10 @@ const routes: Routes = [
       loadChildren: () => import('./talent-pool-management/talent-pool-management.module').then((m) => m.TalentPoolManagementModule),
     },
     {
+      path: 'final-selection-pool',
+      loadChildren: () => import('./final-selection-pool-management/final-selection-pool-management.module').then((m) => m.FinalSelectionPoolManagementModule),
+    },
+    {
       path: 'internal-jobs',
       loadChildren: () => import('./internal-job-board/internal-job-board.module').then((m) => m.InternalJobBoardModule),
     },
