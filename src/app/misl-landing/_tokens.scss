@@ -1,8 +1,9 @@
-// Aliases onto the app's actual design tokens (src/theme/_variables.scss) so this
-// page uses the same brand blue as the rest of the product, not an invented one.
-$msl-blue: var(--primary-600);
-$msl-blue-dark: var(--primary-700);
-$msl-blue-light: var(--primary-50);
+// Matches this landing page's own red brand accent (see the hero CTA in
+// landing-page.component.html: bg-[#DC2626], hover:bg-[#B91C1C]) rather than
+// the admin shell's generic --primary-* blue, so cards/sections read as one page.
+$msl-blue: #dc2626;
+$msl-blue-dark: #b91c1c;
+$msl-blue-light: #fef2f2;
 $msl-ink: var(--text-primary);
 $msl-body: var(--text-secondary);
 $msl-muted: var(--text-tertiary);
@@ -11,9 +12,11 @@ $msl-bg: var(--surface-secondary);
 
 $msl-radius-lg: var(--radius-2xl);
 $msl-radius-md: var(--radius-xl);
+// Matches the hero buttons' rounded-[4px] (View Open Positions / Create an Account).
+$msl-radius-btn: 4px;
 
 $msl-shadow-md: var(--shadow-md);
 $msl-shadow-lg: var(--shadow-xl);
-$msl-shadow-glow: 0 0 0 1px rgba(2, 132, 199, 0.35), var(--shadow-xl);
+$msl-shadow-glow: 0 0 0 1px rgba(220, 38, 38, 0.35), var(--shadow-xl);
 
 $msl-transition: var(--transition-normal);
