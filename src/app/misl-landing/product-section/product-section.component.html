@@ -1,0 +1,29 @@
+<section class="msl-section" [class.msl-section--reversed]="reversed" [id]="product.id" [attr.data-product-id]="product.id">
+  <div class="msl-section__inner">
+    <div class="msl-section__image" [mislReveal]="imageAnimation">
+      <img [src]="product.image" [alt]="product.name + ' product preview'" loading="lazy" />
+    </div>
+
+    <div class="msl-section__content" [mislReveal]="contentAnimation">
+      @if (product.badge) {
+        <span class="msl-section__badge">{{ product.badge }}</span>
+      }
+      <h2>{{ product.name }}</h2>
+      <p class="msl-section__desc">{{ product.description }}</p>
+
+      <ul class="msl-section__features">
+        @for (feature of product.features; track feature) {
+          <li>
+            <span class="msl-section__check">&#10003;</span>
+            {{ feature }}
+          </li>
+        }
+      </ul>
+
+      <a class="msl-section__cta" [href]="product.ctaLink">
+        {{ product.ctaLabel }}
+        <span>&rarr;</span>
+      </a>
+    </div>
+  </div>
+</section>

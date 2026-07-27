@@ -1,0 +1,19 @@
+// Aliases onto the app's actual design tokens (src/theme/_variables.scss) so this
+// page uses the same brand blue as the rest of the product, not an invented one.
+$msl-blue: var(--primary-600);
+$msl-blue-dark: var(--primary-700);
+$msl-blue-light: var(--primary-50);
+$msl-ink: var(--text-primary);
+$msl-body: var(--text-secondary);
+$msl-muted: var(--text-tertiary);
+$msl-border: var(--border-primary);
+$msl-bg: var(--surface-secondary);
+
+$msl-radius-lg: var(--radius-2xl);
+$msl-radius-md: var(--radius-xl);
+
+$msl-shadow-md: var(--shadow-md);
+$msl-shadow-lg: var(--shadow-xl);
+$msl-shadow-glow: 0 0 0 1px rgba(2, 132, 199, 0.35), var(--shadow-xl);
+
+$msl-transition: var(--transition-normal);
