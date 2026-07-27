@@ -10,7 +10,7 @@ export const PRODUCTS: Product[] = [
     image: 'assets/images/products/ababil-ng.svg',
     features: ['Core Banking', 'Mobile Banking', 'Trade Finance', 'Treasury Management'],
     ctaLabel: 'Learn More',
-    ctaLink: '#',
+    ctaLink: 'https://mislbd.com/ababil/',
   },
   {
     id: 'sylvia',
@@ -21,7 +21,7 @@ export const PRODUCTS: Product[] = [
     image: 'assets/images/products/sylvia.svg',
     features: ['Employee Management', 'Payroll', 'Attendance', 'Performance Management'],
     ctaLabel: 'Learn More',
-    ctaLink: '#',
+    ctaLink: 'https://mislbd.com/sylvia/',
   },
   {
     id: 'tahqiq',
@@ -32,7 +32,7 @@ export const PRODUCTS: Product[] = [
     image: 'assets/images/products/tahqiq.svg',
     features: ['Risk Assessment', 'Compliance', 'Audit Planning', 'Dashboard & Analytics'],
     ctaLabel: 'Learn More',
-    ctaLink: '#',
+    ctaLink: 'https://mislbd.com/tahqiq/',
   },
   {
     id: 'recruitment-management-system',

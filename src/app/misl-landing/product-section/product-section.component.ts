@@ -20,4 +20,8 @@ export class ProductSectionComponent {
   get contentAnimation(): 'fade-left' | 'fade-right' {
     return this.reversed ? 'fade-left' : 'fade-right';
   }
+
+  get isExternalLink(): boolean {
+    return this.product.ctaLink.startsWith('http');
+  }
 }

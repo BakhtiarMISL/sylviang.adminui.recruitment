@@ -11,7 +11,7 @@ export class LandingPageComponent implements AfterViewInit, OnDestroy {
   @ViewChild('productSectionsHost', { static: true }) productSectionsHost!: ElementRef<HTMLElement>;
 
   readonly products: Product[] = PRODUCTS;
-  readonly activeProductId = signal<string>(PRODUCTS[0].id);
+  readonly activeProductId = signal<string | null>(null);
 
   private productObserver?: IntersectionObserver;
   private isProgrammaticScroll = false;

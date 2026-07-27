@@ -1,9 +1,16 @@
 @use '../tokens' as *;
 
+:host {
+  display: flex;
+  height: 100%;
+}
+
 .msl-card {
   position: relative;
   display: flex;
   flex-direction: column;
+  flex: 1;
+  width: 100%;
   background: #ffffff;
   border-radius: $msl-radius-lg;
   border: 1px solid $msl-border;
@@ -15,14 +22,17 @@
     box-shadow $msl-transition,
     border-color $msl-transition;
 
-  &:hover,
-  &--active {
+  // Hover always lifts, independent of --active, so the currently-active
+  // card (already outlined) still visibly reacts on hover instead of
+  // looking frozen/unresponsive.
+  &:hover {
     transform: translateY(-6px) scale(1.02);
     box-shadow: $msl-shadow-glow;
     border-color: rgba($msl-blue, 0.35);
   }
 
   &--active {
+    border-color: rgba($msl-blue, 0.35);
     outline: 2px solid $msl-blue;
     outline-offset: -1px;
   }

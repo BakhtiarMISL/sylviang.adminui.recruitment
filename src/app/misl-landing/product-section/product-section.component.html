@@ -20,7 +20,12 @@
         }
       </ul>
 
-      <a class="msl-section__cta" [href]="product.ctaLink">
+      <a
+        class="msl-section__cta"
+        [href]="product.ctaLink"
+        [target]="isExternalLink ? '_blank' : null"
+        [rel]="isExternalLink ? 'noopener noreferrer' : null"
+      >
         {{ product.ctaLabel }}
         <span>&rarr;</span>
       </a>

@@ -100,6 +100,10 @@ const routes: Routes = [
       loadChildren: () => import('./application-settings-management/application-settings-management.module').then((m) => m.ApplicationSettingsManagementModule),
     },
     {
+      path: 'branding-settings',
+      loadChildren: () => import('./branding-settings-management/branding-settings-management.module').then((m) => m.BrandingSettingsManagementModule),
+    },
+    {
       path: 'master-data',
       loadChildren: () => import('./master-data-management/master-data-management.module').then((m) => m.MasterDataManagementModule),
     },

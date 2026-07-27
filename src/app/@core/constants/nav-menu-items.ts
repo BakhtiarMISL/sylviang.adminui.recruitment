@@ -193,6 +193,12 @@ export const webSidebarMenuItems: IMenuItem[] = [
     roles: [UserRoleEnum.Admin],
     subItems: [
       {
+        href: '/branding-settings',
+        title: 'Branding Settings',
+        active: false,
+        icon: 'fa-solid fa-palette',
+      },
+      {
         href: '/master-data/country-list',
         title: 'Countries',
         active: false,
