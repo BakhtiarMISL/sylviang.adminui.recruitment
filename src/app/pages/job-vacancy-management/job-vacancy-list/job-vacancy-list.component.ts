@@ -70,7 +70,7 @@ export class JobVacancyListComponent implements OnInit, AfterViewInit {
     this.loading = true;
 
     const params = {
-      pageNumber: this.currentPage,
+      page: this.currentPage,
       pageSize: this.rows,
       ...(this.searchTerm && this.searchTerm.trim() && { searchTerm: this.searchTerm.trim() }),
       ...(this.sortBy && { sortBy: this.sortBy }),

@@ -36,4 +36,13 @@ export interface IJobApplicationSubmitResponse {
   applicationStatus: string;
   appliedDate?: string;
   source: string;
+  // EP-17: set when the vacancy has an application fee configured. paymentRedirectUrl is null
+  // if the gateway couldn't be reached at submit time even though payment is required.
+  paymentRequired?: boolean;
+  paymentRedirectUrl?: string;
+}
+
+export interface IJobEligibilityResponse {
+  isEligible: boolean;
+  unmetRequirements: string[];
 }
