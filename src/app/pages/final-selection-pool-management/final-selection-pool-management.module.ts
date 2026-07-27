@@ -10,11 +10,13 @@ import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputTextModule } from 'primeng/inputtext';
 import { SkeletonModule } from 'primeng/skeleton';
 import { TableModule } from 'primeng/table';
+import { TextareaModule } from 'primeng/textarea';
 import { FinalSelectionPoolManagementRoutingModule } from './final-selection-pool-management-routing.module';
 import { FinalSelectionPoolListComponent } from './final-selection-pool-list/final-selection-pool-list.component';
+import { PreBoardingReviewComponent } from './pre-boarding-review/pre-boarding-review.component';
 
 @NgModule({
-  declarations: [FinalSelectionPoolListComponent],
+  declarations: [FinalSelectionPoolListComponent, PreBoardingReviewComponent],
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -29,6 +31,7 @@ import { FinalSelectionPoolListComponent } from './final-selection-pool-list/fin
     SkeletonModule,
     TableModule,
     DialogModule,
+    TextareaModule,
   ],
 })
 export class FinalSelectionPoolManagementModule {}

@@ -15,6 +15,11 @@
       Your pre-boarding submission has been received{{ item.submittedAt ? ' on ' + (item.submittedAt | date: 'dd-MMM-yyyy HH:mm') : '' }} and is now locked for editing.
     </div>
 
+    <div *ngIf="needsCorrection" class="table-container p-4 text-orange-600">
+      <i class="fa fa-triangle-exclamation"></i>
+      HR has requested corrections{{ item.correctionComment ? ': ' + item.correctionComment : '.' }} Please update and resubmit.
+    </div>
+
     <div class="table-container p-4">
       <h4 class="mb-3 font-medium">Emergency Contact</h4>
       <div class="form-container">

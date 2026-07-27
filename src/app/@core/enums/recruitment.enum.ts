@@ -194,6 +194,7 @@ export enum DocumentTypeEnum {
   RejectionLetter = 'RejectionLetter',
   ExperienceCertificate = 'ExperienceCertificate',
   RelievingLetter = 'RelievingLetter',
+  OfficeNote = 'OfficeNote',
 }
 
 /** EP-10 US-081: lifecycle of a single generated OfferLetter. */
@@ -212,8 +213,10 @@ export enum DocumentAcceptanceStatusEnum {
   NotApplicable = 'NotApplicable',
 }
 
-/** EP-12 US-095: lifecycle of a candidate's pre-boarding submission. */
+/** EP-12 US-095/096: lifecycle of a candidate's pre-boarding submission. */
 export enum PreBoardingSubmissionStatusEnum {
   Draft = 'Draft',
   Submitted = 'Submitted',
+  Approved = 'Approved',
+  NeedsCorrection = 'NeedsCorrection',
 }
