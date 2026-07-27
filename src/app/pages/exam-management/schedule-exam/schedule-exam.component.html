@@ -1,0 +1,213 @@
+<section class="page-container">
+  <form [formGroup]="examForm" (ngSubmit)="onSubmit()">
+    <!-- Section 1: Exam Details -->
+    <div class="table-container mb-4 p-4">
+      <h3 class="table-title mb-3">1. Exam Details</h3>
+
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div>
+          <p-floatlabel variant="in">
+            <p-select
+              inputId="jobPostingId"
+              class="w-full"
+              [options]="jobPostings"
+              formControlName="jobPostingId"
+              optionLabel="title"
+              optionValue="jobPostingId"
+              [appendTo]="'body'"
+              [autoDisplayFirst]="false"
+              (onChange)="onJobPostingChange()"
+            ></p-select>
+            <label for="jobPostingId">Job Posting</label>
+          </p-floatlabel>
+          <small class="text-red-500" *ngIf="hasError('jobPostingId')">Job posting is required.</small>
+        </div>
+
+        <div>
+          <p-floatlabel variant="in">
+            <input pInputText id="title" class="w-full" formControlName="title" />
+            <label for="title">Exam Title</label>
+          </p-floatlabel>
+          <small class="text-red-500" *ngIf="hasError('title')">Title is required.</small>
+        </div>
+
+        <div>
+          <p-floatlabel variant="in">
+            <p-datepicker
+              inputId="scheduledStartAt"
+              styleClass="w-full"
+              formControlName="scheduledStartAt"
+              [showTime]="true"
+              [showIcon]="true"
+              dateFormat="dd-M-yy"
+              [class.ng-invalid]="hasError('scheduledStartAt')"
+              [class.ng-dirty]="hasError('scheduledStartAt')"
+            ></p-datepicker>
+            <label for="scheduledStartAt">Scheduled Date &amp; Time</label>
+          </p-floatlabel>
+          <small class="text-red-500" *ngIf="hasError('scheduledStartAt')">Scheduled date/time is required.</small>
+        </div>
+
+        <div>
+          <p-floatlabel variant="in">
+            <p-inputnumber inputId="durationMinutes" class="w-full" formControlName="durationMinutes" [min]="1"></p-inputnumber>
+            <label for="durationMinutes">Duration (minutes)</label>
+          </p-floatlabel>
+          <small class="text-red-500" *ngIf="hasError('durationMinutes')">Duration is required.</small>
+        </div>
+
+        <div>
+          <p-floatlabel variant="in">
+            <p-inputnumber inputId="totalMarks" class="w-full" formControlName="totalMarks" [min]="1"></p-inputnumber>
+            <label for="totalMarks">Total Marks</label>
+          </p-floatlabel>
+          <small class="text-red-500" *ngIf="hasError('totalMarks')">Total marks is required.</small>
+        </div>
+
+        <div>
+          <p-floatlabel variant="in">
+            <p-inputnumber inputId="passMarks" class="w-full" formControlName="passMarks" [min]="0"></p-inputnumber>
+            <label for="passMarks">Pass Marks</label>
+          </p-floatlabel>
+          <small class="text-red-500" *ngIf="hasError('passMarks') && passMarksExceedsTotal">Pass marks cannot exceed total marks.</small>
+          <small class="text-red-500" *ngIf="hasError('passMarks') && !passMarksExceedsTotal">Pass marks is required.</small>
+        </div>
+
+        <div>
+          <p-floatlabel variant="in">
+            <p-select
+              inputId="examType"
+              class="w-full"
+              [options]="examTypeOptions"
+              formControlName="examType"
+              optionLabel="label"
+              optionValue="value"
+              [appendTo]="'body'"
+              [autoDisplayFirst]="false"
+              (onChange)="onExamTypeChange()"
+            ></p-select>
+            <label for="examType">Exam Type</label>
+          </p-floatlabel>
+        </div>
+
+        <div *ngIf="isInPerson">
+          <p-floatlabel variant="in">
+            <p-select
+              inputId="examVenueId"
+              class="w-full"
+              [options]="examVenues"
+              formControlName="examVenueId"
+              optionLabel="venueName"
+              optionValue="examVenueId"
+              [appendTo]="'body'"
+              [autoDisplayFirst]="false"
+            ></p-select>
+            <label for="examVenueId">Exam Venue</label>
+          </p-floatlabel>
+          <small class="text-red-500" *ngIf="hasError('examVenueId')">Exam venue is required.</small>
+        </div>
+
+        <div *ngIf="!isInPerson">
+          <p-floatlabel variant="in">
+            <p-select
+              inputId="questionGroupId"
+              class="w-full"
+              [options]="questionGroups"
+              formControlName="questionGroupId"
+              optionLabel="name"
+              optionValue="questionGroupId"
+              [appendTo]="'body'"
+              [autoDisplayFirst]="false"
+            ></p-select>
+            <label for="questionGroupId">Question Group</label>
+          </p-floatlabel>
+          <small class="text-red-500" *ngIf="hasError('questionGroupId')">Question group is required.</small>
+        </div>
+
+        <div *ngIf="!isInPerson" class="flex items-center gap-2 sm:col-span-2">
+          <p-checkbox inputId="showResultsToCandidate" formControlName="showResultsToCandidate" [binary]="true"></p-checkbox>
+          <label for="showResultsToCandidate" class="text-sm text-gray-700 dark:text-gray-300">Show results to candidate immediately after submission</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2: Candidate Picker -->
+    <div class="table-container mb-4 p-4" [class.opacity-50]="!examForm.value.jobPostingId" [class.pointer-events-none]="!examForm.value.jobPostingId">
+      <h3 class="table-title mb-3">2. Select Shortlisted Candidates</h3>
+
+      <div *ngIf="!examForm.value.jobPostingId" class="not-found">
+        <i class="fa fa-magnifying-glass-minus"></i>
+        <p>Pick a job posting above to see its shortlisted candidates.</p>
+      </div>
+
+      <p-table
+        *ngIf="examForm.value.jobPostingId"
+        [value]="candidatesLoading ? skeletonItems : candidates"
+        [(selection)]="selectedCandidates"
+        dataKey="jobApplicationId"
+        [paginator]="true"
+        [rows]="candidateRows"
+        [first]="(candidateCurrentPage - 1) * candidateRows"
+        [rowsPerPageOptions]="UI_CONFIG.pageSizeOptions"
+        [totalRecords]="candidatesTotalRecords"
+        (onPage)="onCandidatePageChange($event)"
+        [lazy]="true"
+        [loading]="false"
+        scrollHeight="flex"
+        [responsiveLayout]="'scroll'"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} candidates"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="width: 3rem"><p-tableHeaderCheckbox *ngIf="!candidatesLoading"></p-tableHeaderCheckbox></th>
+            <th>Candidate Name</th>
+            <th>Applied Date</th>
+            <th>Source</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-candidate>
+          @if (candidatesLoading) {
+            <tr>
+              <td></td>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+            </tr>
+          } @else {
+            <tr>
+              <td><p-tableCheckbox [value]="candidate"></p-tableCheckbox></td>
+              <td>{{ candidate.candidateName }}</td>
+              <td>{{ candidate.appliedDate ? (candidate.appliedDate | date: 'dd-MMM-yyyy') : '-' }}</td>
+              <td>{{ candidate.source }}</td>
+            </tr>
+          }
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="4" class="not-found">
+              <div>
+                <i class="fa fa-magnifying-glass-minus"></i>
+                <p>No shortlisted candidates for this job posting.</p>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+
+    <small class="mb-3 block text-red-500" *ngIf="errorMessage">{{ errorMessage }}</small>
+
+    <div class="flex gap-2">
+      <button pButton type="submit" [disabled]="!canSubmit" [loading]="submitting">
+        <i class="fa fa-save"></i>
+        <span>Schedule Exam &amp; Enroll {{ selectedCandidates.length || '' }} Candidate(s)</span>
+      </button>
+      <button pButton type="button" severity="secondary" [routerLink]="['/exams/exam-list']">
+        <span>Cancel</span>
+      </button>
+    </div>
+  </form>
+</section>

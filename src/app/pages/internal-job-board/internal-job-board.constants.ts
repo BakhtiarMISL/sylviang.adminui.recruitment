@@ -17,4 +17,8 @@ export const ExperienceBucketOptions = [
 ];
 
 export const RESUME_MAX_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
-export const RESUME_ALLOWED_EXTENSIONS = ['.pdf', '.doc', '.docx'];
+
+// US-005 AC3: internal candidates must attach a PDF specifically (backend rejects anything
+// else for Source=Internal) - unlike the external career-portal form, which still allows
+// PDF/DOC/DOCX.
+export const RESUME_ALLOWED_EXTENSIONS = ['.pdf'];

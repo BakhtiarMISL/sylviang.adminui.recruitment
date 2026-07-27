@@ -18,6 +18,7 @@ export interface IAtsDashboardFilterParams {
   location?: string;
   minAge?: number;
   maxAge?: number;
+  tags?: string[];
 }
 
 export interface IJobApplicationListItem {
@@ -56,6 +57,31 @@ export interface IJobApplicationDetail {
   statusHistory: IApplicationStatusHistoryEntry[];
 }
 
+// ── Duplicate Detection (US-038) ──────────────────────────────────────────
+
+export interface IJobApplicationDuplicateItem {
+  jobApplicationId: number;
+  candidateName: string;
+  candidateEmail?: string;
+  candidatePhone?: string;
+  candidateNationalId?: string;
+  source: ApplicationSourceEnum;
+  applicationStatus: ApplicationStatusEnum;
+  appliedDate?: string;
+  resumeUrl?: string;
+}
+
+export interface IJobApplicationDuplicateGroup {
+  applications: IJobApplicationDuplicateItem[];
+  matchedOn: string[];
+}
+
+export interface IJobApplicationDuplicateResolveRequest {
+  jobPostingId: number;
+  primaryJobApplicationId: number;
+  duplicateJobApplicationIds: number[];
+}
+
 export interface IApplicationStatusReason {
   applicationStatusReasonId: number;
   label: string;
@@ -84,6 +110,22 @@ export interface IJobApplicationBulkStatusUpdateFailure {
 export interface IJobApplicationBulkStatusUpdateResponse {
   succeededIds: number[];
   failed: IJobApplicationBulkStatusUpdateFailure[];
+}
+
+/** EP-09 US-076: re-send a chosen event's notification across a batch of applications. */
+export interface IJobApplicationBulkNotifyRequest {
+  jobApplicationIds: number[];
+  recruitmentEvent: string;
+}
+
+export interface IJobApplicationBulkNotifyFailure {
+  jobApplicationId: number;
+  reason: string;
+}
+
+export interface IJobApplicationBulkNotifyResponse {
+  succeededIds: number[];
+  failed: IJobApplicationBulkNotifyFailure[];
 }
 
 export interface IMyApplicationInterview {

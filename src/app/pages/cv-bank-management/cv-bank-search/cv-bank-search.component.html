@@ -1,0 +1,207 @@
+<section class="page-container">
+  <div class="flex justify-between items-center gap-3 mb-2">
+    <h2 class="text-lg font-semibold">CV Bank Search</h2>
+    <a routerLink="talent-pool" class="text-primary">
+      <i class="fa fa-users"></i>
+      <span>View Talent Pool</span>
+    </a>
+  </div>
+
+  <app-filter-panel [(collapsed)]="filtersCollapsed">
+    <div class="flex flex-col gap-3">
+    <p-floatlabel variant="in">
+      <input
+        type="text"
+        pInputText
+        id="booleanQuery"
+        class="w-full"
+        [(ngModel)]="booleanQuery"
+        name="booleanQuery"
+        (keyup.enter)="search()"
+      />
+      <label for="booleanQuery">Boolean query e.g. "project manager" AND (react OR angular) NOT intern</label>
+    </p-floatlabel>
+
+    <div class="flex flex-wrap items-end gap-3">
+      <p-floatlabel variant="in" class="min-w-48">
+        <p-select
+          inputId="educationLevel"
+          class="w-full"
+          [(ngModel)]="educationLevel"
+          name="educationLevel"
+          [options]="educationLevelOptions"
+          optionLabel="label"
+          optionValue="value"
+          [appendTo]="'body'"
+          [autoDisplayFirst]="false"
+          [showClear]="true"
+        ></p-select>
+        <label for="educationLevel">Min education level</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="in" class="min-w-48">
+        <p-inputnumber inputId="minExperienceYears" [(ngModel)]="minExperienceYears" name="minExperienceYears" [min]="0"></p-inputnumber>
+        <label for="minExperienceYears">Min experience (years)</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="in" class="min-w-48">
+        <p-inputnumber inputId="maxExperienceYears" [(ngModel)]="maxExperienceYears" name="maxExperienceYears" [min]="0"></p-inputnumber>
+        <label for="maxExperienceYears">Max experience (years)</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="in" class="min-w-40">
+        <input type="text" pInputText id="location" class="w-full" [(ngModel)]="location" name="location" />
+        <label for="location">Location</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="in" class="min-w-48">
+        <p-select
+          inputId="candidateType"
+          class="w-full"
+          [(ngModel)]="candidateType"
+          name="candidateType"
+          [options]="candidateTypeOptions"
+          optionLabel="label"
+          optionValue="value"
+          [appendTo]="'body'"
+          [autoDisplayFirst]="false"
+          [showClear]="true"
+        ></p-select>
+        <label for="candidateType">Candidate type</label>
+      </p-floatlabel>
+
+      <button pButton (click)="search()">
+        <i class="fa fa-search"></i>
+        <span>Search</span>
+      </button>
+
+      <button pButton severity="secondary" (click)="resetFilters()">
+        <i class="fa fa-times"></i>
+        <span>Reset</span>
+      </button>
+    </div>
+    </div>
+  </app-filter-panel>
+
+  <div *ngIf="statusMessage" class="mb-3" [class.text-red-600]="statusIsError" [class.text-green-600]="!statusIsError">
+    {{ statusMessage }}
+  </div>
+
+  <div class="table-container">
+    <div class="table-title-container flex justify-between items-center">
+      <h3 class="table-title">
+        Results
+        <span class="table-title-info" *ngIf="totalRecords > 0">({{ totalRecords }} total)</span>
+      </h3>
+
+      <div class="flex gap-2">
+        <button pButton severity="secondary" [disabled]="selectedResults.length === 0 || bulkDownloading" (click)="downloadSelectedCvs()">
+          <i class="fa" [class.fa-file-zipper]="!bulkDownloading" [class.fa-spinner]="bulkDownloading" [class.fa-spin]="bulkDownloading"></i>
+          <span>Download {{ selectedResults.length || '' }} CV(s)</span>
+        </button>
+
+        <button pButton severity="secondary" [disabled]="selectedResults.length === 0 || bulkExporting" (click)="exportSelectedToExcel()">
+          <i class="fa" [class.fa-file-excel]="!bulkExporting" [class.fa-spinner]="bulkExporting" [class.fa-spin]="bulkExporting"></i>
+          <span>Export to Excel</span>
+        </button>
+
+        <button pButton [disabled]="selectedResults.length === 0" (click)="addSelectedToTalentPool()">
+          <i class="fa fa-plus"></i>
+          <span>Add {{ selectedResults.length || '' }} to Talent Pool</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="transition-all duration-500 ease-in-out">
+      <p-table
+        [value]="loading ? skeletonItems : results"
+        [(selection)]="selectedResults"
+        dataKey="candidateProfileId"
+        [paginator]="true"
+        [rows]="rows"
+        [first]="(currentPage - 1) * rows"
+        [rowsPerPageOptions]="UI_CONFIG.pageSizeOptions"
+        [totalRecords]="totalRecords"
+        (onPage)="onPageChange($event)"
+        [lazy]="true"
+        [loading]="false"
+        scrollHeight="flex"
+        [responsiveLayout]="'scroll'"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} candidates"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="width: 3rem"><p-tableHeaderCheckbox *ngIf="!loading"></p-tableHeaderCheckbox></th>
+            <th style="width: 3rem"></th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Education</th>
+            <th style="width: 8rem">Experience</th>
+            <th style="width: 6rem">Relevance</th>
+            <th style="width: 4rem">CV</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-candidate>
+          @if (loading) {
+            <tr>
+              <td></td>
+              <td><p-skeleton width="2rem" height="2rem" styleClass="!rounded-full"></p-skeleton></td>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+            </tr>
+          } @else {
+            <tr>
+              <td><p-tableCheckbox [value]="candidate"></p-tableCheckbox></td>
+              <td>
+                <img *ngIf="getPhotoUrl(candidate)" [src]="getPhotoUrl(candidate)" class="candidate-avatar" alt="" />
+                <i *ngIf="!getPhotoUrl(candidate)" class="fa-solid fa-circle-user candidate-avatar-placeholder"></i>
+              </td>
+              <td>{{ candidate.fullName }}</td>
+              <td>{{ candidate.email }}</td>
+              <td>{{ candidate.phone || '-' }}</td>
+              <td>{{ candidate.educationSummary || '-' }}</td>
+              <td>{{ candidate.totalExperienceYears }} yrs</td>
+              <td>{{ candidate.relevanceScore }}</td>
+              <td>
+                <button
+                  pButton
+                  severity="secondary"
+                  [text]="true"
+                  [disabled]="downloadingCandidateId === candidate.candidateProfileId"
+                  (click)="downloadCv(candidate)"
+                  title="Download CV"
+                >
+                  <i
+                    class="fa"
+                    [class.fa-download]="downloadingCandidateId !== candidate.candidateProfileId"
+                    [class.fa-spinner]="downloadingCandidateId === candidate.candidateProfileId"
+                    [class.fa-spin]="downloadingCandidateId === candidate.candidateProfileId"
+                  ></i>
+                </button>
+              </td>
+            </tr>
+          }
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="9" class="not-found">
+              <div>
+                <i class="fa fa-magnifying-glass-minus"></i>
+                <p>{{ hasSearched ? 'No candidates match this search' : 'Search the CV bank to see results' }}</p>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+</section>

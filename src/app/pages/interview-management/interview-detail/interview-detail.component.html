@@ -1,0 +1,195 @@
+<section class="page-container">
+  <div class="flex justify-between items-center gap-3 mb-4">
+    <h3 class="table-title">Interview Detail</h3>
+    <button pButton severity="secondary" [routerLink]="['/interviews/interview-list']">
+      <i class="fa fa-arrow-left"></i>
+      <span>Back to Interviews</span>
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="space-y-3">
+    <p-skeleton height="8rem"></p-skeleton>
+  </div>
+
+  <div *ngIf="!loading && interview" class="table-container mb-4 p-4">
+    <div class="flex flex-wrap items-start justify-between gap-3">
+      <div>
+        <h4 class="text-lg font-medium text-gray-900 dark:text-white">{{ interview.candidateName }}</h4>
+        <p class="text-sm text-gray-600 dark:text-gray-300">
+          {{ interview.scheduledStartAt | date: 'dd-MMM-yyyy HH:mm' }} - {{ interview.scheduledEndAt | date: 'HH:mm' }}
+          &middot; {{ interview.interviewType }} &middot; Round {{ interview.round }}{{ interview.roundConfigName ? ' (' + interview.roundConfigName + ')' : '' }}
+        </p>
+        <p class="text-sm text-gray-600 dark:text-gray-300" *ngIf="interview.interviewType === InterviewTypeEnum.InPerson">
+          Venue: {{ interview.venueName || '-' }} &middot; Room: {{ interview.roomName || '-' }}
+        </p>
+        <p class="text-sm text-gray-600 dark:text-gray-300" *ngIf="interview.interviewType === InterviewTypeEnum.Virtual">
+          Meeting Link: <a [href]="interview.meetingLink" target="_blank" rel="noopener">{{ interview.meetingLink }}</a>
+        </p>
+        <p class="text-sm text-gray-600 dark:text-gray-300" *ngIf="interview.panelistEmployeeIds.length > 0">
+          Panel Employee IDs: {{ interview.panelistEmployeeIds.join(', ') }}
+        </p>
+        <p class="text-sm text-gray-600 dark:text-gray-300" *ngIf="interview.notes">Notes: {{ interview.notes }}</p>
+        <p class="text-sm text-red-600" *ngIf="interview.cancellationReason">Cancellation Reason: {{ interview.cancellationReason }}</p>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <span
+          class="rounded-full px-2 py-0.5 text-xs font-medium"
+          [ngClass]="{
+            'bg-blue-100 text-blue-700': interview.status === InterviewStatusEnum.Scheduled || interview.status === InterviewStatusEnum.Rescheduled,
+            'bg-red-100 text-red-700': interview.status === InterviewStatusEnum.Cancelled || interview.status === InterviewStatusEnum.NoShow,
+            'bg-green-100 text-green-700': interview.status === InterviewStatusEnum.Completed,
+          }"
+        >
+          {{ interview.status }}
+        </span>
+        <span
+          *ngIf="interview.result !== InterviewResultEnum.Pending"
+          class="rounded-full px-2 py-0.5 text-xs font-medium"
+          [ngClass]="{
+            'bg-green-100 text-green-700': interview.result === InterviewResultEnum.Passed,
+            'bg-red-100 text-red-700': interview.result === InterviewResultEnum.Failed,
+          }"
+        >
+          Result: {{ interview.result }}
+        </span>
+        <span
+          class="rounded-full px-2 py-0.5 text-xs font-medium"
+          [ngClass]="{
+            'bg-green-100 text-green-700': interview.emailNotificationStatus === 'Sent',
+            'bg-red-100 text-red-700': interview.emailNotificationStatus === 'Failed',
+            'bg-gray-100 text-gray-600': interview.emailNotificationStatus === 'Pending' || interview.emailNotificationStatus === 'Skipped',
+          }"
+          [title]="interview.emailFailureReason || ''"
+        >
+          Email: {{ interview.emailNotificationStatus }}
+        </span>
+        <span
+          class="rounded-full px-2 py-0.5 text-xs font-medium"
+          [ngClass]="{
+            'bg-green-100 text-green-700': interview.smsNotificationStatus === 'Sent',
+            'bg-red-100 text-red-700': interview.smsNotificationStatus === 'Failed',
+            'bg-gray-100 text-gray-600': interview.smsNotificationStatus === 'Pending' || interview.smsNotificationStatus === 'Skipped',
+          }"
+        >
+          SMS: {{ interview.smsNotificationStatus }}
+        </span>
+      </div>
+    </div>
+
+    <div class="mt-4 flex flex-wrap gap-2">
+      <button pButton *ngIf="!isCancelled" (click)="openRescheduleDialog()">
+        <i class="fa fa-calendar-days"></i>
+        <span>Reschedule</span>
+      </button>
+      <button pButton *ngIf="!isCancelled" severity="danger" (click)="openCancelDialog()">
+        <i class="fa fa-ban"></i>
+        <span>Cancel</span>
+      </button>
+      <button pButton *ngIf="!isCancelled" severity="success" (click)="openMarkResultDialog()">
+        <i class="fa fa-flag-checkered"></i>
+        <span>Mark Result</span>
+      </button>
+      <button pButton severity="secondary" [routerLink]="['/interviews/interview', interviewId, 'evaluate']">
+        <i class="fa fa-star"></i>
+        <span>Evaluate</span>
+      </button>
+      <button pButton severity="secondary" [routerLink]="['/interviews/interview', interviewId, 'results']">
+        <i class="fa fa-chart-simple"></i>
+        <span>View Results</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<p-dialog
+  header="Reschedule Interview"
+  [(visible)]="rescheduleDialogVisible"
+  [modal]="true"
+  [style]="{ width: '28rem', maxWidth: '95vw' }"
+  (onHide)="closeRescheduleDialog()"
+>
+  <div *ngIf="interview" class="flex flex-col gap-3">
+    <p class="text-sm text-gray-600 dark:text-gray-300">{{ interview.candidateName }}</p>
+
+    <p-floatlabel variant="in">
+      <p-datepicker
+        inputId="rescheduleStartAt"
+        styleClass="w-full"
+        [(ngModel)]="rescheduleStartAt"
+        [ngModelOptions]="{ standalone: true }"
+        [showTime]="true"
+        [showIcon]="true"
+        [appendTo]="'body'"
+        dateFormat="dd-M-yy"
+      ></p-datepicker>
+      <label for="rescheduleStartAt">New Date &amp; Time</label>
+    </p-floatlabel>
+
+    <div class="flex gap-2 pb-2">
+      <button pButton [disabled]="!canSaveReschedule" [loading]="rescheduleSaving" (click)="saveReschedule()">
+        <i class="fa fa-save"></i>
+        <span>Save</span>
+      </button>
+      <button pButton type="button" severity="secondary" (click)="closeRescheduleDialog()">
+        <span>Cancel</span>
+      </button>
+    </div>
+  </div>
+</p-dialog>
+
+<p-dialog header="Cancel Interview" [(visible)]="cancelDialogVisible" [modal]="true" [style]="{ width: '28rem', maxWidth: '95vw' }" (onHide)="closeCancelDialog()">
+  <div class="flex flex-col gap-3">
+    <p-floatlabel variant="in">
+      <input pInputText id="cancelReason" class="w-full" [(ngModel)]="cancelReason" [ngModelOptions]="{ standalone: true }" />
+      <label for="cancelReason">Cancellation Reason</label>
+    </p-floatlabel>
+
+    <div class="flex gap-2 pb-2">
+      <button pButton severity="danger" [disabled]="!canSaveCancel" [loading]="cancelSaving" (click)="saveCancel()">
+        <i class="fa fa-ban"></i>
+        <span>Confirm Cancel</span>
+      </button>
+      <button pButton type="button" severity="secondary" (click)="closeCancelDialog()">
+        <span>Close</span>
+      </button>
+    </div>
+  </div>
+</p-dialog>
+
+<p-dialog header="Mark Interview Result" [(visible)]="markResultDialogVisible" [modal]="true" [style]="{ width: '24rem', maxWidth: '95vw' }" (onHide)="closeMarkResultDialog()">
+  <div class="flex flex-col gap-3">
+    <p class="text-sm text-gray-600 dark:text-gray-300">Also marks the interview as Completed.</p>
+
+    <div class="flex gap-2">
+      <button
+        pButton
+        type="button"
+        [severity]="markResultValue === InterviewResultEnum.Passed ? 'success' : 'secondary'"
+        (click)="markResultValue = InterviewResultEnum.Passed"
+      >
+        <i class="fa fa-check"></i>
+        <span>Passed</span>
+      </button>
+      <button
+        pButton
+        type="button"
+        [severity]="markResultValue === InterviewResultEnum.Failed ? 'danger' : 'secondary'"
+        (click)="markResultValue = InterviewResultEnum.Failed"
+      >
+        <i class="fa fa-xmark"></i>
+        <span>Failed</span>
+      </button>
+    </div>
+
+    <div class="flex gap-2 pb-2">
+      <button pButton [disabled]="!canSaveMarkResult" [loading]="markResultSaving" (click)="saveMarkResult()">
+        <i class="fa fa-save"></i>
+        <span>Save</span>
+      </button>
+      <button pButton type="button" severity="secondary" (click)="closeMarkResultDialog()">
+        <span>Cancel</span>
+      </button>
+    </div>
+  </div>
+</p-dialog>

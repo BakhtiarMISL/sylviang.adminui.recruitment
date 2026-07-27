@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AutoCompleteCompleteEvent } from 'primeng/autocomplete';
@@ -46,6 +46,7 @@ export class ManageJobVacancyComponent implements OnInit {
   hiringPipelineOptions: IHiringPipelineLookupResponse[] = [];
 
   // Attachments
+  @ViewChild('attachmentFileInput') attachmentFileInput!: ElementRef<HTMLInputElement>;
   attachments: IJobVacancyAttachmentResponse[] = [];
   loadingAttachments = false;
   uploadingAttachment = false;
@@ -139,9 +140,6 @@ export class ManageJobVacancyComponent implements OnInit {
 
   private initForm(): void {
     this.jobVacancyForm = this.fb.group({
-      siteId: [null, [Validators.required]],
-      departmentId: [null],
-      designationId: [null],
       hiringPipelineId: [null, [Validators.required]],
       title: [null, [Validators.required, Validators.maxLength(200), this.noWhitespaceOnly.bind(this)]],
       description: [null],
@@ -274,9 +272,6 @@ export class ManageJobVacancyComponent implements OnInit {
 
   private getFieldDisplayName(fieldName: string): string {
     const displayNames: { [key: string]: string } = {
-      siteId: 'Site',
-      departmentId: 'Department',
-      designationId: 'Designation',
       hiringPipelineId: 'Hiring Pipeline',
       title: 'Title',
       description: 'Description',
@@ -314,12 +309,17 @@ export class ManageJobVacancyComponent implements OnInit {
     }
   }
 
+  // Site/Department/Designation ID inputs were removed from this form; the backend still
+  // requires a SiteId, so every vacancy created here is filed under this fixed default.
+  private static readonly DEFAULT_SITE_ID = 1;
+
   private buildRequestPayload(): IJobVacancyCreateRequest {
     const formValue = { ...this.jobVacancyForm.getRawValue() };
     delete formValue.status;
 
     return {
       ...formValue,
+      siteId: this.jobVacancyToEdit?.siteId ?? ManageJobVacancyComponent.DEFAULT_SITE_ID,
       postingDate: formValue.postingDate ? DateTimeUtility.formatDateForAPI(formValue.postingDate) : null,
       closingDate: formValue.closingDate ? DateTimeUtility.formatDateForAPI(formValue.closingDate) : null,
     };
@@ -398,6 +398,7 @@ export class ManageJobVacancyComponent implements OnInit {
         this.uploadingAttachment = false;
         if (response && !response.hasError) {
           this.selectedFile = null;
+          if (this.attachmentFileInput) this.attachmentFileInput.nativeElement.value = '';
           this.loadAttachments(this.jobPostingId!);
         } else {
           this.attachmentError = response?.decentMessage || 'Failed to upload attachment';

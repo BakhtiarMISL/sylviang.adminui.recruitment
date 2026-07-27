@@ -16,9 +16,10 @@ import { InternalApplyFormComponent } from './internal-apply-form/internal-apply
 import { InternalJobBoardRoutingModule } from './internal-job-board-routing.module';
 import { InternalJobDetailComponent } from './internal-job-detail/internal-job-detail.component';
 import { InternalJobListComponent } from './internal-job-list/internal-job-list.component';
+import { InternalPaymentResultComponent } from './internal-payment-result/internal-payment-result.component';
 
 @NgModule({
-  declarations: [InternalJobListComponent, InternalJobDetailComponent, InternalApplyFormComponent],
+  declarations: [InternalJobListComponent, InternalJobDetailComponent, InternalApplyFormComponent, InternalPaymentResultComponent],
   imports: [
     ReactiveFormsModule,
     FormsModule,
