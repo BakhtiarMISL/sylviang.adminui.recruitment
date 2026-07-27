@@ -45,6 +45,16 @@
             <i class="fa fa-check"></i>
             <span>Mark Joined</span>
           </button>
+          <button
+            pButton
+            size="small"
+            severity="secondary"
+            *ngIf="item.preBoardingStatus"
+            [routerLink]="['/final-selection-pool/pre-boarding-review', item.finalSelectionPoolId]"
+          >
+            <i class="fa fa-clipboard-check"></i>
+            <span>Review Pre-Boarding</span>
+          </button>
         </td>
       </tr>
     </ng-template>

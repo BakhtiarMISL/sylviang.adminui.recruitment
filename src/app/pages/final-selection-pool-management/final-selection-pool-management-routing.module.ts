@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { RoleGuard } from '@core/guards/role.guard';
 import { UserRoleEnum } from '@core/enums/user-role.enum';
 import { FinalSelectionPoolListComponent } from './final-selection-pool-list/final-selection-pool-list.component';
+import { PreBoardingReviewComponent } from './pre-boarding-review/pre-boarding-review.component';
 
 const roleData = { roles: [UserRoleEnum.Admin, UserRoleEnum.HR] };
 
@@ -10,6 +11,12 @@ const routes: Routes = [
   {
     path: 'final-selection-pool-list',
     component: FinalSelectionPoolListComponent,
+    canActivate: [RoleGuard],
+    data: roleData,
+  },
+  {
+    path: 'pre-boarding-review/:finalSelectionPoolId',
+    component: PreBoardingReviewComponent,
     canActivate: [RoleGuard],
     data: roleData,
   },

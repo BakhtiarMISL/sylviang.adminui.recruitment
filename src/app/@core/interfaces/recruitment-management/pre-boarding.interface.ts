@@ -32,5 +32,10 @@ export interface IPreBoardingSubmissionResponse extends IPreBoardingSaveRequest 
   finalSelectionPoolId: number;
   status: PreBoardingSubmissionStatusEnum;
   submittedAt?: string | null;
+  correctionComment?: string | null;
   nominees: IPreBoardingNomineeResponse[];
+}
+
+export interface IPreBoardingRequestCorrectionRequest {
+  comment: string;
 }

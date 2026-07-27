@@ -13,8 +13,16 @@ import { JoiningBookletListComponent } from './joining-booklet-list/joining-book
 import { JoiningBookletBatchGenerateComponent } from './joining-booklet-batch-generate/joining-booklet-batch-generate.component';
 import { MedicalLetterFormComponent } from './medical-letter-form/medical-letter-form.component';
 import { TargetLetterFormComponent } from './target-letter-form/target-letter-form.component';
+import { FitmentDataFormComponent } from './fitment-data-form/fitment-data-form.component';
+import { OfficeNoteListComponent } from './office-note-list/office-note-list.component';
+import { OfficeNoteGenerateComponent } from './office-note-generate/office-note-generate.component';
 
 const roleData = { roles: [UserRoleEnum.Admin] };
+
+// EP-12 F2b/F3: HR's core onboarding data-entry + document-generation screens, following
+// FinalSelectionPoolController's Admin,HR pairing convention rather than this module's existing
+// Admin-only routes above.
+const adminHrRoleData = { roles: [UserRoleEnum.Admin, UserRoleEnum.HR] };
 
 const routes: Routes = [
   {
@@ -88,6 +96,24 @@ const routes: Routes = [
     component: TargetLetterFormComponent,
     canActivate: [RoleGuard],
     data: roleData,
+  },
+  {
+    path: 'manage-fitment-data',
+    component: FitmentDataFormComponent,
+    canActivate: [RoleGuard],
+    data: adminHrRoleData,
+  },
+  {
+    path: 'office-note-list',
+    component: OfficeNoteListComponent,
+    canActivate: [RoleGuard],
+    data: adminHrRoleData,
+  },
+  {
+    path: 'manage-office-note',
+    component: OfficeNoteGenerateComponent,
+    canActivate: [RoleGuard],
+    data: adminHrRoleData,
   },
 ];
 

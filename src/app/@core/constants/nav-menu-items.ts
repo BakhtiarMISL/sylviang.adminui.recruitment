@@ -77,6 +77,18 @@ export const webSidebarMenuItems: IMenuItem[] = [
         icon: 'fa-solid fa-clipboard-check',
       },
       {
+        href: '/document-management/manage-fitment-data',
+        title: 'Fitment Data',
+        active: false,
+        icon: 'fa-solid fa-sack-dollar',
+      },
+      {
+        href: '/document-management/office-note-list',
+        title: 'Office Notes',
+        active: false,
+        icon: 'fa-solid fa-file-pen',
+      },
+      {
         href: '/applications',
         title: 'ATS Dashboard',
         active: false,

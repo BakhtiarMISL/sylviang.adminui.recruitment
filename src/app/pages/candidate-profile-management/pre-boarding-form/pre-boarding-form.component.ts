@@ -2,6 +2,7 @@ import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { BreadcrumbService } from '@app/@core/services';
 import { PreBoardingCandidateService } from '@app/@core/services/recruitment/pre-boarding-candidate/pre-boarding-candidate.service';
+import { PreBoardingSubmissionStatusEnum } from '@core/enums/recruitment.enum';
 import { IPreBoardingSaveRequest, IPreBoardingSubmissionResponse } from '@core/interfaces/recruitment-management/pre-boarding.interface';
 
 @Component({
@@ -49,7 +50,12 @@ export class PreBoardingFormComponent implements OnInit {
   }
 
   get isLocked(): boolean {
-    return this.item?.status === 'Submitted';
+    // AC5: NeedsCorrection re-opens the form for edits, same as Draft.
+    return this.item?.status === PreBoardingSubmissionStatusEnum.Submitted || this.item?.status === PreBoardingSubmissionStatusEnum.Approved;
+  }
+
+  get needsCorrection(): boolean {
+    return this.item?.status === PreBoardingSubmissionStatusEnum.NeedsCorrection;
   }
 
   get nomineeShareTotal(): number {
