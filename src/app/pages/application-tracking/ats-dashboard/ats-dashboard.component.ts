@@ -1,12 +1,13 @@
 import { AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { ApplicationSourceEnum, ApplicationStatusEnum, EducationLevelEnum, RecruitmentEventEnum } from '@app/@core/enums/recruitment.enum';
+import { ApplicationSourceEnum, ApplicationStatusEnum, EducationLevelEnum, ExportFormatEnum, RecruitmentEventEnum } from '@app/@core/enums/recruitment.enum';
 import { ISkillLibraryItemResponse } from '@app/@core/interfaces/recruitment-management/candidate-profile.interface';
 import { IAtsDashboardFilterParams, IApplicationStatusReason, IJobApplicationListItem } from '@app/@core/interfaces/recruitment-management/job-application.interface';
 import { IJobVacancyResponse } from '@app/@core/interfaces/recruitment-management/job-vacancy.interface';
 import { ISavedSearchFilterSnapshot, ISavedSearchLookupResponse } from '@app/@core/interfaces/recruitment-management/saved-search.interface';
 import { IShortlistFilterApplyResponse, IShortlistFilterLookupResponse } from '@app/@core/interfaces/recruitment-management/shortlist-filter.interface';
 import { CandidateProfileService } from '@app/@core/services/recruitment/candidate-profile/candidate-profile.service';
+import { ExportRequestService } from '@app/@core/services/recruitment/export-request/export-request.service';
 import { JobApplicationService } from '@app/@core/services/recruitment/job-application/job-application.service';
 import { JobVacancyService } from '@app/@core/services/recruitment/job-vacancy/job-vacancy.service';
 import { SavedSearchService } from '@app/@core/services/recruitment/saved-search/saved-search.service';
@@ -35,6 +36,7 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     private shortlistFilterService: ShortlistFilterService,
     private savedSearchService: SavedSearchService,
     private candidateProfileService: CandidateProfileService,
+    private exportRequestService: ExportRequestService,
     private cdr: ChangeDetectorRef,
     private confirmationService: ConfirmationService,
     private toast: ToastService,
@@ -81,6 +83,14 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   tagSuggestions: string[] = [];
 
   private filterChange$ = new Subject<void>();
+
+  // Export (EP-13 US-100/104) - queues an async export of every application matching the current filters
+  exportFormat: ExportFormatEnum = ExportFormatEnum.Xlsx;
+  exportFormatOptions = [
+    { label: 'Excel (.xlsx)', value: ExportFormatEnum.Xlsx },
+    { label: 'CSV', value: ExportFormatEnum.Csv },
+  ];
+  exporting = false;
 
   // Bulk action (US-035 AC5)
   bulkToStatus: ApplicationStatusEnum | null = null;
@@ -258,6 +268,23 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
       ...(this.filterMaxAge != null && { maxAge: this.filterMaxAge }),
       ...(this.filterTags.length > 0 && { tags: this.filterTags }),
     };
+  }
+
+  /** Queues an async export of every application matching the current filters (EP-13 US-100/104) - not just the current page. */
+  exportCandidateList(): void {
+    this.exporting = true;
+    this.exportRequestService.requestCandidateListExport({ filter: this.buildFilterParams(), format: this.exportFormat }).subscribe({
+      next: () => {
+        this.exporting = false;
+        this.toast.success({ detail: 'Export queued - you will be notified when it is ready to download (see Export Requests).' });
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        this.exporting = false;
+        this.toast.error({ detail: error?.error?.decentMessage || 'Failed to queue export.' });
+        this.cdr.detectChanges();
+      },
+    });
   }
 
   // ── Active filter chips (US-050 AC4) ────────────────────────────

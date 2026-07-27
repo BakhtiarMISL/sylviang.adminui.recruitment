@@ -220,3 +220,17 @@ export enum PreBoardingSubmissionStatusEnum {
   Approved = 'Approved',
   NeedsCorrection = 'NeedsCorrection',
 }
+
+/** EP-13 US-104: lifecycle of a queued ExportRequest. */
+export enum ExportRequestStatusEnum {
+  Pending = 'Pending',
+  Processing = 'Processing',
+  Completed = 'Completed',
+  Failed = 'Failed',
+}
+
+/** EP-13 US-100/104: output file format for an ExportRequest. */
+export enum ExportFormatEnum {
+  Xlsx = 'Xlsx',
+  Csv = 'Csv',
+}
