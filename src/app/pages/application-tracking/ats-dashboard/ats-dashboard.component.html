@@ -83,6 +83,25 @@
       <i class="fa fa-bookmark"></i>
       <span>Save Search</span>
     </button>
+
+    <p-floatlabel variant="in">
+      <p-select
+        inputId="exportFormat"
+        [options]="exportFormatOptions"
+        [(ngModel)]="exportFormat"
+        optionLabel="label"
+        optionValue="value"
+        [appendTo]="'body'"
+        [autoDisplayFirst]="false"
+        class="w-full"
+      ></p-select>
+      <label for="exportFormat">Export Format</label>
+    </p-floatlabel>
+
+    <button severity="secondary" pButton [disabled]="exporting" (click)="exportCandidateList()">
+      <i class="fa fa-download"></i>
+      <span>Export Candidate List</span>
+    </button>
   </div>
 
   <div class="filter-bar">

@@ -123,6 +123,10 @@ const routes: Routes = [
       path: 'scorecards',
       loadChildren: () => import('./scorecard-management/scorecard-management.module').then((m) => m.ScorecardManagementModule),
     },
+    {
+      path: 'export-requests',
+      loadChildren: () => import('./export-request-management/export-request-management.module').then((m) => m.ExportRequestManagementModule),
+    },
   ]),
 ];
 

@@ -77,6 +77,12 @@ export const webSidebarMenuItems: IMenuItem[] = [
         icon: 'fa-solid fa-clipboard-check',
       },
       {
+        href: '/export-requests/export-request-list',
+        title: 'Export Requests',
+        active: false,
+        icon: 'fa-solid fa-file-export',
+      },
+      {
         href: '/document-management/manage-fitment-data',
         title: 'Fitment Data',
         active: false,
