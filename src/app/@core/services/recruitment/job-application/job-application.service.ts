@@ -57,6 +57,12 @@ export class JobApplicationService {
     return this.httpClient.post<ApiResponse<IJobApplicationBulkNotifyResponse>>(`${this.API_URL}/bulk-notify`, request);
   }
 
+  /** US-101: synchronous ZIP of selected applications' CVs - capped server-side at
+   * BULK_DOWNLOAD_CVS_SYNC_MAX_COUNT; larger batches should use ExportRequestService.requestBulkCvZipExport instead. */
+  bulkDownloadCvs(jobApplicationIds: number[]) {
+    return this.httpClient.post(`${this.API_URL}/bulk-download-cvs`, { jobApplicationIds }, { responseType: 'blob', observe: 'response' });
+  }
+
   /** HR applies on a candidate's behalf (US-034) - multipart, same shape as the career-portal apply flow. */
   applyOnBehalf(request: {
     jobPostingId: number;

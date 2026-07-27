@@ -7,6 +7,7 @@ import { IJobVacancyResponse } from '@app/@core/interfaces/recruitment-managemen
 import { ISavedSearchFilterSnapshot, ISavedSearchLookupResponse } from '@app/@core/interfaces/recruitment-management/saved-search.interface';
 import { IShortlistFilterApplyResponse, IShortlistFilterLookupResponse } from '@app/@core/interfaces/recruitment-management/shortlist-filter.interface';
 import { CandidateProfileService } from '@app/@core/services/recruitment/candidate-profile/candidate-profile.service';
+import { saveFileResponse } from '@app/@core/services/recruitment/cv-bank/cv-bank.service';
 import { ExportRequestService } from '@app/@core/services/recruitment/export-request/export-request.service';
 import { JobApplicationService } from '@app/@core/services/recruitment/job-application/job-application.service';
 import { JobVacancyService } from '@app/@core/services/recruitment/job-vacancy/job-vacancy.service';
@@ -99,6 +100,11 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   bulkReasonOptions: IApplicationStatusReason[] = [];
   bulkStatusOptions = ApplicationStatusOptions;
   bulkApplying = false;
+
+  // Bulk download CVs (US-101) - batches at/under this size download synchronously; larger
+  // batches queue through the EP-13 F1 export-request async queue instead.
+  readonly BULK_DOWNLOAD_CVS_SYNC_MAX = 20;
+  bulkDownloadingCvs = false;
 
   // Bulk notify (EP-09 US-076) - only the events US-075 actually dispatches on are offered here.
   bulkNotifyEvent: RecruitmentEventEnum | null = null;
@@ -849,6 +855,44 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
             this.toast.error({ detail: error?.error?.decentMessage || 'Failed to send notifications.' });
           },
         });
+      },
+    });
+  }
+
+  // ── Bulk download CVs (US-101) ────────────────────────────────────
+
+  bulkDownloadCvs(): void {
+    const ids = this.getSelectedIds();
+    if (ids.length === 0) return;
+
+    this.bulkDownloadingCvs = true;
+
+    if (ids.length <= this.BULK_DOWNLOAD_CVS_SYNC_MAX) {
+      this.jobApplicationService.bulkDownloadCvs(ids).subscribe({
+        next: (response) => {
+          this.bulkDownloadingCvs = false;
+          saveFileResponse(response, 'Candidate-CVs.zip');
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.bulkDownloadingCvs = false;
+          this.toast.error({ detail: 'Failed to download CVs.' });
+          this.cdr.detectChanges();
+        },
+      });
+      return;
+    }
+
+    this.exportRequestService.requestBulkCvZipExport(ids).subscribe({
+      next: () => {
+        this.bulkDownloadingCvs = false;
+        this.toast.success({ detail: 'Large batch queued - you will be notified when the CV ZIP is ready (see Export Requests).' });
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        this.bulkDownloadingCvs = false;
+        this.toast.error({ detail: error?.error?.decentMessage || 'Failed to queue CV export.' });
+        this.cdr.detectChanges();
       },
     });
   }

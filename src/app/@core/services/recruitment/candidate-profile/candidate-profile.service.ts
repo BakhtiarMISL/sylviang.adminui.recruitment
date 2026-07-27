@@ -280,6 +280,11 @@ export class CandidateProfileService {
     return this.httpClient.put<ApiResponse<void>>(`${this.API_URL}/${candidateProfileId}/mark-internal`, {});
   }
 
+  /** US-103: standardized, branded profile summary PDF - synchronous, no async queue. */
+  downloadProfilePdf(candidateProfileId: number) {
+    return this.httpClient.get(`${this.API_URL}/${candidateProfileId}/download/pdf`, { responseType: 'blob', observe: 'response' });
+  }
+
   // ── Tags (US-041, HR-only) ───────────────────────────────────────
 
   getTagSuggestions(search: string) {
