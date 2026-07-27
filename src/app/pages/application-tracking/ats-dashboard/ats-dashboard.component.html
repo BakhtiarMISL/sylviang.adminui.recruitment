@@ -311,6 +311,11 @@
       <i class="fa fa-bell"></i>
       <span>Notify {{ selectedCount() }} Selected</span>
     </button>
+
+    <button pButton severity="secondary" [disabled]="bulkDownloadingCvs" (click)="bulkDownloadCvs()">
+      <i class="fa" [class.fa-file-zipper]="!bulkDownloadingCvs" [class.fa-spinner]="bulkDownloadingCvs" [class.fa-spin]="bulkDownloadingCvs"></i>
+      <span>Bulk Download CVs ({{ selectedCount() }})</span>
+    </button>
   </div>
 
   <div class="table-container">

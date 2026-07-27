@@ -11,6 +11,7 @@ import {
   IReligionResponse,
 } from '@app/@core/interfaces/recruitment-management/candidate-profile.interface';
 import { CandidateProfileService } from '@app/@core/services/recruitment/candidate-profile/candidate-profile.service';
+import { saveFileResponse } from '@app/@core/services/recruitment/cv-bank/cv-bank.service';
 import { BreadcrumbService } from '@app/@core/services';
 import { Base_URL } from '@env/environment';
 
@@ -47,6 +48,9 @@ export class CandidateDetailComponent implements OnInit {
 
   markingInternal = false;
   markInternalError = '';
+
+  downloadingProfile = false;
+  downloadProfileError = '';
 
   // ── Tags (US-041, HR-only) ─────────────────────────────────────
   tags: ICandidateTagResponse[] = [];
@@ -157,6 +161,22 @@ export class CandidateDetailComponent implements OnInit {
       error: (error) => {
         this.markingInternal = false;
         this.markInternalError = error?.error?.decentMessage || 'Failed to mark candidate as internal.';
+      },
+    });
+  }
+
+  downloadProfile(): void {
+    this.downloadProfileError = '';
+    this.downloadingProfile = true;
+
+    this.candidateProfileService.downloadProfilePdf(this.candidateProfileId).subscribe({
+      next: (response) => {
+        this.downloadingProfile = false;
+        saveFileResponse(response, `${this.profile?.fullName || 'Candidate'}_Profile.pdf`);
+      },
+      error: () => {
+        this.downloadingProfile = false;
+        this.downloadProfileError = 'Failed to download profile.';
       },
     });
   }

@@ -32,6 +32,14 @@
             </button>
             <div *ngIf="markInternalError" class="invalid">{{ markInternalError }}</div>
           </div>
+
+          <div class="sm:col-span-2">
+            <button pButton type="button" severity="secondary" [disabled]="downloadingProfile" (click)="downloadProfile()">
+              <i class="fa" [class.fa-file-pdf]="!downloadingProfile" [class.fa-spinner]="downloadingProfile" [class.fa-spin]="downloadingProfile"></i>
+              <span>{{ downloadingProfile ? 'Downloading...' : 'Download Profile' }}</span>
+            </button>
+            <div *ngIf="downloadProfileError" class="invalid">{{ downloadProfileError }}</div>
+          </div>
         </div>
 
         <app-completeness-ring [percentage]="profile.completenessPercentage"></app-completeness-ring>

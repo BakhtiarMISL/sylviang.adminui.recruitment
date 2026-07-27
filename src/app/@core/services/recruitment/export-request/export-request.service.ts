@@ -21,6 +21,12 @@ export class ExportRequestService {
     return this.httpClient.post<ApiResponse<number>>(`${this.API_URL}/candidate-list`, request);
   }
 
+  /** US-101: queues a large bulk-CV-ZIP request - the synchronous counterpart is
+   * JobApplicationService.bulkDownloadCvs, for small batches. */
+  requestBulkCvZipExport(jobApplicationIds: number[]) {
+    return this.httpClient.post<ApiResponse<number>>(`${this.API_URL}/bulk-cv-zip`, { jobApplicationIds });
+  }
+
   getAll(filter: IExportRequestFilterRequest) {
     return this.httpClient.get<ApiResponse<PaginatedResponse<IExportRequestResponse[]>>>(`${this.API_URL}`, {
       params: this.buildParams(filter),
