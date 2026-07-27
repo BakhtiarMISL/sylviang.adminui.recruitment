@@ -1,0 +1,46 @@
+@use '../tokens' as *;
+@use '../reveal';
+
+.msl-overview {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 5rem 1.5rem;
+
+  @media (min-width: 640px) {
+    padding: 6rem 2rem;
+  }
+}
+
+.msl-overview__header {
+  max-width: 640px;
+  margin: 0 auto 3rem;
+  text-align: center;
+
+  h2 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: $msl-ink;
+    margin: 0 0 0.75rem;
+  }
+
+  p {
+    color: $msl-muted;
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    margin: 0;
+  }
+}
+
+.msl-overview__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.75rem;
+
+  @media (min-width: 640px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}

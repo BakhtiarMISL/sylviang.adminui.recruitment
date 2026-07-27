@@ -34,6 +34,10 @@ export const routes: Routes = [
     loadChildren: () => import('./public-landing/public-landing.module').then((m) => m.PublicLandingModule),
   },
   {
+    path: 'misl',
+    loadComponent: () => import('./misl-landing/misl-landing-page/misl-landing-page.component').then((m) => m.MislLandingPageComponent),
+  },
+  {
     // Root is always the public landing page, logged in or not. canMatch selects this
     // branch for the bare root URL only, decided from segments before the lazy module
     // loads. Deeper paths fail canMatch and fall through to the guarded branch below.
