@@ -27,6 +27,9 @@ export interface IJobApplicationSubmitRequest {
   candidateEmail: string;
   candidatePhone?: string;
   coverLetter?: string;
+  // EP-17/US-127: optional, feeds fee-waiver rule matching and F1 reconciliation reporting.
+  specialCategoryId?: number | null;
+  referralSourceId?: number | null;
 }
 
 export interface IJobApplicationSubmitResponse {

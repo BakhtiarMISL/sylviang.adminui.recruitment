@@ -130,6 +130,18 @@ export const webSidebarMenuItems: IMenuItem[] = [
         active: false,
         icon: 'fa-solid fa-clipboard-list',
       },
+      {
+        href: '/payment-management/payment-transaction-list',
+        title: 'Payment Transactions',
+        active: false,
+        icon: 'fa-solid fa-money-bill-transfer',
+      },
+      {
+        href: '/payment-management/reconciliation-report',
+        title: 'Reconciliation Report',
+        active: false,
+        icon: 'fa-solid fa-file-invoice-dollar',
+      },
     ],
   },
   {
@@ -257,6 +269,24 @@ export const webSidebarMenuItems: IMenuItem[] = [
         title: 'Blood Groups',
         active: false,
         icon: 'fa-solid fa-droplet',
+      },
+      {
+        href: '/master-data/special-category-list',
+        title: 'Special Categories',
+        active: false,
+        icon: 'fa-solid fa-star',
+      },
+      {
+        href: '/master-data/referral-source-list',
+        title: 'Referral Sources',
+        active: false,
+        icon: 'fa-solid fa-share-nodes',
+      },
+      {
+        href: '/waiver-rule-management/waiver-rule-list',
+        title: 'Fee Waiver Rules',
+        active: false,
+        icon: 'fa-solid fa-hand-holding-dollar',
       },
       {
         href: '/notification-management/notification-template-list',

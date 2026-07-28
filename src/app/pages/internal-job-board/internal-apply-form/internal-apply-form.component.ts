@@ -2,7 +2,9 @@ import { Component, Input, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CandidateProfileService } from '@app/@core/services/recruitment/candidate-profile/candidate-profile.service';
 import { IJobApplicationSubmitResponse, IJobEligibilityResponse } from '@app/@core/interfaces/recruitment-management/career-portal.interface';
+import { IMasterDataItem } from '@app/@core/interfaces/recruitment-management/master-data.interface';
 import { InternalJobBoardService } from '@app/@core/services/recruitment/internal-job-board/internal-job-board.service';
+import { MasterDataService } from '@app/@core/services/recruitment/master-data/master-data.service';
 import { PaymentService } from '@app/@core/services/recruitment/payment/payment.service';
 import { RESUME_ALLOWED_EXTENSIONS, RESUME_MAX_SIZE_BYTES } from '../internal-job-board.constants';
 
@@ -27,14 +29,22 @@ export class InternalApplyFormComponent implements OnInit {
     private internalJobBoardService: InternalJobBoardService,
     private paymentService: PaymentService,
     private candidateProfileService: CandidateProfileService,
+    private masterDataService: MasterDataService,
   ) {
     this.applyForm = this.fb.group({
       candidateName: [null, [Validators.required]],
       candidateEmail: [null, [Validators.required, Validators.email]],
       candidatePhone: [null],
       coverLetter: [null],
+      specialCategoryId: [null],
+      referralSourceId: [null],
     });
   }
+
+  // EP-17/US-127: optional at apply time - feeds fee-waiver rule matching. Options come from the
+  // admin-managed master-data lookups.
+  specialCategoryOptions: { label: string; value: number }[] = [];
+  referralSourceOptions: { label: string; value: number }[] = [];
 
   // US-005 AC1: pre-fill from the logged-in candidate's own profile (Core-HR-populated for
   // internal candidates) instead of the blank manual-entry form used previously. Candidate can
@@ -55,6 +65,26 @@ export class InternalApplyFormComponent implements OnInit {
       },
       // Prefill is a convenience, not a requirement - leave the form blank on failure rather
       // than blocking the candidate from applying.
+      error: () => {},
+    });
+
+    this.loadOptionalDropdowns();
+  }
+
+  private loadOptionalDropdowns(): void {
+    this.masterDataService.getAll('special-category').subscribe({
+      next: (response) => {
+        const items: IMasterDataItem[] = !response.hasError && response.content ? response.content : [];
+        this.specialCategoryOptions = items.map((item) => ({ label: item['name'] as string, value: item['specialCategoryId'] as number }));
+      },
+      error: () => {},
+    });
+
+    this.masterDataService.getAll('referral-source').subscribe({
+      next: (response) => {
+        const items: IMasterDataItem[] = !response.hasError && response.content ? response.content : [];
+        this.referralSourceOptions = items.map((item) => ({ label: item['name'] as string, value: item['referralSourceId'] as number }));
+      },
       error: () => {},
     });
   }

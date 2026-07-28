@@ -120,4 +120,22 @@ export const MASTER_DATA_CONFIGS: Record<string, IMasterDataEntityConfig> = {
     icon: 'fa-solid fa-book-open',
     fields: [{ key: 'name', label: 'Name', type: 'text', required: true, maxLength: 150 }],
   },
+  'special-category': {
+    routeKey: 'special-category',
+    apiPath: 'special-category',
+    idField: 'specialCategoryId',
+    title: 'Special Categories',
+    singularLabel: 'Special Category',
+    icon: 'fa-solid fa-star',
+    fields: [{ key: 'name', label: 'Name', type: 'text', required: true, maxLength: 100 }],
+  },
+  'referral-source': {
+    routeKey: 'referral-source',
+    apiPath: 'referral-source',
+    idField: 'referralSourceId',
+    title: 'Referral Sources',
+    singularLabel: 'Referral Source',
+    icon: 'fa-solid fa-share-nodes',
+    fields: [{ key: 'name', label: 'Name', type: 'text', required: true, maxLength: 100 }],
+  },
 };

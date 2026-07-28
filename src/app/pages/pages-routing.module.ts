@@ -131,6 +131,14 @@ const routes: Routes = [
       path: 'export-requests',
       loadChildren: () => import('./export-request-management/export-request-management.module').then((m) => m.ExportRequestManagementModule),
     },
+    {
+      path: 'waiver-rule-management',
+      loadChildren: () => import('./waiver-rule-management/waiver-rule-management.module').then((m) => m.WaiverRuleManagementModule),
+    },
+    {
+      path: 'payment-management',
+      loadChildren: () => import('./payment-management/payment-management.module').then((m) => m.PaymentManagementModule),
+    },
   ]),
 ];
 

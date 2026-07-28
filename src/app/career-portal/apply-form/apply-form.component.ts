@@ -1,8 +1,10 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { IJobApplicationSubmitResponse, IJobEligibilityResponse } from '@app/@core/interfaces/recruitment-management/career-portal.interface';
+import { IMasterDataItem } from '@app/@core/interfaces/recruitment-management/master-data.interface';
 import { CandidateProfileService } from '@app/@core/services/recruitment/candidate-profile/candidate-profile.service';
 import { CareerPortalService } from '@app/@core/services/recruitment/career-portal/career-portal.service';
+import { MasterDataService } from '@app/@core/services/recruitment/master-data/master-data.service';
 import { PaymentService } from '@app/@core/services/recruitment/payment/payment.service';
 import { RESUME_ALLOWED_EXTENSIONS, RESUME_MAX_SIZE_BYTES } from '../career-portal.constants';
 
@@ -27,14 +29,22 @@ export class ApplyFormComponent implements OnInit {
     private careerPortalService: CareerPortalService,
     private paymentService: PaymentService,
     private candidateProfileService: CandidateProfileService,
+    private masterDataService: MasterDataService,
   ) {
     this.applyForm = this.fb.group({
       candidateName: [null, [Validators.required]],
       candidateEmail: [null, [Validators.required, Validators.email]],
       candidatePhone: [null],
       coverLetter: [null],
+      specialCategoryId: [null],
+      referralSourceId: [null],
     });
   }
+
+  // EP-17/US-127: optional at apply time - feeds fee-waiver rule matching. Left unselected
+  // ("None") by default, options come from the admin-managed master-data lookups.
+  specialCategoryOptions: { label: string; value: number }[] = [];
+  referralSourceOptions: { label: string; value: number }[] = [];
 
   // No guest apply - applying always requires a logged-in candidate account, so prefill from
   // their own profile instead of forcing a blank form (same precedent as the internal apply form).
@@ -52,6 +62,26 @@ export class ApplyFormComponent implements OnInit {
       },
       // Prefill is a convenience, not a requirement - leave the form blank on failure rather
       // than blocking the candidate from applying.
+      error: () => {},
+    });
+
+    this.loadOptionalDropdowns();
+  }
+
+  private loadOptionalDropdowns(): void {
+    this.masterDataService.getAll('special-category').subscribe({
+      next: (response) => {
+        const items: IMasterDataItem[] = !response.hasError && response.content ? response.content : [];
+        this.specialCategoryOptions = items.map((item) => ({ label: item['name'] as string, value: item['specialCategoryId'] as number }));
+      },
+      error: () => {},
+    });
+
+    this.masterDataService.getAll('referral-source').subscribe({
+      next: (response) => {
+        const items: IMasterDataItem[] = !response.hasError && response.content ? response.content : [];
+        this.referralSourceOptions = items.map((item) => ({ label: item['name'] as string, value: item['referralSourceId'] as number }));
+      },
       error: () => {},
     });
   }

@@ -27,6 +27,8 @@ export class CareerPortalService {
     formData.append('candidateEmail', request.candidateEmail);
     if (request.candidatePhone) formData.append('candidatePhone', request.candidatePhone);
     if (request.coverLetter) formData.append('coverLetter', request.coverLetter);
+    if (request.specialCategoryId) formData.append('specialCategoryId', String(request.specialCategoryId));
+    if (request.referralSourceId) formData.append('referralSourceId', String(request.referralSourceId));
     formData.append('resume', resume, resume.name);
     return this.httpClient.post<ApiResponse<IJobApplicationSubmitResponse>>(`${this.API_URL}/job-postings/${jobPostingId}/apply`, formData);
   }

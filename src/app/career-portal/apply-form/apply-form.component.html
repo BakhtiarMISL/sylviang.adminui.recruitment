@@ -45,6 +45,38 @@
     </p-floatlabel>
   </div>
 
+  <div *ngIf="specialCategoryOptions.length > 0">
+    <p-floatlabel variant="in">
+      <p-select
+        inputId="specialCategoryId"
+        class="w-full"
+        [options]="specialCategoryOptions"
+        formControlName="specialCategoryId"
+        optionLabel="label"
+        optionValue="value"
+        [showClear]="true"
+        [appendTo]="'body'"
+      ></p-select>
+      <label for="specialCategoryId">Special Category (if applicable)</label>
+    </p-floatlabel>
+  </div>
+
+  <div *ngIf="referralSourceOptions.length > 0">
+    <p-floatlabel variant="in">
+      <p-select
+        inputId="referralSourceId"
+        class="w-full"
+        [options]="referralSourceOptions"
+        formControlName="referralSourceId"
+        optionLabel="label"
+        optionValue="value"
+        [showClear]="true"
+        [appendTo]="'body'"
+      ></p-select>
+      <label for="referralSourceId">How did you hear about this role?</label>
+    </p-floatlabel>
+  </div>
+
   <div>
     <label for="resume" class="mb-1 block text-sm text-gray-700">Resume *</label>
     <label for="resume" class="upload-dropzone" (click)="rememberFilePickerScrollPosition()">
