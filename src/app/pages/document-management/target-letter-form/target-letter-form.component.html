@@ -1,0 +1,71 @@
+<section class="page-container" *ngIf="form">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="table-container mb-4 p-4">
+      <h3 class="table-title mb-3">Generate Target Letter</h3>
+
+      <div class="mb-3" *ngIf="offerLetter">
+        <div><strong>Candidate:</strong> {{ offerLetter.candidateName }}</div>
+        <div><strong>Designation:</strong> {{ offerLetter.designation }}</div>
+      </div>
+
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div>
+          <p-floatlabel variant="in">
+            <textarea pTextarea id="kpis" class="w-full" rows="3" formControlName="kpis" (blur)="onFieldChange()"></textarea>
+            <label for="kpis">KPIs</label>
+          </p-floatlabel>
+          <small class="text-red-500" *ngIf="hasError('kpis')">KPIs are required.</small>
+        </div>
+
+        <div>
+          <p-floatlabel variant="in">
+            <textarea pTextarea id="objectives" class="w-full" rows="3" formControlName="objectives" (blur)="onFieldChange()"></textarea>
+            <label for="objectives">Objectives</label>
+          </p-floatlabel>
+          <small class="text-red-500" *ngIf="hasError('objectives')">Objectives are required.</small>
+        </div>
+
+        <div class="sm:col-span-2">
+          <p-floatlabel variant="in">
+            <p-select
+              inputId="documentTemplateId"
+              class="w-full"
+              [options]="templateOptions"
+              formControlName="documentTemplateId"
+              optionLabel="label"
+              optionValue="value"
+              [appendTo]="'body'"
+              placeholder="Select a Target Letter template"
+              (onChange)="onTemplateChange()"
+            ></p-select>
+            <label for="documentTemplateId">Target Letter Template</label>
+          </p-floatlabel>
+          <small class="text-red-500" *ngIf="hasError('documentTemplateId')">Template is required.</small>
+          <small class="text-neutral" *ngIf="templateOptions.length === 0">
+            No active Target Letter templates found. <a [routerLink]="['/document-management/manage-document-template']">Create one first</a>.
+          </small>
+        </div>
+
+        <div class="sm:col-span-2">
+          <p-floatlabel variant="in">
+            <textarea pTextarea id="finalBody" class="w-full" rows="8" formControlName="finalBody"></textarea>
+            <label for="finalBody">Letter Content (review and adjust before finalizing)</label>
+          </p-floatlabel>
+          <small class="text-red-500" *ngIf="hasError('finalBody')">Letter content is required.</small>
+        </div>
+      </div>
+
+      <small class="mt-3 block text-red-500" *ngIf="errorMessage">{{ errorMessage }}</small>
+
+      <div class="mt-4 flex gap-2">
+        <button pButton type="submit" [disabled]="submitting || loading || !offerLetter">
+          <i class="fa fa-bullseye"></i>
+          <span>Generate Target Letter</span>
+        </button>
+        <button pButton type="button" severity="secondary" [routerLink]="['/applications', jobApplicationId]">
+          <span>Cancel</span>
+        </button>
+      </div>
+    </div>
+  </form>
+</section>

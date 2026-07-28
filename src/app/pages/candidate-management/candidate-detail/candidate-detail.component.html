@@ -1,7 +1,5 @@
-<section class="page-container">
+<section class="page-container" *ngIf="loading || loadError">
   <div class="form-container">
-    <h3 class="form-section-header">Candidate Profile</h3>
-
     <div class="sm:col-span-2" *ngIf="loading">Loading...</div>
     <div class="sm:col-span-2 invalid" *ngIf="loadError">{{ loadError }}</div>
   </div>
@@ -15,9 +13,33 @@
         <i *ngIf="!getPhotoUrl()" class="fa-solid fa-circle-user profile-photo-placeholder"></i>
 
         <div class="profile-header-text">
-          <span class="profile-header-name">{{ profile.fullName }}</span>
+          <span class="profile-header-name">
+            {{ profile.fullName }}
+            <span class="profile-type-badge" [class.internal]="profile.isInternal">{{ profile.isInternal ? 'Internal' : 'External' }}</span>
+          </span>
           <span class="profile-header-email">{{ profile.email }}</span>
           <span class="profile-header-phone" *ngIf="profile.phone">{{ profile.phone }}</span>
+          <span class="profile-header-phone" *ngIf="profile.isInternal && (profile.departmentName || profile.designationName)">
+            {{ profile.designationName }}<span *ngIf="profile.designationName && profile.departmentName"> &middot; </span>{{ profile.departmentName }}
+          </span>
+          <span class="text-sm mt-1" *ngIf="profile.hasPrepopulatedFieldEdits">
+            <i class="fas fa-flag"></i> Candidate has edited a field pre-filled from Core HR.
+          </span>
+          <div class="sm:col-span-2" *ngIf="!profile.isInternal">
+            <button pButton type="button" severity="secondary" [disabled]="markingInternal" (click)="markInternal()">
+              <i class="fas fa-user-check"></i>
+              <span>{{ markingInternal ? 'Marking...' : 'Mark as Internal' }}</span>
+            </button>
+            <div *ngIf="markInternalError" class="invalid">{{ markInternalError }}</div>
+          </div>
+
+          <div class="sm:col-span-2">
+            <button pButton type="button" severity="secondary" [disabled]="downloadingProfile" (click)="downloadProfile()">
+              <i class="fa" [class.fa-file-pdf]="!downloadingProfile" [class.fa-spinner]="downloadingProfile" [class.fa-spin]="downloadingProfile"></i>
+              <span>{{ downloadingProfile ? 'Downloading...' : 'Download Profile' }}</span>
+            </button>
+            <div *ngIf="downloadProfileError" class="invalid">{{ downloadProfileError }}</div>
+          </div>
         </div>
 
         <app-completeness-ring [percentage]="profile.completenessPercentage"></app-completeness-ring>
@@ -29,14 +51,15 @@
     <div class="form-container">
       <h3 class="form-section-header">Personal Info</h3>
 
-      <div><span class="field-label">Date of Birth</span><div>{{ profile.dateOfBirth ? (profile.dateOfBirth | date: 'dd-MMM-yyyy') : '-' }}</div></div>
-      <div><span class="field-label">Gender</span><div>{{ profile.gender || '-' }}</div></div>
-      <div><span class="field-label">National ID</span><div>{{ profile.nationalId || '-' }}</div></div>
-      <div><span class="field-label">Father's Name</span><div>{{ profile.fatherName || '-' }}</div></div>
-      <div><span class="field-label">Mother's Name</span><div>{{ profile.motherName || '-' }}</div></div>
-      <div><span class="field-label">Marital Status</span><div>{{ profile.maritalStatus || '-' }}</div></div>
-      <div><span class="field-label">Religion</span><div>{{ profile.religion || '-' }}</div></div>
-      <div><span class="field-label">Nationality</span><div>{{ profile.nationality || '-' }}</div></div>
+      <div><span class="field-label">Date of Birth</span><div class="field-value">{{ profile.dateOfBirth ? (profile.dateOfBirth | date: 'dd-MMM-yyyy') : '-' }}</div></div>
+      <div><span class="field-label">Gender</span><div class="field-value">{{ genderName(profile.genderId) || '-' }}</div></div>
+      <div><span class="field-label">National ID</span><div class="field-value">{{ profile.nationalId || '-' }}</div></div>
+      <div><span class="field-label">Father's Name</span><div class="field-value">{{ profile.fatherName || '-' }}</div></div>
+      <div><span class="field-label">Mother's Name</span><div class="field-value">{{ profile.motherName || '-' }}</div></div>
+      <div><span class="field-label">Marital Status</span><div class="field-value">{{ maritalStatusName(profile.maritalStatusId) || '-' }}</div></div>
+      <div><span class="field-label">Religion</span><div class="field-value">{{ religionName(profile.religionId) || '-' }}</div></div>
+      <div><span class="field-label">Nationality</span><div class="field-value">{{ profile.nationality || '-' }}</div></div>
+      <div><span class="field-label">Blood Group</span><div class="field-value">{{ bloodGroupName(profile.bloodGroupId) || '-' }}</div></div>
     </div>
   </section>
 
@@ -44,8 +67,8 @@
     <div class="form-container">
       <h3 class="form-section-header">Contact</h3>
 
-      <div><span class="field-label">Present Address</span><div>{{ profile.presentAddress || '-' }}</div></div>
-      <div><span class="field-label">Permanent Address</span><div>{{ profile.permanentAddress || '-' }}</div></div>
+      <div><span class="field-label">Present Address</span><div class="field-value">{{ profile.presentAddressDetail || '-' }}</div></div>
+      <div><span class="field-label">Permanent Address</span><div class="field-value">{{ profile.permanentAddressDetail || '-' }}</div></div>
     </div>
   </section>
 
@@ -57,7 +80,7 @@
       <div class="sm:col-span-2" *ngIf="profile.educations.length > 0">
         <div class="list-row" *ngFor="let edu of profile.educations">
           <div>
-            <strong>{{ edu.degreeTitle }}</strong> — {{ edu.institution }}
+            <strong>{{ degreeName(edu.degreeId) }}</strong> <span>— {{ edu.institution }}</span>
             <span class="text-sm text-neutral ml-2">{{ edu.passingYear }}, {{ edu.result }}</span>
           </div>
         </div>
@@ -73,7 +96,7 @@
       <div class="sm:col-span-2" *ngIf="profile.workExperiences.length > 0">
         <div class="list-row" *ngFor="let exp of profile.workExperiences">
           <div>
-            <strong>{{ exp.designation }}</strong> — {{ exp.companyName }}
+            <strong>{{ exp.designation }}</strong> <span>— {{ exp.companyName }}</span>
             <span class="text-sm text-neutral ml-2">
               {{ exp.startDate | date: 'MMM yyyy' }} - {{ exp.isCurrent ? 'Present' : (exp.endDate | date: 'MMM yyyy') }}
             </span>
@@ -123,7 +146,7 @@
       <div class="sm:col-span-2" *ngIf="profile.documents.length > 0">
         <div class="list-row" *ngFor="let doc of profile.documents">
           <div>
-            <strong>{{ doc.documentType }}</strong> —
+            <strong>{{ doc.documentType }}</strong> <span>—</span>
             <a [href]="getFileUrl(doc.downloadUrl)" target="_blank" rel="noopener noreferrer" class="text-primary">{{ doc.fileName }}</a>
           </div>
         </div>
@@ -144,6 +167,59 @@
             <span class="text-sm text-neutral ml-2" *ngIf="app.appliedDate">Applied {{ app.appliedDate | date: 'dd-MMM-yyyy' }}</span>
           </div>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="page-container">
+    <div class="form-container">
+      <h3 class="form-section-header">Talent Pools</h3>
+
+      <div class="sm:col-span-2 text-sm text-neutral" *ngIf="profile.talentPools.length === 0">Not in any talent pool.</div>
+      <div class="sm:col-span-2 skills-list" *ngIf="profile.talentPools.length > 0">
+        <span class="skill-chip" *ngFor="let pool of profile.talentPools">
+          <a [routerLink]="['/talent-pools/talent-pool-detail', pool.talentPoolId]">{{ pool.name }}</a>
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <section class="page-container">
+    <div class="form-container">
+      <h3 class="form-section-header">Tags</h3>
+      <p class="sm:col-span-2 text-sm text-neutral">Visible to HR/Admin only &mdash; never shown to the candidate.</p>
+
+      <div class="sm:col-span-2 text-sm text-neutral" *ngIf="tags.length === 0">No tags yet.</div>
+      <div class="sm:col-span-2 skills-list" *ngIf="tags.length > 0">
+        <span class="skill-chip" *ngFor="let tag of tags">
+          {{ tag.tagName }}
+          <button type="button" (click)="removeTag(tag)" title="Remove tag"><i class="fas fa-times"></i></button>
+        </span>
+      </div>
+
+      <div class="sm:col-span-2">
+        <p-floatlabel variant="in">
+          <p-autocomplete
+            inputId="newTagName"
+            [(ngModel)]="newTagName"
+            [suggestions]="tagSuggestions"
+            (completeMethod)="filterTagSuggestions($event)"
+            [forceSelection]="false"
+            class="w-full"
+            styleClass="w-full"
+            inputStyleClass="w-full"
+          ></p-autocomplete>
+          <label for="newTagName">Add a tag</label>
+        </p-floatlabel>
+      </div>
+
+      <div *ngIf="addTagError" class="invalid sm:col-span-2">{{ addTagError }}</div>
+
+      <div class="sm:col-span-2">
+        <button pButton type="button" [disabled]="addingTag || !newTagName.trim()" (click)="addTag()">
+          <i class="fas fa-plus"></i>
+          <span>{{ addingTag ? 'Adding...' : 'Add Tag' }}</span>
+        </button>
       </div>
     </div>
   </section>

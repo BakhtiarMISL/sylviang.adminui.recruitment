@@ -1,0 +1,27 @@
+// US-072: below phone width, the per-criterion table reflows into stacked label/value rows
+// instead of forcing a squeezed 3-column table onto a narrow screen.
+@media (max-width: 767px) {
+  .criteria-table {
+    thead {
+      display: none;
+    }
+
+    tr {
+      display: flex;
+      flex-direction: column;
+      padding: 0.5rem 0;
+    }
+
+    td {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.25rem 0;
+
+      &::before {
+        content: attr(data-label);
+        font-weight: 500;
+        margin-right: 0.5rem;
+      }
+    }
+  }
+}

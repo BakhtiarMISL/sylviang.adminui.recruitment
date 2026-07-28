@@ -10,6 +10,8 @@ export interface IPipelineStage {
   departmentId?: number;
   estimatedDurationMinutes?: number;
   slaDays?: number;
+  maxMarks?: number;
+  passMarks?: number;
   colorBadge?: string;
   emailTemplate?: string;
   notifyCandidateOnEnter: boolean;

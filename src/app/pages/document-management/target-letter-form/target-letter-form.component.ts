@@ -1,0 +1,161 @@
+import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { BreadcrumbService } from '@app/@core/services';
+import { DocumentTypeEnum, OfferLetterStatusEnum } from '@app/@core/enums/recruitment.enum';
+import { DocumentTemplateService } from '@app/@core/services/recruitment/document-template/document-template.service';
+import { OfferLetterService } from '@app/@core/services/recruitment/offer-letter/offer-letter.service';
+import { TargetLetterService } from '@app/@core/services/recruitment/target-letter/target-letter.service';
+import { IDocumentTemplateResponse } from '@core/interfaces/recruitment-management/document-template.interface';
+import { IOfferLetterResponse } from '@core/interfaces/recruitment-management/offer-letter.interface';
+
+@Component({
+  selector: 'app-target-letter-form',
+  standalone: false,
+  templateUrl: './target-letter-form.component.html',
+  styleUrl: './target-letter-form.component.scss',
+})
+export class TargetLetterFormComponent implements OnInit {
+  constructor(
+    private fb: FormBuilder,
+    private documentTemplateService: DocumentTemplateService,
+    private offerLetterService: OfferLetterService,
+    private targetLetterService: TargetLetterService,
+    private route: ActivatedRoute,
+    private router: Router,
+    private breadcrumbService: BreadcrumbService,
+  ) {}
+
+  form!: FormGroup;
+  formSubmitted = false;
+  submitting = false;
+  loading = false;
+  errorMessage = '';
+
+  jobApplicationId!: number;
+  offerLetter: IOfferLetterResponse | null = null;
+  templateOptions: { label: string; value: number }[] = [];
+  templates: IDocumentTemplateResponse[] = [];
+
+  ngOnInit(): void {
+    this.breadcrumbService.setBreadcrumbs([
+      { title: 'System Administration', icon: 'fa-solid fa-gears', href: '/document-management/offer-letter-list' },
+      { title: 'Generate Target Letter', icon: 'fa-solid fa-bullseye', href: '' },
+    ]);
+
+    this.jobApplicationId = Number(this.route.snapshot.queryParamMap.get('jobApplicationId'));
+
+    this.form = this.fb.group({
+      kpis: [null, [Validators.required]],
+      objectives: [null, [Validators.required]],
+      documentTemplateId: [null, [Validators.required]],
+      finalBody: [{ value: '', disabled: true }, [Validators.required]],
+    });
+
+    this.loadOfferLetter();
+    this.loadTemplates();
+  }
+
+  private loadOfferLetter(): void {
+    this.loading = true;
+    this.offerLetterService.getAll(this.jobApplicationId).subscribe({
+      next: (response) => {
+        const offerLetters: IOfferLetterResponse[] = !response.hasError && response.content ? response.content : [];
+        this.offerLetter = offerLetters.find((o) => o.status === OfferLetterStatusEnum.Accepted) ?? null;
+        if (!this.offerLetter) {
+          this.errorMessage = 'A target letter can only be generated once the candidate has an Accepted offer letter.';
+        }
+        this.loading = false;
+      },
+      error: () => {
+        this.errorMessage = 'Failed to load the offer letter.';
+        this.loading = false;
+      },
+    });
+  }
+
+  private loadTemplates(): void {
+    this.documentTemplateService.getAll().subscribe({
+      next: (response) => {
+        this.templates = !response.hasError && response.content ? response.content : [];
+        this.templateOptions = this.templates
+          .filter((t) => t.documentType === DocumentTypeEnum.TargetLetter && t.isActive)
+          .map((t) => ({ label: t.name, value: t.documentTemplateId }));
+      },
+    });
+  }
+
+  hasError(fieldName: string): boolean {
+    const field = this.form.get(fieldName);
+    return !!(field && field.invalid && (field.dirty || field.touched || this.formSubmitted));
+  }
+
+  onFieldChange(): void {
+    this.renderPreview();
+  }
+
+  onTemplateChange(): void {
+    this.renderPreview();
+  }
+
+  private renderPreview(): void {
+    const templateId = this.form.get('documentTemplateId')?.value;
+    const template = this.templates.find((t) => t.documentTemplateId === templateId);
+    const bodyControl = this.form.get('finalBody');
+    if (!template || !this.offerLetter) {
+      bodyControl?.setValue('');
+      bodyControl?.disable();
+      return;
+    }
+
+    const placeholderValues: Record<string, string> = {
+      CandidateName: this.offerLetter.candidateName,
+      Designation: this.offerLetter.designation,
+      Kpis: this.form.get('kpis')?.value ?? '',
+      Objectives: this.form.get('objectives')?.value ?? '',
+    };
+
+    this.documentTemplateService.preview({ body: template.body, placeholderValues }).subscribe({
+      next: (response) => {
+        const rendered = !response.hasError && response.content ? response.content.renderedBody : '';
+        bodyControl?.setValue(rendered);
+        bodyControl?.enable();
+      },
+    });
+  }
+
+  onSubmit(): void {
+    this.formSubmitted = true;
+    this.errorMessage = '';
+
+    if (this.form.invalid || !this.offerLetter) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    const value = this.form.getRawValue();
+    this.submitting = true;
+    this.targetLetterService
+      .generate({
+        offerLetterId: this.offerLetter.offerLetterId,
+        documentTemplateId: value.documentTemplateId,
+        kpis: value.kpis,
+        objectives: value.objectives,
+        finalBody: value.finalBody,
+      })
+      .subscribe({
+        next: (response) => {
+          this.submitting = false;
+          if (response && !response.hasError) {
+            this.router.navigate(['/applications', this.jobApplicationId]);
+          } else {
+            this.errorMessage = response?.decentMessage || 'Failed to generate target letter';
+          }
+        },
+        error: (error) => {
+          this.submitting = false;
+          this.errorMessage = error?.error?.decentMessage || 'Failed to generate target letter';
+        },
+      });
+  }
+}

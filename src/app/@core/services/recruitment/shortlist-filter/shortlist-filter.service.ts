@@ -1,6 +1,7 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpContext } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ApiResponse } from '@core/interfaces/ApiResponse';
+import { DISABLE_TOAST } from '@core/constants/http-context';
 import {
   IShortlistFilterApplyRequest,
   IShortlistFilterApplyResponse,
@@ -45,8 +46,12 @@ export class ShortlistFilterService {
     return this.httpClient.delete<ApiResponse<void>>(`${this.API_URL}/${id}`);
   }
 
+  // POST for the request body, but this is a read-only dry-run (matched candidates rendered
+  // inline) - not a save, so it must never toast.
   preview(request: IShortlistFilterPreviewRequest) {
-    return this.httpClient.post<ApiResponse<IShortlistFilterPreviewResponse>>(`${this.API_URL}/preview`, request);
+    return this.httpClient.post<ApiResponse<IShortlistFilterPreviewResponse>>(`${this.API_URL}/preview`, request, {
+      context: new HttpContext().set(DISABLE_TOAST, true),
+    });
   }
 
   apply(request: IShortlistFilterApplyRequest) {
