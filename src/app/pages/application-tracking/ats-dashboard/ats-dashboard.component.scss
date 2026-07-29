@@ -133,3 +133,31 @@
   background: #eef2ff;
   color: #4338ca;
 }
+
+// EP-14 US-109 AC2: rows exceeding the stale-days threshold are highlighted.
+::ng-deep tr.row-stale {
+  background: #fef2f2 !important;
+}
+
+:host-context(.dark) ::ng-deep tr.row-stale {
+  background: rgba(220, 38, 38, 0.15) !important;
+}
+
+.stale-only-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 0 0 auto;
+}
+
+.inline-update-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 0.5rem 0 1rem;
+}
+
+.inline-update-candidate {
+  font-weight: 500;
+  margin: 0;
+}

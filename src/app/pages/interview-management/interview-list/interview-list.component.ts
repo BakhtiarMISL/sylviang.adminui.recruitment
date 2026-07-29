@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, HostListener, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { UI_CONFIG } from '@app/@core/constants';
 import { InterviewStatusEnum } from '@app/@core/enums/recruitment.enum';
 import { IInterviewResponse } from '@app/@core/interfaces/recruitment-management/interview.interface';
@@ -18,6 +18,7 @@ export class InterviewListComponent implements OnInit {
     private interviewService: InterviewService,
     private breadcrumbService: BreadcrumbService,
     private router: Router,
+    private route: ActivatedRoute,
     private cdr: ChangeDetectorRef,
   ) {}
 
@@ -56,6 +57,14 @@ export class InterviewListComponent implements OnInit {
       { title: 'Recruitment', icon: 'fa-solid fa-briefcase', href: '/interviews/interview-list' },
       { title: 'Interviews', icon: 'fa-solid fa-people-arrows', href: '/interviews/interview-list' },
     ]);
+
+    // EP-14 US-105 AC3: deep-link from the "Upcoming Interviews" dashboard card.
+    const statusParam = this.route.snapshot.queryParamMap.get('status') as InterviewStatusEnum | null;
+    if (statusParam && Object.values(InterviewStatusEnum).includes(statusParam)) {
+      this.filterStatus = statusParam;
+      this.filtersCollapsed = false;
+    }
+
     this.loadInterviews();
   }
 

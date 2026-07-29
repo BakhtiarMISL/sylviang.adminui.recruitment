@@ -19,6 +19,9 @@ export interface IAtsDashboardFilterParams {
   minAge?: number;
   maxAge?: number;
   tags?: string[];
+
+  /** EP-14 US-109 AC2: only rows currently flagged stale (days in current stage over threshold). */
+  staleOnly?: boolean;
 }
 
 export interface IJobApplicationListItem {
@@ -29,6 +32,14 @@ export interface IJobApplicationListItem {
   source: ApplicationSourceEnum;
   appliedDate?: string;
   applicationStatus: ApplicationStatusEnum;
+
+  // EP-14 US-109 AC1/AC2: tracker columns, populated from the application's current pipeline
+  // stage - absent/null for applications that haven't entered a stage yet.
+  currentStageName?: string;
+  lastUpdatedAt?: string;
+  daysInCurrentStage?: number;
+  isStale?: boolean;
+  assignedHrUserName?: string;
 }
 
 export interface IApplicationStatusHistoryEntry {

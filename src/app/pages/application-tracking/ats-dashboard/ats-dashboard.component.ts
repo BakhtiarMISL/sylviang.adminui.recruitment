@@ -1,5 +1,5 @@
 import { AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ApplicationSourceEnum, ApplicationStatusEnum, EducationLevelEnum, ExportFormatEnum, RecruitmentEventEnum } from '@app/@core/enums/recruitment.enum';
 import { ISkillLibraryItemResponse } from '@app/@core/interfaces/recruitment-management/candidate-profile.interface';
 import { IAtsDashboardFilterParams, IApplicationStatusReason, IJobApplicationListItem } from '@app/@core/interfaces/recruitment-management/job-application.interface';
@@ -42,6 +42,7 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     private confirmationService: ConfirmationService,
     private toast: ToastService,
     private router: Router,
+    private route: ActivatedRoute,
   ) {}
 
   applications: IJobApplicationListItem[] = [];
@@ -68,6 +69,8 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   filterSource: ApplicationSourceEnum | null = null;
   filterDateFrom: Date | null = null;
   filterDateTo: Date | null = null;
+  /** EP-14 US-109 AC2 */
+  filterStaleOnly = false;
 
   // Candidate-attribute filters, scoped to one vacancy (US-050 AC1/AC2)
   filterMinEducationLevel: EducationLevelEnum | null = null;
@@ -126,6 +129,15 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   pipelineDialogVisible = false;
   pipelineDialogApplicationId: number | null = null;
 
+  // EP-14 US-109 AC4: inline status update/note directly from a tracker row, without navigating away.
+  inlineUpdateDialogVisible = false;
+  inlineUpdateApplication: IJobApplicationListItem | null = null;
+  inlineUpdateToStatus: ApplicationStatusEnum | null = null;
+  inlineUpdateReasonId: number | null = null;
+  inlineUpdateNote = '';
+  inlineUpdateReasonOptions: IApplicationStatusReason[] = [];
+  inlineUpdateSaving = false;
+
   // Apply shortlist filter to vacancy (US-044)
   shortlistFilters: IShortlistFilterLookupResponse[] = [];
   selectedShortlistFilterId: number | null = null;
@@ -159,6 +171,7 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit(): void {
     this.restoreFiltersFromSession();
+    this.applyDeepLinkQueryParams();
     this.filterChange$.pipe(debounceTime(400)).subscribe(() => {
       this.currentPage = 1;
       this.filtersCollapsed = true;
@@ -234,6 +247,7 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     this.filterSource = null;
     this.filterDateFrom = null;
     this.filterDateTo = null;
+    this.filterStaleOnly = false;
     this.resetCandidateAttributeFilters();
     this.currentPage = 1;
     this.filtersCollapsed = false;
@@ -273,6 +287,7 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
       ...(this.filterMinAge != null && { minAge: this.filterMinAge }),
       ...(this.filterMaxAge != null && { maxAge: this.filterMaxAge }),
       ...(this.filterTags.length > 0 && { tags: this.filterTags }),
+      ...(this.filterStaleOnly && { staleOnly: true }),
     };
   }
 
@@ -288,6 +303,24 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
       error: (error) => {
         this.exporting = false;
         this.toast.error({ detail: error?.error?.decentMessage || 'Failed to queue export.' });
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  /** EP-14 US-109 AC5: queues an async export of the tracker columns (Vacancy/Candidate/Stage/
+   * Status/LastUpdated/DaysInStage/AssignedHR) for every application matching the current filters. */
+  exportTracker(): void {
+    this.exporting = true;
+    this.exportRequestService.requestJobApplicationTrackerExport({ filter: this.buildFilterParams(), format: this.exportFormat }).subscribe({
+      next: () => {
+        this.exporting = false;
+        this.toast.success({ detail: 'Tracker export queued - you will be notified when it is ready to download (see Export Requests).' });
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        this.exporting = false;
+        this.toast.error({ detail: error?.error?.decentMessage || 'Failed to queue tracker export.' });
         this.cdr.detectChanges();
       },
     });
@@ -315,6 +348,7 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
       chips.push({ key: 'filterAge', label: `Age: ${this.filterMinAge ?? 0}-${this.filterMaxAge ?? '∞'}` });
     }
     if (this.filterTags.length > 0) chips.push({ key: 'filterTags', label: `Tags: ${this.filterTags.join(', ')}` });
+    if (this.filterStaleOnly) chips.push({ key: 'filterStaleOnly', label: 'Stale only' });
     return chips;
   }
 
@@ -356,6 +390,9 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
       case 'filterTags':
         this.filterTags = [];
         break;
+      case 'filterStaleOnly':
+        this.filterStaleOnly = false;
+        break;
     }
     this.currentPage = 1;
     this.saveFiltersToSession();
@@ -379,6 +416,7 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
       filterMinAge: this.filterMinAge,
       filterMaxAge: this.filterMaxAge,
       filterTags: this.filterTags,
+      filterStaleOnly: this.filterStaleOnly,
     };
     sessionStorage.setItem(FILTER_SESSION_KEY, JSON.stringify(state));
   }
@@ -402,9 +440,21 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
       this.filterMinAge = state.filterMinAge ?? null;
       this.filterMaxAge = state.filterMaxAge ?? null;
       this.filterTags = state.filterTags ?? [];
+      this.filterStaleOnly = state.filterStaleOnly ?? false;
     } catch {
       sessionStorage.removeItem(FILTER_SESSION_KEY);
     }
+  }
+
+  /** EP-14 US-105 AC3: dashboard cards deep-link here with a jobPostingId/staleOnly query param -
+   * applied on top of the restored session filters, since a card click should override them. */
+  private applyDeepLinkQueryParams(): void {
+    const params = this.route.snapshot.queryParamMap;
+    const jobPostingId = params.get('jobPostingId');
+    const staleOnly = params.get('staleOnly');
+
+    if (jobPostingId) this.filterJobPostingId = +jobPostingId;
+    if (staleOnly === 'true') this.filterStaleOnly = true;
   }
 
   loadApplications(): void {
@@ -474,6 +524,64 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   openPipelineTracker(application: IJobApplicationListItem): void {
     this.pipelineDialogApplicationId = application.jobApplicationId;
     this.pipelineDialogVisible = true;
+  }
+
+  // ── Inline status update from a tracker row (EP-14 US-109 AC4) ──
+
+  openInlineUpdate(application: IJobApplicationListItem): void {
+    this.inlineUpdateApplication = application;
+    this.inlineUpdateToStatus = null;
+    this.inlineUpdateReasonId = null;
+    this.inlineUpdateNote = '';
+    this.inlineUpdateReasonOptions = [];
+    this.inlineUpdateDialogVisible = true;
+  }
+
+  onInlineUpdateStatusChange(status: ApplicationStatusEnum | null): void {
+    this.inlineUpdateReasonId = null;
+    this.inlineUpdateReasonOptions = [];
+
+    if (status && StatusesRequiringReason.includes(status)) {
+      this.jobApplicationService.getStatusReasons(status).subscribe({
+        next: (response) => {
+          this.inlineUpdateReasonOptions = response && !response.hasError && response.content ? response.content : [];
+          this.cdr.detectChanges();
+        },
+      });
+    }
+  }
+
+  inlineUpdateRequiresReason(): boolean {
+    return !!this.inlineUpdateToStatus && StatusesRequiringReason.includes(this.inlineUpdateToStatus);
+  }
+
+  canConfirmInlineUpdate(): boolean {
+    if (!this.inlineUpdateApplication || !this.inlineUpdateToStatus) return false;
+    return !this.inlineUpdateRequiresReason() || !!this.inlineUpdateReasonId;
+  }
+
+  confirmInlineUpdate(): void {
+    if (!this.inlineUpdateApplication || !this.inlineUpdateToStatus) return;
+
+    this.inlineUpdateSaving = true;
+    this.jobApplicationService
+      .updateStatus(this.inlineUpdateApplication.jobApplicationId, {
+        toStatus: this.inlineUpdateToStatus,
+        reasonId: this.inlineUpdateReasonId ?? undefined,
+        note: this.inlineUpdateNote || undefined,
+      })
+      .subscribe({
+        next: () => {
+          this.inlineUpdateSaving = false;
+          this.inlineUpdateDialogVisible = false;
+          this.toast.success({ detail: 'Application updated.' });
+          this.loadApplications();
+        },
+        error: (error) => {
+          this.inlineUpdateSaving = false;
+          this.toast.error({ detail: error?.error?.decentMessage || 'Failed to update application.' });
+        },
+      });
   }
 
   openAutoShortlistDialog(): void {

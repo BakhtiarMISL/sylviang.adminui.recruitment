@@ -69,12 +69,17 @@
       <label for="filterDateTo">Applied To</label>
     </p-floatlabel>
 
+    <div class="stale-only-toggle">
+      <p-checkbox [(ngModel)]="filterStaleOnly" [binary]="true" inputId="filterStaleOnly"></p-checkbox>
+      <label for="filterStaleOnly">Stale only</label>
+    </div>
+
     <button pButton (click)="applyFilters()">
       <i class="fa fa-filter"></i>
       <span>Apply Filters</span>
     </button>
 
-    <button *ngIf="filterJobPostingId || filterStatus || filterSource || filterDateFrom || filterDateTo" severity="secondary" pButton (click)="resetFilters()">
+    <button *ngIf="filterJobPostingId || filterStatus || filterSource || filterDateFrom || filterDateTo || filterStaleOnly" severity="secondary" pButton (click)="resetFilters()">
       <i class="fa fa-times"></i>
       <span>Reset</span>
     </button>
@@ -101,6 +106,11 @@
     <button severity="secondary" pButton [disabled]="exporting" (click)="exportCandidateList()">
       <i class="fa fa-download"></i>
       <span>Export Candidate List</span>
+    </button>
+
+    <button severity="secondary" pButton [disabled]="exporting" (click)="exportTracker()">
+      <i class="fa fa-download"></i>
+      <span>Export Tracker</span>
     </button>
   </div>
 
@@ -384,10 +394,14 @@
               <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
               <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
               <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
               <td><p-skeleton width="3rem" height="1rem"></p-skeleton></td>
             </tr>
           } @else {
-            <tr>
+            <tr [class.row-stale]="application.isStale" [pTooltip]="application.isStale ? 'Days in current stage exceeds the stale threshold' : ''">
               <td><p-tableCheckbox [value]="application"></p-tableCheckbox></td>
               <td>{{ application.candidateName }}</td>
               <td>{{ application.jobPostingTitle || '-' }}</td>
@@ -398,12 +412,19 @@
                   {{ formatEnumLabel(application.applicationStatus) }}
                 </span>
               </td>
+              <td>{{ application.currentStageName || 'Not started' }}</td>
+              <td>{{ application.lastUpdatedAt ? (application.lastUpdatedAt | date: 'dd-MMM-yyyy HH:mm') : '-' }}</td>
+              <td>{{ application.daysInCurrentStage ?? '-' }}</td>
+              <td>{{ application.assignedHrUserName || '-' }}</td>
               <td>
                 <button (click)="openDetail(application)" class="text-primary" pTooltip="View Detail">
                   <i class="fa fa-eye"></i>
                 </button>
                 <button (click)="openPipelineTracker(application)" class="text-primary ml-2" pTooltip="Pipeline Progress">
                   <i class="fa-solid fa-diagram-project"></i>
+                </button>
+                <button (click)="openInlineUpdate(application)" class="text-primary ml-2" pTooltip="Update Status">
+                  <i class="fa-solid fa-pen-to-square"></i>
                 </button>
               </td>
             </tr>
@@ -412,7 +433,7 @@
 
         <ng-template pTemplate="emptymessage">
           <tr>
-            <td colspan="7" class="not-found">
+            <td colspan="11" class="not-found">
               <div>
                 <i class="fa fa-magnifying-glass-minus"></i>
                 <p>No applications found</p>
@@ -427,6 +448,54 @@
 
 <p-dialog header="Pipeline Progress" [(visible)]="pipelineDialogVisible" [modal]="true" [style]="{ width: '60rem', maxWidth: '95vw' }">
   <app-pipeline-progress-tracker *ngIf="pipelineDialogVisible && pipelineDialogApplicationId" [jobApplicationId]="pipelineDialogApplicationId"></app-pipeline-progress-tracker>
+</p-dialog>
+
+<!-- EP-14 US-109 AC4: inline status update/note directly from a tracker row -->
+<p-dialog header="Update Application Status" [(visible)]="inlineUpdateDialogVisible" [modal]="true" [style]="{ width: '28rem', maxWidth: '95vw' }">
+  <div class="inline-update-form" *ngIf="inlineUpdateApplication as application">
+    <p class="inline-update-candidate">{{ application.candidateName }} &mdash; {{ formatEnumLabel(application.applicationStatus) }}</p>
+
+    <p-floatlabel variant="in">
+      <p-select
+        inputId="inlineUpdateToStatus"
+        [options]="statusOptions"
+        [(ngModel)]="inlineUpdateToStatus"
+        (ngModelChange)="onInlineUpdateStatusChange($event)"
+        optionLabel="label"
+        optionValue="value"
+        [appendTo]="'body'"
+        [autoDisplayFirst]="false"
+        class="w-full"
+      ></p-select>
+      <label for="inlineUpdateToStatus">Move To</label>
+    </p-floatlabel>
+
+    <p-floatlabel variant="in" *ngIf="inlineUpdateRequiresReason()">
+      <p-select
+        inputId="inlineUpdateReasonId"
+        [options]="inlineUpdateReasonOptions"
+        [(ngModel)]="inlineUpdateReasonId"
+        optionLabel="label"
+        optionValue="applicationStatusReasonId"
+        [appendTo]="'body'"
+        [autoDisplayFirst]="false"
+        class="w-full"
+      ></p-select>
+      <label for="inlineUpdateReasonId">Reason *</label>
+    </p-floatlabel>
+
+    <p-floatlabel variant="in">
+      <input type="text" pInputText id="inlineUpdateNote" class="w-full" [(ngModel)]="inlineUpdateNote" name="inlineUpdateNote" />
+      <label for="inlineUpdateNote">Note (optional)</label>
+    </p-floatlabel>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <button pButton [disabled]="!canConfirmInlineUpdate() || inlineUpdateSaving" (click)="confirmInlineUpdate()">
+      <i class="fa fa-check"></i>
+      <span>Update</span>
+    </button>
+  </ng-template>
 </p-dialog>
 
 <p-dialog header="AI-Powered Auto-Shortlisting" [(visible)]="autoShortlistDialogVisible" [modal]="true" [style]="{ width: '60rem', maxWidth: '95vw' }">

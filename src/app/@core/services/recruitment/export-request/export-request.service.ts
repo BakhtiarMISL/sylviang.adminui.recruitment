@@ -21,6 +21,11 @@ export class ExportRequestService {
     return this.httpClient.post<ApiResponse<number>>(`${this.API_URL}/candidate-list`, request);
   }
 
+  /** EP-14 US-109 AC5: queues a job-application-tracker export. */
+  requestJobApplicationTrackerExport(request: IExportRequestCreateRequest) {
+    return this.httpClient.post<ApiResponse<number>>(`${this.API_URL}/job-application-tracker`, request);
+  }
+
   /** US-101: queues a large bulk-CV-ZIP request - the synchronous counterpart is
    * JobApplicationService.bulkDownloadCvs, for small batches. */
   requestBulkCvZipExport(jobApplicationIds: number[]) {
