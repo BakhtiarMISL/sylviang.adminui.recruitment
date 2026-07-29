@@ -101,6 +101,12 @@ export const webSidebarMenuItems: IMenuItem[] = [
         icon: 'fa-solid fa-list-check',
       },
       {
+        href: '/analytics/recruitment',
+        title: 'Recruitment Analytics',
+        active: false,
+        icon: 'fa-solid fa-chart-column',
+      },
+      {
         href: '/exam-venues/exam-venue-list',
         title: 'Exam Venues',
         active: false,

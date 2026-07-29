@@ -139,6 +139,10 @@ const routes: Routes = [
       path: 'payment-management',
       loadChildren: () => import('./payment-management/payment-management.module').then((m) => m.PaymentManagementModule),
     },
+    {
+      path: 'analytics',
+      loadChildren: () => import('./analytics/analytics.module').then((m) => m.AnalyticsModule),
+    },
   ]),
 ];
 
