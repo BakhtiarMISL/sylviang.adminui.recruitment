@@ -1,5 +1,6 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { EvaluationRecommendationEnum } from '@app/@core/enums/recruitment.enum';
 import { IInterviewResponse } from '@app/@core/interfaces/recruitment-management/interview.interface';
 import { IJobApplicationDetail } from '@app/@core/interfaces/recruitment-management/job-application.interface';
 import { IScorecardLookupResponse, IScorecardResponse } from '@app/@core/interfaces/recruitment-management/scorecard.interface';
@@ -48,6 +49,13 @@ export class EvaluateInterviewComponent implements OnInit {
   selectedScorecardId: number | null = null;
   scoreRows: CriterionScoreRow[] = [];
   overallComments = '';
+  recommendation: EvaluationRecommendationEnum | null = null;
+
+  recommendationOptions = [
+    { label: 'Recommended', value: EvaluationRecommendationEnum.Recommended },
+    { label: 'Not Recommended', value: EvaluationRecommendationEnum.NotRecommended },
+    { label: 'On Hold', value: EvaluationRecommendationEnum.OnHold },
+  ];
 
   loading = false;
   scorecardLoading = false;
@@ -169,6 +177,7 @@ export class EvaluateInterviewComponent implements OnInit {
         scorecardId: this.selectedScorecardId,
         scores: this.scoreRows.map((r) => ({ scorecardCriterionId: r.scorecardCriterionId, score: r.score as number })),
         overallComments: this.overallComments || null,
+        recommendation: this.recommendation,
       })
       .subscribe({
         next: (response) => {

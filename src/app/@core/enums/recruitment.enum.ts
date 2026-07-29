@@ -234,3 +234,10 @@ export enum ExportFormatEnum {
   Xlsx = 'Xlsx',
   Csv = 'Csv',
 }
+
+/** EP-14 US-110: a panelist's explicit hiring recommendation on their InterviewEvaluation. */
+export enum EvaluationRecommendationEnum {
+  Recommended = 'Recommended',
+  NotRecommended = 'NotRecommended',
+  OnHold = 'OnHold',
+}

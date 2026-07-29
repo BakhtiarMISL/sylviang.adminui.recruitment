@@ -1,8 +1,12 @@
 import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { BreadcrumbService } from '@app/@core/services';
-import { ApplicationStatusEnum } from '@core/enums/recruitment.enum';
+import { ApplicationStatusEnum, EmploymentTypeEnum } from '@core/enums/recruitment.enum';
 import { IJobVacancyResponse } from '@core/interfaces/recruitment-management/job-vacancy.interface';
 import {
+  ICandidateSourceAnalyticsRequest,
+  ICandidateSourceAnalyticsResponse,
+  IInterviewAnalyticsRequest,
+  IInterviewAnalyticsResponse,
   IRecruitmentFunnelRequest,
   IRecruitmentFunnelResponse,
   ITimeToHireRequest,
@@ -49,6 +53,13 @@ export class RecruitmentAnalyticsComponent implements OnInit {
     { label: 'Internal', value: true },
     { label: 'External', value: false },
   ];
+  employmentTypeOptions = [
+    { label: 'All', value: null },
+    { label: 'Full Time', value: EmploymentTypeEnum.FullTime },
+    { label: 'Part Time', value: EmploymentTypeEnum.PartTime },
+    { label: 'Contract', value: EmploymentTypeEnum.Contract },
+    { label: 'Internship', value: EmploymentTypeEnum.Internship },
+  ];
 
   loading = false;
   exporting = false;
@@ -56,17 +67,24 @@ export class RecruitmentAnalyticsComponent implements OnInit {
 
   funnel: IRecruitmentFunnelResponse | null = null;
   timeToHire: ITimeToHireResponse | null = null;
+  candidateSourceAnalytics: ICandidateSourceAnalyticsResponse | null = null;
+  interviewAnalytics: IInterviewAnalyticsResponse | null = null;
 
   filterJobPostingId: number | null = null;
   filterDepartmentId: number | null = null;
   filterDateFrom: Date | null = null;
   filterDateTo: Date | null = null;
   filterIsInternal: boolean | null = null;
+  filterEmploymentType: EmploymentTypeEnum | null = null;
 
   funnelChartData: unknown;
   funnelChartOptions: unknown;
   stageDurationChartData: unknown;
   stageDurationChartOptions: unknown;
+  candidateSourceChartData: unknown;
+  candidateSourceChartOptions: unknown;
+  scoreHistogramChartData: unknown;
+  scoreHistogramChartOptions: unknown;
 
   ngOnInit(): void {
     this.breadcrumbService.setBreadcrumbs([
@@ -102,6 +120,24 @@ export class RecruitmentAnalyticsComponent implements OnInit {
     };
   }
 
+  private buildCandidateSourceRequest(): ICandidateSourceAnalyticsRequest {
+    return {
+      jobPostingId: this.filterJobPostingId ?? undefined,
+      employmentType: this.filterEmploymentType ?? undefined,
+      dateFrom: this.filterDateFrom ? this.filterDateFrom.toISOString() : undefined,
+      dateTo: this.filterDateTo ? this.filterDateTo.toISOString() : undefined,
+    };
+  }
+
+  private buildInterviewAnalyticsRequest(): IInterviewAnalyticsRequest {
+    return {
+      jobPostingId: this.filterJobPostingId ?? undefined,
+      departmentId: this.filterDepartmentId ?? undefined,
+      dateFrom: this.filterDateFrom ? this.filterDateFrom.toISOString() : undefined,
+      dateTo: this.filterDateTo ? this.filterDateTo.toISOString() : undefined,
+    };
+  }
+
   runReport(): void {
     this.loading = true;
     this.errorMessage = '';
@@ -109,10 +145,14 @@ export class RecruitmentAnalyticsComponent implements OnInit {
     forkJoin({
       funnel: this.analyticsService.getFunnel(this.buildFunnelRequest()),
       timeToHire: this.analyticsService.getTimeToHire(this.buildTimeToHireRequest()),
+      candidateSource: this.analyticsService.getCandidateSourceAnalytics(this.buildCandidateSourceRequest()),
+      interviewAnalytics: this.analyticsService.getInterviewAnalytics(this.buildInterviewAnalyticsRequest()),
     }).subscribe({
-      next: ({ funnel, timeToHire }) => {
+      next: ({ funnel, timeToHire, candidateSource, interviewAnalytics }) => {
         this.funnel = !funnel.hasError && funnel.content ? funnel.content : null;
         this.timeToHire = !timeToHire.hasError && timeToHire.content ? timeToHire.content : null;
+        this.candidateSourceAnalytics = !candidateSource.hasError && candidateSource.content ? candidateSource.content : null;
+        this.interviewAnalytics = !interviewAnalytics.hasError && interviewAnalytics.content ? interviewAnalytics.content : null;
         this.buildCharts();
         this.loading = false;
         this.cdr.detectChanges();
@@ -120,6 +160,8 @@ export class RecruitmentAnalyticsComponent implements OnInit {
       error: (error) => {
         this.funnel = null;
         this.timeToHire = null;
+        this.candidateSourceAnalytics = null;
+        this.interviewAnalytics = null;
         this.errorMessage = error?.error?.decentMessage || 'Failed to load recruitment analytics.';
         this.loading = false;
         this.cdr.detectChanges();
@@ -191,6 +233,61 @@ export class RecruitmentAnalyticsComponent implements OnInit {
       plugins: { legend: { display: false } },
       scales: { y: { beginAtZero: true }, x: { ticks: { autoSkip: false } } },
     };
+
+    const segments = this.candidateSourceAnalytics?.segments ?? [];
+    const segmentColors = ['#6366f1', '#0ea5e9', '#f59e0b', '#10b981', '#ec4899', '#8b5cf6'];
+
+    this.candidateSourceChartData = {
+      labels: segments.map((s) => s.sourceLabel),
+      datasets: [
+        {
+          data: segments.map((s) => s.totalApplications),
+          backgroundColor: segments.map((_, i) => segmentColors[i % segmentColors.length]),
+        },
+      ],
+    };
+
+    this.candidateSourceChartOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'right' },
+        tooltip: {
+          callbacks: {
+            afterLabel: (context: { dataIndex: number }) => {
+              const segment = segments[context.dataIndex];
+              if (!segment) return '';
+              return [
+                `Shortlisted: ${segment.shortlistedCount}`,
+                `Hired: ${segment.hiredCount}`,
+                `Conversion: ${segment.conversionRatePercent}%`,
+              ];
+            },
+          },
+        },
+      },
+    };
+
+    const histogram = this.interviewAnalytics?.scoreHistogram ?? [];
+
+    this.scoreHistogramChartData = {
+      labels: histogram.map((b) => b.band),
+      datasets: [
+        {
+          label: 'Evaluations',
+          data: histogram.map((b) => b.count),
+          backgroundColor: '#0ea5e9',
+        },
+      ],
+    };
+
+    this.scoreHistogramChartOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      // Fixed set of 5 score bands - always show every label, never thin them out.
+      scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } }, x: { ticks: { autoSkip: false } } },
+    };
   }
 
   exportFunnelPng(): void {
@@ -229,6 +326,38 @@ export class RecruitmentAnalyticsComponent implements OnInit {
       },
       error: (error) => {
         this.errorMessage = error?.error?.decentMessage || 'Failed to export time-to-hire CSV.';
+        this.exporting = false;
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  exportCandidateSourceExcel(): void {
+    this.exporting = true;
+    this.analyticsService.exportCandidateSourceAnalyticsExcel(this.buildCandidateSourceRequest()).subscribe({
+      next: (response) => {
+        saveFileResponse(response, 'Candidate-Source-Analytics.xlsx');
+        this.exporting = false;
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        this.errorMessage = error?.error?.decentMessage || 'Failed to export candidate source analytics.';
+        this.exporting = false;
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  exportInterviewAnalyticsExcel(): void {
+    this.exporting = true;
+    this.analyticsService.exportInterviewAnalyticsExcel(this.buildInterviewAnalyticsRequest()).subscribe({
+      next: (response) => {
+        saveFileResponse(response, 'Interview-Analytics.xlsx');
+        this.exporting = false;
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        this.errorMessage = error?.error?.decentMessage || 'Failed to export interview analytics.';
         this.exporting = false;
         this.cdr.detectChanges();
       },

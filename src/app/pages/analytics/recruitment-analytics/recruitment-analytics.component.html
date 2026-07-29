@@ -46,6 +46,19 @@
       <label for="filterIsInternal">Candidate Type</label>
     </p-floatlabel>
 
+    <p-floatlabel variant="in">
+      <p-select
+        inputId="filterEmploymentType"
+        class="w-40"
+        [options]="employmentTypeOptions"
+        [(ngModel)]="filterEmploymentType"
+        optionLabel="label"
+        optionValue="value"
+        [appendTo]="'body'"
+      ></p-select>
+      <label for="filterEmploymentType">Employment Type</label>
+    </p-floatlabel>
+
     <button pButton [disabled]="loading" (click)="runReport()">
       <i class="fa fa-magnifying-glass"></i>
       <span>Run Report</span>
@@ -118,6 +131,104 @@
         type="bar"
         [data]="stageDurationChartData"
         [options]="stageDurationChartOptions"
+        [style.display]="'block'"
+        [style.width]="'100%'"
+        [style.height]="'100%'"
+      ></p-chart>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && candidateSourceAnalytics" class="table-container p-4 mt-4">
+    <div class="flex justify-between items-center mb-3">
+      <h4 class="font-semibold">Candidate Source Analytics</h4>
+      <button pButton severity="secondary" size="small" [disabled]="exporting" (click)="exportCandidateSourceExcel()">
+        <i class="fa fa-file-excel"></i>
+        <span>Export Excel</span>
+      </button>
+    </div>
+
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div style="height: 20rem; position: relative">
+        <p-chart
+          type="pie"
+          [data]="candidateSourceChartData"
+          [options]="candidateSourceChartOptions"
+          [style.display]="'block'"
+          [style.width]="'100%'"
+          [style.height]="'100%'"
+        ></p-chart>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-left text-gray-600 dark:text-gray-300">
+              <th class="pb-1">Source</th>
+              <th class="pb-1">Total</th>
+              <th class="pb-1">Shortlisted</th>
+              <th class="pb-1">Hired</th>
+              <th class="pb-1">Conversion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let segment of candidateSourceAnalytics.segments">
+              <td class="py-0.5 text-gray-900 dark:text-white">{{ segment.sourceLabel }}</td>
+              <td class="py-0.5 text-gray-600 dark:text-gray-300">{{ segment.totalApplications }}</td>
+              <td class="py-0.5 text-gray-600 dark:text-gray-300">{{ segment.shortlistedCount }}</td>
+              <td class="py-0.5 text-gray-600 dark:text-gray-300">{{ segment.hiredCount }}</td>
+              <td class="py-0.5 text-gray-600 dark:text-gray-300">{{ segment.conversionRatePercent }}%</td>
+            </tr>
+            <tr *ngIf="!candidateSourceAnalytics.segments.length">
+              <td colspan="5" class="py-2 text-center text-gray-500">No applications in scope.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && interviewAnalytics" class="table-container p-4 mt-4">
+    <div class="flex justify-between items-center mb-3">
+      <h4 class="font-semibold">Interview Analytics</h4>
+      <button pButton severity="secondary" size="small" [disabled]="exporting" (click)="exportInterviewAnalyticsExcel()">
+        <i class="fa fa-file-excel"></i>
+        <span>Export Excel</span>
+      </button>
+    </div>
+
+    <div class="overflow-x-auto mb-4">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="text-left text-gray-600 dark:text-gray-300">
+            <th class="pb-1">Panelist</th>
+            <th class="pb-1">Interviews</th>
+            <th class="pb-1">Average Score</th>
+            <th class="pb-1">Recommended</th>
+            <th class="pb-1">Not Recommended</th>
+            <th class="pb-1">On Hold</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let panelist of interviewAnalytics.panelists">
+            <td class="py-0.5 text-gray-900 dark:text-white">{{ panelist.employeeName }}</td>
+            <td class="py-0.5 text-gray-600 dark:text-gray-300">{{ panelist.interviewsConducted }}</td>
+            <td class="py-0.5 text-gray-600 dark:text-gray-300">{{ panelist.averageScore }}%</td>
+            <td class="py-0.5 text-gray-600 dark:text-gray-300">{{ panelist.recommendedCount }}</td>
+            <td class="py-0.5 text-gray-600 dark:text-gray-300">{{ panelist.notRecommendedCount }}</td>
+            <td class="py-0.5 text-gray-600 dark:text-gray-300">{{ panelist.onHoldCount }}</td>
+          </tr>
+          <tr *ngIf="!interviewAnalytics.panelists.length">
+            <td colspan="6" class="py-2 text-center text-gray-500">No evaluations in scope.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="height: 18rem; position: relative" *ngIf="interviewAnalytics.panelists.length">
+      <p-chart
+        type="bar"
+        [data]="scoreHistogramChartData"
+        [options]="scoreHistogramChartOptions"
         [style.display]="'block'"
         [style.width]="'100%'"
         [style.height]="'100%'"
