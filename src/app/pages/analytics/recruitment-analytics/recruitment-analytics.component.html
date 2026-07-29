@@ -1,0 +1,238 @@
+<section class="page-container">
+  <div class="flex justify-between items-center gap-3 mb-4">
+    <h3 class="table-title">Recruitment Analytics</h3>
+  </div>
+
+  <div class="flex flex-wrap items-end gap-3 mb-4">
+    <p-floatlabel variant="in">
+      <p-select
+        inputId="filterJobPostingId"
+        class="w-56"
+        [options]="vacancyOptions"
+        [(ngModel)]="filterJobPostingId"
+        optionLabel="title"
+        optionValue="jobPostingId"
+        [showClear]="true"
+        [appendTo]="'body'"
+      ></p-select>
+      <label for="filterJobPostingId">Vacancy</label>
+    </p-floatlabel>
+
+    <p-floatlabel variant="in">
+      <p-inputnumber inputId="filterDepartmentId" styleClass="w-32" [(ngModel)]="filterDepartmentId" [useGrouping]="false"></p-inputnumber>
+      <label for="filterDepartmentId">Department ID</label>
+    </p-floatlabel>
+
+    <p-floatlabel variant="in">
+      <p-datepicker inputId="filterDateFrom" styleClass="w-40" [(ngModel)]="filterDateFrom" [showIcon]="true" dateFormat="dd-M-yy"></p-datepicker>
+      <label for="filterDateFrom">From</label>
+    </p-floatlabel>
+
+    <p-floatlabel variant="in">
+      <p-datepicker inputId="filterDateTo" styleClass="w-40" [(ngModel)]="filterDateTo" [showIcon]="true" dateFormat="dd-M-yy"></p-datepicker>
+      <label for="filterDateTo">To</label>
+    </p-floatlabel>
+
+    <p-floatlabel variant="in">
+      <p-select
+        inputId="filterIsInternal"
+        class="w-40"
+        [options]="candidateTypeOptions"
+        [(ngModel)]="filterIsInternal"
+        optionLabel="label"
+        optionValue="value"
+        [appendTo]="'body'"
+      ></p-select>
+      <label for="filterIsInternal">Candidate Type</label>
+    </p-floatlabel>
+
+    <p-floatlabel variant="in">
+      <p-select
+        inputId="filterEmploymentType"
+        class="w-40"
+        [options]="employmentTypeOptions"
+        [(ngModel)]="filterEmploymentType"
+        optionLabel="label"
+        optionValue="value"
+        [appendTo]="'body'"
+      ></p-select>
+      <label for="filterEmploymentType">Employment Type</label>
+    </p-floatlabel>
+
+    <button pButton [disabled]="loading" (click)="runReport()">
+      <i class="fa fa-magnifying-glass"></i>
+      <span>Run Report</span>
+    </button>
+  </div>
+
+  <small class="mb-3 block text-red-500" *ngIf="errorMessage">{{ errorMessage }}</small>
+
+  <div *ngIf="loading" class="space-y-3">
+    <p-skeleton height="16rem"></p-skeleton>
+  </div>
+
+  <div *ngIf="!loading && funnel" class="table-container p-4 mb-4">
+    <div class="flex justify-between items-center mb-3">
+      <h4 class="font-semibold">Recruitment Funnel</h4>
+      <div class="flex gap-2">
+        <button pButton severity="secondary" size="small" [disabled]="exporting" (click)="exportFunnelPng()">
+          <i class="fa fa-image"></i>
+          <span>Export PNG</span>
+        </button>
+        <button pButton severity="secondary" size="small" [disabled]="exporting" (click)="exportFunnelCsv()">
+          <i class="fa fa-file-csv"></i>
+          <span>Export CSV</span>
+        </button>
+      </div>
+    </div>
+    <div style="height: 22rem; position: relative">
+      <p-chart
+        #funnelChart
+        type="bar"
+        [data]="funnelChartData"
+        [options]="funnelChartOptions"
+        [style.display]="'block'"
+        [style.width]="'100%'"
+        [style.height]="'100%'"
+      ></p-chart>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && timeToHire" class="table-container p-4">
+    <div class="flex justify-between items-center mb-3">
+      <h4 class="font-semibold">Time-to-Hire</h4>
+      <button pButton severity="secondary" size="small" [disabled]="exporting" (click)="exportTimeToHireCsv()">
+        <i class="fa fa-file-csv"></i>
+        <span>Export CSV</span>
+      </button>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3 sm:grid-cols-4 mb-4">
+      <div class="table-container p-4">
+        <div class="text-sm text-neutral">Average Days</div>
+        <div class="text-2xl font-semibold">{{ timeToHire.averageDays ?? '-' }}</div>
+      </div>
+      <div class="table-container p-4">
+        <div class="text-sm text-neutral">Min Days</div>
+        <div class="text-2xl font-semibold">{{ timeToHire.minDays ?? '-' }}</div>
+      </div>
+      <div class="table-container p-4">
+        <div class="text-sm text-neutral">Max Days</div>
+        <div class="text-2xl font-semibold">{{ timeToHire.maxDays ?? '-' }}</div>
+      </div>
+      <div class="table-container p-4">
+        <div class="text-sm text-neutral">Vacancies (Hired)</div>
+        <div class="text-2xl font-semibold">{{ timeToHire.vacancyCount }}</div>
+      </div>
+    </div>
+
+    <div style="height: 18rem; position: relative" *ngIf="timeToHire.stageBreakdown.length">
+      <p-chart
+        type="bar"
+        [data]="stageDurationChartData"
+        [options]="stageDurationChartOptions"
+        [style.display]="'block'"
+        [style.width]="'100%'"
+        [style.height]="'100%'"
+      ></p-chart>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && candidateSourceAnalytics" class="table-container p-4 mt-4">
+    <div class="flex justify-between items-center mb-3">
+      <h4 class="font-semibold">Candidate Source Analytics</h4>
+      <button pButton severity="secondary" size="small" [disabled]="exporting" (click)="exportCandidateSourceExcel()">
+        <i class="fa fa-file-excel"></i>
+        <span>Export Excel</span>
+      </button>
+    </div>
+
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div style="height: 20rem; position: relative">
+        <p-chart
+          type="pie"
+          [data]="candidateSourceChartData"
+          [options]="candidateSourceChartOptions"
+          [style.display]="'block'"
+          [style.width]="'100%'"
+          [style.height]="'100%'"
+        ></p-chart>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-left text-gray-600 dark:text-gray-300">
+              <th class="pb-1">Source</th>
+              <th class="pb-1">Total</th>
+              <th class="pb-1">Shortlisted</th>
+              <th class="pb-1">Hired</th>
+              <th class="pb-1">Conversion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let segment of candidateSourceAnalytics.segments">
+              <td class="py-0.5 text-gray-900 dark:text-white">{{ segment.sourceLabel }}</td>
+              <td class="py-0.5 text-gray-600 dark:text-gray-300">{{ segment.totalApplications }}</td>
+              <td class="py-0.5 text-gray-600 dark:text-gray-300">{{ segment.shortlistedCount }}</td>
+              <td class="py-0.5 text-gray-600 dark:text-gray-300">{{ segment.hiredCount }}</td>
+              <td class="py-0.5 text-gray-600 dark:text-gray-300">{{ segment.conversionRatePercent }}%</td>
+            </tr>
+            <tr *ngIf="!candidateSourceAnalytics.segments.length">
+              <td colspan="5" class="py-2 text-center text-gray-500">No applications in scope.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && interviewAnalytics" class="table-container p-4 mt-4">
+    <div class="flex justify-between items-center mb-3">
+      <h4 class="font-semibold">Interview Analytics</h4>
+      <button pButton severity="secondary" size="small" [disabled]="exporting" (click)="exportInterviewAnalyticsExcel()">
+        <i class="fa fa-file-excel"></i>
+        <span>Export Excel</span>
+      </button>
+    </div>
+
+    <div class="overflow-x-auto mb-4">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="text-left text-gray-600 dark:text-gray-300">
+            <th class="pb-1">Panelist</th>
+            <th class="pb-1">Interviews</th>
+            <th class="pb-1">Average Score</th>
+            <th class="pb-1">Recommended</th>
+            <th class="pb-1">Not Recommended</th>
+            <th class="pb-1">On Hold</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let panelist of interviewAnalytics.panelists">
+            <td class="py-0.5 text-gray-900 dark:text-white">{{ panelist.employeeName }}</td>
+            <td class="py-0.5 text-gray-600 dark:text-gray-300">{{ panelist.interviewsConducted }}</td>
+            <td class="py-0.5 text-gray-600 dark:text-gray-300">{{ panelist.averageScore }}%</td>
+            <td class="py-0.5 text-gray-600 dark:text-gray-300">{{ panelist.recommendedCount }}</td>
+            <td class="py-0.5 text-gray-600 dark:text-gray-300">{{ panelist.notRecommendedCount }}</td>
+            <td class="py-0.5 text-gray-600 dark:text-gray-300">{{ panelist.onHoldCount }}</td>
+          </tr>
+          <tr *ngIf="!interviewAnalytics.panelists.length">
+            <td colspan="6" class="py-2 text-center text-gray-500">No evaluations in scope.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="height: 18rem; position: relative" *ngIf="interviewAnalytics.panelists.length">
+      <p-chart
+        type="bar"
+        [data]="scoreHistogramChartData"
+        [options]="scoreHistogramChartOptions"
+        [style.display]="'block'"
+        [style.width]="'100%'"
+        [style.height]="'100%'"
+      ></p-chart>
+    </div>
+  </div>
+</section>

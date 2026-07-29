@@ -1,0 +1,17 @@
+<article class="msl-card" [class.msl-card--active]="active" (click)="onSelect()">
+  @if (product.badge) {
+    <span class="msl-card__badge">{{ product.badge }}</span>
+  }
+
+  <div class="msl-card__image">
+    <img [src]="product.image" [alt]="product.name + ' logo'" loading="lazy" />
+  </div>
+
+  <h3 class="msl-card__name">{{ product.name }}</h3>
+  <p class="msl-card__tagline">{{ product.tagline }}</p>
+
+  <button type="button" class="msl-card__cta" (click)="onSelect(); $event.stopPropagation()">
+    {{ product.ctaLabel }}
+    <span class="msl-card__cta-arrow">&rarr;</span>
+  </button>
+</article>

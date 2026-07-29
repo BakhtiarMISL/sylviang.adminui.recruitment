@@ -115,7 +115,7 @@ export class ShellComponent implements OnInit {
     }
 
     if (this.sidebarComponent) {
-      return this.sidebarComponent.desktopExpanded ? '248px' : '80px';
+      return this.sidebarComponent.isVisuallyExpanded ? '248px' : '80px';
     }
 
     return this.isSidebarExpanded ? '248px' : '80px';

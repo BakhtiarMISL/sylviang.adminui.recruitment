@@ -1,0 +1,89 @@
+<section class="page-container">
+  <div class="flex justify-between items-center gap-3 mb-4">
+    <h3 class="table-title">Evaluation Results</h3>
+    <div class="flex gap-2">
+      <button pButton severity="secondary" [routerLink]="['/interviews/interview', interviewId]">
+        <i class="fa fa-arrow-left"></i>
+        <span>Back to Interview</span>
+      </button>
+      <button pButton [routerLink]="['/interviews/interview', interviewId, 'evaluate']">
+        <i class="fa fa-star"></i>
+        <span>Add Evaluation</span>
+      </button>
+      <button pButton severity="secondary" [loading]="exporting" [disabled]="evaluations.length === 0" (click)="exportExcel()">
+        <i class="fa fa-file-excel"></i>
+        <span>Export Excel</span>
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="interview" class="table-container mb-4 p-4">
+    <h4 class="text-lg font-medium text-gray-900 dark:text-white">{{ interview.candidateName }}</h4>
+    <p class="text-sm text-gray-600 dark:text-gray-300">
+      Round {{ interview.round }} &middot; {{ evaluations.length }} evaluation(s)
+      <ng-container *ngIf="evaluations.length > 0"> &middot; Average weighted score {{ averageWeightedScore() | number: '1.0-2' }}%</ng-container>
+    </p>
+  </div>
+
+  <div *ngIf="loading" class="space-y-3">
+    <p-skeleton height="6rem"></p-skeleton>
+  </div>
+
+  <div *ngIf="!loading && evaluations.length === 0" class="table-container">
+    <div class="not-found">
+      <i class="fa fa-magnifying-glass-minus"></i>
+      <p>No evaluations submitted yet for this interview.</p>
+    </div>
+  </div>
+
+  <div *ngIf="!loading" class="grid grid-cols-1 gap-4">
+    <div *ngFor="let evaluation of evaluations" class="rounded-lg bg-white p-4 shadow-sm dark:bg-dark">
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h4 class="text-md font-medium text-gray-900 dark:text-white">Panelist Employee ID: {{ evaluation.employeeId }}</h4>
+          <p class="text-sm text-gray-600 dark:text-gray-300">{{ evaluation.scorecardName }}</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400">
+            Submitted {{ evaluation.submittedAt | date: 'dd-MMM-yyyy HH:mm' }} by {{ evaluation.submittedByUserName || '-' }}
+          </p>
+        </div>
+        <div class="flex flex-col items-end gap-1">
+          <span class="rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700">
+            {{ evaluation.weightedScore | number: '1.0-2' }}%
+          </span>
+          <span
+            *ngIf="evaluation.recommendation"
+            class="rounded-full px-3 py-1 text-xs font-medium"
+            [ngClass]="{
+              'bg-green-100 text-green-700': evaluation.recommendation === 'Recommended',
+              'bg-red-100 text-red-700': evaluation.recommendation === 'NotRecommended',
+              'bg-yellow-100 text-yellow-700': evaluation.recommendation === 'OnHold'
+            }"
+          >
+            {{ evaluation.recommendation === 'NotRecommended' ? 'Not Recommended' : evaluation.recommendation === 'OnHold' ? 'On Hold' : 'Recommended' }}
+          </span>
+        </div>
+      </div>
+
+      <table class="mt-3 w-full text-sm criteria-table">
+        <thead>
+          <tr class="text-left text-gray-600 dark:text-gray-300">
+            <th class="pb-1">Criterion</th>
+            <th class="pb-1">Weight</th>
+            <th class="pb-1">Score</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let score of evaluation.scores">
+            <td class="py-0.5 text-gray-900 dark:text-white" data-label="Criterion">{{ score.criterionName }}</td>
+            <td class="py-0.5 text-gray-600 dark:text-gray-300" data-label="Weight">{{ score.weight }}</td>
+            <td class="py-0.5 text-gray-600 dark:text-gray-300" data-label="Score">{{ score.score }} / {{ score.maxScore }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p class="mt-2 text-sm text-gray-600 dark:text-gray-300" *ngIf="evaluation.overallComments">
+        Comments: {{ evaluation.overallComments }}
+      </p>
+    </div>
+  </div>
+</section>

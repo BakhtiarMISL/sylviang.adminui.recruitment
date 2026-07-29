@@ -111,6 +111,13 @@
                 <button [routerLink]="['/job-vacancy/manage-job-vacancy', vacancy.jobPostingId]" class="text-primary mr-2">
                   <i class="fa fa-edit"></i>
                 </button>
+                <button
+                  [routerLink]="['/interviews/interview-round-config', vacancy.jobPostingId]"
+                  class="text-primary mr-2"
+                  title="Configure Interview Rounds"
+                >
+                  <i class="fa fa-layer-group"></i>
+                </button>
                 <button class="text-danger" (click)="deleteJobVacancy(vacancy, $event)">
                   <i class="fa fa-trash"></i>
                 </button>

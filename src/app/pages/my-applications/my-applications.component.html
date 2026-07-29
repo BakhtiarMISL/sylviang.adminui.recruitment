@@ -32,8 +32,45 @@
         </div>
       </div>
 
-      <div class="application-card-actions" *ngIf="application.canWithdraw">
-        <button pButton type="button" class="p-button-outlined p-button-danger p-button-sm" [disabled]="withdrawingId === application.jobApplicationId" (click)="confirmWithdraw($event, application)">
+      <div class="interviews" *ngIf="examsFor(application.jobApplicationId).length > 0">
+        <h5>Exams</h5>
+        <div class="interview-row" *ngFor="let exam of examsFor(application.jobApplicationId)">
+          <i class="fa-solid fa-file-pen"></i>
+          <span>{{ exam.examTitle }}</span>
+          <span>{{ exam.scheduledStartAt | date: 'dd-MMM-yyyy, h:mm a' }}</span>
+          <span>{{ exam.examType === ExamTypeEnum.Online ? 'Online' : 'In-Person' }}</span>
+
+          <ng-container *ngIf="exam.examType === ExamTypeEnum.Online">
+            <a *ngIf="exam.attemptStatus === ExamAttemptStatusEnum.NotStarted" [routerLink]="['/exam-attempt', exam.examEnrollmentId]" class="exam-action-link">Start Exam</a>
+            <a *ngIf="exam.attemptStatus === ExamAttemptStatusEnum.InProgress" [routerLink]="['/exam-attempt', exam.examEnrollmentId]" class="exam-action-link">Resume Exam</a>
+            <a *ngIf="exam.attemptStatus === ExamAttemptStatusEnum.Submitted" [routerLink]="['/exam-attempt', exam.examEnrollmentId]" class="exam-action-link">View Status</a>
+          </ng-container>
+          <span *ngIf="exam.examType === ExamTypeEnum.InPerson" class="text-sm text-neutral">Scheduled</span>
+          <button
+            type="button"
+            class="exam-action-link"
+            [disabled]="downloadingAdmitCardId === exam.examEnrollmentId"
+            (click)="downloadAdmitCard(exam)"
+          >
+            <i class="fa" [class.fa-download]="downloadingAdmitCardId !== exam.examEnrollmentId" [class.fa-spinner]="downloadingAdmitCardId === exam.examEnrollmentId" [class.fa-spin]="downloadingAdmitCardId === exam.examEnrollmentId"></i>
+            Download Admit Card
+          </button>
+        </div>
+      </div>
+
+      <div class="application-card-actions" *ngIf="application.canWithdraw || application.applicationStatus === 'AwaitingPayment'">
+        <button
+          *ngIf="application.applicationStatus === 'AwaitingPayment'"
+          pButton
+          type="button"
+          class="p-button-sm"
+          [disabled]="retryingPaymentId === application.jobApplicationId"
+          (click)="retryPayment(application)"
+        >
+          <i class="fa fa-credit-card"></i>
+          <span>{{ retryingPaymentId === application.jobApplicationId ? 'Starting payment...' : 'Retry Payment' }}</span>
+        </button>
+        <button pButton type="button" class="p-button-outlined p-button-danger p-button-sm" *ngIf="application.canWithdraw" [disabled]="withdrawingId === application.jobApplicationId" (click)="confirmWithdraw($event, application)">
           <i class="fa fa-ban"></i>
           <span>Withdraw Application</span>
         </button>

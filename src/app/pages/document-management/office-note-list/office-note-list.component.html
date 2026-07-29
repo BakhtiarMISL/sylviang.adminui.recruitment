@@ -1,0 +1,47 @@
+<section class="page-container">
+  <div class="flex justify-between items-center gap-3 mb-4">
+    <h3 class="table-title">Office Notes</h3>
+    <button pButton size="small" [routerLink]="['/document-management/manage-office-note']" [queryParams]="jobApplicationId ? { jobApplicationId } : {}">
+      <i class="fa fa-plus"></i>
+      <span>Generate Office Note</span>
+    </button>
+  </div>
+
+  <small class="mb-3 block text-red-500" *ngIf="errorMessage">{{ errorMessage }}</small>
+
+  <div *ngIf="loading" class="space-y-3">
+    <p-skeleton height="3rem" *ngFor="let i of skeletonItems"></p-skeleton>
+  </div>
+
+  <div *ngIf="!loading && items.length === 0" class="table-container">
+    <div class="not-found">
+      <i class="fa fa-file-pen"></i>
+      <p>No office notes generated yet.</p>
+    </div>
+  </div>
+
+  <p-table *ngIf="!loading && items.length > 0" [value]="items" styleClass="p-datatable-sm">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Candidate</th>
+        <th>Template</th>
+        <th>Enclosures</th>
+        <th>Generated At</th>
+        <th style="width: 8rem">PDF</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-item>
+      <tr>
+        <td>{{ item.candidateName }}</td>
+        <td>{{ item.documentTemplateName }}</td>
+        <td>{{ item.enclosuresSummary }}</td>
+        <td>{{ item.generatedAt | date: 'dd-MMM-yyyy HH:mm' }}</td>
+        <td>
+          <a [href]="getPdfUrl(item)" target="_blank" pButton size="small" severity="secondary">
+            <i class="fa fa-file-pdf"></i>
+          </a>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</section>

@@ -3,31 +3,6 @@
   <section class="form-container">
     <h3 class="form-section-header">{{ isEditMode ? 'Update Job Vacancy' : 'Add Job Vacancy' }}</h3>
 
-    <!-- Site -->
-    <div>
-      <p-floatlabel variant="in">
-        <p-inputnumber inputId="siteId" formControlName="siteId" class="w-full" [useGrouping]="false" [class.ng-invalid]="hasError('siteId')" [class.ng-dirty]="hasError('siteId')" (onBlur)="f['siteId'].markAsTouched()"></p-inputnumber>
-        <label for="siteId">Site ID *</label>
-      </p-floatlabel>
-      <div *ngIf="hasError('siteId')" class="invalid">{{ getErrorMessage('siteId') }}</div>
-    </div>
-
-    <!-- Department -->
-    <div>
-      <p-floatlabel variant="in">
-        <p-inputnumber inputId="departmentId" formControlName="departmentId" class="w-full" [useGrouping]="false"></p-inputnumber>
-        <label for="departmentId">Department ID</label>
-      </p-floatlabel>
-    </div>
-
-    <!-- Designation -->
-    <div>
-      <p-floatlabel variant="in">
-        <p-inputnumber inputId="designationId" formControlName="designationId" class="w-full" [useGrouping]="false"></p-inputnumber>
-        <label for="designationId">Designation ID</label>
-      </p-floatlabel>
-    </div>
-
     <!-- Hiring Pipeline -->
     <div>
       <p-floatlabel variant="in">
@@ -50,6 +25,7 @@
       <div *ngIf="hasError('hiringPipelineId')" class="invalid">{{ getErrorMessage('hiringPipelineId') }}</div>
     </div>
 
+    <!-- Assessment Workflow (optional) -->
     <!-- Title -->
     <div>
       <p-floatlabel variant="in">
@@ -379,7 +355,7 @@
       <i class="fas fa-arrow-left z-10"></i>
       <span>Back</span>
     </button>
-    <button pButton type="submit">
+    <button pButton type="submit" [disabled]="jobVacancyForm.pristine">
       <i class="fas fa-save"></i>
       <span>Save</span>
     </button>
@@ -398,7 +374,7 @@
           <strong>{{ selectedFile?.name || 'Click to upload an attachment' }}</strong>
         </span>
       </label>
-      <input id="attachmentFile" type="file" (change)="onFileSelected($event)" class="sr-only" />
+      <input #attachmentFileInput id="attachmentFile" type="file" (change)="onFileSelected($event)" class="sr-only file-picker-input" />
       <button pButton type="button" [disabled]="!selectedFile || uploadingAttachment" (click)="uploadAttachment()">
         <i class="fa fa-upload"></i>
         <span>{{ uploadingAttachment ? 'Uploading...' : 'Upload' }}</span>

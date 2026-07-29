@@ -2,6 +2,7 @@ import { Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Outpu
 import { Router } from '@angular/router';
 import { BreadcrumbItem, BreadcrumbService } from '@core/services/breadcrumb.service';
 import { AuthService } from '@core/services/auth/auth.service';
+import { UserRoleEnum } from '@core/enums/user-role.enum';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 
 @UntilDestroy()
@@ -33,6 +34,12 @@ export class HeaderComponent implements OnInit {
 
   get displayName(): string {
     return this.authService.getUser()?.displayName || this.authService.getUser()?.username || 'User';
+  }
+
+  // US-079: bell is HR-facing only - Candidates have no AdminHr-scoped NotificationLog rows to see.
+  get showNotificationBell(): boolean {
+    const role = this.authService.getRole();
+    return role === UserRoleEnum.Admin || role === UserRoleEnum.HR;
   }
 
   logout(): void {
