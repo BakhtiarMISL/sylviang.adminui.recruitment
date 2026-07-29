@@ -27,19 +27,25 @@ export class ErrorHandlerInterceptor implements HttpInterceptor {
   ) {}
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    // Snapshot the page the request was fired from. A slow save's response can land well
+    // after the user has already navigated elsewhere - toasting it there reads as a random,
+    // unexplained "success" message with no visible action behind it.
+    const initiatedFromUrl = this.router.url;
+
     return next.handle(request).pipe(
       tap((event) => {
         if (event instanceof HttpResponse) {
-          this._handleSuccessResponse(request, event.body);
+          this._handleSuccessResponse(request, event.body, initiatedFromUrl);
         }
       }),
-      catchError((error) => this._errorHandler(request, error)),
+      catchError((error) => this._errorHandler(request, error, initiatedFromUrl)),
     );
   }
 
-  private _handleSuccessResponse(request: HttpRequest<any>, body: unknown): void {
+  private _handleSuccessResponse(request: HttpRequest<any>, body: unknown, initiatedFromUrl: string): void {
     if (request.context.get(DISABLE_TOAST)) return;
     if (!this._isApiResponseBody(body)) return;
+    if (this.router.url !== initiatedFromUrl) return;
 
     const method = request.method.toUpperCase();
     const message = body.decentMessage.trim();
@@ -59,11 +65,11 @@ export class ErrorHandlerInterceptor implements HttpInterceptor {
     }
   }
 
-  private _errorHandler(request: HttpRequest<any>, error: HttpErrorResponse): Observable<HttpEvent<any>> {
-    const disableToast = request.context.get(DISABLE_TOAST);
+  private _errorHandler(request: HttpRequest<any>, error: HttpErrorResponse, initiatedFromUrl: string): Observable<HttpEvent<any>> {
+    const disableToast = request.context.get(DISABLE_TOAST) || this.router.url !== initiatedFromUrl;
 
     if (error.status === 401 || error.status === 403) {
-      if (error.status === 401 && !this._isAuthLoginRequest(request)) {
+      if (error.status === 401 && !this._isAuthLoginRequest(request) && !this._isOtpChallengeRequest(request) && !this._isPublicEndpointRequest(request)) {
         this.authService.logout();
         this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
       }
@@ -103,6 +109,22 @@ export class ErrorHandlerInterceptor implements HttpInterceptor {
 
   private _isAuthLoginRequest(request: HttpRequest<any>): boolean {
     return request.url.includes('/auth/login');
+  }
+
+  // EP-09 Feature 2: a 401 from these calls means "wrong/expired OTP code," a normal,
+  // retryable, in-place failure - not "your session died." No session exists yet at this
+  // point (verify-otp/resend-otp are called before any token is issued), so there's nothing
+  // to log out of; force-navigating to /login here would just blow away OtpVerifyComponent's
+  // own error handling mid-retry.
+  private _isOtpChallengeRequest(request: HttpRequest<any>): boolean {
+    return request.url.includes('/auth/verify-otp') || request.url.includes('/auth/resend-otp');
+  }
+
+  // Public/anonymous endpoints (landing page, career portal, job browse/detail/apply) must
+  // never force-logout a visitor over a stale/expired token attached by AuthInterceptor —
+  // a 401 here just means "treat as anonymous", not "session invalid".
+  private _isPublicEndpointRequest(request: HttpRequest<any>): boolean {
+    return request.url.includes('/career-portal');
   }
 
   private _isApiResponseBody(body: unknown): body is { hasError: boolean; decentMessage: string } {

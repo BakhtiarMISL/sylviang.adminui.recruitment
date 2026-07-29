@@ -1,0 +1,39 @@
+<div class="relative">
+  <button
+    (click)="togglePanel()"
+    class="h-8 w-8 flex items-center justify-center relative text-black dark:text-borderLight hover:text-primary dark:hover:text-primary duration-300"
+    aria-label="Notifications"
+    title="Notifications"
+  >
+    <i class="fas fa-bell"></i>
+    <span
+      *ngIf="unreadCount > 0"
+      class="absolute top-0 right-0 bg-red-500 text-white text-[10px] leading-none rounded-full min-w-[16px] h-4 flex items-center justify-center px-1"
+    >
+      {{ unreadCount > 9 ? '9+' : unreadCount }}
+    </span>
+  </button>
+
+  <div
+    *ngIf="panelOpen"
+    class="absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto bg-white dark:bg-dark border border-borderLight dark:border-neutral rounded shadow-lg z-50"
+  >
+    <div class="flex justify-between items-center px-3 py-2 border-b border-borderLight dark:border-neutral">
+      <span class="text-sm font-semibold text-dark dark:text-borderLight">Notifications</span>
+      <button class="text-xs text-primary hover:underline" (click)="markAllRead()" *ngIf="items.length > 0">Mark all as read</button>
+    </div>
+
+    <div *ngIf="loading" class="p-3 text-sm text-neutral">Loading...</div>
+
+    <div *ngIf="!loading && items.length === 0" class="p-3 text-sm text-neutral">No new notifications.</div>
+
+    <button
+      *ngFor="let item of items"
+      (click)="openItem(item)"
+      class="w-full text-left px-3 py-2 border-b border-borderLight dark:border-neutral last:border-0 hover:bg-borderLight/40 dark:hover:bg-neutral/40 duration-150"
+    >
+      <div class="text-sm font-medium text-dark dark:text-borderLight">{{ eventLabel(item) }}</div>
+      <div class="text-xs text-neutral">{{ (item.sentAt || item.createdAt) | date: 'dd-MMM-yy HH:mm' }}</div>
+    </button>
+  </div>
+</div>

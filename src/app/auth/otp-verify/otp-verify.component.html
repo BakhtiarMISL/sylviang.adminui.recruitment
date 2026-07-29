@@ -1,0 +1,21 @@
+<app-public-navbar></app-public-navbar>
+
+<div class="login-page">
+  <form class="login-card" [formGroup]="form" (ngSubmit)="onSubmit()">
+    <h1 class="login-title">Verify Your Login</h1>
+    <p class="login-subtitle">Enter the 6-digit code we emailed you.</p>
+
+    <div class="otp-field">
+      <p-inputotp formControlName="code" [length]="6" [integerOnly]="true"></p-inputotp>
+      <small class="login-error" *ngIf="code?.invalid && code?.touched">Enter the 6-digit code.</small>
+    </div>
+
+    <p-button type="submit" label="Verify" [loading]="isSubmitting" [disabled]="isSubmitting" styleClass="w-full"></p-button>
+
+    <p class="login-subtitle">
+      Didn't get a code?
+      <a *ngIf="resendCooldown === 0" (click)="onResend()" class="text-primary font-medium hover:underline resend-link">Resend</a>
+      <span *ngIf="resendCooldown > 0">Resend available in {{ resendCooldown }}s</span>
+    </p>
+  </form>
+</div>
