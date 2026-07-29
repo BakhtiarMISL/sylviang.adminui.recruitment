@@ -2,6 +2,10 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ApiResponse } from '@core/interfaces/ApiResponse';
 import {
+  ICandidateSourceAnalyticsRequest,
+  ICandidateSourceAnalyticsResponse,
+  IInterviewAnalyticsRequest,
+  IInterviewAnalyticsResponse,
   IRecruitmentFunnelRequest,
   IRecruitmentFunnelResponse,
   ITimeToHireRequest,
@@ -39,6 +43,34 @@ export class AnalyticsService {
 
   exportTimeToHireCsv(request: ITimeToHireRequest) {
     return this.httpClient.get(`${this.API_URL}/time-to-hire/export`, {
+      params: this.buildParams(request),
+      responseType: 'blob',
+      observe: 'response',
+    });
+  }
+
+  getCandidateSourceAnalytics(request: ICandidateSourceAnalyticsRequest) {
+    return this.httpClient.get<ApiResponse<ICandidateSourceAnalyticsResponse>>(`${this.API_URL}/candidate-source`, {
+      params: this.buildParams(request),
+    });
+  }
+
+  exportCandidateSourceAnalyticsExcel(request: ICandidateSourceAnalyticsRequest) {
+    return this.httpClient.get(`${this.API_URL}/candidate-source/export`, {
+      params: this.buildParams(request),
+      responseType: 'blob',
+      observe: 'response',
+    });
+  }
+
+  getInterviewAnalytics(request: IInterviewAnalyticsRequest) {
+    return this.httpClient.get<ApiResponse<IInterviewAnalyticsResponse>>(`${this.API_URL}/interview-performance`, {
+      params: this.buildParams(request),
+    });
+  }
+
+  exportInterviewAnalyticsExcel(request: IInterviewAnalyticsRequest) {
+    return this.httpClient.get(`${this.API_URL}/interview-performance/export`, {
       params: this.buildParams(request),
       responseType: 'blob',
       observe: 'response',

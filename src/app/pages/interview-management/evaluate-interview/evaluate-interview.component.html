@@ -81,6 +81,21 @@
       </div>
 
       <p-floatlabel variant="in">
+        <p-select
+          inputId="recommendation"
+          class="w-full sm:w-64"
+          [options]="recommendationOptions"
+          [(ngModel)]="recommendation"
+          [ngModelOptions]="{ standalone: true }"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+          [appendTo]="'body'"
+        ></p-select>
+        <label for="recommendation">Recommendation</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="in">
         <textarea pTextarea class="w-full" rows="3" [(ngModel)]="overallComments" [ngModelOptions]="{ standalone: true }"></textarea>
         <label>Overall Comments</label>
       </p-floatlabel>

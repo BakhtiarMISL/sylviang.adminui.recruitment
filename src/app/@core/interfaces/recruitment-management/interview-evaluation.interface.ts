@@ -1,3 +1,5 @@
+import { EvaluationRecommendationEnum } from '@core/enums/recruitment.enum';
+
 export interface IInterviewEvaluationScoreRequest {
   scorecardCriterionId: number;
   score: number;
@@ -16,11 +18,13 @@ export interface IInterviewEvaluationSubmitRequest {
   scorecardId: number;
   scores: IInterviewEvaluationScoreRequest[];
   overallComments?: string | null;
+  recommendation?: EvaluationRecommendationEnum | null;
 }
 
 export interface IInterviewEvaluationUpdateRequest {
   scores: IInterviewEvaluationScoreRequest[];
   overallComments?: string | null;
+  recommendation?: EvaluationRecommendationEnum | null;
 }
 
 export interface IInterviewEvaluationResponse {
@@ -30,6 +34,7 @@ export interface IInterviewEvaluationResponse {
   scorecardId: number;
   scorecardName: string;
   overallComments?: string | null;
+  recommendation?: EvaluationRecommendationEnum | null;
   submittedAt: string;
   submittedByUserName?: string | null;
   scores: IInterviewEvaluationScoreResponse[];
