@@ -9,6 +9,12 @@
   margin-bottom: 1.5rem;
 }
 
+.stat-grid-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.5rem;
+}
+
 .stat-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -24,6 +30,66 @@
   border-radius: 0.75rem;
   border: 1px solid var(--border-light, #e5e7eb);
   background: var(--bg-light, #fff);
+}
+
+.stat-card-clickable {
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.stat-card-clickable:hover {
+  border-color: var(--p-primary-color, #4f46e5);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.stat-trend {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  margin-left: 0.375rem;
+}
+
+.stat-trend-up {
+  color: #16a34a;
+}
+
+.stat-trend-down {
+  color: #dc2626;
+}
+
+.widget-config-card {
+  padding: 1.25rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-light, #e5e7eb);
+  background: var(--bg-light, #fff);
+  margin-bottom: 1.5rem;
+}
+
+:host-context(.dark) .widget-config-card {
+  border-color: var(--border-dark, #333);
+  background: var(--bg-dark, #1e1e1e);
+}
+
+.widget-config-title {
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.widget-config-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.widget-config-table th,
+.widget-config-table td {
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border-light, #e5e7eb);
+  font-size: 0.875rem;
+}
+
+:host-context(.dark) .widget-config-table th,
+:host-context(.dark) .widget-config-table td {
+  border-color: var(--border-dark, #333);
 }
 
 :host-context(.dark) .stat-card {

@@ -1,0 +1,14 @@
+// US-072 AC3: larger tap targets for score entry on a phone.
+@media (max-width: 767px) {
+  ::ng-deep {
+    .p-inputnumber-input,
+    .p-select-label,
+    input[pInputText] {
+      min-height: 44px;
+    }
+
+    .p-button {
+      min-height: 44px;
+    }
+  }
+}

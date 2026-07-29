@@ -10,7 +10,7 @@ import { HeaderComponent } from '@app/shell/components/header/header.component';
 import { SidebarComponent } from '@app/shell/components/sidebar/sidebar.component';
 import { SidebarMenuItemComponent } from '@app/shell/components/sidebar/sidebar-menu-item/sidebar-menu-item.component';
 import { ThemeToggleComponent } from '@app/shell/components/theme-toggle/theme-toggle.component';
-import { PagesModule } from '@pages/pages.module';
+import { NotificationBellComponent } from '@app/shell/components/notification-bell/notification-bell.component';
 
 @NgModule({
   imports: [
@@ -20,8 +20,7 @@ import { PagesModule } from '@pages/pages.module';
     FormsModule,
     TooltipModule,
     ThemeToggleComponent,
-    PagesModule,
   ],
-  declarations: [ShellComponent, HeaderComponent, SidebarComponent, SidebarMenuItemComponent],
+  declarations: [ShellComponent, HeaderComponent, SidebarComponent, SidebarMenuItemComponent, NotificationBellComponent],
 })
 export class ShellModule {}

@@ -44,9 +44,19 @@ export class LoginComponent {
     this.isSubmitting = true;
 
     this.authService.login(this.form.value).subscribe({
-      next: () => {
+      next: (response) => {
         this.isSubmitting = false;
         const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/dashboard';
+
+        // EP-09 Feature 2: candidate login gated by OTP - no token issued yet, route to the
+        // code-entry screen instead of the dashboard.
+        if (response.content?.requiresOtp && response.content.challengeId) {
+          this.router.navigate(['/login/verify-otp'], {
+            queryParams: { challengeId: response.content.challengeId, returnUrl },
+          });
+          return;
+        }
+
         this.router.navigateByUrl(returnUrl);
       },
       error: (error) => {

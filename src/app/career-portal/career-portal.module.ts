@@ -6,6 +6,7 @@ import { ButtonModule } from 'primeng/button';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
+import { PaginatorModule } from 'primeng/paginator';
 import { SelectModule } from 'primeng/select';
 import { SkeletonModule } from 'primeng/skeleton';
 import { TableModule } from 'primeng/table';
@@ -15,9 +16,10 @@ import { ApplyFormComponent } from './apply-form/apply-form.component';
 import { CareerPortalRoutingModule } from './career-portal-routing.module';
 import { JobBrowseComponent } from './job-browse/job-browse.component';
 import { JobDetailComponent } from './job-detail/job-detail.component';
+import { PaymentResultComponent } from './payment-result/payment-result.component';
 
 @NgModule({
-  declarations: [JobBrowseComponent, JobDetailComponent, ApplyFormComponent],
+  declarations: [JobBrowseComponent, JobDetailComponent, ApplyFormComponent, PaymentResultComponent],
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -31,6 +33,7 @@ import { JobDetailComponent } from './job-detail/job-detail.component';
     SelectModule,
     FloatLabelModule,
     SkeletonModule,
+    PaginatorModule,
     TableModule,
     TextareaModule,
   ],
