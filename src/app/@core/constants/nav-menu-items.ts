@@ -336,6 +336,18 @@ export const webSidebarMenuItems: IMenuItem[] = [
         active: false,
         icon: 'fa-solid fa-book',
       },
+      {
+        href: '/access-control/user-account-list',
+        title: 'User Accounts',
+        active: false,
+        icon: 'fa-solid fa-users-gear',
+      },
+      {
+        href: '/access-control/role-list',
+        title: 'Roles',
+        active: false,
+        icon: 'fa-solid fa-user-shield',
+      },
     ],
   },
 ];

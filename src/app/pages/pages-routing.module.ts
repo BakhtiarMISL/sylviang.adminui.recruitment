@@ -108,6 +108,10 @@ const routes: Routes = [
       loadChildren: () => import('./master-data-management/master-data-management.module').then((m) => m.MasterDataManagementModule),
     },
     {
+      path: 'access-control',
+      loadChildren: () => import('./access-control-management/access-control-management.module').then((m) => m.AccessControlManagementModule),
+    },
+    {
       path: 'notification-management',
       loadChildren: () => import('./notification-management/notification-management.module').then((m) => m.NotificationManagementModule),
     },
