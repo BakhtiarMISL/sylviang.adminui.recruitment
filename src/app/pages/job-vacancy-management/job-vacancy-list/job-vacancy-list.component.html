@@ -16,6 +16,11 @@
         <i class="fa fa-times"></i>
         <span>Reset</span>
       </button>
+
+      <div class="checkbox-container">
+        <p-checkbox [(ngModel)]="myPostingsOnly" [ngModelOptions]="{ standalone: true }" [binary]="true" inputId="myPostingsOnly" (onChange)="toggleMyPostingsOnly()"></p-checkbox>
+        <label for="myPostingsOnly">My Postings Only</label>
+      </div>
     </div>
     <button [routerLink]="['/job-vacancy/manage-job-vacancy']" pButton>
       <i class="fa fa-plus"></i>

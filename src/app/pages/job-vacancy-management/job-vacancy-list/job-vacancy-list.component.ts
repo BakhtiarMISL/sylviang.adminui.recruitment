@@ -34,6 +34,11 @@ export class JobVacancyListComponent implements OnInit, AfterViewInit {
   sortDirection: string = '';
   searchTerm = '';
 
+  // EP-15/US-113: additive "My Postings" filter - client-side paginated since a single
+  // user's own postings is a small, unpaginated backend result (GET .../my-postings).
+  myPostingsOnly = false;
+  private allMyPostings: IJobVacancyResponse[] = [];
+
   get skeletonItems() {
     return Array(this.rows)
       .fill({})
@@ -67,6 +72,11 @@ export class JobVacancyListComponent implements OnInit, AfterViewInit {
   }
 
   loadJobVacancies() {
+    if (this.myPostingsOnly) {
+      this.loadMyPostings();
+      return;
+    }
+
     this.loading = true;
 
     const params = {
@@ -99,9 +109,47 @@ export class JobVacancyListComponent implements OnInit, AfterViewInit {
     });
   }
 
+  toggleMyPostingsOnly(): void {
+    this.currentPage = 1;
+    this.loadJobVacancies();
+  }
+
+  private loadMyPostings(): void {
+    this.loading = true;
+
+    this.jobVacancyService.getMyPostings().subscribe({
+      next: (response) => {
+        this.allMyPostings = !response.hasError && response.content ? response.content : [];
+        this.applyMyPostingsPage();
+        this.selectedJobVacancies = [];
+        this.loading = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.allMyPostings = [];
+        this.applyMyPostingsPage();
+        this.loading = false;
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  private applyMyPostingsPage(): void {
+    this.totalRecords = this.allMyPostings.length;
+    const start = (this.currentPage - 1) * this.rows;
+    this.jobVacancies = this.allMyPostings.slice(start, start + this.rows);
+  }
+
   onPageChange(event: any): void {
     this.currentPage = Math.floor(event.first / event.rows) + 1;
     this.rows = event.rows;
+
+    if (this.myPostingsOnly) {
+      this.applyMyPostingsPage();
+      this.cdr.detectChanges();
+      return;
+    }
+
     this.loadJobVacancies();
   }
 
