@@ -1,6 +1,10 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { IUserAccountResponse } from '@core/interfaces/recruitment-management/access-control.interface';
 import { UserAccountService } from '@core/services/recruitment/access-control/access-control.service';
+import { AuthService } from '@core/services/auth/auth.service';
+import { ImpersonationService } from '@core/services/recruitment/impersonation/impersonation.service';
+import { UserRoleEnum } from '@core/enums/user-role.enum';
 import { ConfirmationService } from 'primeng/api';
 
 @Component({
@@ -13,11 +17,19 @@ export class UserAccountListComponent implements OnInit {
   constructor(
     private userAccountService: UserAccountService,
     private confirmationService: ConfirmationService,
+    private impersonationService: ImpersonationService,
+    private authService: AuthService,
+    private router: Router,
     private cdr: ChangeDetectorRef,
   ) {}
 
   accounts: IUserAccountResponse[] = [];
   loading = false;
+  impersonatingId: number | null = null;
+
+  get isSuperAdmin(): boolean {
+    return this.authService.getRole() === UserRoleEnum.SuperAdmin;
+  }
 
   get skeletonItems() {
     return Array(3)
@@ -65,6 +77,24 @@ export class UserAccountListComponent implements OnInit {
             console.error('Error updating user account active state:', error);
           },
         });
+      },
+    });
+  }
+
+  impersonate(account: IUserAccountResponse): void {
+    this.impersonatingId = account.userAccountId;
+    this.impersonationService.start({ targetUserAccountId: account.userAccountId }).subscribe({
+      next: (response) => {
+        this.impersonatingId = null;
+        if (response && !response.hasError && response.content) {
+          this.authService.startImpersonation(response.content);
+          this.router.navigate(['/dashboard']);
+        }
+      },
+      error: (error) => {
+        this.impersonatingId = null;
+        console.error('Error starting impersonation:', error);
+        this.cdr.detectChanges();
       },
     });
   }

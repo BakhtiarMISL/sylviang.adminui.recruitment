@@ -11,6 +11,7 @@ import { SidebarComponent } from '@app/shell/components/sidebar/sidebar.componen
 import { SidebarMenuItemComponent } from '@app/shell/components/sidebar/sidebar-menu-item/sidebar-menu-item.component';
 import { ThemeToggleComponent } from '@app/shell/components/theme-toggle/theme-toggle.component';
 import { NotificationBellComponent } from '@app/shell/components/notification-bell/notification-bell.component';
+import { ImpersonationBannerComponent } from '@app/shell/components/impersonation-banner/impersonation-banner.component';
 
 @NgModule({
   imports: [
@@ -21,6 +22,6 @@ import { NotificationBellComponent } from '@app/shell/components/notification-be
     TooltipModule,
     ThemeToggleComponent,
   ],
-  declarations: [ShellComponent, HeaderComponent, SidebarComponent, SidebarMenuItemComponent, NotificationBellComponent],
+  declarations: [ShellComponent, HeaderComponent, SidebarComponent, SidebarMenuItemComponent, NotificationBellComponent, ImpersonationBannerComponent],
 })
 export class ShellModule {}

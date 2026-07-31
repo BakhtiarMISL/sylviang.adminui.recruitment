@@ -348,6 +348,12 @@ export const webSidebarMenuItems: IMenuItem[] = [
         active: false,
         icon: 'fa-solid fa-user-shield',
       },
+      {
+        href: '/profile-field-config/profile-field-config-list',
+        title: 'Profile Field Config',
+        active: false,
+        icon: 'fa-solid fa-sliders',
+      },
     ],
   },
 ];

@@ -9,6 +9,7 @@ import { IRegisterResponse } from '@core/interfaces/auth/register-response.inter
 import { IVerifyOtpRequest } from '@core/interfaces/auth/verify-otp-request.interface';
 import { IResendOtpRequest } from '@core/interfaces/auth/resend-otp-request.interface';
 import { UserRoleEnum } from '@core/enums/user-role.enum';
+import { IImpersonationStartResponse } from '@core/interfaces/recruitment-management/impersonation.interface';
 import { BASE_URL_Recruitment } from '@env/environment';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
@@ -17,6 +18,15 @@ const TOKEN_KEY = 'sylviang_auth_token';
 const USER_KEY = 'sylviang_auth_user';
 const REFRESH_TOKEN_KEY = 'sylviang_auth_refresh_token';
 const EXPIRES_AT_KEY = 'sylviang_auth_expires_at';
+
+// EP-15/US-115: while impersonating, the real SuperAdmin session is stashed here so End
+// Impersonation can restore it exactly - the impersonation token itself carries no refresh
+// token, so silent refresh is intentionally not scheduled for it (see startImpersonation).
+const ORIGINAL_TOKEN_KEY = 'sylviang_auth_original_token';
+const ORIGINAL_USER_KEY = 'sylviang_auth_original_user';
+const ORIGINAL_REFRESH_TOKEN_KEY = 'sylviang_auth_original_refresh_token';
+const ORIGINAL_EXPIRES_AT_KEY = 'sylviang_auth_original_expires_at';
+const IMPERSONATION_INFO_KEY = 'sylviang_impersonation_info';
 
 // Refresh this many ms before actual expiry, so a request in flight right at the boundary
 // still lands within the token's validity instead of racing it.
@@ -94,6 +104,85 @@ export class AuthService {
 
   isAuthenticated(): boolean {
     return !!this.getToken();
+  }
+
+  // ── Impersonation (EP-15/US-115) ────────────────────────────────────────
+
+  /** Stashes the current (real) session and swaps the active one to the impersonation token. */
+  startImpersonation(response: IImpersonationStartResponse): void {
+    const currentToken = localStorage.getItem(TOKEN_KEY);
+    const currentUser = localStorage.getItem(USER_KEY);
+    const currentRefreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
+    const currentExpiresAt = localStorage.getItem(EXPIRES_AT_KEY);
+
+    if (currentToken) localStorage.setItem(ORIGINAL_TOKEN_KEY, currentToken);
+    if (currentUser) localStorage.setItem(ORIGINAL_USER_KEY, currentUser);
+    if (currentRefreshToken) localStorage.setItem(ORIGINAL_REFRESH_TOKEN_KEY, currentRefreshToken);
+    if (currentExpiresAt) localStorage.setItem(ORIGINAL_EXPIRES_AT_KEY, currentExpiresAt);
+
+    this.clearScheduledRefresh();
+
+    const impersonatedUser: IAuthenticatedUser = {
+      username: response.targetEmail,
+      displayName: response.targetFullName,
+      role: response.targetRole as UserRoleEnum,
+    };
+
+    localStorage.setItem(TOKEN_KEY, response.token);
+    localStorage.setItem(USER_KEY, JSON.stringify(impersonatedUser));
+    localStorage.setItem(EXPIRES_AT_KEY, response.expiresAtUtc);
+    localStorage.removeItem(REFRESH_TOKEN_KEY);
+    localStorage.setItem(
+      IMPERSONATION_INFO_KEY,
+      JSON.stringify({ sessionId: response.impersonationSessionId, targetFullName: response.targetFullName, expiresAtUtc: response.expiresAtUtc }),
+    );
+
+    this.userSubject.next(impersonatedUser);
+    // No scheduleRefresh call - the impersonation token has no refresh token by design
+    // (30-minute hard cap, see ImpersonationService.StartAsync).
+  }
+
+  /** Restores the stashed real session after End Impersonation succeeds server-side. */
+  restoreOriginalSession(): void {
+    const originalToken = localStorage.getItem(ORIGINAL_TOKEN_KEY);
+    const originalUser = localStorage.getItem(ORIGINAL_USER_KEY);
+    const originalRefreshToken = localStorage.getItem(ORIGINAL_REFRESH_TOKEN_KEY);
+    const originalExpiresAt = localStorage.getItem(ORIGINAL_EXPIRES_AT_KEY);
+
+    localStorage.removeItem(ORIGINAL_TOKEN_KEY);
+    localStorage.removeItem(ORIGINAL_USER_KEY);
+    localStorage.removeItem(ORIGINAL_REFRESH_TOKEN_KEY);
+    localStorage.removeItem(ORIGINAL_EXPIRES_AT_KEY);
+    localStorage.removeItem(IMPERSONATION_INFO_KEY);
+
+    if (!originalToken || !originalUser || !originalExpiresAt) {
+      this.logout();
+      return;
+    }
+
+    localStorage.setItem(TOKEN_KEY, originalToken);
+    localStorage.setItem(USER_KEY, originalUser);
+    localStorage.setItem(EXPIRES_AT_KEY, originalExpiresAt);
+    if (originalRefreshToken) {
+      localStorage.setItem(REFRESH_TOKEN_KEY, originalRefreshToken);
+    }
+
+    this.userSubject.next(JSON.parse(originalUser) as IAuthenticatedUser);
+    this.scheduleRefresh(originalExpiresAt);
+  }
+
+  isImpersonating(): boolean {
+    return !!localStorage.getItem(IMPERSONATION_INFO_KEY);
+  }
+
+  getImpersonationInfo(): { sessionId: number; targetFullName: string; expiresAtUtc: string } | null {
+    const raw = localStorage.getItem(IMPERSONATION_INFO_KEY);
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw);
+    } catch {
+      return null;
+    }
   }
 
   private persistSession(content: ILoginResponse): void {

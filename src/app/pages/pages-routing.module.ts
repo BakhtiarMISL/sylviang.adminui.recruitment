@@ -112,6 +112,11 @@ const routes: Routes = [
       loadChildren: () => import('./access-control-management/access-control-management.module').then((m) => m.AccessControlManagementModule),
     },
     {
+      path: 'profile-field-config',
+      loadChildren: () =>
+        import('./profile-field-config-management/profile-field-config-management.module').then((m) => m.ProfileFieldConfigManagementModule),
+    },
+    {
       path: 'notification-management',
       loadChildren: () => import('./notification-management/notification-management.module').then((m) => m.NotificationManagementModule),
     },

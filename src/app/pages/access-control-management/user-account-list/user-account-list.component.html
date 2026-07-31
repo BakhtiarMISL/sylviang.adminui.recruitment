@@ -50,6 +50,17 @@
               <i class="fa" [ngClass]="account.isActive ? 'fa-ban' : 'fa-check'"></i>
               <span>{{ account.isActive ? 'Deactivate' : 'Activate' }}</span>
             </button>
+            <button
+              pButton
+              size="small"
+              severity="warn"
+              *ngIf="isSuperAdmin && (account.roleNames.includes('Admin') || account.roleNames.includes('HR'))"
+              [disabled]="impersonatingId === account.userAccountId"
+              (click)="impersonate(account)"
+            >
+              <i class="fa fa-user-secret"></i>
+              <span>Impersonate</span>
+            </button>
           </div>
         </td>
       </tr>
