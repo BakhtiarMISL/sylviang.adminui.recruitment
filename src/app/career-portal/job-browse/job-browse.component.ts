@@ -1,10 +1,17 @@
 import { AfterViewInit, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { IPublicJobPostingResponse } from '@app/@core/interfaces/recruitment-management/career-portal.interface';
 import { CareerPortalService } from '@app/@core/services/recruitment/career-portal/career-portal.service';
+import { JobApplicationService } from '@app/@core/services/recruitment/job-application/job-application.service';
 import { UI_CONFIG } from '@app/@core/constants';
+import { AuthService } from '@core/services/auth/auth.service';
+import { UserRoleEnum } from '@core/enums/user-role.enum';
 import { SortEvent } from 'primeng/api';
 import { EmploymentTypeOptions, ExperienceBucketOptions } from '../career-portal.constants';
 import { JobBrowseColumns } from './job-browse.component.constants';
+
+interface IJobPostingRow extends IPublicJobPostingResponse {
+  alreadyApplied?: boolean;
+}
 
 @Component({
   selector: 'app-job-browse',
@@ -15,24 +22,39 @@ import { JobBrowseColumns } from './job-browse.component.constants';
 export class JobBrowseComponent implements OnInit, AfterViewInit {
   constructor(
     private careerPortalService: CareerPortalService,
+    private jobApplicationService: JobApplicationService,
+    private authService: AuthService,
     private cdr: ChangeDetectorRef,
   ) {}
 
-  jobPostings: IPublicJobPostingResponse[] = [];
-  sortedColumn: string = '';
+  // Reached both pre-login (top-level /careers, standalone public layout) and post-login
+  // (same module nested under Shell, see pages-routing.module.ts) - suppress the page's own
+  // public navbar in the latter case so it doesn't stack with Shell's sidebar/header.
+  get isLoggedIn(): boolean {
+    return this.authService.isAuthenticated();
+  }
+
+  jobPostings: IJobPostingRow[] = [];
   loading = false;
+  // Job posting ids the current candidate has already applied to - fetched once (not
+  // per-page, "My Applications" isn't paginated either) so re-sorting/tagging works
+  // regardless of which page of results just loaded.
+  private appliedJobPostingIds = new Set<number>();
   totalRecords = 0;
   UI_CONFIG = UI_CONFIG;
   rows = UI_CONFIG.defaultPageSize;
   currentPage = 1;
 
-  sortBy: string = '';
-  sortDirection: string = '';
+  sortField: string | null = null;
+  sortDirection: 'asc' | 'desc' = 'asc';
 
   employmentTypeOptions = EmploymentTypeOptions;
   experienceBucketOptions = ExperienceBucketOptions;
 
+  sortOptions = JobBrowseColumns.filter((col) => col.sortable !== false).map((col) => ({ label: col.label, value: col.field }));
+  // Table view (logged-in / Shell-nested) sorts via column header click instead of the card view's dropdown.
   columns = JobBrowseColumns;
+  filtersCollapsed = true;
 
   searchTerm = '';
   location = '';
@@ -47,7 +69,32 @@ export class JobBrowseComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
+    if (this.isLoggedIn && this.authService.getRole() === UserRoleEnum.Candidate) {
+      this.jobApplicationService.getMyApplications().subscribe({
+        next: (response) => {
+          if (!response.hasError && response.content) {
+            this.appliedJobPostingIds = new Set(response.content.map((a) => a.jobPostingId));
+            this.applyAppliedFlag();
+            this.cdr.detectChanges();
+          }
+        },
+        // Not knowing which jobs are already applied is a degraded-but-fine state - don't
+        // block the listing from loading over it.
+        error: () => {},
+      });
+    }
+
     this.loadJobPostings();
+  }
+
+  // Tags each row and pushes already-applied postings to the bottom of the current page,
+  // rather than the top of the next one - a real backend-driven sort would need the API to
+  // know the requesting candidate's identity in the public listing query, which is a bigger
+  // change than this page-local re-order justifies for how few open postings exist at once.
+  private applyAppliedFlag(): void {
+    this.jobPostings = this.jobPostings
+      .map((job) => ({ ...job, alreadyApplied: this.appliedJobPostingIds.has(job.jobPostingId) }))
+      .sort((a, b) => Number(!!a.alreadyApplied) - Number(!!b.alreadyApplied));
   }
 
   ngAfterViewInit(): void {
@@ -56,6 +103,7 @@ export class JobBrowseComponent implements OnInit, AfterViewInit {
 
   applyFilters(): void {
     this.currentPage = 1;
+    this.filtersCollapsed = true;
     this.loadJobPostings();
   }
 
@@ -66,6 +114,7 @@ export class JobBrowseComponent implements OnInit, AfterViewInit {
     this.employmentType = null;
     this.maxExperienceYears = null;
     this.currentPage = 1;
+    this.filtersCollapsed = false;
     this.loadJobPostings();
   }
 
@@ -80,8 +129,8 @@ export class JobBrowseComponent implements OnInit, AfterViewInit {
       ...(this.departmentId !== null && this.departmentId !== undefined && { departmentId: this.departmentId }),
       ...(this.employmentType && { employmentType: this.employmentType }),
       ...(this.maxExperienceYears !== null && this.maxExperienceYears !== undefined && { maxExperienceYears: this.maxExperienceYears }),
-      ...(this.sortBy && { sortBy: this.sortBy }),
-      ...(this.sortDirection && { sortDirection: this.sortDirection }),
+      ...(this.sortField && { sortBy: this.sortField }),
+      ...(this.sortField && { sortDirection: this.sortDirection }),
     };
 
     this.careerPortalService.getJobPostings(params).subscribe({
@@ -89,6 +138,7 @@ export class JobBrowseComponent implements OnInit, AfterViewInit {
         if (!response.hasError && response.content) {
           this.jobPostings = response.content.data || [];
           this.totalRecords = response.content.totalCount || 0;
+          this.applyAppliedFlag();
         } else {
           this.jobPostings = [];
           this.totalRecords = 0;
@@ -111,9 +161,19 @@ export class JobBrowseComponent implements OnInit, AfterViewInit {
     this.loadJobPostings();
   }
 
-  onSort(event: SortEvent) {
-    this.sortedColumn = event.field || '';
-    this.sortBy = event.field || '';
+  onSortChange(): void {
+    this.currentPage = 1;
+    this.loadJobPostings();
+  }
+
+  toggleSortDirection(): void {
+    this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    this.currentPage = 1;
+    this.loadJobPostings();
+  }
+
+  onSort(event: SortEvent): void {
+    this.sortField = event.field || null;
     this.sortDirection = event.order === 1 ? 'asc' : 'desc';
     this.currentPage = 1;
     this.loadJobPostings();

@@ -7,136 +7,249 @@
     </button>
   </div>
 
-  <div class="filter-bar">
-    <p-floatlabel variant="in">
-      <p-select
-        inputId="filterJobPostingId"
-        [options]="jobPostings"
-        [(ngModel)]="filterJobPostingId"
-        optionLabel="title"
-        optionValue="jobPostingId"
-        [appendTo]="'body'"
-        [autoDisplayFirst]="false"
-        [showClear]="true"
-        class="w-full"
-      ></p-select>
-      <label for="filterJobPostingId">Job Posting</label>
-    </p-floatlabel>
+  <app-filter-panel [(collapsed)]="filtersCollapsed">
+  <div class="filter-section">
+    <h4 class="filter-section-title">Search Filters</h4>
+    <div class="filter-bar">
+      <p-floatlabel variant="in">
+        <p-select
+          inputId="filterJobPostingId"
+          [options]="jobPostings"
+          [(ngModel)]="filterJobPostingId"
+          optionLabel="title"
+          optionValue="jobPostingId"
+          [appendTo]="'body'"
+          [autoDisplayFirst]="false"
+          [showClear]="true"
+          class="w-full"
+        ></p-select>
+        <label for="filterJobPostingId">Job Posting</label>
+      </p-floatlabel>
 
-    <p-floatlabel variant="in">
-      <p-select
-        inputId="filterStatus"
-        [options]="statusOptions"
-        [(ngModel)]="filterStatus"
-        optionLabel="label"
-        optionValue="value"
-        [appendTo]="'body'"
-        [autoDisplayFirst]="false"
-        [showClear]="true"
-        class="w-full"
-      ></p-select>
-      <label for="filterStatus">Status</label>
-    </p-floatlabel>
+      <p-floatlabel variant="in">
+        <p-select
+          inputId="filterStatus"
+          [options]="statusOptions"
+          [(ngModel)]="filterStatus"
+          optionLabel="label"
+          optionValue="value"
+          [appendTo]="'body'"
+          [autoDisplayFirst]="false"
+          [showClear]="true"
+          class="w-full"
+        ></p-select>
+        <label for="filterStatus">Status</label>
+      </p-floatlabel>
 
-    <p-floatlabel variant="in">
-      <p-select
-        inputId="filterSource"
-        [options]="sourceOptions"
-        [(ngModel)]="filterSource"
-        optionLabel="label"
-        optionValue="value"
-        [appendTo]="'body'"
-        [autoDisplayFirst]="false"
-        [showClear]="true"
-        class="w-full"
-      ></p-select>
-      <label for="filterSource">Source / Candidate Type</label>
-    </p-floatlabel>
+      <p-floatlabel variant="in" class="source-filter">
+        <p-select
+          inputId="filterSource"
+          [options]="sourceOptions"
+          [(ngModel)]="filterSource"
+          optionLabel="label"
+          optionValue="value"
+          [appendTo]="'body'"
+          [autoDisplayFirst]="false"
+          [showClear]="true"
+          class="w-full"
+        ></p-select>
+        <label for="filterSource">Source / Candidate Type</label>
+      </p-floatlabel>
 
-    <p-floatlabel variant="in">
-      <p-datepicker inputId="filterDateFrom" [(ngModel)]="filterDateFrom" dateFormat="dd-M-yy" [showIcon]="true"></p-datepicker>
-      <label for="filterDateFrom">Applied From</label>
-    </p-floatlabel>
+      <p-floatlabel variant="in">
+        <p-datepicker inputId="filterDateFrom" [(ngModel)]="filterDateFrom" dateFormat="dd-M-yy" [showIcon]="true"></p-datepicker>
+        <label for="filterDateFrom">Applied From</label>
+      </p-floatlabel>
 
-    <p-floatlabel variant="in">
-      <p-datepicker inputId="filterDateTo" [(ngModel)]="filterDateTo" dateFormat="dd-M-yy" [showIcon]="true"></p-datepicker>
-      <label for="filterDateTo">Applied To</label>
-    </p-floatlabel>
+      <p-floatlabel variant="in">
+        <p-datepicker inputId="filterDateTo" [(ngModel)]="filterDateTo" dateFormat="dd-M-yy" [showIcon]="true"></p-datepicker>
+        <label for="filterDateTo">Applied To</label>
+      </p-floatlabel>
+    </div>
 
-    <button pButton (click)="applyFilters()">
-      <i class="fa fa-filter"></i>
-      <span>Apply Filters</span>
-    </button>
+    <div class="filter-actions">
+      <div class="stale-only-toggle">
+        <p-checkbox [(ngModel)]="filterStaleOnly" [binary]="true" inputId="filterStaleOnly"></p-checkbox>
+        <label for="filterStaleOnly">Stale only</label>
+      </div>
 
-    <button severity="secondary" pButton (click)="resetFilters()">
-      <i class="fa fa-times"></i>
-      <span>Reset</span>
-    </button>
+      <button pButton (click)="applyFilters()">
+        <i class="fa fa-filter"></i>
+        <span>Apply Filters</span>
+      </button>
+
+      <button *ngIf="filterJobPostingId || filterStatus || filterSource || filterDateFrom || filterDateTo || filterStaleOnly" severity="secondary" pButton (click)="resetFilters()">
+        <i class="fa fa-times"></i>
+        <span>Reset</span>
+      </button>
+
+      <button severity="secondary" pButton type="button" [disabled]="!filterJobPostingId" (click)="viewDuplicates()">
+        <i class="fa fa-clone"></i>
+        <span>View Duplicates</span>
+      </button>
+
+      <button severity="secondary" pButton (click)="openSaveSearchDialog()">
+        <i class="fa fa-bookmark"></i>
+        <span>Save Search</span>
+      </button>
+    </div>
   </div>
 
-  <div class="filter-bar" *ngIf="filterJobPostingId">
-    <p-floatlabel variant="in">
-      <p-select
-        inputId="filterMinEducationLevel"
-        [options]="educationLevelOptions"
-        [(ngModel)]="filterMinEducationLevel"
-        (ngModelChange)="onCandidateAttributeFilterChange()"
-        optionLabel="label"
-        optionValue="value"
-        [appendTo]="'body'"
-        [autoDisplayFirst]="false"
-        [showClear]="true"
-        class="w-full"
-      ></p-select>
-      <label for="filterMinEducationLevel">Min. Education Level</label>
-    </p-floatlabel>
+  <div class="filter-section">
+    <h4 class="filter-section-title">Saved Search</h4>
+    <div class="filter-bar">
+      <p-floatlabel variant="in">
+        <p-select
+          inputId="selectedSavedSearchId"
+          [options]="savedSearches"
+          [(ngModel)]="selectedSavedSearchId"
+          optionLabel="name"
+          optionValue="savedSearchId"
+          [appendTo]="'body'"
+          [autoDisplayFirst]="false"
+          [showClear]="true"
+          class="w-full"
+        ></p-select>
+        <label for="selectedSavedSearchId">Saved Search</label>
+      </p-floatlabel>
+    </div>
 
-    <p-floatlabel variant="in">
-      <p-inputnumber inputId="filterMinExperienceYears" [(ngModel)]="filterMinExperienceYears" (ngModelChange)="onCandidateAttributeFilterChange()" [min]="0" suffix=" yrs" class="w-full"></p-inputnumber>
-      <label for="filterMinExperienceYears">Min. Experience</label>
-    </p-floatlabel>
+    <div class="filter-actions">
+      <button pButton [disabled]="!canApplySavedSearch()" (click)="applySavedSearch()">
+        <i class="fa fa-magnifying-glass"></i>
+        <span>Apply Saved Search</span>
+      </button>
 
-    <p-floatlabel variant="in">
-      <p-inputnumber inputId="filterMaxExperienceYears" [(ngModel)]="filterMaxExperienceYears" (ngModelChange)="onCandidateAttributeFilterChange()" [min]="0" suffix=" yrs" class="w-full"></p-inputnumber>
-      <label for="filterMaxExperienceYears">Max. Experience</label>
-    </p-floatlabel>
-
-    <p-floatlabel variant="in">
-      <p-multiSelect
-        inputId="filterSkills"
-        [options]="skillLibrary"
-        [(ngModel)]="filterSkills"
-        (ngModelChange)="onCandidateAttributeFilterChange()"
-        optionLabel="name"
-        optionValue="name"
-        [appendTo]="'body'"
-        display="chip"
-        class="w-full"
-      ></p-multiSelect>
-      <label for="filterSkills">Skills (any of)</label>
-    </p-floatlabel>
-
-    <p-floatlabel variant="in">
-      <input pInputText id="filterLocation" [(ngModel)]="filterLocation" (ngModelChange)="onCandidateAttributeFilterChange()" class="w-full" />
-      <label for="filterLocation">Location</label>
-    </p-floatlabel>
-
-    <p-floatlabel variant="in">
-      <p-inputnumber inputId="filterMinAge" [(ngModel)]="filterMinAge" (ngModelChange)="onCandidateAttributeFilterChange()" [min]="0" class="w-full"></p-inputnumber>
-      <label for="filterMinAge">Min. Age</label>
-    </p-floatlabel>
-
-    <p-floatlabel variant="in">
-      <p-inputnumber inputId="filterMaxAge" [(ngModel)]="filterMaxAge" (ngModelChange)="onCandidateAttributeFilterChange()" [min]="0" class="w-full"></p-inputnumber>
-      <label for="filterMaxAge">Max. Age</label>
-    </p-floatlabel>
+      <button severity="secondary" pButton (click)="openManageSavedSearchesDialog()">
+        <i class="fa fa-gear"></i>
+        <span>Manage Saved Searches</span>
+      </button>
+    </div>
   </div>
+
+  <div class="filter-section" *ngIf="filterJobPostingId">
+    <h4 class="filter-section-title">Candidate Match Criteria</h4>
+    <div class="filter-bar">
+      <p-floatlabel variant="in">
+        <p-select
+          inputId="filterMinEducationLevel"
+          [options]="educationLevelOptions"
+          [(ngModel)]="filterMinEducationLevel"
+          (ngModelChange)="onCandidateAttributeFilterChange()"
+          optionLabel="label"
+          optionValue="value"
+          [appendTo]="'body'"
+          [autoDisplayFirst]="false"
+          [showClear]="true"
+          class="w-full"
+        ></p-select>
+        <label for="filterMinEducationLevel">Min. Education Level</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="in">
+        <p-inputnumber inputId="filterMinExperienceYears" [(ngModel)]="filterMinExperienceYears" (ngModelChange)="onCandidateAttributeFilterChange()" [min]="0" suffix=" yrs" class="w-full"></p-inputnumber>
+        <label for="filterMinExperienceYears">Min. Experience</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="in">
+        <p-inputnumber inputId="filterMaxExperienceYears" [(ngModel)]="filterMaxExperienceYears" (ngModelChange)="onCandidateAttributeFilterChange()" [min]="0" suffix=" yrs" class="w-full"></p-inputnumber>
+        <label for="filterMaxExperienceYears">Max. Experience</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="in">
+        <p-autoComplete
+          inputId="filterSkills"
+          [suggestions]="filterSkillSuggestions"
+          (completeMethod)="onFilterSkillSearch($event)"
+          [ngModel]="filterSkills"
+          (ngModelChange)="onFilterSkillsChange($event)"
+          (keydown.enter)="onFilterSkillsInputCommit($event)"
+          (onBlur)="onFilterSkillsInputCommit($event)"
+          optionLabel="name"
+          field="name"
+          [multiple]="true"
+          [forceSelection]="false"
+          [appendTo]="'body'"
+          class="w-full"
+        >
+          <ng-template let-skill pTemplate="item">
+            <span>{{ skill.name }}</span>
+          </ng-template>
+          <ng-template let-skill pTemplate="selecteditem">
+            <p-chip [label]="skill?.name || skill" [removable]="true" (onRemove)="removeFilterSkill(skill)" styleClass="p-autocomplete-chip"></p-chip>
+          </ng-template>
+        </p-autoComplete>
+        <label for="filterSkills">Skills (any of)</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="in">
+        <input pInputText id="filterLocation" [(ngModel)]="filterLocation" (ngModelChange)="onCandidateAttributeFilterChange()" class="w-full" />
+        <label for="filterLocation">Location</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="in">
+        <p-inputnumber inputId="filterMinAge" [(ngModel)]="filterMinAge" (ngModelChange)="onCandidateAttributeFilterChange()" [min]="0" class="w-full"></p-inputnumber>
+        <label for="filterMinAge">Min. Age</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="in">
+        <p-inputnumber inputId="filterMaxAge" [(ngModel)]="filterMaxAge" (ngModelChange)="onCandidateAttributeFilterChange()" [min]="0" class="w-full"></p-inputnumber>
+        <label for="filterMaxAge">Max. Age</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="in">
+        <p-multiSelect
+          inputId="filterTags"
+          [options]="tagSuggestions"
+          [(ngModel)]="filterTags"
+          (ngModelChange)="onCandidateAttributeFilterChange()"
+          [filter]="true"
+          [appendTo]="'body'"
+          display="chip"
+          class="w-full"
+        ></p-multiSelect>
+        <label for="filterTags">Tags (any of)</label>
+      </p-floatlabel>
+    </div>
+  </div>
+
+  <div class="filter-section">
+    <h4 class="filter-section-title">Export</h4>
+    <div class="filter-bar">
+      <p-floatlabel variant="in">
+        <p-select
+          inputId="exportFormat"
+          [options]="exportFormatOptions"
+          [(ngModel)]="exportFormat"
+          optionLabel="label"
+          optionValue="value"
+          [appendTo]="'body'"
+          [autoDisplayFirst]="false"
+          class="w-full"
+        ></p-select>
+        <label for="exportFormat">Export Format</label>
+      </p-floatlabel>
+    </div>
+
+    <div class="filter-actions">
+      <button severity="secondary" pButton [disabled]="exporting" (click)="exportCandidateList()">
+        <i class="fa fa-download"></i>
+        <span>Export Candidate List</span>
+      </button>
+
+      <button severity="secondary" pButton [disabled]="exporting" (click)="exportTracker()">
+        <i class="fa fa-download"></i>
+        <span>Export Tracker</span>
+      </button>
+    </div>
+  </div>
+  </app-filter-panel>
 
   <div class="active-filter-chips" *ngIf="activeFilterChips.length > 0">
     <p-chip *ngFor="let chip of activeFilterChips" [label]="chip.label" [removable]="true" (onRemove)="removeFilterChip(chip.key)"></p-chip>
   </div>
 
-  <div class="filter-bar" *ngIf="filterJobPostingId">
+  <div class="filter-bar mb-4" *ngIf="filterJobPostingId">
     <p-floatlabel variant="in">
       <p-select
         inputId="selectedShortlistFilterId"
@@ -155,6 +268,13 @@
     <button pButton [disabled]="!canApplyShortlistFilter() || applyingShortlistFilter" (click)="applyShortlistFilter($event)">
       <i class="fa fa-filter-circle-check"></i>
       <span>Apply to Applications</span>
+    </button>
+  </div>
+
+  <div class="filter-bar mb-4" *ngIf="filterJobPostingId">
+    <button pButton severity="help" (click)="openAutoShortlistDialog()">
+      <i class="fa fa-robot"></i>
+      <span>AI Shortlist</span>
     </button>
   </div>
 
@@ -211,6 +331,31 @@
     <button pButton [disabled]="!canApplyBulk() || bulkApplying" (click)="applyBulkStatus($event)">
       <i class="fa fa-check"></i>
       <span>Apply to {{ selectedCount() }} Selected</span>
+    </button>
+
+    <p-floatlabel variant="in">
+      <p-select
+        inputId="bulkNotifyEvent"
+        [options]="bulkNotifyEventOptions"
+        [(ngModel)]="bulkNotifyEvent"
+        optionLabel="label"
+        optionValue="value"
+        [appendTo]="'body'"
+        [autoDisplayFirst]="false"
+        [showClear]="true"
+        class="w-full"
+      ></p-select>
+      <label for="bulkNotifyEvent">Notify Event</label>
+    </p-floatlabel>
+
+    <button pButton severity="info" [disabled]="!bulkNotifyEvent || bulkNotifying" (click)="notifySelected($event)">
+      <i class="fa fa-bell"></i>
+      <span>Notify {{ selectedCount() }} Selected</span>
+    </button>
+
+    <button pButton severity="secondary" [disabled]="bulkDownloadingCvs" (click)="bulkDownloadCvs()">
+      <i class="fa" [class.fa-file-zipper]="!bulkDownloadingCvs" [class.fa-spinner]="bulkDownloadingCvs" [class.fa-spin]="bulkDownloadingCvs"></i>
+      <span>Bulk Download CVs ({{ selectedCount() }})</span>
     </button>
   </div>
 
@@ -280,10 +425,14 @@
               <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
               <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
               <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
               <td><p-skeleton width="3rem" height="1rem"></p-skeleton></td>
             </tr>
           } @else {
-            <tr>
+            <tr [class.row-stale]="application.isStale" [pTooltip]="application.isStale ? 'Days in current stage exceeds the stale threshold' : ''">
               <td><p-tableCheckbox [value]="application"></p-tableCheckbox></td>
               <td>{{ application.candidateName }}</td>
               <td>{{ application.jobPostingTitle || '-' }}</td>
@@ -294,12 +443,19 @@
                   {{ formatEnumLabel(application.applicationStatus) }}
                 </span>
               </td>
+              <td>{{ application.currentStageName || 'Not started' }}</td>
+              <td>{{ application.lastUpdatedAt ? (application.lastUpdatedAt | date: 'dd-MMM-yyyy HH:mm') : '-' }}</td>
+              <td>{{ application.daysInCurrentStage ?? '-' }}</td>
+              <td>{{ application.assignedHrUserName || '-' }}</td>
               <td>
                 <button (click)="openDetail(application)" class="text-primary" pTooltip="View Detail">
                   <i class="fa fa-eye"></i>
                 </button>
                 <button (click)="openPipelineTracker(application)" class="text-primary ml-2" pTooltip="Pipeline Progress">
                   <i class="fa-solid fa-diagram-project"></i>
+                </button>
+                <button (click)="openInlineUpdate(application)" class="text-primary ml-2" pTooltip="Update Status">
+                  <i class="fa-solid fa-pen-to-square"></i>
                 </button>
               </td>
             </tr>
@@ -308,7 +464,7 @@
 
         <ng-template pTemplate="emptymessage">
           <tr>
-            <td colspan="7" class="not-found">
+            <td colspan="11" class="not-found">
               <div>
                 <i class="fa fa-magnifying-glass-minus"></i>
                 <p>No applications found</p>
@@ -323,6 +479,62 @@
 
 <p-dialog header="Pipeline Progress" [(visible)]="pipelineDialogVisible" [modal]="true" [style]="{ width: '60rem', maxWidth: '95vw' }">
   <app-pipeline-progress-tracker *ngIf="pipelineDialogVisible && pipelineDialogApplicationId" [jobApplicationId]="pipelineDialogApplicationId"></app-pipeline-progress-tracker>
+</p-dialog>
+
+<!-- EP-14 US-109 AC4: inline status update/note directly from a tracker row -->
+<p-dialog header="Update Application Status" [(visible)]="inlineUpdateDialogVisible" [modal]="true" [style]="{ width: '28rem', maxWidth: '95vw' }">
+  <div class="inline-update-form" *ngIf="inlineUpdateApplication as application">
+    <p class="inline-update-candidate">{{ application.candidateName }} &mdash; {{ formatEnumLabel(application.applicationStatus) }}</p>
+
+    <p-floatlabel variant="in">
+      <p-select
+        inputId="inlineUpdateToStatus"
+        [options]="statusOptions"
+        [(ngModel)]="inlineUpdateToStatus"
+        (ngModelChange)="onInlineUpdateStatusChange($event)"
+        optionLabel="label"
+        optionValue="value"
+        [appendTo]="'body'"
+        [autoDisplayFirst]="false"
+        class="w-full"
+      ></p-select>
+      <label for="inlineUpdateToStatus">Move To</label>
+    </p-floatlabel>
+
+    <p-floatlabel variant="in" *ngIf="inlineUpdateRequiresReason()">
+      <p-select
+        inputId="inlineUpdateReasonId"
+        [options]="inlineUpdateReasonOptions"
+        [(ngModel)]="inlineUpdateReasonId"
+        optionLabel="label"
+        optionValue="applicationStatusReasonId"
+        [appendTo]="'body'"
+        [autoDisplayFirst]="false"
+        class="w-full"
+      ></p-select>
+      <label for="inlineUpdateReasonId">Reason *</label>
+    </p-floatlabel>
+
+    <p-floatlabel variant="in">
+      <input type="text" pInputText id="inlineUpdateNote" class="w-full" [(ngModel)]="inlineUpdateNote" name="inlineUpdateNote" />
+      <label for="inlineUpdateNote">Note (optional)</label>
+    </p-floatlabel>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <button pButton [disabled]="!canConfirmInlineUpdate() || inlineUpdateSaving" (click)="confirmInlineUpdate()">
+      <i class="fa fa-check"></i>
+      <span>Update</span>
+    </button>
+  </ng-template>
+</p-dialog>
+
+<p-dialog header="AI-Powered Auto-Shortlisting" [(visible)]="autoShortlistDialogVisible" [modal]="true" [style]="{ width: '60rem', maxWidth: '95vw' }">
+  <app-auto-shortlist-dialog
+    *ngIf="autoShortlistDialogVisible && filterJobPostingId"
+    [jobPostingId]="filterJobPostingId"
+    (applied)="loadApplications()"
+  ></app-auto-shortlist-dialog>
 </p-dialog>
 
 <p-dialog header="Shortlist Filter Applied" [(visible)]="shortlistApplySummaryVisible" [modal]="true" [style]="{ width: '28rem', maxWidth: '95vw' }">
@@ -343,5 +555,58 @@
     <ul class="shortlist-summary-failures" *ngIf="summary.failures.length > 0">
       <li *ngFor="let failure of summary.failures">Application #{{ failure.jobApplicationId }}: {{ failure.reason }}</li>
     </ul>
+  </div>
+</p-dialog>
+
+<p-dialog header="Save Search" [(visible)]="saveSearchDialogVisible" [modal]="true" [style]="{ width: '32rem', maxWidth: '95vw' }">
+  <div class="save-search-form">
+    <p-floatlabel variant="in">
+      <input pInputText id="saveSearchName" [(ngModel)]="saveSearchName" class="w-full" />
+      <label for="saveSearchName">Name</label>
+    </p-floatlabel>
+
+    <div class="save-search-share">
+      <p-checkbox [(ngModel)]="saveSearchIsShared" [binary]="true" inputId="saveSearchIsShared"></p-checkbox>
+      <label for="saveSearchIsShared">Share with HR team</label>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <button pButton [disabled]="!saveSearchName.trim() || savingSearch" (click)="confirmSaveSearch()">
+      <i class="fa fa-check"></i>
+      <span>Save</span>
+    </button>
+  </ng-template>
+</p-dialog>
+
+<p-dialog header="Manage Saved Searches" [(visible)]="manageSavedSearchesDialogVisible" [modal]="true" [style]="{ width: '36rem', maxWidth: '95vw' }">
+  <div class="manage-saved-searches">
+    <div class="manage-saved-search-row" *ngFor="let search of savedSearches">
+      <ng-container *ngIf="editingSavedSearchId === search.savedSearchId; else viewRow">
+        <input pInputText [(ngModel)]="editingSavedSearchName" class="manage-saved-search-name-input" />
+        <p-checkbox [(ngModel)]="editingSavedSearchIsShared" [binary]="true" inputId="editingSavedSearchIsShared-{{ search.savedSearchId }}"></p-checkbox>
+        <label for="editingSavedSearchIsShared-{{ search.savedSearchId }}">Shared</label>
+        <button pButton [disabled]="!editingSavedSearchName.trim()" (click)="confirmEditSavedSearch(search)">
+          <i class="fa fa-check"></i>
+        </button>
+        <button severity="secondary" pButton (click)="cancelEditSavedSearch()">
+          <i class="fa fa-times"></i>
+        </button>
+      </ng-container>
+      <ng-template #viewRow>
+        <span class="manage-saved-search-name">{{ search.name }}</span>
+        <span class="manage-saved-search-shared" *ngIf="search.isShared">Shared</span>
+        <button pButton [disabled]="!search.isOwner" pTooltip="Rename" (click)="startEditSavedSearch(search)">
+          <i class="fa fa-pen"></i>
+        </button>
+        <button severity="danger" pButton [disabled]="!search.isOwner" pTooltip="Delete" (click)="deleteSavedSearch(search, $event)">
+          <i class="fa fa-trash"></i>
+        </button>
+      </ng-template>
+    </div>
+
+    <div class="manage-saved-searches-empty" *ngIf="savedSearches.length === 0">
+      <p>No saved searches yet.</p>
+    </div>
   </div>
 </p-dialog>

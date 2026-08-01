@@ -9,6 +9,51 @@
 
   <div class="no-pipeline" *ngIf="!loading && !loadError && progress && !progress.hasPipeline">No hiring pipeline is configured for this job posting.</div>
 
+  <div class="recommendation-panel" *ngIf="!loading">
+    <ng-container *ngIf="recommendation; else noRecommendation">
+      <div class="recommendation-status" [ngClass]="'recommendation-status-' + recommendation.status.toLowerCase()">
+        <span class="recommendation-status-label">Final Selection: {{ formatEnumLabel(recommendation.status) }}</span>
+        <span class="recommendation-meta">Recommended by {{ recommendation.recommendedByUserName }} on {{ recommendation.recommendedAt | date: 'dd-MMM-yyyy' }}</span>
+        <div class="recommendation-justification">{{ recommendation.justification }}</div>
+        <div class="recommendation-review" *ngIf="recommendation.status !== 'Pending'">
+          <span>Reviewed by {{ recommendation.reviewedByUserName }} on {{ recommendation.reviewedAt | date: 'dd-MMM-yyyy' }}</span>
+          <div *ngIf="recommendation.reviewComments">{{ recommendation.reviewComments }}</div>
+        </div>
+      </div>
+    </ng-container>
+    <ng-template #noRecommendation>
+      <span class="recommendation-meta">No final selection recommendation yet.</span>
+    </ng-template>
+
+    <button pButton type="button" [outlined]="true" size="small" [disabled]="!canRecommend()" (click)="openRecommendDialog()">
+      <i class="fa fa-star"></i>
+      <span>Recommend for Final Selection</span>
+    </button>
+  </div>
+
+  <div class="recommendation-panel" *ngIf="!loading && (hasInterviewStage || interviews.length > 0)">
+    <div class="recommendation-status">
+      <div class="flex items-center justify-between gap-3">
+        <span class="recommendation-status-label">Interviews</span>
+        <button pButton type="button" [outlined]="true" size="small" [routerLink]="['/interviews/schedule-interview']">
+          <i class="fa fa-plus"></i>
+          <span>Schedule Interview</span>
+        </button>
+      </div>
+
+      <span class="recommendation-meta" *ngIf="!loadingInterviews && interviews.length === 0">No interviews scheduled yet.</span>
+
+      <div *ngFor="let interview of interviews" class="stage-field" style="justify-content: space-between; display: flex; width: 100%">
+        <span>
+          Round {{ interview.round }}{{ interview.roundConfigName ? ' (' + interview.roundConfigName + ')' : '' }} &middot;
+          {{ interview.interviewType }} &middot; {{ interview.scheduledStartAt | date: 'dd-MMM-yyyy HH:mm' }} &middot; {{ interview.status }}
+          <ng-container *ngIf="interview.result !== 'Pending'"> &middot; Result: {{ interview.result }}</ng-container>
+        </span>
+        <a [routerLink]="['/interviews/interview', interview.interviewId]">View</a>
+      </div>
+    </div>
+  </div>
+
   <div class="tracker-row" *ngIf="!loading && !loadError && progress && progress.hasPipeline">
     <div class="stage-card" *ngFor="let stage of progress.stages" [ngClass]="'status-' + stage.status">
       <div class="stage-card-header">
@@ -16,6 +61,11 @@
         <span class="status-badge">{{ formatEnumLabel(stage.status) }}</span>
       </div>
       <div class="stage-type">{{ formatEnumLabel(stage.stageType) }}</div>
+
+      <div class="stage-field notes" *ngIf="stage.stageDescription">{{ stage.stageDescription }}</div>
+      <div class="stage-field text-sm text-neutral" *ngIf="stage.passingCriteria">Passing criteria: {{ stage.passingCriteria }}</div>
+      <div class="stage-field text-sm text-neutral" *ngIf="stage.requiredDocuments">Required documents: {{ stage.requiredDocuments }}</div>
+      <div class="stage-field text-sm text-neutral" *ngIf="stage.estimatedDurationMinutes">Est. duration: {{ stage.estimatedDurationMinutes }} min</div>
 
       <ng-container *ngIf="editingStageId !== stage.pipelineStageId">
         <div class="stage-field" *ngIf="stage.scheduledDate">
@@ -27,9 +77,13 @@
           <a [href]="stage.meetingLink" target="_blank" rel="noopener">Join link</a>
         </div>
         <div class="stage-field notes" *ngIf="stage.notes">{{ stage.notes }}</div>
+        <div class="stage-field" *ngIf="stage.score != null">
+          <i class="fa-solid fa-star"></i>
+          <span>Score: {{ stage.score }}</span>
+        </div>
         <div class="stage-field text-sm text-neutral" *ngIf="stage.lastUpdatedByUserName">Last updated by {{ stage.lastUpdatedByUserName }}</div>
 
-        <button pButton type="button" class="p-button-outlined p-button-sm edit-btn" (click)="startEdit(stage)">
+        <button pButton type="button" class="edit-btn" [outlined]="true" size="small" (click)="startEdit(stage)">
           <i class="fa fa-pen"></i>
           <span>Update</span>
         </button>
@@ -67,6 +121,13 @@
         </div>
 
         <div class="edit-field">
+          <p-floatlabel variant="in">
+            <input type="number" pInputText [id]="'score-' + stage.pipelineStageId" [(ngModel)]="editState.score" class="w-full" />
+            <label [for]="'score-' + stage.pipelineStageId">Score</label>
+          </p-floatlabel>
+        </div>
+
+        <div class="edit-field">
           <textarea pInputText [(ngModel)]="editState.notes" rows="2" class="w-full" maxlength="1000" placeholder="Notes"></textarea>
         </div>
 
@@ -78,3 +139,13 @@
     </div>
   </div>
 </div>
+
+<p-dialog header="Recommend for Final Selection" [(visible)]="recommendDialogVisible" [modal]="true" [style]="{ width: '28rem', maxWidth: '95vw' }">
+  <div class="recommend-form">
+    <textarea pInputText [(ngModel)]="recommendJustification" rows="4" class="w-full" maxlength="2000" placeholder="Justification (required)"></textarea>
+    <button pButton type="button" [disabled]="!recommendJustification.trim() || submittingRecommendation" (click)="confirmRecommend()">
+      <i class="fa fa-check"></i>
+      <span>Submit</span>
+    </button>
+  </div>
+</p-dialog>

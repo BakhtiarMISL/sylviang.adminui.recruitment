@@ -39,6 +39,13 @@
 
     <div>
       <p-floatlabel variant="in">
+        <input type="text" pInputText id="candidateNationalId" class="w-full" [(ngModel)]="candidateNationalId" name="candidateNationalId" />
+        <label for="candidateNationalId">National ID</label>
+      </p-floatlabel>
+    </div>
+
+    <div>
+      <p-floatlabel variant="in">
         <p-select
           inputId="jobPostingId"
           [options]="openJobPostings"
@@ -59,7 +66,15 @@
 
     <div class="sm:col-span-2">
       <label class="field-label">Resume/CV *</label>
-      <input type="file" (change)="onResumeSelected($event)" accept=".pdf,.doc,.docx" />
+      <label for="resume" class="upload-dropzone">
+        <i class="fas fa-file-arrow-up"></i>
+        <span class="upload-dropzone-text">
+          <span *ngIf="!resumeFile">Click to upload or drag and drop</span>
+          <span *ngIf="resumeFile"><strong>{{ resumeFile.name }}</strong></span>
+          <small>PDF, DOC or DOCX, up to 10MB</small>
+        </span>
+      </label>
+      <input type="file" id="resume" accept=".pdf,.doc,.docx" (change)="onResumeSelected($event)" class="sr-only file-picker-input" />
     </div>
 
     <div *ngIf="submitError" class="invalid sm:col-span-2">{{ submitError }}</div>

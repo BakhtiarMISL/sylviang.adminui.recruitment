@@ -2,6 +2,21 @@
   display: block;
 }
 
+// .form-container is a shared 4-column-at-xl grid utility. Sections with only 2-3 short
+// fields (Salary Range, Visibility & Dates, Application Fee) stretch it wide and leave half
+// the card empty at desktop widths - cap those specific sections at 2 columns instead.
+.form-container-compact {
+  @media (min-width: 640px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    // .form-section-header spans 3-4 columns at lg/xl by default (see _utilities.scss) - with
+    // only 2 explicit columns here that span would overflow into implicit auto-sized columns.
+    > .form-section-header {
+      grid-column: span 2 / span 2;
+    }
+  }
+}
+
 .attachment-row {
   display: flex;
   align-items: center;

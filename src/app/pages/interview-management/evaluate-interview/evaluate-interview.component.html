@@ -1,0 +1,116 @@
+<section class="page-container">
+  <div class="flex justify-between items-center gap-3 mb-4">
+    <h3 class="table-title">Evaluate Interview</h3>
+    <button pButton severity="secondary" [routerLink]="['/interviews/interview', interviewId]">
+      <i class="fa fa-arrow-left"></i>
+      <span>Back to Interview</span>
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="space-y-3">
+    <p-skeleton height="8rem"></p-skeleton>
+  </div>
+
+  <div *ngIf="!loading && interview" class="table-container mb-4 p-4">
+    <h4 class="text-lg font-medium text-gray-900 dark:text-white">{{ interview.candidateName }}</h4>
+    <p class="text-sm text-gray-600 dark:text-gray-300">
+      {{ interview.scheduledStartAt | date: 'dd-MMM-yyyy HH:mm' }} &middot; {{ interview.interviewType }} &middot; Round {{ interview.round }}
+    </p>
+    <div *ngIf="jobApplication?.resumeUrl" class="mt-2">
+      <a [href]="getFileUrl(jobApplication?.resumeUrl)" target="_blank" rel="noopener noreferrer" class="text-primary">
+        <i class="fa fa-file-lines"></i> View Candidate CV
+      </a>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && interview" class="table-container mb-4 p-4">
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <div>
+        <p-floatlabel variant="in">
+          <p-select
+            inputId="selectedEmployeeId"
+            class="w-full"
+            [options]="interview.panelistEmployeeIds"
+            [(ngModel)]="selectedEmployeeId"
+            [ngModelOptions]="{ standalone: true }"
+            [appendTo]="'body'"
+            [autoDisplayFirst]="false"
+          ></p-select>
+          <label for="selectedEmployeeId">Panelist (Employee ID)</label>
+        </p-floatlabel>
+      </div>
+
+      <div>
+        <p-floatlabel variant="in">
+          <p-select
+            inputId="selectedScorecardId"
+            class="w-full"
+            [options]="scorecardOptions"
+            [(ngModel)]="selectedScorecardId"
+            [ngModelOptions]="{ standalone: true }"
+            optionLabel="name"
+            optionValue="scorecardId"
+            [appendTo]="'body'"
+            [autoDisplayFirst]="false"
+            (onChange)="onScorecardChange()"
+          ></p-select>
+          <label for="selectedScorecardId">Scorecard</label>
+        </p-floatlabel>
+      </div>
+    </div>
+
+    <div *ngIf="scorecardLoading" class="mt-4">
+      <p-skeleton height="6rem"></p-skeleton>
+    </div>
+
+    <div *ngIf="!scorecardLoading && scoreRows.length > 0" class="mt-4 space-y-3">
+      <div
+        *ngFor="let row of scoreRows"
+        class="grid grid-cols-1 items-end gap-3 rounded-md border border-gray-200 p-3 dark:border-gray-700 sm:grid-cols-12"
+      >
+        <div class="sm:col-span-7">
+          <p class="text-sm font-medium text-gray-900 dark:text-white">{{ row.name }}</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400">Weight {{ row.weight }} &middot; Max Score {{ row.maxScore }}</p>
+        </div>
+        <div class="sm:col-span-5">
+          <p-floatlabel variant="in">
+            <p-inputnumber class="w-full" [(ngModel)]="row.score" [ngModelOptions]="{ standalone: true }" [min]="0" [max]="row.maxScore" [maxFractionDigits]="2"></p-inputnumber>
+            <label>Score (0 - {{ row.maxScore }})</label>
+          </p-floatlabel>
+        </div>
+      </div>
+
+      <p-floatlabel variant="in">
+        <p-select
+          inputId="recommendation"
+          class="w-full sm:w-64"
+          [options]="recommendationOptions"
+          [(ngModel)]="recommendation"
+          [ngModelOptions]="{ standalone: true }"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+          [appendTo]="'body'"
+        ></p-select>
+        <label for="recommendation">Recommendation</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="in">
+        <textarea pTextarea class="w-full" rows="3" [(ngModel)]="overallComments" [ngModelOptions]="{ standalone: true }"></textarea>
+        <label>Overall Comments</label>
+      </p-floatlabel>
+    </div>
+
+    <small class="mt-3 block text-red-500" *ngIf="errorMessage">{{ errorMessage }}</small>
+
+    <div class="mt-4 flex gap-2" *ngIf="scoreRows.length > 0">
+      <button pButton [disabled]="!canSubmit" [loading]="saving" (click)="submit()">
+        <i class="fa fa-save"></i>
+        <span>Submit Evaluation</span>
+      </button>
+      <button pButton type="button" severity="secondary" [routerLink]="['/interviews/interview', interviewId]">
+        <span>Cancel</span>
+      </button>
+    </div>
+  </div>
+</section>

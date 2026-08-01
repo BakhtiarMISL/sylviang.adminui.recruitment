@@ -16,6 +16,11 @@
         <i class="fa fa-times"></i>
         <span>Reset</span>
       </button>
+
+      <div class="checkbox-container">
+        <p-checkbox [(ngModel)]="myPostingsOnly" [ngModelOptions]="{ standalone: true }" [binary]="true" inputId="myPostingsOnly" (onChange)="toggleMyPostingsOnly()"></p-checkbox>
+        <label for="myPostingsOnly">My Postings Only</label>
+      </div>
     </div>
     <button [routerLink]="['/job-vacancy/manage-job-vacancy']" pButton>
       <i class="fa fa-plus"></i>
@@ -110,6 +115,13 @@
               <td>
                 <button [routerLink]="['/job-vacancy/manage-job-vacancy', vacancy.jobPostingId]" class="text-primary mr-2">
                   <i class="fa fa-edit"></i>
+                </button>
+                <button
+                  [routerLink]="['/interviews/interview-round-config', vacancy.jobPostingId]"
+                  class="text-primary mr-2"
+                  title="Configure Interview Rounds"
+                >
+                  <i class="fa fa-layer-group"></i>
                 </button>
                 <button class="text-danger" (click)="deleteJobVacancy(vacancy, $event)">
                   <i class="fa fa-trash"></i>

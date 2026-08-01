@@ -1,6 +1,6 @@
-<app-public-sidebar></app-public-sidebar>
+<app-public-navbar *ngIf="!isLoggedIn"></app-public-navbar>
 
-<div class="min-h-screen bg-gray-50 px-4 py-8 pl-24 sm:px-8 lg:pl-8 lg:ml-60">
+<div class="min-h-[calc(100vh-4.5rem)] bg-gray-50 px-4 py-8 sm:px-8">
   <div class="mx-auto max-w-3xl">
     <a [routerLink]="['/careers']" class="mb-4 inline-flex items-center gap-2 text-sm text-blue-600 hover:underline">
       <i class="fa fa-arrow-left"></i>
@@ -50,18 +50,47 @@
             <li *ngIf="jobPosting.requiredDistrict">Required District: {{ jobPosting.requiredDistrict }}</li>
           </ul>
           <p *ngIf="!hasEligibilityInfo" class="mt-1 text-sm text-gray-500">No specific eligibility requirements.</p>
+
+          <!-- Real-time eligibility check against the logged-in candidate's profile (US-024 AC2/AC3) -->
+          <div *ngIf="eligibilityResult?.isEligible" class="mt-3 rounded-md bg-green-50 p-3 text-sm text-green-800">
+            <i class="fa fa-check-circle mr-1"></i>You are eligible to apply for this position.
+          </div>
+          <div *ngIf="eligibilityResult && !eligibilityResult.isEligible" class="mt-3 rounded-md bg-amber-50 p-3 text-sm text-amber-800">
+            <i class="fa fa-triangle-exclamation mr-1"></i>You do not meet the following requirements: {{ eligibilityResult.unmetRequirements.join(', ') }}
+          </div>
         </div>
 
         <!-- Fee info -->
         <div class="mt-4 rounded-md bg-blue-50 p-3 text-sm text-blue-800" *ngIf="jobPosting.applicationFeeAmount">
-          An application fee of {{ jobPosting.applicationFeeAmount }} {{ jobPosting.applicationFeeCurrency }} applies.
+          An application fee of {{ jobPosting.applicationFeeAmount }} {{ jobPosting.applicationFeeCurrency }} applies (non-refundable). You'll be redirected to pay it securely after submitting your application.
         </div>
       </section>
 
       <section class="rounded-lg bg-white p-6 shadow-sm">
         <h2 class="mb-4 text-lg font-medium text-gray-900">Apply for this position</h2>
-        <app-apply-form [jobPostingId]="jobPosting.jobPostingId"></app-apply-form>
+
+        <div *ngIf="isLoggedIn && existingApplication" class="rounded-md bg-green-50 p-4 text-sm text-green-800">
+          <p><i class="fa fa-check-circle mr-1"></i>You already applied for this position on {{ existingApplication.appliedDate | date: 'dd-MMM-yyyy' }}.</p>
+          <p class="mt-1">Status: <strong>{{ formatEnumLabel(existingApplication.applicationStatus) }}</strong></p>
+          <a [routerLink]="['/my-applications']" class="mt-2 inline-block text-primary hover:underline">View in My Applications</a>
+        </div>
+
+        <app-apply-form *ngIf="isLoggedIn && !existingApplication" [jobPostingId]="jobPosting.jobPostingId" [eligibilityResult]="eligibilityResult"></app-apply-form>
+
+        <div *ngIf="!isLoggedIn" class="rounded-md bg-gray-50 p-4 text-center">
+          <p class="mb-3 text-sm text-gray-700">You need a candidate account to apply for this position.</p>
+          <div class="flex justify-center gap-2">
+            <button pButton type="button" (click)="goToLogin()">
+              <span>Login to Apply</span>
+            </button>
+            <a [routerLink]="['/register']" pButton type="button" class="p-button-outlined">
+              <span>Create Account</span>
+            </a>
+          </div>
+        </div>
       </section>
     </div>
   </div>
 </div>
+
+<app-public-footer></app-public-footer>

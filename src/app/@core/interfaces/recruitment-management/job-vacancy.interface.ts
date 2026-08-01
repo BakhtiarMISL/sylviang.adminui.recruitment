@@ -1,9 +1,7 @@
 import { CircularTypeEnum, EducationLevelEnum, EmploymentTypeEnum, JobStatusEnum } from '@app/@core/enums/recruitment.enum';
 
 export interface IJobVacancyCreateRequest {
-  siteId: number;
   departmentId?: number;
-  designationId?: number;
   title: string;
   description?: string;
   requirements?: string;
@@ -13,6 +11,7 @@ export interface IJobVacancyCreateRequest {
   circularType: CircularTypeEnum;
   minSalary?: number;
   maxSalary?: number;
+  salaryCurrency?: string;
   postingDate?: string;
   closingDate?: string;
   minAge?: number;
@@ -29,9 +28,7 @@ export interface IJobVacancyResponse extends IJobVacancyCreateRequest {
   jobPostingId: number;
   jobPostingCode: string;
   status: JobStatusEnum;
-  siteName?: string;
   departmentName?: string;
-  designationName?: string;
   totalApplications: number;
   isActive: boolean;
   hiringPipelineName?: string;

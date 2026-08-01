@@ -114,18 +114,19 @@ export class ManageHiringPipelineComponent implements OnInit {
     this.stages.forEach((s, i) => (s.displayOrder = i));
   }
 
-  onInterviewerIdsBlur(stage: IPipelineStage, event: Event): void {
-    const value = (event.target as HTMLInputElement).value;
-    stage.interviewerEmployeeIds = value
-      .split(',')
-      .map((s) => s.trim())
-      .filter(Boolean)
-      .map(Number)
-      .filter((n) => !isNaN(n));
+  stageIsInvalid(stage: IPipelineStage): boolean {
+    return !stage.name?.trim() || !stage.stageType?.trim() || this.marksAreInvalid(stage);
   }
 
-  stageIsInvalid(stage: IPipelineStage): boolean {
-    return !stage.name?.trim() || !stage.stageType?.trim();
+  marksAreInvalid(stage: IPipelineStage): boolean {
+    return stage.maxMarks != null && stage.passMarks != null && stage.passMarks > stage.maxMarks;
+  }
+
+  otherStageOptions(currentIndex: number): { label: string; value: number }[] {
+    return this.stages
+      .map((s, i) => ({ label: s.name?.trim() || `Stage ${i + 1}`, value: s.displayOrder, index: i }))
+      .filter((option) => option.index !== currentIndex)
+      .map(({ label, value }) => ({ label, value }));
   }
 
   get hasInvalidStages(): boolean {
@@ -142,7 +143,7 @@ export class ManageHiringPipelineComponent implements OnInit {
     }
 
     if (this.hasInvalidStages) {
-      this.errorMessage = 'Every stage needs a name and a stage type, and the pipeline needs at least one stage.';
+      this.errorMessage = 'Every stage needs a name and a stage type, pass marks must not exceed max marks, and the pipeline needs at least one stage.';
       return;
     }
 

@@ -1,0 +1,6 @@
+// A p-datepicker nested inside a p-dialog renders its overlay panel with a much lower
+// static z-index (50) than the dialog's own mask (~1100+), leaving the calendar unclickable
+// behind the mask even though it paints visually on top. Force it above the dialog stack.
+::ng-deep .p-datepicker-panel {
+  z-index: 1200 !important;
+}

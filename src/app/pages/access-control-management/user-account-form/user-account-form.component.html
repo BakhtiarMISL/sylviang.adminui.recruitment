@@ -1,0 +1,63 @@
+<section class="page-container" *ngIf="form">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="table-container mb-4 p-4">
+      <h3 class="table-title mb-3">{{ isEditMode ? 'Edit User' : 'Invite User' }}</h3>
+
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div *ngIf="!isEditMode">
+          <p-floatlabel variant="in">
+            <input pInputText id="email" class="w-full" formControlName="email" />
+            <label for="email">Email</label>
+          </p-floatlabel>
+          <small class="text-red-500" *ngIf="hasError('email') && form.get('email')?.errors?.['required']">Email is required.</small>
+          <small class="text-red-500" *ngIf="hasError('email') && form.get('email')?.errors?.['email']">A valid email is required.</small>
+        </div>
+
+        <div>
+          <p-floatlabel variant="in">
+            <input pInputText id="fullName" class="w-full" formControlName="fullName" />
+            <label for="fullName">Full Name</label>
+          </p-floatlabel>
+          <small class="text-red-500" *ngIf="hasError('fullName') && form.get('fullName')?.errors?.['required']">Full name is required.</small>
+        </div>
+
+        <div *ngIf="!isEditMode">
+          <p-floatlabel variant="in">
+            <input pInputText type="password" id="password" class="w-full" formControlName="password" />
+            <label for="password">Password</label>
+          </p-floatlabel>
+          <small class="text-red-500" *ngIf="hasError('password') && form.get('password')?.errors?.['required']">Password is required.</small>
+          <small class="text-red-500" *ngIf="hasError('password') && form.get('password')?.errors?.['minlength']">Password must be at least 8 characters.</small>
+        </div>
+
+        <div class="sm:col-span-2">
+          <p-floatlabel variant="in">
+            <p-multiSelect
+              inputId="roleIds"
+              class="w-full"
+              [options]="roleOptions"
+              formControlName="roleIds"
+              optionLabel="name"
+              optionValue="roleId"
+              display="chip"
+            ></p-multiSelect>
+            <label for="roleIds">Roles</label>
+          </p-floatlabel>
+          <small class="text-red-500" *ngIf="hasError('roleIds')">At least one role must be assigned.</small>
+        </div>
+      </div>
+
+      <small class="mt-3 block text-red-500" *ngIf="errorMessage">{{ errorMessage }}</small>
+
+      <div class="mt-4 flex gap-2">
+        <button pButton type="submit">
+          <i class="fa fa-save"></i>
+          <span>{{ isEditMode ? 'Save Changes' : 'Invite User' }}</span>
+        </button>
+        <button pButton type="button" severity="secondary" [routerLink]="['/access-control/user-account-list']">
+          <span>Cancel</span>
+        </button>
+      </div>
+    </div>
+  </form>
+</section>

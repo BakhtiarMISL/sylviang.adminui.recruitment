@@ -1,0 +1,244 @@
+<section class="page-container">
+  <form [formGroup]="scheduleForm" (ngSubmit)="onSubmit()">
+    <!-- Section 1: Interview Details -->
+    <div class="table-container mb-4 p-4">
+      <h3 class="table-title mb-3">1. Interview Details</h3>
+
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div>
+          <p-floatlabel variant="in">
+            <p-select
+              inputId="jobPostingId"
+              class="w-full"
+              [options]="jobPostings"
+              formControlName="jobPostingId"
+              optionLabel="title"
+              optionValue="jobPostingId"
+              [appendTo]="'body'"
+              [autoDisplayFirst]="false"
+              (onChange)="onJobPostingChange()"
+            ></p-select>
+            <label for="jobPostingId">Job Posting</label>
+          </p-floatlabel>
+          <small class="text-red-500" *ngIf="hasError('jobPostingId')">Job posting is required.</small>
+        </div>
+
+        <div>
+          <p-floatlabel variant="in">
+            <p-select
+              inputId="interviewType"
+              class="w-full"
+              [options]="interviewTypeOptions"
+              formControlName="interviewType"
+              optionLabel="label"
+              optionValue="value"
+              [appendTo]="'body'"
+              [autoDisplayFirst]="false"
+              (onChange)="onInterviewTypeChange()"
+            ></p-select>
+            <label for="interviewType">Interview Type</label>
+          </p-floatlabel>
+        </div>
+
+        <div *ngIf="isInPerson">
+          <p-floatlabel variant="in">
+            <p-select
+              inputId="interviewVenueId"
+              class="w-full"
+              [options]="interviewVenues"
+              formControlName="interviewVenueId"
+              optionLabel="venueName"
+              optionValue="interviewVenueId"
+              [appendTo]="'body'"
+              [autoDisplayFirst]="false"
+              (onChange)="onVenueChange()"
+            ></p-select>
+            <label for="interviewVenueId">Venue</label>
+          </p-floatlabel>
+        </div>
+
+        <div *ngIf="isInPerson">
+          <p-floatlabel variant="in">
+            <p-select
+              inputId="interviewRoomId"
+              class="w-full"
+              [options]="interviewRooms"
+              formControlName="interviewRoomId"
+              optionLabel="roomName"
+              optionValue="interviewRoomId"
+              [appendTo]="'body'"
+              [autoDisplayFirst]="false"
+            ></p-select>
+            <label for="interviewRoomId">Room</label>
+          </p-floatlabel>
+          <small class="text-red-500" *ngIf="hasError('interviewRoomId')">Room is required.</small>
+        </div>
+
+        <div *ngIf="!isInPerson" class="sm:col-span-2">
+          <p-floatlabel variant="in">
+            <input pInputText id="meetingLink" class="w-full" formControlName="meetingLink" />
+            <label for="meetingLink">Meeting Link</label>
+          </p-floatlabel>
+          <small class="text-red-500" *ngIf="hasError('meetingLink')">Meeting link is required.</small>
+        </div>
+
+        <div>
+          <p-floatlabel variant="in">
+            <p-datepicker
+              inputId="scheduledStartAt"
+              styleClass="w-full"
+              formControlName="scheduledStartAt"
+              [showTime]="true"
+              [showIcon]="true"
+              dateFormat="dd-M-yy"
+            ></p-datepicker>
+            <label for="scheduledStartAt">{{ isBulk ? 'First Candidate Start Time' : 'Scheduled Date &amp; Time' }}</label>
+          </p-floatlabel>
+          <small class="text-red-500" *ngIf="hasError('scheduledStartAt')">Scheduled date/time is required.</small>
+        </div>
+
+        <div>
+          <p-floatlabel variant="in">
+            <p-inputnumber inputId="durationMinutes" class="w-full" formControlName="durationMinutes" [min]="1"></p-inputnumber>
+            <label for="durationMinutes">Duration (minutes)</label>
+          </p-floatlabel>
+          <small class="text-red-500" *ngIf="hasError('durationMinutes')">Duration is required.</small>
+        </div>
+
+        <div *ngIf="isBulk">
+          <p-floatlabel variant="in">
+            <p-inputnumber inputId="gapMinutes" class="w-full" formControlName="gapMinutes" [min]="0"></p-inputnumber>
+            <label for="gapMinutes">Gap Between Candidates (minutes)</label>
+          </p-floatlabel>
+          <small class="text-red-500" *ngIf="hasError('gapMinutes')">Gap cannot be negative.</small>
+        </div>
+
+        <div *ngIf="roundConfigs.length > 0">
+          <p-floatlabel variant="in">
+            <p-select
+              inputId="interviewRoundConfigId"
+              class="w-full"
+              [options]="roundConfigs"
+              formControlName="interviewRoundConfigId"
+              optionLabel="name"
+              optionValue="interviewRoundConfigId"
+              [showClear]="true"
+              [appendTo]="'body'"
+              [autoDisplayFirst]="false"
+              (onChange)="onRoundConfigChange()"
+              (onClear)="onRoundConfigChange()"
+            ></p-select>
+            <label for="interviewRoundConfigId">Interview Round (configured)</label>
+          </p-floatlabel>
+        </div>
+
+        <div>
+          <p-floatlabel variant="in">
+            <p-inputnumber inputId="round" class="w-full" formControlName="round" [min]="1"></p-inputnumber>
+            <label for="round">Round</label>
+          </p-floatlabel>
+        </div>
+
+        <div>
+          <p-floatlabel variant="in">
+            <input pInputText id="panelistEmployeeIdsText" class="w-full" formControlName="panelistEmployeeIdsText" />
+            <label for="panelistEmployeeIdsText">Panel Member Employee IDs (comma-separated)</label>
+          </p-floatlabel>
+        </div>
+
+        <div class="sm:col-span-2">
+          <p-floatlabel variant="in">
+            <input pInputText id="notes" class="w-full" formControlName="notes" />
+            <label for="notes">Notes</label>
+          </p-floatlabel>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2: Candidate Picker -->
+    <div
+      class="table-container mb-4 p-4"
+      [class.opacity-50]="!scheduleForm.value.jobPostingId"
+      [class.pointer-events-none]="!scheduleForm.value.jobPostingId"
+    >
+      <h3 class="table-title mb-3">2. Select Shortlisted Candidates</h3>
+      <p class="mb-3 text-sm text-gray-600 dark:text-gray-300">
+        Select one candidate to schedule a single interview, or several to bulk-schedule staggered slots starting from the time above.
+      </p>
+
+      <div *ngIf="!scheduleForm.value.jobPostingId" class="not-found">
+        <i class="fa fa-magnifying-glass-minus"></i>
+        <p>Pick a job posting above to see its shortlisted candidates.</p>
+      </div>
+
+      <p-table
+        *ngIf="scheduleForm.value.jobPostingId"
+        [value]="candidatesLoading ? skeletonItems : candidates"
+        [(selection)]="selectedCandidates"
+        dataKey="jobApplicationId"
+        [paginator]="true"
+        [rows]="candidateRows"
+        [first]="(candidateCurrentPage - 1) * candidateRows"
+        [rowsPerPageOptions]="UI_CONFIG.pageSizeOptions"
+        [totalRecords]="candidatesTotalRecords"
+        (onPage)="onCandidatePageChange($event)"
+        [lazy]="true"
+        [loading]="false"
+        scrollHeight="flex"
+        [responsiveLayout]="'scroll'"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} candidates"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="width: 3rem"><p-tableHeaderCheckbox *ngIf="!candidatesLoading"></p-tableHeaderCheckbox></th>
+            <th>Candidate Name</th>
+            <th>Applied Date</th>
+            <th>Source</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-candidate>
+          @if (candidatesLoading) {
+            <tr>
+              <td></td>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+            </tr>
+          } @else {
+            <tr>
+              <td><p-tableCheckbox [value]="candidate"></p-tableCheckbox></td>
+              <td>{{ candidate.candidateName }}</td>
+              <td>{{ candidate.appliedDate ? (candidate.appliedDate | date: 'dd-MMM-yyyy') : '-' }}</td>
+              <td>{{ candidate.source }}</td>
+            </tr>
+          }
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="4" class="not-found">
+              <div>
+                <i class="fa fa-magnifying-glass-minus"></i>
+                <p>No shortlisted candidates for this job posting.</p>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+
+    <small class="mb-3 block text-red-500" *ngIf="errorMessage">{{ errorMessage }}</small>
+
+    <div class="flex gap-2">
+      <button pButton type="submit" [disabled]="!canSubmit" [loading]="submitting">
+        <i class="fa fa-save"></i>
+        <span>{{ isBulk ? 'Bulk Schedule ' + selectedCandidates.length + ' Interviews' : 'Schedule Interview' }}</span>
+      </button>
+      <button pButton type="button" severity="secondary" [routerLink]="['/interviews/interview-list']">
+        <span>Cancel</span>
+      </button>
+    </div>
+  </form>
+</section>

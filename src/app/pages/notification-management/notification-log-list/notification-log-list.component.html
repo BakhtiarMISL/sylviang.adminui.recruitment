@@ -1,0 +1,145 @@
+<section class="page-container">
+  <div class="flex justify-between items-center gap-3 mb-4">
+    <h3 class="table-title">
+      Notification Log
+      <span class="table-title-info" *ngIf="totalRecords > 0">({{ totalRecords }} total)</span>
+    </h3>
+    <button pButton severity="secondary" (click)="exportExcel()">
+      <i class="fa fa-file-excel"></i>
+      <span>Export to Excel</span>
+    </button>
+  </div>
+
+  <div class="flex flex-wrap items-end gap-3 mb-4">
+    <p-floatlabel variant="in">
+      <p-datepicker inputId="filterDateFrom" [(ngModel)]="filterDateFrom" dateFormat="dd-M-yy" [showIcon]="true"></p-datepicker>
+      <label for="filterDateFrom">From</label>
+    </p-floatlabel>
+
+    <p-floatlabel variant="in">
+      <p-datepicker inputId="filterDateTo" [(ngModel)]="filterDateTo" dateFormat="dd-M-yy" [showIcon]="true"></p-datepicker>
+      <label for="filterDateTo">To</label>
+    </p-floatlabel>
+
+    <p-floatlabel variant="in">
+      <p-select
+        inputId="filterChannel"
+        class="w-48"
+        [options]="channelOptions"
+        [(ngModel)]="filterChannel"
+        optionLabel="label"
+        optionValue="value"
+        [showClear]="true"
+        [appendTo]="'body'"
+      ></p-select>
+      <label for="filterChannel">Channel</label>
+    </p-floatlabel>
+
+    <p-floatlabel variant="in">
+      <p-select
+        inputId="filterEvent"
+        class="w-56"
+        [options]="eventOptions"
+        [(ngModel)]="filterEvent"
+        optionLabel="label"
+        optionValue="value"
+        [showClear]="true"
+        [appendTo]="'body'"
+      ></p-select>
+      <label for="filterEvent">Event</label>
+    </p-floatlabel>
+
+    <p-floatlabel variant="in">
+      <p-select
+        inputId="filterStatus"
+        class="w-48"
+        [options]="statusOptions"
+        [(ngModel)]="filterStatus"
+        optionLabel="label"
+        optionValue="value"
+        [showClear]="true"
+        [appendTo]="'body'"
+      ></p-select>
+      <label for="filterStatus">Delivery Status</label>
+    </p-floatlabel>
+
+    <button pButton (click)="applyFilters()">
+      <i class="fa fa-filter"></i>
+      <span>Apply</span>
+    </button>
+    <button pButton severity="secondary" (click)="resetFilters()">
+      <i class="fa fa-rotate-left"></i>
+      <span>Reset</span>
+    </button>
+  </div>
+
+  <small class="mb-3 block text-red-500" *ngIf="errorMessage">{{ errorMessage }}</small>
+
+  <div *ngIf="loading" class="space-y-3">
+    <p-skeleton height="3rem" *ngFor="let i of skeletonItems"></p-skeleton>
+  </div>
+
+  <div *ngIf="!loading && items.length === 0" class="table-container">
+    <div class="not-found">
+      <i class="fa fa-magnifying-glass-minus"></i>
+      <p>No notifications match these filters.</p>
+    </div>
+  </div>
+
+  <p-table
+    *ngIf="!loading && items.length > 0"
+    [value]="items"
+    styleClass="p-datatable-sm"
+    [paginator]="true"
+    [rows]="rows"
+    [first]="(currentPage - 1) * rows"
+    [rowsPerPageOptions]="UI_CONFIG.pageSizeOptions"
+    [totalRecords]="totalRecords"
+    (onPage)="onPageChange($event)"
+    [lazy]="true"
+    [showCurrentPageReport]="true"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} notifications"
+  >
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Recipient</th>
+        <th>Channel</th>
+        <th>Event</th>
+        <th>Subject</th>
+        <th>Status</th>
+        <th>Sent At</th>
+        <th style="width: 10rem">Actions</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-item>
+      <tr>
+        <td>
+          <div>{{ item.recipientName }}</div>
+          <div class="text-xs text-neutral">{{ item.recipientAddress }}</div>
+        </td>
+        <td>{{ item.channel }}</td>
+        <td>{{ item.recruitmentEvent }}</td>
+        <td>{{ item.renderedSubject || '-' }}</td>
+        <td>
+          <span
+            [ngClass]="{
+              'text-green-600': item.deliveryStatus === 'Sent',
+              'text-red-500': item.deliveryStatus === 'Failed',
+              'text-neutral': item.deliveryStatus === 'Skipped' || item.deliveryStatus === 'Pending',
+            }"
+          >
+            {{ item.deliveryStatus }}
+          </span>
+          <div class="text-xs text-red-500" *ngIf="item.failureReason">{{ item.failureReason }}</div>
+        </td>
+        <td>{{ item.sentAt ? (item.sentAt | date: 'dd-MMM-yy HH:mm') : '-' }}</td>
+        <td>
+          <button pButton size="small" severity="secondary" *ngIf="isFailed(item)" (click)="retry(item)">
+            <i class="fa fa-rotate-right"></i>
+            <span>Retry</span>
+          </button>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</section>

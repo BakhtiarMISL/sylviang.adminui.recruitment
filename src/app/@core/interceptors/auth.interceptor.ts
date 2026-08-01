@@ -11,7 +11,14 @@ export class AuthInterceptor implements HttpInterceptor {
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const token = this.authService.getToken();
-    if (!token) {
+    // The career-portal GET endpoints (browse/detail) are [AllowAnonymous] and must be
+    // reachable without auth. But POST .../career-portal/job-postings/{id}/apply is
+    // [Authorize(Roles = "Candidate")] - it needs the token to identify who's applying, so
+    // it must NOT be swept into this exclusion just because the URL also contains
+    // "/career-portal". Was previously stripping the token from every career-portal request
+    // including apply, causing a logged-in candidate's own application submission to 401.
+    const isPublicCareerPortalRequest = request.method === 'GET' && request.url.includes('/career-portal');
+    if (!token || isPublicCareerPortalRequest) {
       return next.handle(request);
     }
 

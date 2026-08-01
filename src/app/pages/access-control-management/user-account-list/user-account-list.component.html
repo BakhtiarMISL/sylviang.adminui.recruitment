@@ -1,0 +1,71 @@
+<section class="page-container">
+  <div class="flex justify-between items-center gap-3 mb-4">
+    <h3 class="table-title">User Accounts</h3>
+    <button pButton [routerLink]="['/access-control', 'manage-user-account']">
+      <i class="fa fa-plus"></i>
+      <span>Invite User</span>
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="space-y-3">
+    <p-skeleton height="3rem" *ngFor="let i of skeletonItems"></p-skeleton>
+  </div>
+
+  <div *ngIf="!loading && accounts.length === 0" class="table-container">
+    <div class="not-found">
+      <i class="fa fa-magnifying-glass-minus"></i>
+      <p>No user accounts yet.</p>
+    </div>
+  </div>
+
+  <p-table *ngIf="!loading && accounts.length > 0" [value]="accounts" styleClass="p-datatable-sm">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Roles</th>
+        <th>Status</th>
+        <th style="width: 14rem">Actions</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-account>
+      <tr>
+        <td>{{ account.fullName }}</td>
+        <td>{{ account.email }}</td>
+        <td>
+          <span *ngFor="let name of account.roleNames" class="mr-1 rounded-md bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-200">{{ name }}</span>
+        </td>
+        <td>
+          <span class="rounded-full px-2 py-0.5 text-xs font-medium" [ngClass]="account.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'">
+            {{ account.isActive ? 'Active' : 'Inactive' }}
+          </span>
+        </td>
+        <td>
+          <div class="flex gap-2">
+            <button pButton size="small" severity="secondary" [routerLink]="['/access-control', 'manage-user-account', account.userAccountId]">
+              <i class="fa fa-edit"></i>
+              <span>Edit</span>
+            </button>
+            <button pButton size="small" [severity]="account.isActive ? 'danger' : 'success'" (click)="toggleActive(account, $event)">
+              <i class="fa" [ngClass]="account.isActive ? 'fa-ban' : 'fa-check'"></i>
+              <span>{{ account.isActive ? 'Deactivate' : 'Activate' }}</span>
+            </button>
+            <button
+              pButton
+              size="small"
+              severity="warn"
+              *ngIf="isSuperAdmin && (account.roleNames.includes('Admin') || account.roleNames.includes('HR'))"
+              [disabled]="impersonatingId === account.userAccountId"
+              (click)="impersonate(account)"
+            >
+              <i class="fa fa-user-secret"></i>
+              <span>Impersonate</span>
+            </button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+
+  <p-confirmDialog></p-confirmDialog>
+</section>

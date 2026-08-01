@@ -1,6 +1,8 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ICandidateProfileSummaryResponse } from '@app/@core/interfaces/recruitment-management/candidate-profile.interface';
+import { ITalentPoolLookupResponse } from '@app/@core/interfaces/recruitment-management/talent-pool.interface';
 import { CandidateProfileService } from '@app/@core/services/recruitment/candidate-profile/candidate-profile.service';
+import { TalentPoolService } from '@app/@core/services/recruitment/talent-pool/talent-pool.service';
 import { UI_CONFIG } from '@app/@core/constants';
 import { Base_URL } from '@env/environment';
 
@@ -13,6 +15,7 @@ import { Base_URL } from '@env/environment';
 export class CandidateListComponent implements OnInit {
   constructor(
     private candidateProfileService: CandidateProfileService,
+    private talentPoolService: TalentPoolService,
     private cdr: ChangeDetectorRef,
   ) {}
 
@@ -24,6 +27,24 @@ export class CandidateListComponent implements OnInit {
   rows = UI_CONFIG.defaultPageSize;
   currentPage = 1;
   searchTerm = '';
+  filtersCollapsed = true;
+
+  pools: ITalentPoolLookupResponse[] = [];
+  selectedPoolIds: number[] = [];
+
+  showAddToPoolDialog = false;
+  addToPoolCandidate: ICandidateProfileSummaryResponse | null = null;
+  addToPoolSelectedId: number | null = null;
+  addingToPool = false;
+  addToPoolError = '';
+  addToPoolSuccess = false;
+  addToPoolAlreadyInPool = false;
+
+  // US-041 AC3: filter by HR tags. Suggestions loaded once (same shape as ATS dashboard's
+  // skillLibrary p-multiSelect) rather than per-keystroke, since this is a dropdown filter, not
+  // a free-text autocomplete.
+  filterTags: string[] = [];
+  tagSuggestions: string[] = [];
 
   get skeletonItems() {
     return Array(this.rows)
@@ -33,7 +54,81 @@ export class CandidateListComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadCandidates();
+    this.loadPools();
+    this.loadTagSuggestions();
     this.isLoading = false;
+  }
+
+  loadPools(): void {
+    this.talentPoolService.getLookup().subscribe({
+      next: (response) => {
+        this.pools = !response.hasError && response.content ? response.content : [];
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.pools = [];
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  loadTagSuggestions(): void {
+    this.candidateProfileService.getTagSuggestions('').subscribe({
+      next: (response) => {
+        this.tagSuggestions = !response.hasError && response.content ? response.content : [];
+      },
+      error: () => {
+        this.tagSuggestions = [];
+      },
+    });
+  }
+
+  applyPoolFilter(): void {
+    this.currentPage = 1;
+    this.filtersCollapsed = true;
+    this.loadCandidates();
+  }
+
+  onTagFilterChange(): void {
+    this.currentPage = 1;
+    this.filtersCollapsed = true;
+    this.loadCandidates();
+  }
+
+  openAddToPoolDialog(candidate: ICandidateProfileSummaryResponse): void {
+    this.addToPoolCandidate = candidate;
+    this.addToPoolSelectedId = null;
+    this.addToPoolError = '';
+    this.addToPoolSuccess = false;
+    this.addToPoolAlreadyInPool = false;
+    this.showAddToPoolDialog = true;
+  }
+
+  addToPool(): void {
+    if (!this.addToPoolCandidate || !this.addToPoolSelectedId) return;
+
+    this.addingToPool = true;
+    this.addToPoolError = '';
+
+    this.talentPoolService
+      .addCandidates(this.addToPoolSelectedId, { candidateProfileIds: [this.addToPoolCandidate.candidateProfileId] })
+      .subscribe({
+        next: (response) => {
+          this.addingToPool = false;
+          if (!response.hasError) {
+            this.addToPoolAlreadyInPool = (response.content?.alreadyInPoolCount ?? 0) > 0;
+            this.addToPoolSuccess = true;
+          } else {
+            this.addToPoolError = response.decentMessage || 'Failed to add candidate to pool.';
+          }
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          this.addingToPool = false;
+          this.addToPoolError = error?.error?.decentMessage || 'Failed to add candidate to pool.';
+          this.cdr.detectChanges();
+        },
+      });
   }
 
   getPhotoUrl(candidate: ICandidateProfileSummaryResponse): string {
@@ -43,11 +138,14 @@ export class CandidateListComponent implements OnInit {
 
   applySearch(): void {
     this.currentPage = 1;
+    this.filtersCollapsed = true;
     this.loadCandidates();
   }
 
   resetSearch(): void {
     this.searchTerm = '';
+    this.filterTags = [];
+    this.filtersCollapsed = false;
     this.loadCandidates();
   }
 
@@ -58,6 +156,8 @@ export class CandidateListComponent implements OnInit {
       page: this.currentPage,
       pageSize: this.rows,
       ...(this.searchTerm && this.searchTerm.trim() && { searchTerm: this.searchTerm.trim(), searchProperties: ['FullName', 'Email'] }),
+      ...(this.selectedPoolIds.length > 0 && { talentPoolIds: this.selectedPoolIds }),
+      ...(this.filterTags.length > 0 && { tags: this.filterTags }),
     };
 
     this.candidateProfileService.getPaged(params).subscribe({

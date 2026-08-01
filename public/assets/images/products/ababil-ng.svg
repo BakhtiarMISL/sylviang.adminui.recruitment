@@ -1,0 +1,11 @@
+<svg width="450" height="338" viewBox="0 0 450 338" xmlns="http://www.w3.org/2000/svg">
+  <rect width="450" height="338" rx="14" fill="#3d6659"/>
+  <rect x="4" y="4" width="442" height="330" rx="10" fill="none" stroke="#6b9186" stroke-width="1.5"/>
+  <text x="205" y="160" font-family="Georgia, serif" font-size="52" font-style="italic" font-weight="700" fill="#ffffff" text-anchor="middle">Ababil</text>
+  <circle cx="330" cy="120" r="20" fill="none" stroke="#ffffff" stroke-width="2"/>
+  <text x="330" y="126" font-family="Segoe UI, sans-serif" font-size="14" fill="#ffffff" text-anchor="middle">ng</text>
+  <path d="M150 185 Q225 150 300 185" stroke="#ffffff" stroke-width="3" fill="none"/>
+  <path d="M150 195 Q225 165 300 195" stroke="#ffffff" stroke-width="3" fill="none"/>
+  <text x="225" y="222" font-family="Georgia, serif" font-style="italic" font-size="17" fill="#e6efec" text-anchor="middle">next generation</text>
+  <text x="225" y="246" font-family="Segoe UI, sans-serif" font-size="14" fill="#e6efec" text-anchor="middle">Upholding Social Equity and Justice</text>
+</svg>
