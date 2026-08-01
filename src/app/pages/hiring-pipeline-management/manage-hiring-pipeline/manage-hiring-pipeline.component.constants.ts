@@ -42,10 +42,6 @@ export function newStage(displayOrder: number): IPipelineStage {
     stageType: '',
     displayOrder,
     isMandatory: true,
-    notifyCandidateOnEnter: true,
-    notifyInterviewersOnAssign: true,
-    allowCandidateReschedule: false,
     manualApprovalRequired: false,
-    interviewerEmployeeIds: [],
   };
 }

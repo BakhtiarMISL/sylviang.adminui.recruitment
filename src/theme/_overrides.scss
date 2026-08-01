@@ -96,6 +96,13 @@
   @apply text-black/80 dark:text-white/80 !important;
 }
 
+// PrimeNG's own floatlabel-in padding-top token isn't resolving in this theme setup, so the
+// floated label sits directly on top of the textarea's first line instead of above it - most
+// visible on multi-line values. Force the clearance directly rather than depend on the token.
+.p-floatlabel-in .p-textarea {
+  padding-top: 1.5rem !important;
+}
+
 // --------------------------------------------Input Number Css Override--------------------------------------------
 .p-inputnumber .p-inputnumber-input {
   @apply w-full !important;

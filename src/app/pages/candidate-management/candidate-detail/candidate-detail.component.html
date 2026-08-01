@@ -18,7 +18,7 @@
             <span class="profile-type-badge" [class.internal]="profile.isInternal">{{ profile.isInternal ? 'Internal' : 'External' }}</span>
           </span>
           <span class="profile-header-email">{{ profile.email }}</span>
-          <span class="profile-header-phone" *ngIf="profile.phone">{{ profile.phone }}</span>
+          <span class="profile-header-phone" *ngIf="profile.phone">{{ profile.phoneDialCode ? profile.phoneDialCode + ' ' : '' }}{{ profile.phone }}</span>
           <span class="profile-header-phone" *ngIf="profile.isInternal && (profile.departmentName || profile.designationName)">
             {{ profile.designationName }}<span *ngIf="profile.designationName && profile.departmentName"> &middot; </span>{{ profile.departmentName }}
           </span>

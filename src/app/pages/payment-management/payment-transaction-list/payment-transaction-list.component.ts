@@ -40,6 +40,7 @@ export class PaymentTransactionListComponent implements OnInit {
   filterCandidateName: string | null = null;
   filterDateFrom: Date | null = null;
   filterDateTo: Date | null = null;
+  filtersCollapsed = true;
 
   get skeletonItems() {
     return Array(6)
@@ -95,6 +96,7 @@ export class PaymentTransactionListComponent implements OnInit {
 
   applyFilters(): void {
     this.currentPage = 1;
+    this.filtersCollapsed = true;
     this.loadItems();
   }
 
@@ -105,6 +107,7 @@ export class PaymentTransactionListComponent implements OnInit {
     this.filterDateFrom = null;
     this.filterDateTo = null;
     this.currentPage = 1;
+    this.filtersCollapsed = false;
     this.loadItems();
   }
 

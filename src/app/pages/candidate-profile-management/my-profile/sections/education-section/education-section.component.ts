@@ -257,7 +257,9 @@ export class EducationSectionComponent implements OnInit {
     this.loading = true;
     this.candidateProfileService.getEducation().subscribe({
       next: (response) => {
-        this.items = !response.hasError && response.content ? response.content : [];
+        const items = !response.hasError && response.content ? response.content : [];
+        // Most recent first - matches how a candidate would naturally list their education.
+        this.items = items.sort((a, b) => (b.passingYear ?? 0) - (a.passingYear ?? 0));
         this.loading = false;
       },
       error: () => {
@@ -307,10 +309,18 @@ export class EducationSectionComponent implements OnInit {
     }
   }
 
-  // Switching to/from "Division" changes what the Result field means (free-text GPA/CGPA number
-  // vs a First/Second/Third dropdown) - the previously entered value no longer applies either way.
+  // Only Division actually changes what the Result field means (free-text GPA/CGPA number vs a
+  // First/Second/Third dropdown) - a value entered under CGPA is still meaningful after switching
+  // to GPA (or from unset, e.g. resume-autofilled before the candidate had picked a system), so
+  // only clear when Division is on either side of the change.
+  private previousGradingSystem: string | null = null;
+
   onGradingSystemChange(): void {
-    this.form.patchValue({ result: null });
+    const newValue = this.f['gradingSystem'].value as string | null;
+    if (this.previousGradingSystem === 'Division' || newValue === 'Division') {
+      this.form.patchValue({ result: null });
+    }
+    this.previousGradingSystem = newValue;
     this.updateResultValidators();
   }
 
@@ -384,6 +394,7 @@ export class EducationSectionComponent implements OnInit {
     this.formSubmitted = false;
     this.saveError = '';
     this.form.reset();
+    this.previousGradingSystem = null;
     // form.reset() clears values but not a previously set() validator - a leftover CGPA/GPA
     // scale validator from editing another entry must not carry over to a fresh Add.
     this.updateResultValidators();
@@ -395,6 +406,7 @@ export class EducationSectionComponent implements OnInit {
     this.formSubmitted = false;
     this.saveError = '';
     this.form.patchValue(item);
+    this.previousGradingSystem = (item.gradingSystem as string | null) ?? null;
     this.updateResultValidators();
     this.showForm = true;
   }

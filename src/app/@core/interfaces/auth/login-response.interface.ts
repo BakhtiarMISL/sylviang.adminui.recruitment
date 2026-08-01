@@ -11,4 +11,6 @@ export interface ILoginResponse {
   requiresOtp?: boolean;
   /** Opaque id to pass to verify-otp/resend-otp. Only set when requiresOtp is true. */
   challengeId?: string;
+  /** When the current OTP code expires (UTC ISO string). Only set when requiresOtp is true. */
+  otpExpiresAtUtc?: string;
 }

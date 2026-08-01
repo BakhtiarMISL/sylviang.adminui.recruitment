@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { AutoCompleteCompleteEvent } from 'primeng/autocomplete';
 import { CriterionTypeEnum, EducationLevelEnum, FilterCombinatorEnum } from '@app/@core/enums/recruitment.enum';
 import { IShortlistFilterCreateRequest, IShortlistFilterCriterion, IShortlistFilterPreviewResponse } from '@app/@core/interfaces/recruitment-management/shortlist-filter.interface';
 import { ISkillLibraryItemResponse } from '@app/@core/interfaces/recruitment-management/candidate-profile.interface';
@@ -45,6 +46,7 @@ export class ManageShortlistFilterComponent implements OnInit {
   educationLevelOptions = Object.values(EducationLevelEnum).map((value) => ({ label: value, value }));
 
   skillLibrary: ISkillLibraryItemResponse[] = [];
+  skillSuggestions: ISkillLibraryItemResponse[] = [];
   jobPostings: IJobVacancyResponse[] = [];
 
   previewJobPostingId: number | null = null;
@@ -149,9 +151,38 @@ export class ManageShortlistFilterComponent implements OnInit {
     this.expandedCriterionIndex = null;
   }
 
-  onRequiredSkillsChange(criterion: IShortlistFilterCriterion, skills: string[]): void {
-    criterion.selectedSkills = skills;
-    criterion.requiredSkillNames = skills.join(',');
+  // p-autoComplete's multi-mode emits a mix of ISkillLibraryItemResponse (picked from the
+  // library) and plain strings (typed free text, since forceSelection is false) - normalize
+  // both to name strings before persisting.
+  onRequiredSkillsChange(criterion: IShortlistFilterCriterion, skills: (ISkillLibraryItemResponse | string)[]): void {
+    const names = skills.map((s) => (typeof s === 'string' ? s : s.name));
+    criterion.selectedSkills = names;
+    criterion.requiredSkillNames = names.join(',');
+  }
+
+  // PrimeNG's autocomplete only auto-adds untyped free text on Enter when [typeahead] is off,
+  // but typeahead is what drives the library search-as-you-type - so commit free text ourselves
+  // on Enter/blur instead. Harmless if the user picked a real suggestion: PrimeNG's own handler
+  // already cleared the input before this bubbles up, so text is empty and this is a no-op.
+  onSkillsInputCommit(event: Event, criterion: IShortlistFilterCriterion): void {
+    const input = event.target as HTMLInputElement;
+    const text = input.value?.trim();
+    if (!text) return;
+    this.onRequiredSkillsChange(criterion, [...(criterion.selectedSkills || []), text]);
+    input.value = '';
+  }
+
+  filterSkillSuggestions(event: AutoCompleteCompleteEvent): void {
+    const query = event.query.trim().toLowerCase();
+    this.skillSuggestions = this.skillLibrary.filter((s) => s.name.toLowerCase().includes(query));
+  }
+
+  // Selected values are a mix of ISkillLibraryItemResponse (picked from the library) and plain
+  // strings (typed free text, since forceSelection is false) - normalize both to name strings.
+  removeSkill(criterion: IShortlistFilterCriterion, skill: ISkillLibraryItemResponse | string): void {
+    const skillName = typeof skill === 'string' ? skill : skill.name;
+    const remaining = (criterion.selectedSkills || []).filter((s: unknown) => (typeof s === 'string' ? s : (s as ISkillLibraryItemResponse).name) !== skillName);
+    this.onRequiredSkillsChange(criterion, remaining);
   }
 
   criterionIsInvalid(criterion: IShortlistFilterCriterion): boolean {

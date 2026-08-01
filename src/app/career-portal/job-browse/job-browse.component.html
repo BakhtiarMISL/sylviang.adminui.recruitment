@@ -282,9 +282,14 @@
                 <td><p-skeleton width="3rem" height="1rem"></p-skeleton></td>
               </tr>
             } @else {
-              <tr>
+              <tr [class.opacity-60]="job.alreadyApplied">
                 <td>{{ job.jobPostingCode }}</td>
-                <td>{{ job.title }}</td>
+                <td>
+                  {{ job.title }}
+                  <span *ngIf="job.alreadyApplied" class="ml-2 inline-flex items-center rounded-full bg-success-100 px-2 py-0.5 text-xs font-medium text-success-700">
+                    <i class="fa fa-check mr-1"></i>Applied
+                  </span>
+                </td>
                 <td>{{ formatEnumLabel(job.employmentType) }}</td>
                 <td>{{ job.location || '-' }}</td>
                 <td>{{ job.postingDate ? (job.postingDate | date: 'dd-MMM-yyyy') : '-' }}</td>

@@ -1,6 +1,8 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { forkJoin } from 'rxjs';
 import { IJobApplicationSubmitResponse, IJobEligibilityResponse } from '@app/@core/interfaces/recruitment-management/career-portal.interface';
+import { ICandidateDocumentResponse } from '@app/@core/interfaces/recruitment-management/candidate-profile.interface';
 import { IMasterDataItem } from '@app/@core/interfaces/recruitment-management/master-data.interface';
 import { CandidateProfileService } from '@app/@core/services/recruitment/candidate-profile/candidate-profile.service';
 import { CareerPortalService } from '@app/@core/services/recruitment/career-portal/career-portal.service';
@@ -49,14 +51,23 @@ export class ApplyFormComponent implements OnInit {
   // No guest apply - applying always requires a logged-in candidate account, so prefill from
   // their own profile instead of forcing a blank form (same precedent as the internal apply form).
   ngOnInit(): void {
-    this.candidateProfileService.getMyProfile().subscribe({
-      next: (response) => {
-        if (response && !response.hasError && response.content) {
-          const profile = response.content;
+    forkJoin({
+      profile: this.candidateProfileService.getMyProfile(),
+      countries: this.candidateProfileService.getCountries(),
+    }).subscribe({
+      next: ({ profile, countries }) => {
+        if (profile && !profile.hasError && profile.content) {
+          const content = profile.content;
+          // Contact section stores the dial code and local number as two separate fields
+          // (Country Code dropdown + Mobile Number) - this form has one plain Phone input, so
+          // reconstruct the full number the candidate would actually recognize/expect to see.
+          const country = !countries.hasError ? countries.content?.find((c) => c.countryId === content.countryId) : null;
+          const fullPhone = content.phone ? `${country?.dialCode ?? ''}${content.phone}` : null;
+
           this.applyForm.patchValue({
-            candidateName: profile.fullName || null,
-            candidateEmail: profile.email || null,
-            candidatePhone: profile.phone || null,
+            candidateName: content.fullName || null,
+            candidateEmail: content.email || null,
+            candidatePhone: fullPhone,
           });
         }
       },
@@ -65,7 +76,37 @@ export class ApplyFormComponent implements OnInit {
       error: () => {},
     });
 
+    this.loadExistingResume();
     this.loadOptionalDropdowns();
+  }
+
+  // Candidates already upload a resume once to their profile Documents (US-006) - default to
+  // reusing that instead of asking them to upload the same file again for every application.
+  existingResume: ICandidateDocumentResponse | null = null;
+  useExistingResume = false;
+
+  private loadExistingResume(): void {
+    this.candidateProfileService.getDocuments().subscribe({
+      next: (response) => {
+        if (!response.hasError && response.content) {
+          this.existingResume = response.content.find((d) => d.documentType === 'Resume' && d.isActive) || null;
+          this.useExistingResume = !!this.existingResume;
+        }
+      },
+      // Same reasoning as the profile prefill - a convenience, not a requirement.
+      error: () => {},
+    });
+  }
+
+  replaceResume(): void {
+    this.useExistingResume = false;
+  }
+
+  useExistingResumeInstead(): void {
+    if (!this.existingResume) return;
+    this.useExistingResume = true;
+    this.selectedFile = null;
+    this.fileError = '';
   }
 
   private loadOptionalDropdowns(): void {
@@ -162,6 +203,7 @@ export class ApplyFormComponent implements OnInit {
     }
 
     this.selectedFile = file;
+    this.useExistingResume = false;
   }
 
   private restoreFilePickerScrollPosition(): void {
@@ -198,22 +240,30 @@ export class ApplyFormComponent implements OnInit {
     return null;
   }
 
+  get hasResume(): boolean {
+    return !!this.selectedFile || (this.useExistingResume && !!this.existingResume);
+  }
+
   onSubmit(): void {
     this.formSubmitted = true;
     this.submitError = '';
 
-    if (!this.selectedFile) {
+    if (!this.hasResume) {
       this.fileError = 'Resume is required';
     }
 
-    if (this.applyForm.invalid || !this.selectedFile || (this.needsAcknowledgement && !this.acknowledgedIneligibility)) {
+    if (this.applyForm.invalid || !this.hasResume || (this.needsAcknowledgement && !this.acknowledgedIneligibility)) {
       this.applyForm.markAllAsTouched();
       return;
     }
 
     this.submitting = true;
 
-    this.careerPortalService.apply(this.jobPostingId, this.applyForm.value, this.selectedFile).subscribe({
+    // null when reusing the existing profile resume - the backend falls back to that document
+    // itself (JobApplicationService.SubmitAsync) rather than requiring it re-uploaded here.
+    const resumeToSend = this.useExistingResume ? null : this.selectedFile;
+
+    this.careerPortalService.apply(this.jobPostingId, this.applyForm.value, resumeToSend).subscribe({
       next: (response) => {
         this.submitting = false;
         if (response && !response.hasError && response.content) {
@@ -233,10 +283,21 @@ export class ApplyFormComponent implements OnInit {
         if (error?.status === 409) {
           this.submitError = "You've already applied to this position with this email address.";
         } else {
-          this.submitError = error?.error?.decentMessage || 'Failed to submit application. Please try again.';
+          this.submitError = this.extractErrorMessage(error) || 'Failed to submit application. Please try again.';
         }
       },
     });
+  }
+
+  // Validation failures (e.g. the profile-completeness gate) come back as decentMessage:
+  // "Validation failed." with the real per-field message(s) in errorDetails - show those
+  // instead of the generic wrapper text.
+  private extractErrorMessage(error: any): string {
+    const details = error?.error?.errorDetails;
+    if (Array.isArray(details) && details.length > 0) {
+      return details.join(' ');
+    }
+    return error?.error?.decentMessage;
   }
 
   retryPayment(): void {

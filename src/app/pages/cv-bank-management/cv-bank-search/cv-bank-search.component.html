@@ -166,7 +166,7 @@
               </td>
               <td>{{ candidate.fullName }}</td>
               <td>{{ candidate.email }}</td>
-              <td>{{ candidate.phone || '-' }}</td>
+              <td>{{ candidate.phone ? (candidate.phoneDialCode ? candidate.phoneDialCode + ' ' : '') + candidate.phone : '-' }}</td>
               <td>{{ candidate.educationSummary || '-' }}</td>
               <td>{{ candidate.totalExperienceYears }} yrs</td>
               <td>{{ candidate.relevanceScore }}</td>

@@ -52,7 +52,7 @@ export class LoginComponent {
         // code-entry screen instead of the dashboard.
         if (response.content?.requiresOtp && response.content.challengeId) {
           this.router.navigate(['/login/verify-otp'], {
-            queryParams: { challengeId: response.content.challengeId, returnUrl },
+            queryParams: { challengeId: response.content.challengeId, returnUrl, expiresAt: response.content.otpExpiresAtUtc },
           });
           return;
         }

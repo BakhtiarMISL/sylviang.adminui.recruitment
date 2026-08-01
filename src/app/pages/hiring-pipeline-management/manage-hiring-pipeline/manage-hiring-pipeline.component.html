@@ -11,7 +11,7 @@
         <small class="text-red-500" *ngIf="hasError('name')">Pipeline name is required.</small>
 
         <p-floatlabel variant="in">
-          <textarea pTextarea id="description" class="w-full" formControlName="description" rows="1"></textarea>
+          <textarea pTextarea id="description" class="w-full" formControlName="description" rows="2"></textarea>
           <label for="description">Description</label>
         </p-floatlabel>
       </div>
@@ -26,7 +26,7 @@
         </button>
       </div>
 
-      <p class="mb-3 text-sm text-gray-500">Drag stages to reorder. Mandatory / optional and the stage type drive downstream candidate-stage behavior.</p>
+      <p class="mb-3 text-sm text-gray-500">Drag stages to reorder. A mandatory stage blocks advancing any later stage until it's Completed; optional stages don't.</p>
 
       <div cdkDropList class="flex flex-col gap-2" (cdkDropListDropped)="onStageDrop($event)">
         <div cdkDrag *ngFor="let stage of stages; let i = index" class="rounded-lg border border-gray-200 bg-white dark:border-neutral dark:bg-dark">
@@ -58,12 +58,12 @@
 
             <p-floatlabel variant="in">
               <input pInputText [id]="'passingCriteria' + i" class="w-full" [(ngModel)]="stage.passingCriteria" [ngModelOptions]="{ standalone: true }" />
-              <label [for]="'passingCriteria' + i">Passing Criteria</label>
+              <label [for]="'passingCriteria' + i">Passing Criteria (shown to HR on the candidate's stage card)</label>
             </p-floatlabel>
 
             <p-floatlabel variant="in" class="sm:col-span-2 lg:col-span-3">
               <textarea pTextarea [id]="'stageDescription' + i" class="w-full" rows="2" [(ngModel)]="stage.description" [ngModelOptions]="{ standalone: true }"></textarea>
-              <label [for]="'stageDescription' + i">Description</label>
+              <label [for]="'stageDescription' + i">Description (shown to HR on the candidate's stage card)</label>
             </p-floatlabel>
 
             <p-floatlabel variant="in">
@@ -89,30 +89,33 @@
               <small class="text-red-500" *ngIf="marksAreInvalid(stage)">Pass marks must not exceed max marks.</small>
             </div>
 
-            <div class="flex items-center gap-2">
-              <label [for]="'colorBadge' + i" class="text-sm text-gray-600">Color Badge</label>
-              <input type="color" [id]="'colorBadge' + i" [(ngModel)]="stage.colorBadge" [ngModelOptions]="{ standalone: true }" class="h-9 w-14 cursor-pointer rounded border border-gray-300" />
-            </div>
-
-            <p-floatlabel variant="in">
-              <input pInputText [id]="'requiredDocuments' + i" class="w-full" [(ngModel)]="stage.requiredDocuments" [ngModelOptions]="{ standalone: true }" />
-              <label [for]="'requiredDocuments' + i">Required Documents</label>
-            </p-floatlabel>
-
-            <p-floatlabel variant="in">
-              <input pInputText [id]="'interviewers' + i" class="w-full" [value]="stage.interviewerEmployeeIds.join(', ')" (blur)="onInterviewerIdsBlur(stage, $event)" />
-              <label [for]="'interviewers' + i">Interviewer Employee IDs</label>
-            </p-floatlabel>
-
             <p-floatlabel variant="in" class="sm:col-span-2 lg:col-span-3">
-              <textarea pTextarea [id]="'emailTemplate' + i" class="w-full" rows="2" [(ngModel)]="stage.emailTemplate" [ngModelOptions]="{ standalone: true }"></textarea>
-              <label [for]="'emailTemplate' + i">Email Template</label>
+              <input pInputText [id]="'requiredDocuments' + i" class="w-full" [(ngModel)]="stage.requiredDocuments" [ngModelOptions]="{ standalone: true }" />
+              <label [for]="'requiredDocuments' + i">Required Documents (shown to HR on the candidate's stage card)</label>
             </p-floatlabel>
 
             <p-floatlabel variant="in" class="sm:col-span-2 lg:col-span-3">
               <input pInputText [id]="'autoProgressionRule' + i" class="w-full" [(ngModel)]="stage.autoProgressionRule" [ngModelOptions]="{ standalone: true }" />
-              <label [for]="'autoProgressionRule' + i">Auto Progression Rule</label>
+              <label [for]="'autoProgressionRule' + i">Auto Progression Rule (note only)</label>
             </p-floatlabel>
+
+            <div>
+              <p-floatlabel variant="in">
+                <p-select
+                  [inputId]="'autoProgressionTarget' + i"
+                  class="w-full"
+                  [options]="otherStageOptions(i)"
+                  [(ngModel)]="stage.autoProgressionTargetDisplayOrder"
+                  [ngModelOptions]="{ standalone: true }"
+                  optionLabel="label"
+                  optionValue="value"
+                  [showClear]="true"
+                  [appendTo]="'body'"
+                ></p-select>
+                <label [for]="'autoProgressionTarget' + i">Auto-progress to (if Score ≥ Pass Marks)</label>
+              </p-floatlabel>
+              <small class="text-gray-500" *ngIf="stage.autoProgressionTargetDisplayOrder != null && stage.passMarks == null">Set Pass Marks above for this to actually trigger.</small>
+            </div>
 
             <div class="flex flex-col gap-2 sm:col-span-2 lg:col-span-3">
               <div class="checkbox-container">
@@ -120,20 +123,8 @@
                 <label [for]="'mandatory' + i">Mandatory stage</label>
               </div>
               <div class="checkbox-container">
-                <p-checkbox [(ngModel)]="stage.allowCandidateReschedule" [ngModelOptions]="{ standalone: true }" [binary]="true" [inputId]="'reschedule' + i"></p-checkbox>
-                <label [for]="'reschedule' + i">Allow candidate reschedule</label>
-              </div>
-              <div class="checkbox-container">
                 <p-checkbox [(ngModel)]="stage.manualApprovalRequired" [ngModelOptions]="{ standalone: true }" [binary]="true" [inputId]="'approval' + i"></p-checkbox>
-                <label [for]="'approval' + i">Manual approval required to advance</label>
-              </div>
-              <div class="checkbox-container">
-                <p-checkbox [(ngModel)]="stage.notifyCandidateOnEnter" [ngModelOptions]="{ standalone: true }" [binary]="true" [inputId]="'notifyCandidate' + i"></p-checkbox>
-                <label [for]="'notifyCandidate' + i">Notify candidate when entering this stage</label>
-              </div>
-              <div class="checkbox-container">
-                <p-checkbox [(ngModel)]="stage.notifyInterviewersOnAssign" [ngModelOptions]="{ standalone: true }" [binary]="true" [inputId]="'notifyInterviewers' + i"></p-checkbox>
-                <label [for]="'notifyInterviewers' + i">Notify interviewers when assigned</label>
+                <label [for]="'approval' + i">Manual approval required to advance (counts toward the Pending Approvals dashboard stat)</label>
               </div>
             </div>
           </div>

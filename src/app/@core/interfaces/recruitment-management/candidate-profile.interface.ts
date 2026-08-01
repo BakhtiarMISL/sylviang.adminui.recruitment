@@ -48,6 +48,7 @@ export interface IThanaResponse {
 
 export interface ICandidateProfileResponse extends ICandidateProfilePersonalInfoUpdateRequest, ICandidateProfileContactUpdateRequest {
   candidateProfileId: number;
+  phoneDialCode?: string | null;
   profilePhotoPath?: string | null;
   signaturePath?: string | null;
   completenessPercentage: number;
@@ -234,6 +235,7 @@ export interface ICandidateProfileSummaryResponse {
   fullName: string;
   email: string;
   phone?: string | null;
+  phoneDialCode?: string | null;
   profilePhotoPath?: string | null;
   completenessPercentage: number;
 }

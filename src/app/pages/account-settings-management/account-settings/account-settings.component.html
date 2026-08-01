@@ -31,7 +31,7 @@
 </section>
 
 <section class="page-container" *ngIf="!loading && account">
-  <form [formGroup]="emailForm" (ngSubmit)="submitEmail()" class="form-container">
+  <form *ngIf="!awaitingOtp" [formGroup]="emailForm" (ngSubmit)="submitEmail()" class="form-container">
     <h3 class="form-section-header">Email</h3>
 
     <div>
@@ -43,12 +43,38 @@
     </div>
 
     <div *ngIf="emailSaveError" class="invalid sm:col-span-2">{{ emailSaveError }}</div>
-    <div *ngIf="emailSaveSuccess" class="success-message sm:col-span-2">Email updated.</div>
+    <div *ngIf="emailSaveSuccess" class="success-message sm:col-span-2">Email updated and verified.</div>
 
     <div class="sm:col-span-2">
       <button pButton type="submit" [disabled]="savingEmail || emailForm.pristine">
         <i class="fas fa-save"></i>
-        <span>{{ savingEmail ? 'Saving...' : 'Save Email' }}</span>
+        <span>{{ savingEmail ? 'Sending code...' : 'Save Email' }}</span>
+      </button>
+    </div>
+  </form>
+
+  <form *ngIf="awaitingOtp" [formGroup]="otpForm" (ngSubmit)="confirmEmailChange()" class="form-container">
+    <h3 class="form-section-header">Verify New Email</h3>
+    <div class="sm:col-span-2 helper-text">We sent a verification code to <strong>{{ pendingEmail }}</strong>. Enter it below to confirm the change.</div>
+
+    <div>
+      <p-floatlabel variant="in">
+        <input pInputText inputId="otpCode" formControlName="otpCode" maxlength="6" class="w-full" [class.ng-invalid]="hasOtpError()" [class.ng-dirty]="hasOtpError()" (blur)="of['otpCode'].markAsTouched()" />
+        <label for="otpCode">Verification Code *</label>
+      </p-floatlabel>
+      <div *ngIf="hasOtpError()" class="invalid">Verification code is required</div>
+    </div>
+
+    <div *ngIf="otpError" class="invalid sm:col-span-2">{{ otpError }}</div>
+
+    <div class="sm:col-span-2">
+      <button pButton type="submit" [disabled]="confirmingOtp || otpForm.pristine">
+        <i class="fas fa-check"></i>
+        <span>{{ confirmingOtp ? 'Verifying...' : 'Confirm Email Change' }}</span>
+      </button>
+      <button pButton type="button" severity="secondary" (click)="cancelEmailChange()" [disabled]="confirmingOtp">
+        <i class="fas fa-times"></i>
+        <span>Cancel</span>
       </button>
     </div>
   </form>

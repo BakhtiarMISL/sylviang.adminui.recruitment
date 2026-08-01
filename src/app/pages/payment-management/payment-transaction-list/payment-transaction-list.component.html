@@ -6,59 +6,61 @@
     </h3>
   </div>
 
-  <div class="flex flex-wrap items-end gap-3 mb-4">
-    <p-floatlabel variant="in">
-      <p-select
-        inputId="filterJobPostingId"
-        class="w-56"
-        [options]="vacancyOptions"
-        [(ngModel)]="filterJobPostingId"
-        optionLabel="title"
-        optionValue="jobPostingId"
-        [showClear]="true"
-        [appendTo]="'body'"
-      ></p-select>
-      <label for="filterJobPostingId">Vacancy</label>
-    </p-floatlabel>
+  <app-filter-panel [(collapsed)]="filtersCollapsed">
+    <div class="filter-bar">
+      <p-floatlabel variant="in">
+        <p-select
+          inputId="filterJobPostingId"
+          class="w-full"
+          [options]="vacancyOptions"
+          [(ngModel)]="filterJobPostingId"
+          optionLabel="title"
+          optionValue="jobPostingId"
+          [showClear]="true"
+          [appendTo]="'body'"
+        ></p-select>
+        <label for="filterJobPostingId">Vacancy</label>
+      </p-floatlabel>
 
-    <p-floatlabel variant="in">
-      <p-select
-        inputId="filterStatus"
-        class="w-40"
-        [options]="statusOptions"
-        [(ngModel)]="filterStatus"
-        optionLabel="label"
-        optionValue="value"
-        [showClear]="true"
-        [appendTo]="'body'"
-      ></p-select>
-      <label for="filterStatus">Status</label>
-    </p-floatlabel>
+      <p-floatlabel variant="in">
+        <p-select
+          inputId="filterStatus"
+          class="w-full"
+          [options]="statusOptions"
+          [(ngModel)]="filterStatus"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+          [appendTo]="'body'"
+        ></p-select>
+        <label for="filterStatus">Status</label>
+      </p-floatlabel>
 
-    <p-floatlabel variant="in">
-      <input pInputText inputId="filterCandidateName" class="w-48" [(ngModel)]="filterCandidateName" />
-      <label for="filterCandidateName">Candidate Name</label>
-    </p-floatlabel>
+      <p-floatlabel variant="in">
+        <input pInputText inputId="filterCandidateName" class="w-full" [(ngModel)]="filterCandidateName" />
+        <label for="filterCandidateName">Candidate Name</label>
+      </p-floatlabel>
 
-    <p-floatlabel variant="in">
-      <p-datepicker inputId="filterDateFrom" styleClass="w-40" [(ngModel)]="filterDateFrom" [showIcon]="true" dateFormat="dd-M-yy"></p-datepicker>
-      <label for="filterDateFrom">From</label>
-    </p-floatlabel>
+      <p-floatlabel variant="in">
+        <p-datepicker inputId="filterDateFrom" styleClass="w-full" [(ngModel)]="filterDateFrom" [showIcon]="true" dateFormat="dd-M-yy"></p-datepicker>
+        <label for="filterDateFrom">From</label>
+      </p-floatlabel>
 
-    <p-floatlabel variant="in">
-      <p-datepicker inputId="filterDateTo" styleClass="w-40" [(ngModel)]="filterDateTo" [showIcon]="true" dateFormat="dd-M-yy"></p-datepicker>
-      <label for="filterDateTo">To</label>
-    </p-floatlabel>
+      <p-floatlabel variant="in">
+        <p-datepicker inputId="filterDateTo" styleClass="w-full" [(ngModel)]="filterDateTo" [showIcon]="true" dateFormat="dd-M-yy"></p-datepicker>
+        <label for="filterDateTo">To</label>
+      </p-floatlabel>
 
-    <button pButton (click)="applyFilters()">
-      <i class="fa fa-filter"></i>
-      <span>Apply</span>
-    </button>
-    <button pButton severity="secondary" (click)="resetFilters()">
-      <i class="fa fa-rotate-left"></i>
-      <span>Reset</span>
-    </button>
-  </div>
+      <button pButton (click)="applyFilters()">
+        <i class="fa fa-filter"></i>
+        <span>Apply</span>
+      </button>
+      <button pButton severity="secondary" (click)="resetFilters()">
+        <i class="fa fa-rotate-left"></i>
+        <span>Reset</span>
+      </button>
+    </div>
+  </app-filter-panel>
 
   <small class="mb-3 block text-red-500" *ngIf="errorMessage">{{ errorMessage }}</small>
 

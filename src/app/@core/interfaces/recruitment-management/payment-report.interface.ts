@@ -44,7 +44,6 @@ export interface IReconciliationRequest {
   dateTo: string;
   jobPostingId?: number | null;
   departmentId?: number | null;
-  siteId?: number | null;
 }
 
 export interface IReconciliationResponse {

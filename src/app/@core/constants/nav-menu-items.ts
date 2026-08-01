@@ -15,12 +15,7 @@ export const webSidebarMenuItems: IMenuItem[] = [
     icon: 'fa-solid fa-briefcase',
     roles: [UserRoleEnum.Admin, UserRoleEnum.HR],
     subItems: [
-      {
-        href: '/job-vacancy/job-vacancy-list',
-        title: 'Job Vacancies',
-        active: false,
-        icon: 'fa-solid fa-list',
-      },
+      // ── Setup: configure before a vacancy can be posted/run ──
       {
         href: '/hiring-pipeline/hiring-pipeline-list',
         title: 'Hiring Pipelines',
@@ -28,17 +23,10 @@ export const webSidebarMenuItems: IMenuItem[] = [
         icon: 'fa-solid fa-diagram-project',
       },
       {
-        href: '/shortlist-filters/shortlist-filter-list',
-        title: 'Shortlist Filters',
+        href: '/scorecards/scorecard-list',
+        title: 'Scorecard Templates',
         active: false,
-        icon: 'fa-solid fa-filter',
-      },
-      {
-        href: '/candidate-recommendations/candidate-recommendation-list',
-        title: 'Final Selection Recommendations',
-        active: false,
-        icon: 'fa-solid fa-star',
-        roles: [UserRoleEnum.Admin],
+        icon: 'fa-solid fa-clipboard-list',
       },
       {
         href: '/exam-questions/question-group-list',
@@ -51,6 +39,25 @@ export const webSidebarMenuItems: IMenuItem[] = [
         title: 'Exam Questions',
         active: false,
         icon: 'fa-solid fa-circle-question',
+      },
+      {
+        href: '/exam-venues/exam-venue-list',
+        title: 'Exam Venues',
+        active: false,
+        icon: 'fa-solid fa-building',
+      },
+      {
+        href: '/interview-venues/interview-venue-list',
+        title: 'Interview Venues',
+        active: false,
+        icon: 'fa-solid fa-door-open',
+      },
+      // ── Vacancy & sourcing ──
+      {
+        href: '/job-vacancy/job-vacancy-list',
+        title: 'Job Vacancies',
+        active: false,
+        icon: 'fa-solid fa-list',
       },
       {
         href: '/candidates',
@@ -71,16 +78,44 @@ export const webSidebarMenuItems: IMenuItem[] = [
         icon: 'fa-solid fa-user-group',
       },
       {
+        href: '/shortlist-filters/shortlist-filter-list',
+        title: 'Shortlist Filters',
+        active: false,
+        icon: 'fa-solid fa-filter',
+      },
+      {
+        href: '/applications',
+        title: 'ATS Dashboard',
+        active: false,
+        icon: 'fa-solid fa-list-check',
+      },
+      // ── Exam stage ──
+      {
+        href: '/exams/exam-list',
+        title: 'Exams',
+        active: false,
+        icon: 'fa-solid fa-file-pen',
+      },
+      // ── Interview stage ──
+      {
+        href: '/interviews/interview-list',
+        title: 'Interviews',
+        active: false,
+        icon: 'fa-solid fa-people-arrows',
+      },
+      // ── Selection ──
+      {
+        href: '/candidate-recommendations/candidate-recommendation-list',
+        title: 'Final Selection Recommendations',
+        active: false,
+        icon: 'fa-solid fa-star',
+        roles: [UserRoleEnum.Admin],
+      },
+      {
         href: '/final-selection-pool/final-selection-pool-list',
         title: 'Final Selection Pool',
         active: false,
         icon: 'fa-solid fa-clipboard-check',
-      },
-      {
-        href: '/export-requests/export-request-list',
-        title: 'Export Requests',
-        active: false,
-        icon: 'fa-solid fa-file-export',
       },
       {
         href: '/document-management/manage-fitment-data',
@@ -94,48 +129,7 @@ export const webSidebarMenuItems: IMenuItem[] = [
         active: false,
         icon: 'fa-solid fa-file-pen',
       },
-      {
-        href: '/applications',
-        title: 'ATS Dashboard',
-        active: false,
-        icon: 'fa-solid fa-list-check',
-      },
-      {
-        href: '/analytics/recruitment',
-        title: 'Recruitment Analytics',
-        active: false,
-        icon: 'fa-solid fa-chart-column',
-      },
-      {
-        href: '/exam-venues/exam-venue-list',
-        title: 'Exam Venues',
-        active: false,
-        icon: 'fa-solid fa-building',
-      },
-      {
-        href: '/exams/exam-list',
-        title: 'Exams',
-        active: false,
-        icon: 'fa-solid fa-file-pen',
-      },
-      {
-        href: '/interview-venues/interview-venue-list',
-        title: 'Interview Venues',
-        active: false,
-        icon: 'fa-solid fa-door-open',
-      },
-      {
-        href: '/interviews/interview-list',
-        title: 'Interviews',
-        active: false,
-        icon: 'fa-solid fa-people-arrows',
-      },
-      {
-        href: '/scorecards/scorecard-list',
-        title: 'Scorecard Templates',
-        active: false,
-        icon: 'fa-solid fa-clipboard-list',
-      },
+      // ── Payment ──
       {
         href: '/payment-management/payment-transaction-list',
         title: 'Payment Transactions',
@@ -148,6 +142,19 @@ export const webSidebarMenuItems: IMenuItem[] = [
         active: false,
         icon: 'fa-solid fa-file-invoice-dollar',
       },
+      // ── Reporting/utility (anytime) ──
+      {
+        href: '/analytics/recruitment',
+        title: 'Recruitment Analytics',
+        active: false,
+        icon: 'fa-solid fa-chart-column',
+      },
+      {
+        href: '/export-requests/export-request-list',
+        title: 'Export Requests',
+        active: false,
+        icon: 'fa-solid fa-file-export',
+      },
     ],
   },
   {
@@ -157,17 +164,17 @@ export const webSidebarMenuItems: IMenuItem[] = [
     icon: 'fa-solid fa-building',
   },
   {
-    href: '/careers',
-    title: 'Browse Careers',
-    active: false,
-    icon: 'fa-solid fa-magnifying-glass',
-    roles: [UserRoleEnum.Candidate],
-  },
-  {
     href: '/candidate-profile',
     title: 'My Profile',
     active: false,
     icon: 'fa-solid fa-id-card',
+    roles: [UserRoleEnum.Candidate],
+  },
+  {
+    href: '/careers',
+    title: 'Browse Careers',
+    active: false,
+    icon: 'fa-solid fa-magnifying-glass',
     roles: [UserRoleEnum.Candidate],
   },
   {
@@ -239,6 +246,12 @@ export const webSidebarMenuItems: IMenuItem[] = [
         title: 'Universities',
         active: false,
         icon: 'fa-solid fa-building-columns',
+      },
+      {
+        href: '/master-data/department-list',
+        title: 'Departments',
+        active: false,
+        icon: 'fa-solid fa-building',
       },
       {
         href: '/master-data/gender-list',

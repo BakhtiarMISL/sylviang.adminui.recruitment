@@ -36,10 +36,11 @@ export class HeaderComponent implements OnInit {
     return this.authService.getUser()?.displayName || this.authService.getUser()?.username || 'User';
   }
 
-  // US-079: bell is HR-facing only - Candidates have no AdminHr-scoped NotificationLog rows to see.
+  // US-079 (Admin/HR) + candidate-facing counterpart: every role gets the bell, NotificationBellComponent
+  // itself picks the right API (AdminHr-scoped vs candidate-scoped) and click-through target by role.
   get showNotificationBell(): boolean {
     const role = this.authService.getRole();
-    return role === UserRoleEnum.Admin || role === UserRoleEnum.HR;
+    return role === UserRoleEnum.Admin || role === UserRoleEnum.HR || role === UserRoleEnum.Candidate;
   }
 
   logout(): void {

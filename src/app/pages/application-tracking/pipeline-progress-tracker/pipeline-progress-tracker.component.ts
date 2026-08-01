@@ -13,6 +13,7 @@ interface StageEditState {
   scheduledDate: Date | null;
   meetingLink: string;
   notes: string;
+  score: number | null;
 }
 
 @Component({
@@ -121,6 +122,7 @@ export class PipelineProgressTrackerComponent implements OnInit, OnChanges {
       scheduledDate: stage.scheduledDate ? new Date(stage.scheduledDate) : null,
       meetingLink: stage.meetingLink || '',
       notes: stage.notes || '',
+      score: stage.score ?? null,
     };
   }
 
@@ -139,6 +141,7 @@ export class PipelineProgressTrackerComponent implements OnInit, OnChanges {
         scheduledDate: this.editState.scheduledDate ? this.editState.scheduledDate.toISOString() : undefined,
         meetingLink: this.editState.meetingLink || undefined,
         notes: this.editState.notes || undefined,
+        score: this.editState.score ?? undefined,
       })
       .subscribe({
         next: (response) => {

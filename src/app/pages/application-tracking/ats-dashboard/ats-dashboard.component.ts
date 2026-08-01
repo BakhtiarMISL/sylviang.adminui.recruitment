@@ -1,5 +1,6 @@
 import { AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { AutoCompleteCompleteEvent } from 'primeng/autocomplete';
 import { ApplicationSourceEnum, ApplicationStatusEnum, EducationLevelEnum, ExportFormatEnum, RecruitmentEventEnum } from '@app/@core/enums/recruitment.enum';
 import { ISkillLibraryItemResponse } from '@app/@core/interfaces/recruitment-management/candidate-profile.interface';
 import { IAtsDashboardFilterParams, IApplicationStatusReason, IJobApplicationListItem } from '@app/@core/interfaces/recruitment-management/job-application.interface';
@@ -84,6 +85,7 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   educationLevelOptions = Object.values(EducationLevelEnum).map((value) => ({ label: value, value }));
   skillLibrary: ISkillLibraryItemResponse[] = [];
+  filterSkillSuggestions: ISkillLibraryItemResponse[] = [];
   tagSuggestions: string[] = [];
 
   private filterChange$ = new Subject<void>();
@@ -269,6 +271,36 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   /** Candidate-attribute filters real-time apply (US-050 AC3) - debounced via filterChange$. */
   onCandidateAttributeFilterChange(): void {
     this.filterChange$.next();
+  }
+
+  onFilterSkillSearch(event: AutoCompleteCompleteEvent): void {
+    const query = event.query.trim().toLowerCase();
+    this.filterSkillSuggestions = this.skillLibrary.filter((s) => s.name.toLowerCase().includes(query));
+  }
+
+  // p-autoComplete's multi-mode emits a mix of ISkillLibraryItemResponse (picked from the
+  // library) and plain strings (typed free text, since forceSelection is false) - normalize
+  // both to name strings, matching the shortlist filter's Required Skills field.
+  onFilterSkillsChange(skills: (ISkillLibraryItemResponse | string)[]): void {
+    this.filterSkills = skills.map((s) => (typeof s === 'string' ? s : s.name));
+    this.onCandidateAttributeFilterChange();
+  }
+
+  removeFilterSkill(skill: ISkillLibraryItemResponse | string): void {
+    const skillName = typeof skill === 'string' ? skill : skill.name;
+    this.filterSkills = this.filterSkills.filter((s) => s !== skillName);
+    this.onCandidateAttributeFilterChange();
+  }
+
+  // PrimeNG only auto-adds untyped free text on Enter when [typeahead] is off, which would kill
+  // the library search-as-you-type - so commit free text ourselves on Enter/blur instead.
+  onFilterSkillsInputCommit(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const text = input.value?.trim();
+    if (!text) return;
+    this.filterSkills = [...this.filterSkills, text];
+    this.onCandidateAttributeFilterChange();
+    input.value = '';
   }
 
   /** Filter-only query params (no page/sort) shared by loadApplications and select-all-matching (US-047 AC5). */

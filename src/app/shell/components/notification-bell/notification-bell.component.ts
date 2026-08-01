@@ -2,6 +2,8 @@ import { Component, ElementRef, HostListener, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { INotificationLogResponse } from '@core/interfaces/recruitment-management/notification-log.interface';
 import { NotificationLogService } from '@core/services/recruitment/notification-log/notification-log.service';
+import { AuthService } from '@core/services/auth/auth.service';
+import { UserRoleEnum } from '@core/enums/user-role.enum';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { interval, startWith } from 'rxjs';
 
@@ -23,6 +25,7 @@ export class NotificationBellComponent implements OnInit {
   constructor(
     private readonly _eRef: ElementRef,
     private notificationLogService: NotificationLogService,
+    private authService: AuthService,
     private router: Router,
   ) {}
 
@@ -47,7 +50,13 @@ export class NotificationBellComponent implements OnInit {
     }
     this.panelOpen = false;
     if (item.jobApplicationId) {
-      this.router.navigate(['/applications', item.jobApplicationId]);
+      // Candidates have no ATS-dashboard detail route for a single application - send them to
+      // their own applications list instead of HR's /applications/:id.
+      if (this.authService.getRole() === UserRoleEnum.Candidate) {
+        this.router.navigate(['/my-applications']);
+      } else {
+        this.router.navigate(['/applications', item.jobApplicationId]);
+      }
     }
   }
 

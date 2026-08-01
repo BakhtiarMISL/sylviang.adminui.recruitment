@@ -123,8 +123,9 @@
           <span>{{ university.name }} ({{ university.code }})</span>
         </ng-template>
       </p-autocomplete>
-      <label for="institution">Institution * (type 3+ characters for university suggestions)</label>
+      <label for="institution">Institution *</label>
     </p-floatlabel>
+    <small class="text-sm text-neutral">Type 3+ characters for university suggestions</small>
     <div *ngIf="hasError('institution')" class="invalid">{{ getErrorMessage('institution') }}</div>
   </div>
 

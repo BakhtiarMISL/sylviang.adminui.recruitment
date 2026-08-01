@@ -16,6 +16,10 @@ export class PreBoardingCandidateService {
     return this.httpClient.get<ApiResponse<IPreBoardingSubmissionResponse>>(`${this.API_URL}`);
   }
 
+  isEligible() {
+    return this.httpClient.get<ApiResponse<boolean>>(`${this.API_URL}/eligible`);
+  }
+
   saveDraft(request: IPreBoardingSaveRequest) {
     return this.httpClient.put<ApiResponse<IPreBoardingSubmissionResponse>>(`${this.API_URL}`, request);
   }

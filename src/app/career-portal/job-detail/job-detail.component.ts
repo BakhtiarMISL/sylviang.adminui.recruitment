@@ -1,6 +1,7 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { IJobEligibilityResponse, IPublicJobPostingResponse } from '@app/@core/interfaces/recruitment-management/career-portal.interface';
+import { IMyApplication } from '@app/@core/interfaces/recruitment-management/job-application.interface';
 import { CareerPortalService } from '@app/@core/services/recruitment/career-portal/career-portal.service';
 import { JobApplicationService } from '@app/@core/services/recruitment/job-application/job-application.service';
 import { AuthService } from '@core/services/auth/auth.service';
@@ -26,6 +27,7 @@ export class JobDetailComponent implements OnInit {
   loading = true;
   notFound = false;
   eligibilityResult: IJobEligibilityResponse | null = null;
+  existingApplication: IMyApplication | null = null;
 
   ngOnInit(): void {
     this.route.paramMap.subscribe((params) => {
@@ -40,11 +42,13 @@ export class JobDetailComponent implements OnInit {
     this.loading = true;
     this.notFound = false;
     this.eligibilityResult = null;
+    this.existingApplication = null;
     this.careerPortalService.getJobPostingById(id).subscribe({
       next: (response) => {
         if (!response.hasError && response.content) {
           this.jobPosting = response.content;
           this.checkEligibility(id);
+          this.checkExistingApplication(id);
         } else {
           this.notFound = true;
         }
@@ -71,6 +75,25 @@ export class JobDetailComponent implements OnInit {
       },
       error: () => {
         // Eligibility is a nice-to-have on top of the static summary - don't block the page on failure.
+      },
+    });
+  }
+
+  // Applying again already 409s server-side (ApplyFormComponent handles that), but telling
+  // the candidate up front - before they fill the whole form and hit resume upload - is a
+  // much better experience than letting them find out only after submitting.
+  private checkExistingApplication(jobPostingId: number): void {
+    if (!this.authService.isAuthenticated() || this.authService.getRole() !== UserRoleEnum.Candidate) return;
+
+    this.jobApplicationService.getMyApplications().subscribe({
+      next: (response) => {
+        if (!response.hasError && response.content) {
+          this.existingApplication = response.content.find((a) => a.jobPostingId === jobPostingId) || null;
+          this.cdr.detectChanges();
+        }
+      },
+      error: () => {
+        // Same reasoning as checkEligibility - a nice-to-have, don't block the page over it.
       },
     });
   }

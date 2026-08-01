@@ -68,7 +68,15 @@
 
       <section class="rounded-lg bg-white p-6 shadow-sm">
         <h2 class="mb-4 text-lg font-medium text-gray-900">Apply for this position</h2>
-        <app-apply-form *ngIf="isLoggedIn" [jobPostingId]="jobPosting.jobPostingId" [eligibilityResult]="eligibilityResult"></app-apply-form>
+
+        <div *ngIf="isLoggedIn && existingApplication" class="rounded-md bg-green-50 p-4 text-sm text-green-800">
+          <p><i class="fa fa-check-circle mr-1"></i>You already applied for this position on {{ existingApplication.appliedDate | date: 'dd-MMM-yyyy' }}.</p>
+          <p class="mt-1">Status: <strong>{{ formatEnumLabel(existingApplication.applicationStatus) }}</strong></p>
+          <a [routerLink]="['/my-applications']" class="mt-2 inline-block text-primary hover:underline">View in My Applications</a>
+        </div>
+
+        <app-apply-form *ngIf="isLoggedIn && !existingApplication" [jobPostingId]="jobPosting.jobPostingId" [eligibilityResult]="eligibilityResult"></app-apply-form>
+
         <div *ngIf="!isLoggedIn" class="rounded-md bg-gray-50 p-4 text-center">
           <p class="mb-3 text-sm text-gray-700">You need a candidate account to apply for this position.</p>
           <div class="flex justify-center gap-2">

@@ -16,7 +16,7 @@
         </p-floatlabel>
 
         <p-floatlabel variant="in" class="sm:col-span-2">
-          <textarea pTextarea id="description" class="w-full" formControlName="description" rows="1"></textarea>
+          <textarea pTextarea id="description" class="w-full" formControlName="description" rows="2"></textarea>
           <label for="description">Description</label>
         </p-floatlabel>
       </div>
@@ -63,19 +63,32 @@
               </p-floatlabel>
 
               <p-floatlabel variant="in" class="sm:col-span-2" *ngSwitchCase="CriterionTypeEnum.RequiredSkills">
-                <p-multiSelect
+                <p-autoComplete
                   [inputId]="'requiredSkills' + i"
                   class="w-full"
-                  [options]="skillLibrary"
+                  styleClass="w-full"
+                  inputStyleClass="w-full"
+                  [suggestions]="skillSuggestions"
+                  (completeMethod)="filterSkillSuggestions($event)"
                   [ngModel]="criterion.selectedSkills"
                   (ngModelChange)="onRequiredSkillsChange(criterion, $event)"
                   [ngModelOptions]="{ standalone: true }"
                   optionLabel="name"
-                  optionValue="name"
+                  field="name"
+                  [multiple]="true"
+                  [forceSelection]="false"
                   [appendTo]="'body'"
-                  display="chip"
-                ></p-multiSelect>
-                <label [for]="'requiredSkills' + i">Required Skills</label>
+                  (keydown.enter)="onSkillsInputCommit($event, criterion)"
+                  (onBlur)="onSkillsInputCommit($event, criterion)"
+                >
+                  <ng-template let-skill pTemplate="item">
+                    <span>{{ skill.name }}</span>
+                  </ng-template>
+                  <ng-template let-skill pTemplate="selecteditem">
+                    <p-chip [label]="skill?.name || skill" [removable]="true" (onRemove)="removeSkill(criterion, skill)" styleClass="p-autocomplete-chip"></p-chip>
+                  </ng-template>
+                </p-autoComplete>
+                <label [for]="'requiredSkills' + i">Required Skills (pick from list or type your own)</label>
               </p-floatlabel>
 
               <ng-container *ngSwitchCase="CriterionTypeEnum.AgeRange">

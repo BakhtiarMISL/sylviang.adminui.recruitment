@@ -1,6 +1,7 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpContext } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ApiResponse } from '@core/interfaces/ApiResponse';
+import { DISABLE_TOAST } from '@core/constants/http-context';
 import {
   ITalentPoolCandidateAddRequest,
   ITalentPoolCandidateAddResponse,
@@ -47,8 +48,13 @@ export class TalentPoolService {
     return this.httpClient.delete<ApiResponse<void>>(`${this.API_URL}/${talentPoolId}`);
   }
 
+  // The caller renders its own precise message from addedCount/alreadyInPoolCount - the generic
+  // "Request processed successfully" toast would be redundant at best, misleading (always reads
+  // as a fresh add) at worst when every candidate was already in the pool.
   addCandidates(talentPoolId: number, request: ITalentPoolCandidateAddRequest) {
-    return this.httpClient.post<ApiResponse<ITalentPoolCandidateAddResponse>>(`${this.API_URL}/${talentPoolId}/candidates`, request);
+    return this.httpClient.post<ApiResponse<ITalentPoolCandidateAddResponse>>(`${this.API_URL}/${talentPoolId}/candidates`, request, {
+      context: new HttpContext().set(DISABLE_TOAST, true),
+    });
   }
 
   removeCandidate(talentPoolId: number, candidateProfileId: number) {

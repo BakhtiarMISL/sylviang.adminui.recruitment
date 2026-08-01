@@ -105,7 +105,7 @@
               </td>
               <td>{{ candidate.fullName }}</td>
               <td>{{ candidate.email }}</td>
-              <td>{{ candidate.phone || '-' }}</td>
+              <td>{{ candidate.phone ? (candidate.phoneDialCode ? candidate.phoneDialCode + ' ' : '') + candidate.phone : '-' }}</td>
               <td>{{ candidate.completenessPercentage }}%</td>
               <td>
                 <button [routerLink]="[candidate.candidateProfileId]" class="text-primary">
@@ -161,7 +161,7 @@
   </div>
 
   <div class="form-container" *ngIf="addToPoolSuccess">
-    <p class="sm:col-span-2">Added to pool.</p>
+    <p class="sm:col-span-2">{{ addToPoolAlreadyInPool ? 'Candidate is already in this pool.' : 'Added to pool.' }}</p>
   </div>
 
   <ng-template pTemplate="footer">

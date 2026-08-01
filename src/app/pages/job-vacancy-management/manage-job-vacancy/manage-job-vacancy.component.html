@@ -84,6 +84,28 @@
       <div *ngIf="hasError('employmentType')" class="invalid">{{ getErrorMessage('employmentType') }}</div>
     </div>
 
+    <!-- Department -->
+    <div>
+      <p-floatlabel variant="in">
+        <p-select
+          inputId="departmentId"
+          [options]="departmentOptions"
+          [appendTo]="'body'"
+          [autoDisplayFirst]="false"
+          optionLabel="name"
+          optionValue="departmentId"
+          formControlName="departmentId"
+          class="w-full"
+          [class.ng-invalid]="hasError('departmentId')"
+          [class.ng-dirty]="hasError('departmentId')"
+          (onBlur)="f['departmentId'].markAsTouched()"
+          (onChange)="f['departmentId'].markAsTouched()"
+        ></p-select>
+        <label for="departmentId">Department</label>
+      </p-floatlabel>
+      <div *ngIf="hasError('departmentId')" class="invalid">{{ getErrorMessage('departmentId') }}</div>
+    </div>
+
     <!-- Circular Type -->
     <div>
       <p-floatlabel variant="in">
@@ -116,7 +138,7 @@
     </div>
 
     <!-- Description -->
-    <div class="sm:col-span-2">
+    <div class="col-span-full">
       <p-floatlabel variant="in">
         <textarea pInputText inputId="description" formControlName="description" class="w-full" rows="3"></textarea>
         <label for="description">Description</label>
@@ -124,7 +146,7 @@
     </div>
 
     <!-- Requirements -->
-    <div class="sm:col-span-2">
+    <div class="col-span-full">
       <p-floatlabel variant="in">
         <textarea pInputText inputId="requirements" formControlName="requirements" class="w-full" rows="3"></textarea>
         <label for="requirements">Requirements</label>
@@ -133,9 +155,9 @@
   </section>
 
   <!-- Salary Range -->
-  <section class="form-container">
+  <section class="form-container form-container-compact">
     <h3 class="form-section-header">Salary Range</h3>
-    <p class="text-sm text-neutral sm:col-span-2">Leave both fields blank to display "Negotiable".</p>
+    <p class="text-sm text-neutral col-span-full">Leave both fields blank to display "Negotiable".</p>
 
     <div>
       <p-floatlabel variant="in">
@@ -175,13 +197,41 @@
       <div *ngIf="hasError('maxSalary')" class="invalid">{{ getErrorMessage('maxSalary') }}</div>
     </div>
 
+    <div>
+      <p-floatlabel variant="in">
+        <p-autocomplete
+          inputId="salaryCurrency"
+          formControlName="salaryCurrency"
+          [suggestions]="currencySuggestions"
+          (completeMethod)="filterCurrency($event)"
+          [dropdown]="true"
+          [forceSelection]="false"
+          class="w-full"
+          styleClass="w-full"
+          inputStyleClass="w-full"
+          [class.ng-invalid]="hasError('salaryCurrency')"
+          [class.ng-dirty]="hasError('salaryCurrency')"
+          (onBlur)="f['salaryCurrency'].markAsTouched()"
+        >
+          <ng-template let-currency pTemplate="item">
+            <span>{{ currency }}<span class="text-sm text-neutral" *ngIf="getCurrencyName(currency)"> &mdash; {{ getCurrencyName(currency) }}</span></span>
+          </ng-template>
+        </p-autocomplete>
+        <label for="salaryCurrency">Salary Currency</label>
+      </p-floatlabel>
+      <div *ngIf="hasError('salaryCurrency')" class="invalid">{{ getErrorMessage('salaryCurrency') }}</div>
+    </div>
+
     <div *ngIf="jobVacancyForm.errors?.['salaryRangeInvalid'] && (jobVacancyForm.touched || formSubmitted)" class="invalid sm:col-span-2">
       Minimum salary must be less than or equal to maximum salary
+    </div>
+    <div *ngIf="jobVacancyForm.errors?.['salaryCurrencyRequired'] && (jobVacancyForm.touched || formSubmitted)" class="invalid sm:col-span-2">
+      Salary currency is required when a minimum or maximum salary is set
     </div>
   </section>
 
   <!-- Eligibility Criteria -->
-  <section class="form-container">
+  <section class="form-container form-container-compact">
     <h3 class="form-section-header">Eligibility Criteria</h3>
 
     <div>
@@ -256,7 +306,7 @@
   </section>
 
   <!-- Visibility & Dates -->
-  <section class="form-container">
+  <section class="form-container form-container-compact">
     <h3 class="form-section-header">Visibility &amp; Dates</h3>
 
     <div>
@@ -279,9 +329,9 @@
   </section>
 
   <!-- Application Fee -->
-  <section class="form-container">
+  <section class="form-container form-container-compact">
     <h3 class="form-section-header">Application Fee</h3>
-    <p class="text-sm text-neutral sm:col-span-2">Leave amount as 0 or blank for a free application.</p>
+    <p class="text-sm text-neutral col-span-full">Leave amount as 0 or blank for a free application.</p>
 
     <div>
       <p-floatlabel variant="in">
@@ -333,7 +383,7 @@
   </section>
 
   <!-- Status (edit mode only) -->
-  <section class="form-container" *ngIf="isEditMode">
+  <section class="form-container form-container-compact" *ngIf="isEditMode">
     <h3 class="form-section-header">Status</h3>
 
     <div>
@@ -367,7 +417,7 @@
   <div class="form-container">
     <h3 class="form-section-header">Attachments</h3>
 
-    <div class="sm:col-span-2 flex items-center gap-3">
+    <div class="col-span-full flex items-center gap-3">
       <label for="attachmentFile" class="upload-dropzone flex-1">
         <i class="fas fa-file-arrow-up"></i>
         <span class="upload-dropzone-text">
@@ -380,9 +430,9 @@
         <span>{{ uploadingAttachment ? 'Uploading...' : 'Upload' }}</span>
       </button>
     </div>
-    <div *ngIf="attachmentError" class="invalid sm:col-span-2">{{ attachmentError }}</div>
+    <div *ngIf="attachmentError" class="invalid col-span-full">{{ attachmentError }}</div>
 
-    <div class="sm:col-span-2">
+    <div class="col-span-full">
       <div *ngIf="loadingAttachments" class="text-sm text-neutral">Loading attachments...</div>
 
       <div *ngIf="!loadingAttachments && attachments.length === 0" class="text-sm text-neutral">No attachments uploaded yet.</div>

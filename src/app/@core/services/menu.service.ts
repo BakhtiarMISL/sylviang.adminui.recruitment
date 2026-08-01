@@ -1,12 +1,14 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { BehaviorSubject, Observable, forkJoin, of } from 'rxjs';
 import type { IMenuItem } from '@core/interfaces/menuResponse.interface';
 import { webSidebarMenuItems } from '../constants/nav-menu-items';
 import { AuthService } from '@core/services/auth/auth.service';
 import { CandidateProfileService } from '@core/services/recruitment/candidate-profile/candidate-profile.service';
+import { PreBoardingCandidateService } from '@core/services/recruitment/pre-boarding-candidate/pre-boarding-candidate.service';
 import { UserRoleEnum } from '@core/enums/user-role.enum';
 
 const INTERNAL_JOB_BOARD_HREF = '/internal-jobs/job-list';
+const PRE_BOARDING_HREF = '/candidate-profile/pre-boarding';
 
 @Injectable({
   providedIn: 'root',
@@ -22,6 +24,7 @@ export class MenuService {
   constructor(
     private readonly _authService: AuthService,
     private readonly _candidateProfileService: CandidateProfileService,
+    private readonly _preBoardingCandidateService: PreBoardingCandidateService,
   ) {
     this._authService.user$.subscribe(() => this.loadFallbackMenu());
   }
@@ -30,15 +33,20 @@ export class MenuService {
     const role = this._authService.getRole();
     const baseItems = this.filterByRole(webSidebarMenuItems, role);
 
-    // Internal Job Board carries no `roles` restriction (Admin/HR/Candidate can all
-    // legitimately browse it) - but a Candidate should only see it when their own
-    // profile is internal (CandidateProfile.IsInternal), mirroring the backend's
-    // CurrentUserMayViewInternalPostingsAsync check. Requires an extra call since
-    // that flag isn't part of the auth token/role.
+    // Internal Job Board and Pre-Boarding carry no `roles` restriction of their own - both are
+    // gated on a per-candidate condition instead (CandidateProfile.IsInternal, and having a
+    // Final Selection Pool entry i.e. an accepted offer) rather than role alone, mirroring the
+    // backend's own checks. Requires extra calls since neither flag is part of the auth token.
     if (role === UserRoleEnum.Candidate) {
-      this._candidateProfileService.getMyProfile().subscribe({
-        next: (response) => this.menuSubject.next(this.transformMenuItems(this.filterInternalJobBoard(baseItems, response.content?.isInternal ?? false))),
-        error: () => this.menuSubject.next(this.transformMenuItems(this.filterInternalJobBoard(baseItems, false))),
+      forkJoin({
+        profile: this._candidateProfileService.getMyProfile(),
+        eligible: this._preBoardingCandidateService.isEligible(),
+      }).subscribe({
+        next: ({ profile, eligible }) => {
+          const filtered = this.filterInternalJobBoard(baseItems, profile.content?.isInternal ?? false);
+          this.menuSubject.next(this.transformMenuItems(this.filterPreBoarding(filtered, eligible.content ?? false)));
+        },
+        error: () => this.menuSubject.next(this.transformMenuItems(this.filterPreBoarding(this.filterInternalJobBoard(baseItems, false), false))),
       });
       return;
     }
@@ -49,6 +57,11 @@ export class MenuService {
   private filterInternalJobBoard(items: IMenuItem[], isInternal: boolean): IMenuItem[] {
     if (isInternal) return items;
     return items.filter((item) => item.href !== INTERNAL_JOB_BOARD_HREF);
+  }
+
+  private filterPreBoarding(items: IMenuItem[], isEligible: boolean): IMenuItem[] {
+    if (isEligible) return items;
+    return items.filter((item) => item.href !== PRE_BOARDING_HREF);
   }
 
   /** Recursive so per-role restrictions on sub-items (not just top-level items) are actually enforced. */

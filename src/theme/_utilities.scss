@@ -116,6 +116,28 @@
   }
 }
 
+.filter-section {
+  & + & {
+    @apply mt-4 pt-4 border-t border-borderLight dark:border-borderDark;
+  }
+}
+
+.filter-section-title {
+  @apply text-xs font-semibold uppercase tracking-wide text-neutral dark:text-white/50 mb-2;
+}
+
+.filter-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+
+  > button {
+    flex: 0 0 auto;
+  }
+}
+
 .field-info {
   @apply absolute top-1/2 right-3 -translate-y-1/2 text-neutral dark:text-white/70;
 }

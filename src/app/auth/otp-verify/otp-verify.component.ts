@@ -17,10 +17,15 @@ export class OtpVerifyComponent implements OnInit, OnDestroy {
   isSubmitting = false;
   isResending = false;
   resendCooldown = 0;
+  /** Seconds left before the current code expires, for the countdown display. */
+  secondsRemaining = 0;
+  isExpired = false;
 
   private challengeId = '';
   private returnUrl = '/dashboard';
+  private otpExpiresAt: number | null = null;
   private cooldownTimer: ReturnType<typeof setInterval> | null = null;
+  private expiryTimer: ReturnType<typeof setInterval> | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -40,20 +45,38 @@ export class OtpVerifyComponent implements OnInit, OnDestroy {
 
     if (!this.challengeId) {
       this.router.navigateByUrl('/login');
+      return;
+    }
+
+    const expiresAt = this.route.snapshot.queryParamMap.get('expiresAt');
+    if (expiresAt) {
+      this.startExpiryCountdown(expiresAt);
     }
   }
 
   ngOnDestroy(): void {
     this.clearCooldown();
+    this.clearExpiryTimer();
   }
 
   get code() {
     return this.form.get('code');
   }
 
+  get formattedTimeRemaining(): string {
+    const minutes = Math.floor(this.secondsRemaining / 60);
+    const seconds = this.secondsRemaining % 60;
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  }
+
   onSubmit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      return;
+    }
+
+    if (this.isExpired) {
+      this.toastService.error({ detail: 'This code has expired. Request a new one.' });
       return;
     }
 
@@ -83,10 +106,13 @@ export class OtpVerifyComponent implements OnInit, OnDestroy {
 
     this.isResending = true;
     this.authService.resendOtp({ challengeId: this.challengeId }).subscribe({
-      next: () => {
+      next: (response) => {
         this.isResending = false;
         this.toastService.success({ detail: 'A new code has been sent.' });
         this.startCooldown();
+        if (response.content?.expiresAtUtc) {
+          this.startExpiryCountdown(response.content.expiresAtUtc);
+        }
       },
       error: (error) => {
         this.isResending = false;
@@ -112,6 +138,31 @@ export class OtpVerifyComponent implements OnInit, OnDestroy {
     if (this.cooldownTimer) {
       clearInterval(this.cooldownTimer);
       this.cooldownTimer = null;
+    }
+  }
+
+  private startExpiryCountdown(expiresAtUtc: string): void {
+    this.otpExpiresAt = new Date(expiresAtUtc).getTime();
+    this.isExpired = false;
+    this.clearExpiryTimer();
+    this.tickExpiryCountdown();
+    this.expiryTimer = setInterval(() => this.tickExpiryCountdown(), 1000);
+  }
+
+  private tickExpiryCountdown(): void {
+    if (this.otpExpiresAt === null) return;
+
+    this.secondsRemaining = Math.max(0, Math.round((this.otpExpiresAt - Date.now()) / 1000));
+    if (this.secondsRemaining === 0) {
+      this.isExpired = true;
+      this.clearExpiryTimer();
+    }
+  }
+
+  private clearExpiryTimer(): void {
+    if (this.expiryTimer) {
+      clearInterval(this.expiryTimer);
+      this.expiryTimer = null;
     }
   }
 }

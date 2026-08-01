@@ -46,7 +46,7 @@
               </td>
               <td>{{ entry.fullName }}</td>
               <td>{{ entry.email }}</td>
-              <td>{{ entry.phone || '-' }}</td>
+              <td>{{ entry.phone ? (entry.phoneDialCode ? entry.phoneDialCode + ' ' : '') + entry.phone : '-' }}</td>
               <td>{{ entry.addedAt | date: 'dd-MMM-yyyy' }}</td>
               <td>
                 <button (click)="remove(entry, $event)" class="text-red-600">

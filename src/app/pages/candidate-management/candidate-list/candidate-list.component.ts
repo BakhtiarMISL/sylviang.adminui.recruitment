@@ -38,6 +38,7 @@ export class CandidateListComponent implements OnInit {
   addingToPool = false;
   addToPoolError = '';
   addToPoolSuccess = false;
+  addToPoolAlreadyInPool = false;
 
   // US-041 AC3: filter by HR tags. Suggestions loaded once (same shape as ATS dashboard's
   // skillLibrary p-multiSelect) rather than per-keystroke, since this is a dropdown filter, not
@@ -99,6 +100,7 @@ export class CandidateListComponent implements OnInit {
     this.addToPoolSelectedId = null;
     this.addToPoolError = '';
     this.addToPoolSuccess = false;
+    this.addToPoolAlreadyInPool = false;
     this.showAddToPoolDialog = true;
   }
 
@@ -114,6 +116,7 @@ export class CandidateListComponent implements OnInit {
         next: (response) => {
           this.addingToPool = false;
           if (!response.hasError) {
+            this.addToPoolAlreadyInPool = (response.content?.alreadyInPoolCount ?? 0) > 0;
             this.addToPoolSuccess = true;
           } else {
             this.addToPoolError = response.decentMessage || 'Failed to add candidate to pool.';

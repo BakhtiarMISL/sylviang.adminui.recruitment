@@ -10,7 +10,10 @@
       <small class="login-error" *ngIf="code?.invalid && code?.touched">Enter the 6-digit code.</small>
     </div>
 
-    <p-button type="submit" label="Verify" [loading]="isSubmitting" [disabled]="isSubmitting" styleClass="w-full"></p-button>
+    <p class="login-subtitle" *ngIf="secondsRemaining > 0">Code expires in {{ formattedTimeRemaining }}</p>
+    <p class="login-error" *ngIf="isExpired">Code expired. Request a new one below.</p>
+
+    <p-button type="submit" label="Verify" [loading]="isSubmitting" [disabled]="isSubmitting || isExpired" styleClass="w-full"></p-button>
 
     <p class="login-subtitle">
       Didn't get a code?

@@ -66,6 +66,15 @@ export const MASTER_DATA_CONFIGS: Record<string, IMasterDataEntityConfig> = {
       { key: 'code', label: 'Short Code', type: 'text', required: true, maxLength: 20, placeholder: 'e.g. DU' },
     ],
   },
+  department: {
+    routeKey: 'department',
+    apiPath: 'department',
+    idField: 'departmentId',
+    title: 'Departments',
+    singularLabel: 'Department',
+    icon: 'fa-solid fa-building',
+    fields: [{ key: 'name', label: 'Name', type: 'text', required: true, maxLength: 100 }],
+  },
   gender: {
     routeKey: 'gender',
     apiPath: 'gender',

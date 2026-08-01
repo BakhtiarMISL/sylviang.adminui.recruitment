@@ -79,6 +79,10 @@ export class ContactSectionComponent implements OnInit, OnChanges {
   homeDistrictOptions: IDistrictResponse[] = [];
   homeThanaOptions: IThanaResponse[] = [];
 
+  // Set by applyPrefill when it runs before countryOptions has finished loading (a race with
+  // this component's own getCountries() call below) - re-resolved once countries arrive.
+  private pendingPhonePrefill: string | null = null;
+
   ngOnInit(): void {
     this.candidateProfileService.getDivisions().subscribe({
       next: (response) => {
@@ -88,6 +92,12 @@ export class ContactSectionComponent implements OnInit, OnChanges {
     this.candidateProfileService.getCountries().subscribe({
       next: (response) => {
         this.countryOptions = !response.hasError && response.content ? response.content : [];
+        // Only re-resolve if the candidate hasn't already edited Mobile Number themselves since
+        // the (incomplete) prefill landed - don't clobber a manual edit.
+        if (this.pendingPhonePrefill && this.form.get('mobileNumber')!.pristine) {
+          this.applyPhonePrefill(this.pendingPhonePrefill);
+        }
+        this.pendingPhonePrefill = null;
       },
     });
   }
@@ -97,11 +107,38 @@ export class ContactSectionComponent implements OnInit, OnChanges {
   // control, which the user can't see changing, only to have the eventual Save rejected.
   applyPrefill(email?: string | null, phone?: string | null, presentAddress?: string | null): void {
     if (this.identityFieldsLocked) return;
-    const patch: { email?: string; mobileNumber?: string; presentAddressDetail?: string } = {};
+    const patch: { email?: string; presentAddressDetail?: string } = {};
     if (email) patch.email = email;
-    if (phone) patch.mobileNumber = phone;
     if (presentAddress) patch.presentAddressDetail = presentAddress;
     if (Object.keys(patch).length > 0) this.form.patchValue(patch);
+    if (phone) {
+      this.pendingPhonePrefill = phone;
+      this.applyPhonePrefill(phone);
+    }
+  }
+
+  private applyPhonePrefill(phone: string): void {
+    const resolved = this.splitDialCode(phone);
+    const patch: { countryId?: number; mobileNumber: string } = { mobileNumber: resolved.localNumber };
+    if (resolved.countryId) patch.countryId = resolved.countryId;
+    this.form.patchValue(patch);
+  }
+
+  // Resume-parsed phone numbers come back with the country code still attached (e.g.
+  // "+8801701554707") - mobileNumber's own pattern validator only accepts digits, so the raw
+  // string never actually saves cleanly. Match the longest dialCode prefix against the loaded
+  // country list and split it into the Country Code dropdown + a digits-only local number.
+  private splitDialCode(rawPhone: string): { countryId: number | null; localNumber: string } {
+    const digitsOnly = rawPhone.replace(/[^\d+]/g, '');
+    if (digitsOnly.startsWith('+') && this.countryOptions.length > 0) {
+      const match = [...this.countryOptions]
+        .filter((c) => digitsOnly.startsWith(c.dialCode))
+        .sort((a, b) => b.dialCode.length - a.dialCode.length)[0];
+      if (match) {
+        return { countryId: match.countryId, localNumber: digitsOnly.slice(match.dialCode.length) };
+      }
+    }
+    return { countryId: null, localNumber: digitsOnly.replace(/\D/g, '') };
   }
 
   ngOnChanges(changes: SimpleChanges): void {

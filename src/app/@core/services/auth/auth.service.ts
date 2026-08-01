@@ -1,5 +1,6 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpContext } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { DISABLE_TOAST } from '@core/constants/http-context';
 import { ApiResponse } from '@core/interfaces/ApiResponse';
 import { IAuthenticatedUser } from '@core/interfaces/auth/authenticated-user.interface';
 import { ILoginRequest } from '@core/interfaces/auth/login-request.interface';
@@ -8,6 +9,7 @@ import { IRegisterRequest } from '@core/interfaces/auth/register-request.interfa
 import { IRegisterResponse } from '@core/interfaces/auth/register-response.interface';
 import { IVerifyOtpRequest } from '@core/interfaces/auth/verify-otp-request.interface';
 import { IResendOtpRequest } from '@core/interfaces/auth/resend-otp-request.interface';
+import { IResendOtpResponse } from '@core/interfaces/auth/resend-otp-response.interface';
 import { UserRoleEnum } from '@core/enums/user-role.enum';
 import { IImpersonationStartResponse } from '@core/interfaces/recruitment-management/impersonation.interface';
 import { BASE_URL_Recruitment } from '@env/environment';
@@ -73,8 +75,8 @@ export class AuthService {
     );
   }
 
-  resendOtp(request: IResendOtpRequest): Observable<ApiResponse<void>> {
-    return this.httpClient.post<ApiResponse<void>>(`${this.API_URL}/resend-otp`, request);
+  resendOtp(request: IResendOtpRequest): Observable<ApiResponse<IResendOtpResponse>> {
+    return this.httpClient.post<ApiResponse<IResendOtpResponse>>(`${this.API_URL}/resend-otp`, request);
   }
 
   register(request: IRegisterRequest): Observable<ApiResponse<IRegisterResponse>> {
@@ -244,7 +246,10 @@ export class AuthService {
   }
 
   private runScheduledRefresh(refreshToken: string): void {
-    this.httpClient.post<ApiResponse<ILoginResponse>>(`${this.API_URL}/refresh`, { refreshToken }).subscribe({
+    // Silent/background call - the user took no action, so a "Request processed successfully"
+    // toast popping up minutes later reads as unexplained noise (see error-handler.interceptor.ts).
+    const context = new HttpContext().set(DISABLE_TOAST, true);
+    this.httpClient.post<ApiResponse<ILoginResponse>>(`${this.API_URL}/refresh`, { refreshToken }, { context }).subscribe({
       next: (response) => {
         if (response?.content) {
           this.persistSession(response.content);

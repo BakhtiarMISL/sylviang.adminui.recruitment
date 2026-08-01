@@ -16,6 +16,7 @@ export interface ICvBankSearchResultResponse {
   fullName: string;
   email: string;
   phone?: string;
+  phoneDialCode?: string;
   profilePhotoPath?: string;
   educationSummary?: string;
   totalExperienceYears: number;
@@ -40,6 +41,7 @@ export interface ICvBankTalentPoolEntryResponse {
   fullName: string;
   email: string;
   phone?: string;
+  phoneDialCode?: string;
   profilePhotoPath?: string;
   addedAt?: string;
 }

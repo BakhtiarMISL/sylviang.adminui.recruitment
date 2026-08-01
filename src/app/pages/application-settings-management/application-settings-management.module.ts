@@ -6,6 +6,7 @@ import { SharedModule } from '@app/shared/shared.module';
 import { ButtonModule } from 'primeng/button';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputNumberModule } from 'primeng/inputnumber';
+import { InputTextModule } from 'primeng/inputtext';
 import { SkeletonModule } from 'primeng/skeleton';
 import { ApplicationSettingsManagementRoutingModule } from './application-settings-management-routing.module';
 import { ApplicationSettingsComponent } from './application-settings/application-settings.component';
@@ -21,6 +22,7 @@ import { ApplicationSettingsComponent } from './application-settings/application
     ApplicationSettingsManagementRoutingModule,
     ButtonModule,
     InputNumberModule,
+    InputTextModule,
     FloatLabelModule,
     SkeletonModule,
   ],

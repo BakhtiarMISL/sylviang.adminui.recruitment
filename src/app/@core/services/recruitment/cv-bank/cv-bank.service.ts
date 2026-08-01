@@ -29,8 +29,12 @@ export class CvBankService {
     });
   }
 
+  // Same reasoning as TalentPoolService.addCandidates - caller renders its own precise
+  // addedCount/alreadyInPoolCount message, the generic success toast would be redundant/misleading.
   addToTalentPool(request: ICvBankTalentPoolAddRequest) {
-    return this.httpClient.post<ApiResponse<ICvBankTalentPoolAddResponse>>(`${this.API_URL}/talent-pool`, request);
+    return this.httpClient.post<ApiResponse<ICvBankTalentPoolAddResponse>>(`${this.API_URL}/talent-pool`, request, {
+      context: new HttpContext().set(DISABLE_TOAST, true),
+    });
   }
 
   getTalentPool() {
