@@ -15,6 +15,7 @@
             <label for="medicalTestCenter">Medical Test Center</label>
           </p-floatlabel>
           <small class="text-red-500" *ngIf="hasError('medicalTestCenter')">Medical test center is required.</small>
+          <small class="text-neutral" *ngIf="!hasError('medicalTestCenter')">e.g. Square Hospital, Dhaka</small>
         </div>
 
         <div>
@@ -23,6 +24,7 @@
             <label for="requiredTests">Required Tests</label>
           </p-floatlabel>
           <small class="text-red-500" *ngIf="hasError('requiredTests')">Required tests are required.</small>
+          <small class="text-neutral" *ngIf="!hasError('requiredTests')">e.g. Blood test, Chest X-ray, Urine analysis</small>
         </div>
 
         <div class="sm:col-span-2">
@@ -47,10 +49,8 @@
         </div>
 
         <div class="sm:col-span-2">
-          <p-floatlabel variant="in">
-            <textarea pTextarea id="finalBody" class="w-full" rows="8" formControlName="finalBody"></textarea>
-            <label for="finalBody">Letter Content (review and adjust before finalizing)</label>
-          </p-floatlabel>
+          <label for="finalBody" class="text-sm font-medium block mb-1">Letter Content (review and adjust before finalizing)</label>
+          <textarea pTextarea id="finalBody" class="w-full" rows="8" formControlName="finalBody"></textarea>
           <small class="text-red-500" *ngIf="hasError('finalBody')">Letter content is required.</small>
         </div>
       </div>

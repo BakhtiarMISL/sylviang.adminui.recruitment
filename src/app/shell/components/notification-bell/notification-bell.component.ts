@@ -42,6 +42,8 @@ export class NotificationBellComponent implements OnInit {
     }
   }
 
+  private static readonly OFFER_EVENTS = ['OfferLetterAvailable', 'OfferAccepted', 'OfferDeclined'];
+
   openItem(item: INotificationLogResponse): void {
     if (!item.isRead) {
       this.notificationLogService.markRead(item.notificationLogId).subscribe();
@@ -49,14 +51,17 @@ export class NotificationBellComponent implements OnInit {
       this.unreadCount = Math.max(0, this.unreadCount - 1);
     }
     this.panelOpen = false;
-    if (item.jobApplicationId) {
-      // Candidates have no ATS-dashboard detail route for a single application - send them to
-      // their own applications list instead of HR's /applications/:id.
-      if (this.authService.getRole() === UserRoleEnum.Candidate) {
+
+    if (this.authService.getRole() === UserRoleEnum.Candidate) {
+      if (NotificationBellComponent.OFFER_EVENTS.includes(item.recruitmentEvent)) {
+        this.router.navigate(['/candidate-profile/offer-letters']);
+      } else if (item.jobApplicationId) {
+        // Candidates have no ATS-dashboard detail route for a single application - send them to
+        // their own applications list instead of HR's /applications/:id.
         this.router.navigate(['/my-applications']);
-      } else {
-        this.router.navigate(['/applications', item.jobApplicationId]);
       }
+    } else if (item.jobApplicationId) {
+      this.router.navigate(['/applications', item.jobApplicationId]);
     }
   }
 

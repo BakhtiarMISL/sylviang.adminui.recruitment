@@ -48,7 +48,18 @@
     <div class="overflow-hidden transition-all duration-300 ease-in-out" [style.max-height]="isExpanded() ? 'none' : '0'" [style.opacity]="isExpanded() ? '1' : '0'">
       <div [ngClass]="getIndentClass()" class="mt-1 mr-2 border-l-2 border-primary" [style.border-opacity]="getBorderOpacity()">
         <ng-container *ngFor="let subItem of item.subItems; let subIndex = index">
+          <div *ngIf="subItem.divider" class="my-2 h-px bg-gradient-to-r from-transparent via-borderLight dark:via-neutral to-transparent"></div>
+
+          <div
+            *ngIf="subItem.label"
+            class="ml-2 whitespace-nowrap overflow-hidden text-[0.65rem] font-semibold uppercase tracking-wide text-neutral/70 dark:text-white/40 transition-all duration-300"
+            [ngClass]="isMobile || isVisuallyExpanded ? 'opacity-100 h-auto px-2 pt-2 pb-1' : 'opacity-0 h-0 p-0'"
+          >
+            {{ subItem.label | translate }}
+          </div>
+
           <app-sidebar-menu-item
+            *ngIf="!subItem.divider && !subItem.label"
             [item]="subItem"
             [parentPath]="getChildPath(subIndex)"
             [isMobile]="isMobile"

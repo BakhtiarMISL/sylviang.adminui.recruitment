@@ -78,6 +78,7 @@ export class ApplicationSettingsComponent implements OnInit {
         this.saving = false;
         if (response && !response.hasError) {
           this.successMessage = 'Application settings saved.';
+          this.settingsForm.markAsPristine();
         } else {
           this.errorMessage = response?.decentMessage || 'Failed to save application settings.';
         }

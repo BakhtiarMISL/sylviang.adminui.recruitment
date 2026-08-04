@@ -34,7 +34,7 @@
         <th>Status</th>
         <th>Decision</th>
         <th>Generated At</th>
-        <th style="width: 14rem">Actions</th>
+        <th style="width: 18rem">Actions</th>
       </tr>
     </ng-template>
     <ng-template pTemplate="body" let-item>
@@ -49,21 +49,15 @@
           <div class="text-xs text-red-500" *ngIf="item.declineReason">{{ item.declineReason }}</div>
         </td>
         <td>{{ item.generatedAt | date: 'dd-MMM-yyyy HH:mm' }}</td>
-        <td class="flex gap-2">
+        <td class="actions-cell flex gap-2">
           <a pButton size="small" severity="secondary" [href]="getPdfUrl(item)" target="_blank" rel="noopener noreferrer">
             <i class="fa fa-download"></i>
             <span>PDF</span>
           </a>
-          <a
-            pButton
-            size="small"
-            *ngIf="item.status === 'Accepted'"
-            [routerLink]="['/document-management/manage-appointment-letter']"
-            [queryParams]="{ offerLetterId: item.offerLetterId }"
-          >
+          <button pButton size="small" *ngIf="item.status === 'Accepted'" (click)="onAppointmentLetterClick(item, $event)">
             <i class="fa fa-file-contract"></i>
             <span>Appointment Letter</span>
-          </a>
+          </button>
         </td>
       </tr>
     </ng-template>

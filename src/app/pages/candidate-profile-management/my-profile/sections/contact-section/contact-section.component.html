@@ -23,6 +23,7 @@
       <label for="mobileNumber">Mobile Number <i *ngIf="identityFieldsLocked" class="fas fa-lock" pTooltip="Locked because you have a submitted application. Contact HR support to correct this." tooltipPosition="top"></i></label>
     </p-floatlabel>
     <div *ngIf="hasError('mobileNumber')" class="invalid">{{ getErrorMessage('mobileNumber') }}</div>
+    <small class="text-neutral" *ngIf="!hasError('mobileNumber')">e.g. 1712345678 (without country code, that's set above)</small>
   </div>
 
   <h3 class="form-section-header">Present Address</h3>

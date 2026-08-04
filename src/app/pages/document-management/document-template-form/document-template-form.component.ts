@@ -15,6 +15,7 @@ const DOCUMENT_TYPE_OPTIONS = [
   { label: 'Rejection Letter', value: DocumentTypeEnum.RejectionLetter },
   { label: 'Experience Certificate', value: DocumentTypeEnum.ExperienceCertificate },
   { label: 'Relieving Letter', value: DocumentTypeEnum.RelievingLetter },
+  { label: 'Office Note', value: DocumentTypeEnum.OfficeNote },
 ];
 
 @Component({

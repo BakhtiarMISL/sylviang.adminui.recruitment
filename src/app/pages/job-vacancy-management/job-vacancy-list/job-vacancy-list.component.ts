@@ -30,8 +30,11 @@ export class JobVacancyListComponent implements OnInit, AfterViewInit {
   rows = UI_CONFIG.defaultPageSize;
   currentPage = 1;
 
-  sortBy: string = '';
-  sortDirection: string = '';
+  // Default to newest-posted-first - previously '' meant no ORDER BY at all was sent to the
+  // backend, so the list came back in whatever incidental order Postgres returned rows in
+  // (oldest-first in practice), not the most recently posted vacancies HR actually wants to see.
+  sortBy: string = 'postingDate';
+  sortDirection: string = 'desc';
   searchTerm = '';
 
   // EP-15/US-113: additive "My Postings" filter - client-side paginated since a single

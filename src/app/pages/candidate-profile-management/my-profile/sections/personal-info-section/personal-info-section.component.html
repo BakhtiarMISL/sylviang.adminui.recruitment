@@ -27,6 +27,7 @@
       <label for="nationalId">National ID <i *ngIf="identityFieldsLocked" class="fas fa-lock" pTooltip="Locked because you have a submitted application. Contact HR support to correct this." tooltipPosition="top"></i></label>
     </p-floatlabel>
     <div *ngIf="hasError('nationalId')" class="invalid">{{ getErrorMessage('nationalId') }}</div>
+    <small class="text-neutral" *ngIf="!hasError('nationalId')">e.g. 1990123456789</small>
   </div>
 
   <div>

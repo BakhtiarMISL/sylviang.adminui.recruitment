@@ -5,10 +5,12 @@ export interface IPipelineStageProgress {
   stageName: string;
   stageType: string;
   displayOrder: number;
+  isMandatory: boolean;
   stageDescription?: string;
   passingCriteria?: string;
   requiredDocuments?: string;
   estimatedDurationMinutes?: number;
+  maxMarks?: number;
   status: StageProgressStatusEnum;
   scheduledDate?: string;
   meetingLink?: string;

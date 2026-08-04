@@ -47,13 +47,13 @@ const routes: Routes = [
     path: 'offer-letter-list',
     component: OfferLetterListComponent,
     canActivate: [RoleGuard],
-    data: roleData,
+    data: adminHrRoleData,
   },
   {
     path: 'manage-offer-letter',
     component: OfferLetterFormComponent,
     canActivate: [RoleGuard],
-    data: roleData,
+    data: adminHrRoleData,
   },
   {
     path: 'appointment-letter-list',
@@ -89,13 +89,13 @@ const routes: Routes = [
     path: 'manage-medical-letter',
     component: MedicalLetterFormComponent,
     canActivate: [RoleGuard],
-    data: roleData,
+    data: adminHrRoleData,
   },
   {
     path: 'manage-target-letter',
     component: TargetLetterFormComponent,
     canActivate: [RoleGuard],
-    data: roleData,
+    data: adminHrRoleData,
   },
   {
     path: 'manage-fitment-data',

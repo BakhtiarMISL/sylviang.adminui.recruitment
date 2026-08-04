@@ -22,10 +22,11 @@
 
         <div>
           <p-floatlabel variant="in">
-            <input pInputText id="code" class="w-full" formControlName="code" placeholder="e.g. OFFER_LETTER_STANDARD" />
+            <input pInputText id="code" class="w-full" formControlName="code" />
             <label for="code">Code</label>
           </p-floatlabel>
           <small class="text-red-500" *ngIf="hasError('code')">Code is required.</small>
+          <small class="text-neutral" *ngIf="!hasError('code')">e.g. OFFER_LETTER_STANDARD</small>
         </div>
 
         <div class="sm:col-span-2">
@@ -37,10 +38,8 @@
         </div>
 
         <div class="sm:col-span-2">
-          <p-floatlabel variant="in">
-            <textarea pTextarea id="body" class="w-full" formControlName="body" rows="10"></textarea>
-            <label for="body">Body — use {{ '{{PlaceholderName}}' }} for dynamic values</label>
-          </p-floatlabel>
+          <label for="body" class="text-sm font-medium block mb-1">Body — use {{ '{{PlaceholderName}}' }} for dynamic values</label>
+          <textarea pTextarea id="body" class="w-full" formControlName="body" rows="10"></textarea>
           <small class="text-red-500" *ngIf="hasError('body')">Body is required.</small>
         </div>
       </div>

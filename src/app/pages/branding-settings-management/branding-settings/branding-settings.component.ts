@@ -143,6 +143,7 @@ export class BrandingSettingsComponent implements OnInit {
         this.saving = false;
         if (response && !response.hasError) {
           this.successMessage = 'Branding settings saved.';
+          this.settingsForm.markAsPristine();
         } else {
           this.errorMessage = response?.decentMessage || 'Failed to save branding settings.';
         }

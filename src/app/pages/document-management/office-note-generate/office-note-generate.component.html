@@ -17,6 +17,7 @@
             <label for="jobApplicationId">Job Application ID</label>
           </p-floatlabel>
           <small class="text-red-500" *ngIf="hasError('jobApplicationId')">Job Application ID is required.</small>
+          <small class="text-neutral" *ngIf="!hasError('jobApplicationId') && !jobApplicationIdLocked">The numeric ID shown on the ATS Dashboard / application detail page, e.g. 3</small>
         </div>
 
         <div>

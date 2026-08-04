@@ -1,0 +1,38 @@
+<section class="page-container">
+  <h3 class="table-title mb-4">My Appointment Letters</h3>
+
+  <small class="mb-3 block text-red-500" *ngIf="errorMessage">{{ errorMessage }}</small>
+
+  <div *ngIf="loading" class="space-y-3">
+    <p-skeleton height="3rem" *ngFor="let i of skeletonItems"></p-skeleton>
+  </div>
+
+  <div *ngIf="!loading && items.length === 0" class="table-container">
+    <div class="not-found">
+      <i class="fa fa-magnifying-glass-minus"></i>
+      <p>No appointment letters yet.</p>
+    </div>
+  </div>
+
+  <p-table *ngIf="!loading && items.length > 0" [value]="items" styleClass="p-datatable-sm">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Template</th>
+        <th>Generated At</th>
+        <th style="width: 8rem">Actions</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-item>
+      <tr>
+        <td>{{ item.documentTemplateName }}</td>
+        <td>{{ item.generatedAt | date: 'dd-MMM-yyyy HH:mm' }}</td>
+        <td>
+          <a pButton size="small" [routerLink]="['/candidate-profile/appointment-letters', item.appointmentLetterId]">
+            <i class="fa fa-eye"></i>
+            <span>View</span>
+          </a>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</section>

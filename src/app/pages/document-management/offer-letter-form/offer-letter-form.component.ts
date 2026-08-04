@@ -2,10 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BreadcrumbService } from '@app/@core/services';
-import { DocumentTypeEnum } from '@app/@core/enums/recruitment.enum';
+import { DocumentTypeEnum, RecommendationStatusEnum } from '@app/@core/enums/recruitment.enum';
 import { DocumentTemplateService } from '@app/@core/services/recruitment/document-template/document-template.service';
 import { OfferLetterService } from '@app/@core/services/recruitment/offer-letter/offer-letter.service';
+import { CandidateRecommendationService } from '@app/@core/services/recruitment/candidate-recommendation/candidate-recommendation.service';
 import { IDocumentTemplateResponse } from '@core/interfaces/recruitment-management/document-template.interface';
+import { ICandidateHireConflictResponse } from '@core/interfaces/recruitment-management/offer-letter.interface';
 
 @Component({
   selector: 'app-offer-letter-form',
@@ -18,6 +20,7 @@ export class OfferLetterFormComponent implements OnInit {
     private fb: FormBuilder,
     private documentTemplateService: DocumentTemplateService,
     private offerLetterService: OfferLetterService,
+    private candidateRecommendationService: CandidateRecommendationService,
     private route: ActivatedRoute,
     private router: Router,
     private breadcrumbService: BreadcrumbService,
@@ -28,8 +31,14 @@ export class OfferLetterFormComponent implements OnInit {
   submitting = false;
   errorMessage = '';
   jobApplicationIdLocked = false;
+  recommendationAccepted: boolean | null = null;
 
   templateOptions: { label: string; value: number }[] = [];
+
+  // Warn-only (never blocks): candidate already Hired elsewhere. Nothing in the pipeline/offer/
+  // onboarding flow is scoped to the candidate as a whole, so nothing technically stops HR from
+  // hiring the same person into two postings - this just surfaces it at the point of decision.
+  hireConflicts: ICandidateHireConflictResponse[] = [];
 
   ngOnInit(): void {
     this.breadcrumbService.setBreadcrumbs([
@@ -52,6 +61,48 @@ export class OfferLetterFormComponent implements OnInit {
     });
 
     this.loadTemplates();
+
+    if (this.jobApplicationIdLocked) {
+      this.loadRecommendation(+jobApplicationIdParam!);
+      this.loadHireConflicts(+jobApplicationIdParam!);
+    } else {
+      this.form.get('jobApplicationId')?.valueChanges.subscribe((id) => {
+        this.hireConflicts = [];
+        if (id && id > 0) this.loadHireConflicts(id);
+      });
+    }
+  }
+
+  private loadHireConflicts(jobApplicationId: number): void {
+    this.offerLetterService.getCandidateHireConflicts(jobApplicationId).subscribe({
+      next: (response) => {
+        this.hireConflicts = response && !response.hasError && response.content ? response.content : [];
+      },
+      error: () => {
+        this.hireConflicts = [];
+      },
+    });
+  }
+
+  // Angular templates can't parse arrow functions (`c => c.jobPostingTitle`) in a binding - that's
+  // an assignment/arrow expression, which NG5002 rejects - so this has to live here, not inline.
+  get hireConflictTitles(): string {
+    return this.hireConflicts.map((c) => c.jobPostingTitle).join(', ');
+  }
+
+  private loadRecommendation(jobApplicationId: number): void {
+    this.candidateRecommendationService.getLatest(jobApplicationId).subscribe({
+      next: (response) => {
+        const recommendation = response && !response.hasError ? response.content : null;
+        this.recommendationAccepted = recommendation?.status === RecommendationStatusEnum.Accepted;
+        if (!this.recommendationAccepted) {
+          this.errorMessage = 'An offer letter can only be generated once the candidate has an Accepted final selection recommendation.';
+        }
+      },
+      error: () => {
+        this.recommendationAccepted = false;
+      },
+    });
   }
 
   private loadTemplates(): void {
@@ -72,6 +123,9 @@ export class OfferLetterFormComponent implements OnInit {
 
   onSubmit(): void {
     this.formSubmitted = true;
+
+    if (this.jobApplicationIdLocked && !this.recommendationAccepted) return;
+
     this.errorMessage = '';
 
     if (this.form.invalid) {

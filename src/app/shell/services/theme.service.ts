@@ -26,6 +26,13 @@ export class ThemeService {
     '--deep-gray': '#393B3D',
     '--slate-gray': '#667085',
     '--surface-1': '#F5F5F5',
+    // Ad-hoc panel/border tokens referenced across several components (pipeline tracker,
+    // ATS dashboard, auto-shortlist dialog, duplicate applications, my-applications) via
+    // var(--surface-N, <light fallback>) - never defined here before, so every one of those
+    // silently used its hardcoded light fallback regardless of theme.
+    '--surface-100': '#f4f4f5',
+    '--surface-200': '#e5e7eb',
+    '--surface-300': '#d1d5db',
     '--text-color-light': '#ffffff',
     '--text-color-medium': '#667085',
     '--text-color-dark': '#333843',
@@ -99,6 +106,9 @@ export class ThemeService {
     '--deep-gray': '#2F3134',
     '--slate-gray': '#4A5059',
     '--surface-1': '#202124',
+    '--surface-100': '#2d3748',
+    '--surface-200': '#4b5563',
+    '--surface-300': '#6b7280',
     '--text-color-light': '#212529',
     '--text-color-medium': '#ced4da',
     '--text-color-dark': '#f8f9fa',

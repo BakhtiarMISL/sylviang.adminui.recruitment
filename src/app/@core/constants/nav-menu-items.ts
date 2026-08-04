@@ -103,14 +103,9 @@ export const webSidebarMenuItems: IMenuItem[] = [
         active: false,
         icon: 'fa-solid fa-people-arrows',
       },
-      // ── Selection ──
-      {
-        href: '/candidate-recommendations/candidate-recommendation-list',
-        title: 'Final Selection Recommendations',
-        active: false,
-        icon: 'fa-solid fa-star',
-        roles: [UserRoleEnum.Admin],
-      },
+      // ── Selection ── (everything below is Admin+HR per each route's own roleData - moved
+      // Final Selection Recommendations, the one genuinely Admin-only item here, down next to
+      // Account Settings/Application Settings so it doesn't sit under a misleading heading.)
       {
         href: '/final-selection-pool/final-selection-pool-list',
         title: 'Final Selection Pool',
@@ -192,6 +187,13 @@ export const webSidebarMenuItems: IMenuItem[] = [
     roles: [UserRoleEnum.Candidate],
   },
   {
+    href: '/candidate-profile/appointment-letters',
+    title: 'My Appointment Letters',
+    active: false,
+    icon: 'fa-solid fa-file-contract',
+    roles: [UserRoleEnum.Candidate],
+  },
+  {
     href: '/candidate-profile/pre-boarding',
     title: 'Pre-Boarding',
     active: false,
@@ -203,6 +205,13 @@ export const webSidebarMenuItems: IMenuItem[] = [
     title: 'Account Settings',
     active: false,
     icon: 'fa-solid fa-user-gear',
+  },
+  {
+    href: '/candidate-recommendations/candidate-recommendation-list',
+    title: 'Final Selection Recommendations',
+    active: false,
+    icon: 'fa-solid fa-star',
+    roles: [UserRoleEnum.Admin],
   },
   {
     href: '/application-settings',

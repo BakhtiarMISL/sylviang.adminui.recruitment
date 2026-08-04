@@ -86,9 +86,13 @@
         <i class="fa fa-ban"></i>
         <span>Cancel</span>
       </button>
-      <button pButton *ngIf="!isCancelled" severity="success" (click)="openMarkResultDialog()">
+      <button pButton *ngIf="!isCancelled && !isCompleted" severity="success" (click)="openMarkResultDialog()">
         <i class="fa fa-flag-checkered"></i>
         <span>Mark Result</span>
+      </button>
+      <button pButton *ngIf="!isCancelled && isCompleted" severity="warning" (click)="openChangeResultDialog($event)">
+        <i class="fa fa-rotate"></i>
+        <span>Change Result</span>
       </button>
       <button pButton severity="secondary" [routerLink]="['/interviews/interview', interviewId, 'evaluate']">
         <i class="fa fa-star"></i>
@@ -144,6 +148,7 @@
       <input pInputText id="cancelReason" class="w-full" [(ngModel)]="cancelReason" [ngModelOptions]="{ standalone: true }" />
       <label for="cancelReason">Cancellation Reason</label>
     </p-floatlabel>
+    <small class="text-neutral">e.g. Candidate requested reschedule / Panelist unavailable</small>
 
     <div class="flex gap-2 pb-2">
       <button pButton severity="danger" [disabled]="!canSaveCancel" [loading]="cancelSaving" (click)="saveCancel()">
@@ -157,9 +162,17 @@
   </div>
 </p-dialog>
 
-<p-dialog header="Mark Interview Result" [(visible)]="markResultDialogVisible" [modal]="true" [style]="{ width: '24rem', maxWidth: '95vw' }" (onHide)="closeMarkResultDialog()">
+<p-dialog
+  [header]="isCompleted ? 'Change Interview Result' : 'Mark Interview Result'"
+  [(visible)]="markResultDialogVisible"
+  [modal]="true"
+  [style]="{ width: '24rem', maxWidth: '95vw' }"
+  (onHide)="closeMarkResultDialog()"
+>
   <div class="flex flex-col gap-3">
-    <p class="text-sm text-gray-600 dark:text-gray-300">Also marks the interview as Completed.</p>
+    <p class="text-sm text-gray-600 dark:text-gray-300">
+      {{ isCompleted ? 'This overwrites the previously recorded result.' : 'Also marks the interview as Completed.' }}
+    </p>
 
     <div class="flex gap-2">
       <button

@@ -412,7 +412,7 @@
                 </div>
               </th>
             }
-            <th style="width: 6rem">Actions</th>
+            <th style="width: 6rem" class="text-center">Actions</th>
           </tr>
         </ng-template>
 
@@ -447,15 +447,9 @@
               <td>{{ application.lastUpdatedAt ? (application.lastUpdatedAt | date: 'dd-MMM-yyyy HH:mm') : '-' }}</td>
               <td>{{ application.daysInCurrentStage ?? '-' }}</td>
               <td>{{ application.assignedHrUserName || '-' }}</td>
-              <td>
+              <td class="text-center">
                 <button (click)="openDetail(application)" class="text-primary" pTooltip="View Detail">
                   <i class="fa fa-eye"></i>
-                </button>
-                <button (click)="openPipelineTracker(application)" class="text-primary ml-2" pTooltip="Pipeline Progress">
-                  <i class="fa-solid fa-diagram-project"></i>
-                </button>
-                <button (click)="openInlineUpdate(application)" class="text-primary ml-2" pTooltip="Update Status">
-                  <i class="fa-solid fa-pen-to-square"></i>
                 </button>
               </td>
             </tr>
@@ -476,58 +470,6 @@
     </div>
   </div>
 </section>
-
-<p-dialog header="Pipeline Progress" [(visible)]="pipelineDialogVisible" [modal]="true" [style]="{ width: '60rem', maxWidth: '95vw' }">
-  <app-pipeline-progress-tracker *ngIf="pipelineDialogVisible && pipelineDialogApplicationId" [jobApplicationId]="pipelineDialogApplicationId"></app-pipeline-progress-tracker>
-</p-dialog>
-
-<!-- EP-14 US-109 AC4: inline status update/note directly from a tracker row -->
-<p-dialog header="Update Application Status" [(visible)]="inlineUpdateDialogVisible" [modal]="true" [style]="{ width: '28rem', maxWidth: '95vw' }">
-  <div class="inline-update-form" *ngIf="inlineUpdateApplication as application">
-    <p class="inline-update-candidate">{{ application.candidateName }} &mdash; {{ formatEnumLabel(application.applicationStatus) }}</p>
-
-    <p-floatlabel variant="in">
-      <p-select
-        inputId="inlineUpdateToStatus"
-        [options]="statusOptions"
-        [(ngModel)]="inlineUpdateToStatus"
-        (ngModelChange)="onInlineUpdateStatusChange($event)"
-        optionLabel="label"
-        optionValue="value"
-        [appendTo]="'body'"
-        [autoDisplayFirst]="false"
-        class="w-full"
-      ></p-select>
-      <label for="inlineUpdateToStatus">Move To</label>
-    </p-floatlabel>
-
-    <p-floatlabel variant="in" *ngIf="inlineUpdateRequiresReason()">
-      <p-select
-        inputId="inlineUpdateReasonId"
-        [options]="inlineUpdateReasonOptions"
-        [(ngModel)]="inlineUpdateReasonId"
-        optionLabel="label"
-        optionValue="applicationStatusReasonId"
-        [appendTo]="'body'"
-        [autoDisplayFirst]="false"
-        class="w-full"
-      ></p-select>
-      <label for="inlineUpdateReasonId">Reason *</label>
-    </p-floatlabel>
-
-    <p-floatlabel variant="in">
-      <input type="text" pInputText id="inlineUpdateNote" class="w-full" [(ngModel)]="inlineUpdateNote" name="inlineUpdateNote" />
-      <label for="inlineUpdateNote">Note (optional)</label>
-    </p-floatlabel>
-  </div>
-
-  <ng-template pTemplate="footer">
-    <button pButton [disabled]="!canConfirmInlineUpdate() || inlineUpdateSaving" (click)="confirmInlineUpdate()">
-      <i class="fa fa-check"></i>
-      <span>Update</span>
-    </button>
-  </ng-template>
-</p-dialog>
 
 <p-dialog header="AI-Powered Auto-Shortlisting" [(visible)]="autoShortlistDialogVisible" [modal]="true" [style]="{ width: '60rem', maxWidth: '95vw' }">
   <app-auto-shortlist-dialog
@@ -575,6 +517,9 @@
     <button pButton [disabled]="!saveSearchName.trim() || savingSearch" (click)="confirmSaveSearch()">
       <i class="fa fa-check"></i>
       <span>Save</span>
+    </button>
+    <button pButton type="button" severity="secondary" [disabled]="savingSearch" (click)="saveSearchDialogVisible = false">
+      <span>Cancel</span>
     </button>
   </ng-template>
 </p-dialog>

@@ -13,7 +13,6 @@
                 [id]="field.key"
                 class="w-full"
                 [formControlName]="field.key"
-                [placeholder]="field.placeholder || ''"
               />
               <p-inputnumber *ngIf="field.type === 'number'" [inputId]="field.key" class="w-full" [formControlName]="field.key" [useGrouping]="false">
               </p-inputnumber>
@@ -26,6 +25,7 @@
             <small class="text-red-500" *ngIf="hasError(field.key) && form.get(field.key)?.errors?.['pattern']">
               {{ patternError(field.key) || (field.label + ' is invalid.') }}
             </small>
+            <small class="text-neutral" *ngIf="field.placeholder && !hasError(field.key)">{{ field.placeholder }}</small>
           </div>
         </ng-container>
       </div>

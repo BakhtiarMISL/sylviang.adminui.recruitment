@@ -47,7 +47,7 @@
     </p-floatlabel>
     <small class="mt-2 block text-red-500" *ngIf="declineErrorMessage">{{ declineErrorMessage }}</small>
 
-    <div class="mt-4 flex justify-end gap-2">
+    <div class="mt-4 flex justify-end gap-2 pb-2">
       <button pButton severity="secondary" [disabled]="submitting" (click)="declineDialogVisible = false">Cancel</button>
       <button pButton severity="danger" [disabled]="submitting" (click)="confirmDecline()">Confirm Decline</button>
     </div>

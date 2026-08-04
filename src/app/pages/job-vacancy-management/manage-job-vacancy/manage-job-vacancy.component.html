@@ -220,6 +220,7 @@
         <label for="salaryCurrency">Salary Currency</label>
       </p-floatlabel>
       <div *ngIf="hasError('salaryCurrency')" class="invalid">{{ getErrorMessage('salaryCurrency') }}</div>
+      <small class="text-neutral" *ngIf="!hasError('salaryCurrency')">e.g. BDT, USD</small>
     </div>
 
     <div *ngIf="jobVacancyForm.errors?.['salaryRangeInvalid'] && (jobVacancyForm.touched || formSubmitted)" class="invalid sm:col-span-2">
@@ -302,6 +303,7 @@
         <label for="requiredDistrict">Required District</label>
       </p-floatlabel>
       <div *ngIf="hasError('requiredDistrict')" class="invalid">{{ getErrorMessage('requiredDistrict') }}</div>
+      <small class="text-neutral" *ngIf="!hasError('requiredDistrict')">e.g. Dhaka</small>
     </div>
   </section>
 
@@ -375,6 +377,7 @@
         <label for="applicationFeeCurrency">Application Fee Currency</label>
       </p-floatlabel>
       <div *ngIf="hasError('applicationFeeCurrency')" class="invalid">{{ getErrorMessage('applicationFeeCurrency') }}</div>
+      <small class="text-neutral" *ngIf="!hasError('applicationFeeCurrency')">e.g. BDT, USD</small>
     </div>
 
     <div *ngIf="jobVacancyForm.errors?.['applicationFeeCurrencyRequired'] && (jobVacancyForm.touched || formSubmitted)" class="invalid sm:col-span-2">

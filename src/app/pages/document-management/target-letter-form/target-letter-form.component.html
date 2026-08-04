@@ -15,6 +15,7 @@
             <label for="kpis">KPIs</label>
           </p-floatlabel>
           <small class="text-red-500" *ngIf="hasError('kpis')">KPIs are required.</small>
+          <small class="text-neutral" *ngIf="!hasError('kpis')">e.g. Close 5 client accounts per quarter; maintain 95% code review turnaround</small>
         </div>
 
         <div>
@@ -23,6 +24,7 @@
             <label for="objectives">Objectives</label>
           </p-floatlabel>
           <small class="text-red-500" *ngIf="hasError('objectives')">Objectives are required.</small>
+          <small class="text-neutral" *ngIf="!hasError('objectives')">e.g. Ramp up on the codebase within 30 days; lead one feature by month 3</small>
         </div>
 
         <div class="sm:col-span-2">
@@ -47,10 +49,8 @@
         </div>
 
         <div class="sm:col-span-2">
-          <p-floatlabel variant="in">
-            <textarea pTextarea id="finalBody" class="w-full" rows="8" formControlName="finalBody"></textarea>
-            <label for="finalBody">Letter Content (review and adjust before finalizing)</label>
-          </p-floatlabel>
+          <label for="finalBody" class="text-sm font-medium block mb-1">Letter Content (review and adjust before finalizing)</label>
+          <textarea pTextarea id="finalBody" class="w-full" rows="8" formControlName="finalBody"></textarea>
           <small class="text-red-500" *ngIf="hasError('finalBody')">Letter content is required.</small>
         </div>
       </div>

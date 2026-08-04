@@ -25,29 +25,79 @@
       </div>
     </div>
 
-    <div class="mt-3 flex gap-2">
-      <a pButton size="small" severity="secondary" [routerLink]="['/document-management/manage-offer-letter']" [queryParams]="{ jobApplicationId: jobApplicationId }">
+    <div class="mt-3 flex gap-2 flex-wrap items-center">
+      <button pButton type="button" size="small" severity="secondary" [disabled]="!recommendationAccepted" (click)="goToGenerateOfferLetter()">
         <i class="fa fa-file-signature"></i>
         <span>Generate Offer Letter</span>
-      </a>
+      </button>
       <a pButton size="small" severity="secondary" [routerLink]="['/document-management/offer-letter-list']" [queryParams]="{ jobApplicationId: jobApplicationId }">
         <i class="fa fa-list"></i>
         <span>View Offer Letters</span>
       </a>
-      <a pButton size="small" severity="secondary" [routerLink]="['/document-management/manage-medical-letter']" [queryParams]="{ jobApplicationId: jobApplicationId }">
+      <button pButton type="button" size="small" severity="secondary" [disabled]="!offerLetterAccepted" (click)="goToGenerateMedicalLetter()">
         <i class="fa fa-file-medical"></i>
         <span>Generate Medical Letter</span>
-      </a>
-      <a pButton size="small" severity="secondary" [routerLink]="['/document-management/manage-target-letter']" [queryParams]="{ jobApplicationId: jobApplicationId }">
+      </button>
+      <button pButton type="button" size="small" severity="secondary" [disabled]="!offerLetterAccepted" (click)="goToGenerateTargetLetter()">
         <i class="fa fa-bullseye"></i>
         <span>Generate Target Letter</span>
-      </a>
+      </button>
+    </div>
+    <small class="text-neutral block" *ngIf="recommendationAccepted === false">Generate Offer Letter requires an Accepted Final Selection recommendation.</small>
+    <small class="text-neutral block" *ngIf="offerLetterAccepted === false">Generate Medical/Target Letter requires an Accepted offer letter.</small>
+  </section>
+
+  <section class="page-container">
+    <div class="flex items-start gap-3 rounded-lg border px-4 py-3" [ngClass]="nextStepClasses.card">
+      <i class="fa text-lg mt-0.5" [ngClass]="[nextStep.icon, nextStepClasses.accent]"></i>
+      <div class="flex flex-col gap-1 flex-1 min-w-0">
+        <span class="text-xs font-semibold uppercase tracking-wide" [ngClass]="nextStepClasses.accent">
+          {{ isTerminalStatus ? 'Status' : 'What to do next' }}
+        </span>
+        <span class="text-sm font-medium text-black dark:text-white">{{ nextStep.text }}</span>
+        <div class="flex items-center gap-2 mt-1" *ngIf="suggestedStatus">
+          <span class="text-xs text-neutral dark:text-white/60">Current Status ("{{ formatEnumLabel(application.applicationStatus) }}") looks out of date -</span>
+          <button
+            pButton
+            type="button"
+            size="small"
+            severity="success"
+            [disabled]="updating"
+            [loading]="updating"
+            (click)="applySuggestedStatus()"
+          >
+            <i class="fa fa-forward"></i>
+            <span>Move to {{ suggestedStatusLabel }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex items-center flex-wrap gap-x-1 gap-y-2 mt-4" *ngIf="!isTerminalStatus">
+      <ng-container *ngFor="let step of steps; let last = last">
+        <div
+          class="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium border"
+          [ngClass]="{
+            'bg-success-50 dark:bg-success-900/20 border-success-200 dark:border-success-800 text-success-700 dark:text-success-400': step.state === 'done',
+            'bg-info-50 dark:bg-info-900/20 border-info-300 dark:border-info-700 text-info-700 dark:text-info-400 shadow-sm': step.state === 'current',
+            'bg-light dark:bg-white/5 border-borderLight dark:border-borderDark text-neutral dark:text-white/50': step.state === 'upcoming'
+          }"
+        >
+          <i class="fa" [ngClass]="step.state === 'done' ? 'fa-circle-check' : step.state === 'current' ? 'fa-circle-dot' : 'fa-circle'"></i>
+          <span>{{ step.label }}</span>
+        </div>
+        <i class="fa fa-chevron-right text-xs text-neutral dark:text-white/30" *ngIf="!last"></i>
+      </ng-container>
     </div>
   </section>
 
   <section class="page-container">
     <h3 class="form-section-header">Pipeline Progress</h3>
-    <app-pipeline-progress-tracker [jobApplicationId]="jobApplicationId"></app-pipeline-progress-tracker>
+    <app-pipeline-progress-tracker
+      [jobApplicationId]="jobApplicationId"
+      [resumeUrl]="application.resumeUrl"
+      (nextStepStateChange)="onTrackerStateChange($event)"
+    ></app-pipeline-progress-tracker>
   </section>
 
   <section class="page-container">

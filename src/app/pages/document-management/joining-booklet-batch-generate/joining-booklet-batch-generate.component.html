@@ -9,6 +9,7 @@
           <label for="batchLabel">Batch Label</label>
         </p-floatlabel>
         <small class="text-red-500" *ngIf="formSubmitted && !batchLabel.trim()">Batch label is required.</small>
+        <small class="text-neutral" *ngIf="!(formSubmitted && !batchLabel.trim())">e.g. August-2026-Batch-1</small>
       </div>
 
       <div>

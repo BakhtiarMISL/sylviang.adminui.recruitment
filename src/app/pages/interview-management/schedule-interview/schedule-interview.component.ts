@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { UI_CONFIG } from '@app/@core/constants';
 import { ApplicationStatusEnum, InterviewTypeEnum } from '@app/@core/enums/recruitment.enum';
 import { IInterviewRoomResponse } from '@app/@core/interfaces/recruitment-management/interview-room.interface';
@@ -16,6 +16,7 @@ import { InterviewRoundConfigService } from '@app/@core/services/recruitment/int
 import { JobApplicationService } from '@app/@core/services/recruitment/job-application/job-application.service';
 import { JobVacancyService } from '@app/@core/services/recruitment/job-vacancy/job-vacancy.service';
 import { ToastService } from '@app/@core/services/misc/toast.service';
+import { DateTimeUtility } from '@app/@core/utils/date-time.utility';
 import { InterviewTypeOptions } from './schedule-interview.component.constants';
 
 @Component({
@@ -35,9 +36,16 @@ export class ScheduleInterviewComponent implements OnInit {
     private jobApplicationService: JobApplicationService,
     private toast: ToastService,
     private router: Router,
+    private route: ActivatedRoute,
     private breadcrumbService: BreadcrumbService,
     private cdr: ChangeDetectorRef,
   ) {}
+
+  // Set when arriving from a specific candidate's Application Detail page (?jobApplicationId=X) -
+  // previously this link dropped HR onto a blank scheduler with no idea which candidate they came
+  // from, forcing a manual re-search. Locked mode pre-fills the job posting and pre-selects (and
+  // restricts to) that one candidate.
+  jobApplicationIdLocked = false;
 
   scheduleForm!: FormGroup;
   formSubmitted = false;
@@ -94,6 +102,38 @@ export class ScheduleInterviewComponent implements OnInit {
 
     this.loadJobPostings();
     this.loadInterviewVenues();
+
+    const lockedJobApplicationId = this.route.snapshot.queryParamMap.get('jobApplicationId');
+    if (lockedJobApplicationId) {
+      this.lockToJobApplication(+lockedJobApplicationId);
+    }
+  }
+
+  private lockToJobApplication(jobApplicationId: number): void {
+    this.jobApplicationService.getDetail(jobApplicationId).subscribe({
+      next: (response) => {
+        if (!response || response.hasError || !response.content) return;
+        const detail = response.content;
+
+        this.jobApplicationIdLocked = true;
+        this.scheduleForm.patchValue({ jobPostingId: detail.jobPostingId });
+        this.loadRoundConfigs();
+
+        const candidate: IJobApplicationListItem = {
+          jobApplicationId: detail.jobApplicationId,
+          candidateName: detail.candidateName,
+          jobPostingId: detail.jobPostingId,
+          jobPostingTitle: detail.jobPostingTitle,
+          source: detail.source,
+          appliedDate: detail.appliedDate,
+          applicationStatus: detail.applicationStatus,
+        };
+        this.candidates = [candidate];
+        this.selectedCandidates = [candidate];
+        this.candidatesTotalRecords = 1;
+        this.cdr.detectChanges();
+      },
+    });
   }
 
   get f() {
@@ -274,7 +314,7 @@ export class ScheduleInterviewComponent implements OnInit {
     }
 
     const start: Date = this.scheduleForm.value.scheduledStartAt;
-    const startIso = start instanceof Date ? start.toISOString() : start;
+    const startLocal = DateTimeUtility.toLocalDateTimeString(start);
     const panelistEmployeeIds = this.parsePanelistIds();
 
     this.submitting = true;
@@ -282,7 +322,9 @@ export class ScheduleInterviewComponent implements OnInit {
     if (!this.isBulk) {
       const candidate = this.selectedCandidates[0];
       const durationMinutes: number = this.scheduleForm.value.durationMinutes;
-      const scheduledEndAt = new Date(new Date(startIso).getTime() + durationMinutes * 60000).toISOString();
+      const scheduledEndAt = DateTimeUtility.toLocalDateTimeString(
+        new Date(start.getTime() + durationMinutes * 60000),
+      );
 
       const request = {
         jobApplicationId: candidate.jobApplicationId,
@@ -290,7 +332,7 @@ export class ScheduleInterviewComponent implements OnInit {
         interviewVenueId: this.isInPerson ? this.scheduleForm.value.interviewVenueId : null,
         interviewRoomId: this.isInPerson ? this.scheduleForm.value.interviewRoomId : null,
         meetingLink: this.isInPerson ? null : this.scheduleForm.value.meetingLink,
-        scheduledStartAt: startIso,
+        scheduledStartAt: startLocal,
         scheduledEndAt,
         round: this.scheduleForm.get('round')?.value,
         interviewRoundConfigId: this.scheduleForm.value.interviewRoundConfigId,
@@ -320,7 +362,7 @@ export class ScheduleInterviewComponent implements OnInit {
         interviewVenueId: this.isInPerson ? this.scheduleForm.value.interviewVenueId : null,
         interviewRoomId: this.isInPerson ? this.scheduleForm.value.interviewRoomId : null,
         meetingLink: this.isInPerson ? null : this.scheduleForm.value.meetingLink,
-        startAt: startIso,
+        startAt: startLocal,
         durationMinutes: this.scheduleForm.value.durationMinutes,
         gapMinutes: this.scheduleForm.value.gapMinutes,
         round: this.scheduleForm.get('round')?.value,

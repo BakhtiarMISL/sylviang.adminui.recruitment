@@ -102,10 +102,13 @@
                 </p-floatlabel>
               </ng-container>
 
-              <p-floatlabel variant="in" *ngSwitchCase="CriterionTypeEnum.District">
-                <input pInputText [id]="'requiredDistrict' + i" class="w-full" [(ngModel)]="criterion.requiredDistrict" [ngModelOptions]="{ standalone: true }" />
-                <label [for]="'requiredDistrict' + i">Location / District</label>
-              </p-floatlabel>
+              <div *ngSwitchCase="CriterionTypeEnum.District">
+                <p-floatlabel variant="in">
+                  <input pInputText [id]="'requiredDistrict' + i" class="w-full" [(ngModel)]="criterion.requiredDistrict" [ngModelOptions]="{ standalone: true }" />
+                  <label [for]="'requiredDistrict' + i">Location / District</label>
+                </p-floatlabel>
+                <small class="text-neutral">e.g. Dhaka</small>
+              </div>
 
               <p-floatlabel variant="in" *ngSwitchCase="CriterionTypeEnum.MinScreeningScore">
                 <p-inputnumber [inputId]="'minScreeningScore' + i" class="w-full" [(ngModel)]="criterion.minScreeningScore" [ngModelOptions]="{ standalone: true }" [min]="0" [max]="100"></p-inputnumber>

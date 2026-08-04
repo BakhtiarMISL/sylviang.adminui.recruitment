@@ -14,6 +14,7 @@ import { JobApplicationService } from '@app/@core/services/recruitment/job-appli
 import { JobVacancyService } from '@app/@core/services/recruitment/job-vacancy/job-vacancy.service';
 import { QuestionGroupService } from '@app/@core/services/recruitment/question-group/question-group.service';
 import { ToastService } from '@app/@core/services/misc/toast.service';
+import { DateTimeUtility } from '@app/@core/utils/date-time.utility';
 import { ExamTypeOptions } from './schedule-exam.component.constants';
 
 @Component({
@@ -227,7 +228,8 @@ export class ScheduleExamComponent implements OnInit {
     const request = {
       jobPostingId: this.examForm.value.jobPostingId,
       title: this.examForm.value.title,
-      scheduledStartAt: scheduledStartAt instanceof Date ? scheduledStartAt.toISOString() : scheduledStartAt,
+      scheduledStartAt:
+        scheduledStartAt instanceof Date ? DateTimeUtility.toLocalDateTimeString(scheduledStartAt) : scheduledStartAt,
       durationMinutes: this.examForm.value.durationMinutes,
       totalMarks: this.examForm.value.totalMarks,
       passMarks: this.examForm.value.passMarks,

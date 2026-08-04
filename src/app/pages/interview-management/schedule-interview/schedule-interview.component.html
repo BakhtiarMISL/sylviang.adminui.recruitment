@@ -16,6 +16,7 @@
               optionValue="jobPostingId"
               [appendTo]="'body'"
               [autoDisplayFirst]="false"
+              [disabled]="jobApplicationIdLocked"
               (onChange)="onJobPostingChange()"
             ></p-select>
             <label for="jobPostingId">Job Posting</label>
@@ -80,6 +81,7 @@
             <label for="meetingLink">Meeting Link</label>
           </p-floatlabel>
           <small class="text-red-500" *ngIf="hasError('meetingLink')">Meeting link is required.</small>
+          <small class="text-neutral" *ngIf="!hasError('meetingLink')">e.g. https://meet.google.com/abc-defg-hij</small>
         </div>
 
         <div>
@@ -144,6 +146,7 @@
             <input pInputText id="panelistEmployeeIdsText" class="w-full" formControlName="panelistEmployeeIdsText" />
             <label for="panelistEmployeeIdsText">Panel Member Employee IDs (comma-separated)</label>
           </p-floatlabel>
+          <small class="text-neutral">e.g. 101, 205, 310</small>
         </div>
 
         <div class="sm:col-span-2">
@@ -162,8 +165,11 @@
       [class.pointer-events-none]="!scheduleForm.value.jobPostingId"
     >
       <h3 class="table-title mb-3">2. Select Shortlisted Candidates</h3>
-      <p class="mb-3 text-sm text-gray-600 dark:text-gray-300">
+      <p class="mb-3 text-sm text-gray-600 dark:text-gray-300" *ngIf="!jobApplicationIdLocked">
         Select one candidate to schedule a single interview, or several to bulk-schedule staggered slots starting from the time above.
+      </p>
+      <p class="mb-3 text-sm text-gray-600 dark:text-gray-300" *ngIf="jobApplicationIdLocked">
+        Scheduling for this candidate only.
       </p>
 
       <div *ngIf="!scheduleForm.value.jobPostingId" class="not-found">

@@ -89,6 +89,7 @@ export class FitmentDataFormComponent implements OnInit {
         this.submitting = false;
         if (response && !response.hasError) {
           this.successMessage = 'Fitment data saved.';
+          this.form.markAsPristine();
         } else {
           this.errorMessage = response?.decentMessage || 'Failed to save fitment data.';
         }

@@ -11,6 +11,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { SkeletonModule } from 'primeng/skeleton';
 import { TableModule } from 'primeng/table';
 import { TextareaModule } from 'primeng/textarea';
+import { TooltipModule } from 'primeng/tooltip';
 import { FinalSelectionPoolManagementRoutingModule } from './final-selection-pool-management-routing.module';
 import { FinalSelectionPoolListComponent } from './final-selection-pool-list/final-selection-pool-list.component';
 import { PreBoardingReviewComponent } from './pre-boarding-review/pre-boarding-review.component';
@@ -32,6 +33,7 @@ import { PreBoardingReviewComponent } from './pre-boarding-review/pre-boarding-r
     TableModule,
     DialogModule,
     TextareaModule,
+    TooltipModule,
   ],
 })
 export class FinalSelectionPoolManagementModule {}

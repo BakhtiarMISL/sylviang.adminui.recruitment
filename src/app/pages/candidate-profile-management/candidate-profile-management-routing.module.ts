@@ -3,6 +3,8 @@ import { RouterModule, Routes } from '@angular/router';
 import { MyProfileComponent } from './my-profile/my-profile.component';
 import { MyOfferLettersComponent } from './my-offer-letters/my-offer-letters.component';
 import { MyOfferLetterDetailComponent } from './my-offer-letter-detail/my-offer-letter-detail.component';
+import { MyAppointmentLettersComponent } from './my-appointment-letters/my-appointment-letters.component';
+import { MyAppointmentLetterDetailComponent } from './my-appointment-letter-detail/my-appointment-letter-detail.component';
 import { PreBoardingFormComponent } from './pre-boarding-form/pre-boarding-form.component';
 
 // Intentionally no RoleGuard / canActivate / data:{roles} here, matching
@@ -20,6 +22,14 @@ const routes: Routes = [
   {
     path: 'offer-letters/:id',
     component: MyOfferLetterDetailComponent,
+  },
+  {
+    path: 'appointment-letters',
+    component: MyAppointmentLettersComponent,
+  },
+  {
+    path: 'appointment-letters/:id',
+    component: MyAppointmentLetterDetailComponent,
   },
   {
     path: 'pre-boarding',

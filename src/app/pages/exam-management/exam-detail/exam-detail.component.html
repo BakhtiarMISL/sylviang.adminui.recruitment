@@ -286,6 +286,7 @@
       <input pInputText id="reassignSeatNumber" class="w-full" [(ngModel)]="reassignSeatNumber" [ngModelOptions]="{ standalone: true }" />
       <label for="reassignSeatNumber">Seat Number</label>
     </p-floatlabel>
+    <small class="text-neutral">e.g. A-12</small>
 
     <div class="flex gap-2 pb-2">
       <button pButton [disabled]="!canSaveReassign" [loading]="reassignSaving" (click)="saveReassign()">

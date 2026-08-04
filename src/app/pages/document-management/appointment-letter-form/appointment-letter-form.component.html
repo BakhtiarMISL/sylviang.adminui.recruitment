@@ -32,10 +32,8 @@
         </div>
 
         <div>
-          <p-floatlabel variant="in">
-            <textarea pTextarea id="finalBody" class="w-full" rows="10" formControlName="finalBody"></textarea>
-            <label for="finalBody">Letter Content (review and adjust before finalizing)</label>
-          </p-floatlabel>
+          <label for="finalBody" class="text-sm font-medium block mb-1">Letter Content (review and adjust before finalizing)</label>
+          <textarea pTextarea id="finalBody" class="w-full" rows="10" formControlName="finalBody"></textarea>
           <small class="text-red-500" *ngIf="hasError('finalBody')">Letter content is required.</small>
         </div>
       </div>

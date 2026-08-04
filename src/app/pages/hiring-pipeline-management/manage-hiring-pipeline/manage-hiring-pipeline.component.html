@@ -56,10 +56,13 @@
               <label [for]="'stageType' + i">Stage Type</label>
             </p-floatlabel>
 
-            <p-floatlabel variant="in">
-              <input pInputText [id]="'passingCriteria' + i" class="w-full" [(ngModel)]="stage.passingCriteria" [ngModelOptions]="{ standalone: true }" />
-              <label [for]="'passingCriteria' + i">Passing Criteria (shown to HR on the candidate's stage card)</label>
-            </p-floatlabel>
+            <div>
+              <p-floatlabel variant="in">
+                <input pInputText [id]="'passingCriteria' + i" class="w-full" [(ngModel)]="stage.passingCriteria" [ngModelOptions]="{ standalone: true }" />
+                <label [for]="'passingCriteria' + i">Passing Criteria (shown to HR on the candidate's stage card)</label>
+              </p-floatlabel>
+              <small class="text-neutral">e.g. Candidate scores at least 70% on the technical assessment</small>
+            </div>
 
             <p-floatlabel variant="in" class="sm:col-span-2 lg:col-span-3">
               <textarea pTextarea [id]="'stageDescription' + i" class="w-full" rows="2" [(ngModel)]="stage.description" [ngModelOptions]="{ standalone: true }"></textarea>
@@ -89,15 +92,21 @@
               <small class="text-red-500" *ngIf="marksAreInvalid(stage)">Pass marks must not exceed max marks.</small>
             </div>
 
-            <p-floatlabel variant="in" class="sm:col-span-2 lg:col-span-3">
-              <input pInputText [id]="'requiredDocuments' + i" class="w-full" [(ngModel)]="stage.requiredDocuments" [ngModelOptions]="{ standalone: true }" />
-              <label [for]="'requiredDocuments' + i">Required Documents (shown to HR on the candidate's stage card)</label>
-            </p-floatlabel>
+            <div class="sm:col-span-2 lg:col-span-3">
+              <p-floatlabel variant="in">
+                <input pInputText [id]="'requiredDocuments' + i" class="w-full" [(ngModel)]="stage.requiredDocuments" [ngModelOptions]="{ standalone: true }" />
+                <label [for]="'requiredDocuments' + i">Required Documents (shown to HR on the candidate's stage card)</label>
+              </p-floatlabel>
+              <small class="text-neutral">e.g. NID, Resume, Cover Letter</small>
+            </div>
 
-            <p-floatlabel variant="in" class="sm:col-span-2 lg:col-span-3">
-              <input pInputText [id]="'autoProgressionRule' + i" class="w-full" [(ngModel)]="stage.autoProgressionRule" [ngModelOptions]="{ standalone: true }" />
-              <label [for]="'autoProgressionRule' + i">Auto Progression Rule (note only)</label>
-            </p-floatlabel>
+            <div class="sm:col-span-2 lg:col-span-3">
+              <p-floatlabel variant="in">
+                <input pInputText [id]="'autoProgressionRule' + i" class="w-full" [(ngModel)]="stage.autoProgressionRule" [ngModelOptions]="{ standalone: true }" />
+                <label [for]="'autoProgressionRule' + i">Auto Progression Rule (note only)</label>
+              </p-floatlabel>
+              <small class="text-neutral">Free-text note for other HR staff, e.g. Auto-advance if score &ge; 70 - not enforced by the system</small>
+            </div>
 
             <div>
               <p-floatlabel variant="in">

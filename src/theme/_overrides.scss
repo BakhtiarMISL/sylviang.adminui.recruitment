@@ -103,6 +103,19 @@
   padding-top: 1.5rem !important;
 }
 
+// Same missing token, on p-select's inner label span - the floated label sits on top of the
+// selected value / placeholder text instead of above it. p-select's box-sizing:border-box and
+// fixed height mean padding-top alone just squeezes the line, so the box also needs to grow.
+.p-floatlabel-in .p-select {
+  height: auto !important;
+  min-height: 4.75rem !important;
+}
+.p-floatlabel-in .p-select-label {
+  height: auto !important;
+  padding-top: 3.4rem !important;
+  padding-bottom: 0.75rem !important;
+}
+
 // --------------------------------------------Input Number Css Override--------------------------------------------
 .p-inputnumber .p-inputnumber-input {
   @apply w-full !important;
@@ -162,6 +175,15 @@
   }
   .p-datatable-tbody > tr > td {
     @apply p-[0.5rem_1rem] border-b text-sm border-b-borderLight dark:border-b-borderDark truncate text-black dark:text-white max-w-[150px] whitespace-nowrap overflow-hidden text-ellipsis hover:whitespace-normal hover:overflow-visible !important;
+  }
+
+  // Action cells (buttons/icons) are never meant to truncate like text content - the 150px
+  // ellipsis cap above was clipping any button whose label runs longer than that (e.g. "Review
+  // Pre-Boarding"), invisible until now only because most action-cell buttons happened to be
+  // shorter. :has(.p-button) targets exactly the cells that hold action buttons.
+  .p-datatable-tbody > tr > td:has(.p-button) {
+    @apply max-w-none whitespace-normal overflow-visible !important;
+    text-overflow: clip !important;
   }
   .p-datatable-thead > tr > th.p-datatable-column-sorted {
     @apply bg-transparent text-black dark:text-white !important;

@@ -22,10 +22,11 @@
 
         <div>
           <p-floatlabel variant="in">
-            <input pInputText id="code" class="w-full" formControlName="code" placeholder="e.g. ADMIT_CARD_ISSUED_EMAIL" />
+            <input pInputText id="code" class="w-full" formControlName="code" />
             <label for="code">Code</label>
           </p-floatlabel>
           <small class="text-red-500" *ngIf="hasError('code')">Code is required.</small>
+          <small class="text-neutral" *ngIf="!hasError('code')">e.g. ADMIT_CARD_ISSUED_EMAIL</small>
         </div>
 
         <div class="sm:col-span-2">

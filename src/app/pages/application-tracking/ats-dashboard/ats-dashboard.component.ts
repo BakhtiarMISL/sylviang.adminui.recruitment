@@ -127,19 +127,6 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   loadingSelectAll = false;
   shortlisting = false;
 
-  // Pipeline progress tracker dialog (US-042 AC5)
-  pipelineDialogVisible = false;
-  pipelineDialogApplicationId: number | null = null;
-
-  // EP-14 US-109 AC4: inline status update/note directly from a tracker row, without navigating away.
-  inlineUpdateDialogVisible = false;
-  inlineUpdateApplication: IJobApplicationListItem | null = null;
-  inlineUpdateToStatus: ApplicationStatusEnum | null = null;
-  inlineUpdateReasonId: number | null = null;
-  inlineUpdateNote = '';
-  inlineUpdateReasonOptions: IApplicationStatusReason[] = [];
-  inlineUpdateSaving = false;
-
   // Apply shortlist filter to vacancy (US-044)
   shortlistFilters: IShortlistFilterLookupResponse[] = [];
   selectedShortlistFilterId: number | null = null;
@@ -551,69 +538,6 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!this.filterJobPostingId) return;
     const title = this.jobPostings.find((p) => p.jobPostingId === this.filterJobPostingId)?.title;
     this.router.navigate(['/applications/duplicates', this.filterJobPostingId], { queryParams: title ? { title } : {} });
-  }
-
-  openPipelineTracker(application: IJobApplicationListItem): void {
-    this.pipelineDialogApplicationId = application.jobApplicationId;
-    this.pipelineDialogVisible = true;
-  }
-
-  // ── Inline status update from a tracker row (EP-14 US-109 AC4) ──
-
-  openInlineUpdate(application: IJobApplicationListItem): void {
-    this.inlineUpdateApplication = application;
-    this.inlineUpdateToStatus = null;
-    this.inlineUpdateReasonId = null;
-    this.inlineUpdateNote = '';
-    this.inlineUpdateReasonOptions = [];
-    this.inlineUpdateDialogVisible = true;
-  }
-
-  onInlineUpdateStatusChange(status: ApplicationStatusEnum | null): void {
-    this.inlineUpdateReasonId = null;
-    this.inlineUpdateReasonOptions = [];
-
-    if (status && StatusesRequiringReason.includes(status)) {
-      this.jobApplicationService.getStatusReasons(status).subscribe({
-        next: (response) => {
-          this.inlineUpdateReasonOptions = response && !response.hasError && response.content ? response.content : [];
-          this.cdr.detectChanges();
-        },
-      });
-    }
-  }
-
-  inlineUpdateRequiresReason(): boolean {
-    return !!this.inlineUpdateToStatus && StatusesRequiringReason.includes(this.inlineUpdateToStatus);
-  }
-
-  canConfirmInlineUpdate(): boolean {
-    if (!this.inlineUpdateApplication || !this.inlineUpdateToStatus) return false;
-    return !this.inlineUpdateRequiresReason() || !!this.inlineUpdateReasonId;
-  }
-
-  confirmInlineUpdate(): void {
-    if (!this.inlineUpdateApplication || !this.inlineUpdateToStatus) return;
-
-    this.inlineUpdateSaving = true;
-    this.jobApplicationService
-      .updateStatus(this.inlineUpdateApplication.jobApplicationId, {
-        toStatus: this.inlineUpdateToStatus,
-        reasonId: this.inlineUpdateReasonId ?? undefined,
-        note: this.inlineUpdateNote || undefined,
-      })
-      .subscribe({
-        next: () => {
-          this.inlineUpdateSaving = false;
-          this.inlineUpdateDialogVisible = false;
-          this.toast.success({ detail: 'Application updated.' });
-          this.loadApplications();
-        },
-        error: (error) => {
-          this.inlineUpdateSaving = false;
-          this.toast.error({ detail: error?.error?.decentMessage || 'Failed to update application.' });
-        },
-      });
   }
 
   openAutoShortlistDialog(): void {

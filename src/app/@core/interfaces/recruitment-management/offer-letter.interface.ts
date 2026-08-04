@@ -31,3 +31,9 @@ export interface IOfferLetterResponse {
 export interface IOfferLetterDeclineRequest {
   reason: string;
 }
+
+export interface ICandidateHireConflictResponse {
+  jobApplicationId: number;
+  jobPostingTitle: string;
+  applicationStatus: string;
+}

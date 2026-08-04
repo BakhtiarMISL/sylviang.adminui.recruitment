@@ -272,6 +272,7 @@ export class ContactSectionComponent implements OnInit, OnChanges {
         this.saving = false;
         if (response && !response.hasError) {
           this.saveSuccess = true;
+          this.form.markAsPristine();
           this.saved.emit();
         } else {
           this.saveError = response?.decentMessage || 'Failed to save contact info.';

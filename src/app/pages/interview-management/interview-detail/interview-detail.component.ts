@@ -5,6 +5,7 @@ import { IInterviewResponse } from '@app/@core/interfaces/recruitment-management
 import { BreadcrumbService } from '@app/@core/services';
 import { InterviewService } from '@app/@core/services/recruitment/interview/interview.service';
 import { ToastService } from '@app/@core/services/misc/toast.service';
+import { DateTimeUtility } from '@app/@core/utils/date-time.utility';
 import { ConfirmationService } from 'primeng/api';
 
 @Component({
@@ -91,6 +92,10 @@ export class InterviewDetailComponent implements OnInit {
     return this.interview?.status === InterviewStatusEnum.Cancelled;
   }
 
+  get isCompleted(): boolean {
+    return this.interview?.status === InterviewStatusEnum.Completed;
+  }
+
   // ── Reschedule ─────────────────────────────────────────────────
 
   openRescheduleDialog(): void {
@@ -118,8 +123,8 @@ export class InterviewDetailComponent implements OnInit {
     this.rescheduleSaving = true;
     this.interviewService
       .reschedule(this.interviewId, {
-        scheduledStartAt: newStart.toISOString(),
-        scheduledEndAt: newEnd.toISOString(),
+        scheduledStartAt: DateTimeUtility.toLocalDateTimeString(newStart),
+        scheduledEndAt: DateTimeUtility.toLocalDateTimeString(newEnd),
       })
       .subscribe({
         next: (response) => {
@@ -182,6 +187,24 @@ export class InterviewDetailComponent implements OnInit {
   openMarkResultDialog(): void {
     this.markResultValue = null;
     this.markResultDialogVisible = true;
+  }
+
+  openChangeResultDialog(event: Event): void {
+    if (!this.interview) return;
+
+    this.confirmationService.confirm({
+      target: event.target as EventTarget,
+      message: `This interview already has a recorded result (${this.interview.result}). Changing it will overwrite that result and re-check the linked pipeline stage. Continue?`,
+      header: 'Change Interview Result',
+      acceptButtonStyleClass: 'p-button-warning',
+      rejectButtonStyleClass: 'p-button-secondary',
+      acceptIcon: 'fa fa-check',
+      rejectIcon: 'fa fa-times',
+      accept: () => {
+        this.markResultValue = this.interview?.result !== InterviewResultEnum.Pending ? this.interview!.result : null;
+        this.markResultDialogVisible = true;
+      },
+    });
   }
 
   closeMarkResultDialog(): void {

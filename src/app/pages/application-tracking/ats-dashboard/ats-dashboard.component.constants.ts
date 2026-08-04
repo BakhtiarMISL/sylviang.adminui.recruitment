@@ -8,5 +8,8 @@ export const AtsDashboardColumns = [
   { field: 'currentStageName', label: 'Stage', width: '12rem', sortable: true },
   { field: 'lastUpdatedAt', label: 'Last Updated', width: '10rem', sortable: true },
   { field: 'daysInCurrentStage', label: 'Days in Stage', width: '8rem', sortable: true },
-  { field: 'assignedHrUserName', label: 'Assigned HR', width: '10rem', sortable: true },
+  // Despite the field name, this is whoever/whatever last touched the current stage - not a real
+  // HR-ownership/assignment feature (no such concept exists in the data model). Labeled honestly
+  // so "system:offer-accepted"/"system:exam-score" reads as what it is, not a fake assignee.
+  { field: 'assignedHrUserName', label: 'Last Updated By', width: '10rem', sortable: true },
 ];

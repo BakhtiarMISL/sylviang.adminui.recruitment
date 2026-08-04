@@ -25,7 +25,7 @@
         <th>Batch</th>
         <th>Pre-Boarding</th>
         <th>Joined</th>
-        <th style="width: 14rem">Actions</th>
+        <th>Actions</th>
       </tr>
     </ng-template>
     <ng-template pTemplate="body" let-item>
@@ -36,12 +36,20 @@
         <td>{{ item.batchLabel || '-' }}</td>
         <td>{{ item.preBoardingStatus || 'Not started' }}</td>
         <td>{{ item.hasJoined ? 'Yes' : 'No' }}</td>
-        <td class="flex gap-2">
+        <td class="flex flex-wrap gap-2" style="overflow: visible; white-space: normal">
           <button pButton size="small" severity="secondary" (click)="openEditDialog(item)">
             <i class="fa fa-edit"></i>
             <span>Batch</span>
           </button>
-          <button pButton size="small" *ngIf="!item.hasJoined" (click)="markJoined(item)">
+          <button
+            pButton
+            size="small"
+            *ngIf="!item.hasJoined"
+            [disabled]="item.preBoardingStatus !== 'Approved'"
+            [pTooltip]="item.preBoardingStatus !== 'Approved' ? 'Pre-Boarding must be reviewed and Approved first' : ''"
+            tooltipPosition="top"
+            (click)="markJoined(item)"
+          >
             <i class="fa fa-check"></i>
             <span>Mark Joined</span>
           </button>
@@ -63,15 +71,21 @@
 
 <p-dialog header="Update Batch" [(visible)]="editDialogVisible" [modal]="true" [style]="{ width: '28rem' }">
   <div class="form-container">
-    <p-floatlabel variant="in" class="sm:col-span-2">
-      <input type="text" pInputText id="batchLabel" class="w-full" [(ngModel)]="editBatchLabel" name="batchLabel" />
-      <label for="batchLabel">Batch Label</label>
-    </p-floatlabel>
+    <div class="sm:col-span-2">
+      <p-floatlabel variant="in">
+        <input type="text" pInputText id="batchLabel" class="w-full" [(ngModel)]="editBatchLabel" name="batchLabel" />
+        <label for="batchLabel">Batch Label</label>
+      </p-floatlabel>
+      <small class="text-neutral">Groups candidates joining together, e.g. August-2026-Batch-1</small>
+    </div>
 
-    <p-floatlabel variant="in" class="sm:col-span-2">
-      <p-datepicker inputId="joiningDate" class="w-full" [(ngModel)]="editJoiningDate" dateFormat="dd-mm-yy" [appendTo]="'body'"></p-datepicker>
-      <label for="joiningDate">Joining Date</label>
-    </p-floatlabel>
+    <div class="sm:col-span-2">
+      <p-floatlabel variant="in">
+        <p-datepicker inputId="joiningDate" class="w-full" [(ngModel)]="editJoiningDate" dateFormat="dd-mm-yy" [appendTo]="'body'"></p-datepicker>
+        <label for="joiningDate">Joining Date</label>
+      </p-floatlabel>
+      <small class="text-neutral">Defaults to the offer's joining date - adjust if it changed</small>
+    </div>
 
     <div *ngIf="saveError" class="invalid sm:col-span-2">{{ saveError }}</div>
   </div>

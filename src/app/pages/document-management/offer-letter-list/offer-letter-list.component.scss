@@ -1,3 +1,10 @@
 :host {
   display: block;
 }
+
+::ng-deep .p-datatable-tbody > tr > td.actions-cell {
+  max-width: none !important;
+  overflow: visible !important;
+  white-space: nowrap !important;
+  text-overflow: unset !important;
+}

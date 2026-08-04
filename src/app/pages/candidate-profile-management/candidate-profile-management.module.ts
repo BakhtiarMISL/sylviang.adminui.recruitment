@@ -21,6 +21,8 @@ import { CandidateProfileManagementRoutingModule } from './candidate-profile-man
 import { MyProfileComponent } from './my-profile/my-profile.component';
 import { MyOfferLettersComponent } from './my-offer-letters/my-offer-letters.component';
 import { MyOfferLetterDetailComponent } from './my-offer-letter-detail/my-offer-letter-detail.component';
+import { MyAppointmentLettersComponent } from './my-appointment-letters/my-appointment-letters.component';
+import { MyAppointmentLetterDetailComponent } from './my-appointment-letter-detail/my-appointment-letter-detail.component';
 import { PersonalInfoSectionComponent } from './my-profile/sections/personal-info-section/personal-info-section.component';
 import { ContactSectionComponent } from './my-profile/sections/contact-section/contact-section.component';
 import { EducationSectionComponent } from './my-profile/sections/education-section/education-section.component';
@@ -44,6 +46,8 @@ import { PreBoardingFormComponent } from './pre-boarding-form/pre-boarding-form.
     PhotoSignatureUploadComponent,
     MyOfferLettersComponent,
     MyOfferLetterDetailComponent,
+    MyAppointmentLettersComponent,
+    MyAppointmentLetterDetailComponent,
     PreBoardingFormComponent,
   ],
   imports: [
