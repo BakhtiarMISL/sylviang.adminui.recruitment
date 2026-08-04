@@ -9,9 +9,10 @@ import { SharedModule } from '@shared/shared.module';
 import { AuthRoutingModule } from './auth-routing.module';
 import { LoginComponent } from './login/login.component';
 import { OtpVerifyComponent } from './otp-verify/otp-verify.component';
+import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
 
 @NgModule({
-  declarations: [LoginComponent, OtpVerifyComponent],
+  declarations: [LoginComponent, OtpVerifyComponent, ForgotPasswordComponent],
   imports: [CommonModule, ReactiveFormsModule, FormsModule, SharedModule, AuthRoutingModule, ButtonModule, InputTextModule, FloatLabelModule, InputOtpModule],
 })
 export class AuthModule {}

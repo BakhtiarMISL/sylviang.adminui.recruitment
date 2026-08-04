@@ -10,6 +10,9 @@ import { IRegisterResponse } from '@core/interfaces/auth/register-response.inter
 import { IVerifyOtpRequest } from '@core/interfaces/auth/verify-otp-request.interface';
 import { IResendOtpRequest } from '@core/interfaces/auth/resend-otp-request.interface';
 import { IResendOtpResponse } from '@core/interfaces/auth/resend-otp-response.interface';
+import { IForgotPasswordRequest } from '@core/interfaces/auth/forgot-password-request.interface';
+import { IForgotPasswordResponse } from '@core/interfaces/auth/forgot-password-response.interface';
+import { IResetPasswordRequest } from '@core/interfaces/auth/reset-password-request.interface';
 import { UserRoleEnum } from '@core/enums/user-role.enum';
 import { IImpersonationStartResponse } from '@core/interfaces/recruitment-management/impersonation.interface';
 import { BASE_URL_Recruitment } from '@env/environment';
@@ -81,6 +84,14 @@ export class AuthService {
 
   register(request: IRegisterRequest): Observable<ApiResponse<IRegisterResponse>> {
     return this.httpClient.post<ApiResponse<IRegisterResponse>>(`${this.API_URL}/register`, request);
+  }
+
+  forgotPassword(request: IForgotPasswordRequest): Observable<ApiResponse<IForgotPasswordResponse>> {
+    return this.httpClient.post<ApiResponse<IForgotPasswordResponse>>(`${this.API_URL}/forgot-password`, request);
+  }
+
+  resetPassword(request: IResetPasswordRequest): Observable<ApiResponse<null>> {
+    return this.httpClient.post<ApiResponse<null>>(`${this.API_URL}/reset-password`, request);
   }
 
   logout(): void {
