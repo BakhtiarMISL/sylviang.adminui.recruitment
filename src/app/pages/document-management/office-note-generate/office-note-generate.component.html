@@ -1,0 +1,78 @@
+<section class="page-container" *ngIf="form">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="table-container mb-4 p-4">
+      <h3 class="table-title mb-3">Generate Office Note</h3>
+
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div>
+          <p-floatlabel variant="in">
+            <input
+              pInputText
+              id="jobApplicationId"
+              type="number"
+              class="w-full"
+              formControlName="jobApplicationId"
+              [readOnly]="jobApplicationIdLocked"
+            />
+            <label for="jobApplicationId">Job Application ID</label>
+          </p-floatlabel>
+          <small class="text-red-500" *ngIf="hasError('jobApplicationId')">Job Application ID is required.</small>
+          <small class="text-neutral" *ngIf="!hasError('jobApplicationId') && !jobApplicationIdLocked">The numeric ID shown on the ATS Dashboard / application detail page, e.g. 3</small>
+        </div>
+
+        <div>
+          <p-floatlabel variant="in">
+            <p-select
+              inputId="documentTemplateId"
+              class="w-full"
+              [options]="templateOptions"
+              formControlName="documentTemplateId"
+              optionLabel="label"
+              optionValue="value"
+              [appendTo]="'body'"
+              placeholder="Select an Office Note template"
+            ></p-select>
+            <label for="documentTemplateId">Office Note Template</label>
+          </p-floatlabel>
+          <small class="text-red-500" *ngIf="hasError('documentTemplateId')">Template is required.</small>
+          <small class="text-neutral" *ngIf="templateOptions.length === 0">
+            No active Office Note templates found. <a [routerLink]="['/document-management/manage-document-template']">Create one first</a>.
+          </small>
+        </div>
+
+        <div class="sm:col-span-2">
+          <p-floatlabel variant="in">
+            <textarea pTextarea id="remarks" class="w-full" rows="3" formControlName="remarks"></textarea>
+            <label for="remarks">Remarks (optional)</label>
+          </p-floatlabel>
+        </div>
+      </div>
+
+      <div class="mt-4" *ngIf="jobApplicationIdLocked">
+        <h4 class="font-medium mb-2">Enclosures</h4>
+        <ul class="space-y-1">
+          <li *ngFor="let enclosure of enclosures">
+            <i class="fa" [ngClass]="enclosure.exists ? 'fa-check text-green-600' : 'fa-xmark text-red-400'"></i>
+            {{ enclosure.documentType }}
+            <span *ngIf="enclosure.exists" class="text-neutral"> - generated {{ enclosure.generatedAt | date: 'dd-MMM-yyyy' }}</span>
+          </li>
+        </ul>
+        <small class="text-red-500" *ngIf="!loadingEnclosures && !hasAnyEnclosure">
+          No enclosures exist yet for this job application - generate at least an offer letter first.
+        </small>
+      </div>
+
+      <small class="mt-3 block text-red-500" *ngIf="errorMessage">{{ errorMessage }}</small>
+
+      <div class="mt-4 flex gap-2">
+        <button pButton type="submit" [disabled]="submitting">
+          <i class="fa fa-file-pen"></i>
+          <span>Generate Office Note</span>
+        </button>
+        <button pButton type="button" severity="secondary" [routerLink]="['/document-management/office-note-list']">
+          <span>Cancel</span>
+        </button>
+      </div>
+    </div>
+  </form>
+</section>

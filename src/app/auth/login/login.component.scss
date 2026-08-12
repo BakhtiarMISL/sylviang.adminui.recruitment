@@ -2,7 +2,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
+  min-height: calc(100vh - 4.5rem);
   padding: 1.5rem;
 }
 
@@ -40,4 +40,10 @@
 
 .login-error {
   color: var(--p-red-500, #e24c4c);
+}
+
+.forgot-password-link {
+  align-self: flex-end;
+  font-size: 0.85rem;
+  cursor: pointer;
 }

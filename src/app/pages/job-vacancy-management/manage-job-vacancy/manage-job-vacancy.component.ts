@@ -1,14 +1,16 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AutoCompleteCompleteEvent } from 'primeng/autocomplete';
 import { IJobVacancyAttachmentResponse } from '@app/@core/interfaces/recruitment-management/job-vacancy-attachment.interface';
 import { IJobVacancyCreateRequest, IJobVacancyResponse, IJobVacancyUpdateRequest } from '@app/@core/interfaces/recruitment-management/job-vacancy.interface';
 import { IHiringPipelineLookupResponse } from '@app/@core/interfaces/recruitment-management/hiring-pipeline.interface';
+import { IMasterDataItem } from '@app/@core/interfaces/recruitment-management/master-data.interface';
 import { BreadcrumbService } from '@app/@core/services';
 import { JobVacancyAttachmentService } from '@app/@core/services/recruitment/job-vacancy/job-vacancy-attachment.service';
 import { JobVacancyService } from '@app/@core/services/recruitment/job-vacancy/job-vacancy.service';
 import { HiringPipelineService } from '@app/@core/services/recruitment/hiring-pipeline/hiring-pipeline.service';
+import { MasterDataService } from '@app/@core/services/recruitment/master-data/master-data.service';
 import { JobStatusEnum } from '@app/@core/enums/recruitment.enum';
 import { DateTimeUtility } from '@app/@core/utils/date-time.utility';
 import { Base_URL } from '@env/environment';
@@ -26,6 +28,7 @@ export class ManageJobVacancyComponent implements OnInit {
     private jobVacancyService: JobVacancyService,
     private jobVacancyAttachmentService: JobVacancyAttachmentService,
     private hiringPipelineService: HiringPipelineService,
+    private masterDataService: MasterDataService,
     private route: ActivatedRoute,
     private breadcrumbService: BreadcrumbService,
     private router: Router,
@@ -44,8 +47,10 @@ export class ManageJobVacancyComponent implements OnInit {
   currencyOptions = CurrencyOptions;
   currencySuggestions: string[] = [];
   hiringPipelineOptions: IHiringPipelineLookupResponse[] = [];
+  departmentOptions: IMasterDataItem[] = [];
 
   // Attachments
+  @ViewChild('attachmentFileInput') attachmentFileInput!: ElementRef<HTMLInputElement>;
   attachments: IJobVacancyAttachmentResponse[] = [];
   loadingAttachments = false;
   uploadingAttachment = false;
@@ -66,6 +71,7 @@ export class ManageJobVacancyComponent implements OnInit {
   ngOnInit(): void {
     this.initForm();
     this.loadHiringPipelineOptions();
+    this.loadDepartmentOptions();
 
     this.route.paramMap.subscribe((params) => {
       const idParam = params.get('id');
@@ -90,6 +96,17 @@ export class ManageJobVacancyComponent implements OnInit {
       },
       error: () => {
         this.hiringPipelineOptions = [];
+      },
+    });
+  }
+
+  private loadDepartmentOptions(): void {
+    this.masterDataService.getAll('department').subscribe({
+      next: (response) => {
+        this.departmentOptions = !response.hasError && response.content ? response.content : [];
+      },
+      error: () => {
+        this.departmentOptions = [];
       },
     });
   }
@@ -139,10 +156,8 @@ export class ManageJobVacancyComponent implements OnInit {
 
   private initForm(): void {
     this.jobVacancyForm = this.fb.group({
-      siteId: [null, [Validators.required]],
-      departmentId: [null],
-      designationId: [null],
       hiringPipelineId: [null, [Validators.required]],
+      departmentId: [null],
       title: [null, [Validators.required, Validators.maxLength(200), this.noWhitespaceOnly.bind(this)]],
       description: [null],
       requirements: [null],
@@ -152,10 +167,11 @@ export class ManageJobVacancyComponent implements OnInit {
       circularType: ['Both', Validators.required],
       minSalary: [null, [Validators.min(0)]],
       maxSalary: [null, [Validators.min(0)]],
+      salaryCurrency: [null, [Validators.maxLength(10)]],
       postingDate: [null],
       closingDate: [null],
-      minAge: [null, [Validators.min(0)]],
-      maxAge: [null, [Validators.min(0)]],
+      minAge: [null, [Validators.min(18), Validators.max(80)]],
+      maxAge: [null, [Validators.min(18), Validators.max(80)]],
       minEducationLevel: [null],
       minExperienceYears: [null, [Validators.min(0)]],
       requiredDistrict: [null, [Validators.maxLength(100)]],
@@ -164,7 +180,13 @@ export class ManageJobVacancyComponent implements OnInit {
       status: [{ value: null, disabled: true }],
     });
 
-    this.jobVacancyForm.addValidators([this.dateRangeValidator.bind(this), this.ageRangeValidator.bind(this), this.salaryRangeValidator.bind(this), this.feeCurrencyRequiredValidator.bind(this)]);
+    this.jobVacancyForm.addValidators([
+      this.dateRangeValidator.bind(this),
+      this.ageRangeValidator.bind(this),
+      this.salaryRangeValidator.bind(this),
+      this.salaryCurrencyRequiredValidator.bind(this),
+      this.feeCurrencyRequiredValidator.bind(this),
+    ]);
   }
 
   private noWhitespaceOnly(control: AbstractControl): ValidationErrors | null {
@@ -205,6 +227,19 @@ export class ManageJobVacancyComponent implements OnInit {
 
     if (minSalary !== null && minSalary !== undefined && maxSalary !== null && maxSalary !== undefined && +minSalary > +maxSalary) {
       return { salaryRangeInvalid: true };
+    }
+    return null;
+  }
+
+  private salaryCurrencyRequiredValidator(control: AbstractControl): ValidationErrors | null {
+    const form = control as FormGroup;
+    const minSalary = form.get('minSalary')?.value;
+    const maxSalary = form.get('maxSalary')?.value;
+    const salaryCurrency = form.get('salaryCurrency')?.value;
+
+    const hasSalary = (minSalary !== null && minSalary !== undefined && minSalary !== '') || (maxSalary !== null && maxSalary !== undefined && maxSalary !== '');
+    if (hasSalary && !salaryCurrency) {
+      return { salaryCurrencyRequired: true };
     }
     return null;
   }
@@ -262,6 +297,9 @@ export class ManageJobVacancyComponent implements OnInit {
     if (this.jobVacancyForm.errors?.['salaryRangeInvalid']) {
       return 'Minimum salary must be less than or equal to maximum salary';
     }
+    if (this.jobVacancyForm.errors?.['salaryCurrencyRequired']) {
+      return 'Salary currency is required when a minimum or maximum salary is set';
+    }
     if (this.jobVacancyForm.errors?.['applicationFeeCurrencyRequired']) {
       return 'Application fee currency is required when an application fee amount is set';
     }
@@ -274,19 +312,18 @@ export class ManageJobVacancyComponent implements OnInit {
 
   private getFieldDisplayName(fieldName: string): string {
     const displayNames: { [key: string]: string } = {
-      siteId: 'Site',
-      departmentId: 'Department',
-      designationId: 'Designation',
       hiringPipelineId: 'Hiring Pipeline',
       title: 'Title',
       description: 'Description',
       requirements: 'Requirements',
       numberOfPositions: 'Number of Positions',
       employmentType: 'Employment Type',
+      departmentId: 'Department',
       location: 'Location',
       circularType: 'Circular Type',
       minSalary: 'Minimum Salary',
       maxSalary: 'Maximum Salary',
+      salaryCurrency: 'Salary Currency',
       postingDate: 'Posting Date',
       closingDate: 'Closing Date',
       minAge: 'Minimum Age',
@@ -398,6 +435,7 @@ export class ManageJobVacancyComponent implements OnInit {
         this.uploadingAttachment = false;
         if (response && !response.hasError) {
           this.selectedFile = null;
+          if (this.attachmentFileInput) this.attachmentFileInput.nativeElement.value = '';
           this.loadAttachments(this.jobPostingId!);
         } else {
           this.attachmentError = response?.decentMessage || 'Failed to upload attachment';

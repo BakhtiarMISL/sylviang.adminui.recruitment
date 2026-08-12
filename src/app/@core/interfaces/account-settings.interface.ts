@@ -4,8 +4,18 @@ export interface IAccountSettingsResponse {
   role: string;
 }
 
-export interface IAccountEmailUpdateRequest {
-  email: string;
+export interface IAccountEmailChangeRequest {
+  newEmail: string;
+}
+
+export interface IAccountEmailChangeChallengeResponse {
+  challengeId: string;
+  expiresAtUtc: string;
+}
+
+export interface IAccountEmailChangeConfirmRequest {
+  challengeId: string;
+  otpCode: string;
 }
 
 export interface IAccountPasswordChangeRequest {

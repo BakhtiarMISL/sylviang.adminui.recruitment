@@ -21,13 +21,18 @@ export class InternalJobBoardService {
     return this.httpClient.get<ApiResponse<IPublicJobPostingResponse>>(`${this.API_URL}/job-postings/${id}`);
   }
 
-  apply(jobPostingId: number, request: IJobApplicationSubmitRequest, resume: File) {
+  // waiverProofDocument backs a claimed specialCategoryId (e.g. Freedom Fighter) - without it the
+  // backend records the category but never waives the fee (JobApplicationService.SubmitAsync).
+  apply(jobPostingId: number, request: IJobApplicationSubmitRequest, resume: File, waiverProofDocument: File | null = null) {
     const formData = new FormData();
     formData.append('candidateName', request.candidateName);
     formData.append('candidateEmail', request.candidateEmail);
     if (request.candidatePhone) formData.append('candidatePhone', request.candidatePhone);
     if (request.coverLetter) formData.append('coverLetter', request.coverLetter);
+    if (request.specialCategoryId) formData.append('specialCategoryId', String(request.specialCategoryId));
+    if (request.referralSourceId) formData.append('referralSourceId', String(request.referralSourceId));
     formData.append('resume', resume, resume.name);
+    if (waiverProofDocument) formData.append('waiverProofDocument', waiverProofDocument, waiverProofDocument.name);
     return this.httpClient.post<ApiResponse<IJobApplicationSubmitResponse>>(`${this.API_URL}/job-postings/${jobPostingId}/apply`, formData);
   }
 }

@@ -1,0 +1,31 @@
+<svg width="450" height="338" viewBox="0 0 450 338" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="rmsBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0f1e3d"/>
+      <stop offset="1" stop-color="#132a52"/>
+    </linearGradient>
+    <linearGradient id="rmsIcon" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0ea5e9"/>
+      <stop offset="1" stop-color="#0284c7"/>
+    </linearGradient>
+  </defs>
+  <rect width="450" height="338" rx="14" fill="url(#rmsBg)"/>
+  <rect x="4" y="4" width="442" height="330" rx="10" fill="none" stroke="#1e3a5f" stroke-width="1.5"/>
+
+  <circle cx="225" cy="120" r="52" fill="none" stroke="url(#rmsIcon)" stroke-width="4"/>
+  <path d="M263 92 A56 56 0 0 1 273 118" stroke="url(#rmsIcon)" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <path d="M263 92 L275 88 L271 101 Z" fill="#0ea5e9"/>
+
+  <circle cx="225" cy="105" r="12" fill="#ffffff"/>
+  <path d="M204 148 Q225 128 246 148 L246 160 L204 160 Z" fill="#ffffff"/>
+  <circle cx="200" cy="112" r="9" fill="#7dd3fc"/>
+  <path d="M184 148 Q200 133 216 148 L216 156 L184 156 Z" fill="#7dd3fc"/>
+  <circle cx="250" cy="112" r="9" fill="#7dd3fc"/>
+  <path d="M234 148 Q250 133 266 148 L266 156 L234 156 Z" fill="#7dd3fc"/>
+
+  <text x="225" y="222" font-family="Segoe UI, Arial, sans-serif" font-size="34" font-weight="700" fill="#ffffff" text-anchor="middle">Recruitment</text>
+  <text x="225" y="246" font-family="Segoe UI, Arial, sans-serif" font-size="13" letter-spacing="3" fill="#7dd3fc" text-anchor="middle">MANAGEMENT SYSTEM</text>
+  <line x1="185" y1="256" x2="265" y2="256" stroke="#1e3a5f" stroke-width="1"/>
+  <text x="225" y="278" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#bae6fd" text-anchor="middle">Streamline Hiring. Find Talent. Build the Future.</text>
+
+</svg>

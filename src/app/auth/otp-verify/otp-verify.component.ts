@@ -1,0 +1,176 @@
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { AuthService } from '@core/services/auth/auth.service';
+import { ToastService } from '@core/services/misc/toast.service';
+
+const RESEND_COOLDOWN_SECONDS = 30;
+
+@Component({
+  selector: 'app-otp-verify',
+  templateUrl: './otp-verify.component.html',
+  styleUrls: ['./otp-verify.component.scss'],
+  standalone: false,
+})
+export class OtpVerifyComponent implements OnInit, OnDestroy {
+  form: FormGroup;
+  isSubmitting = false;
+  isResending = false;
+  resendCooldown = 0;
+  /** Seconds left before the current code expires, for the countdown display. */
+  secondsRemaining = 0;
+  isExpired = false;
+
+  private challengeId = '';
+  private returnUrl = '/dashboard';
+  private otpExpiresAt: number | null = null;
+  private cooldownTimer: ReturnType<typeof setInterval> | null = null;
+  private expiryTimer: ReturnType<typeof setInterval> | null = null;
+
+  constructor(
+    private fb: FormBuilder,
+    private authService: AuthService,
+    private toastService: ToastService,
+    private router: Router,
+    private route: ActivatedRoute,
+  ) {
+    this.form = this.fb.group({
+      code: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]],
+    });
+  }
+
+  ngOnInit(): void {
+    this.challengeId = this.route.snapshot.queryParamMap.get('challengeId') || '';
+    this.returnUrl = this.sanitizeReturnUrl(this.route.snapshot.queryParamMap.get('returnUrl'));
+
+    if (!this.challengeId) {
+      this.router.navigateByUrl('/login');
+      return;
+    }
+
+    const expiresAt = this.route.snapshot.queryParamMap.get('expiresAt');
+    if (expiresAt) {
+      this.startExpiryCountdown(expiresAt);
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.clearCooldown();
+    this.clearExpiryTimer();
+  }
+
+  // Same hardening as LoginComponent - returnUrl is attacker-controllable via the query string.
+  private sanitizeReturnUrl(returnUrl: string | null): string {
+    if (returnUrl && returnUrl.startsWith('/') && !returnUrl.startsWith('//')) {
+      return returnUrl;
+    }
+    return '/dashboard';
+  }
+
+  get code() {
+    return this.form.get('code');
+  }
+
+  get formattedTimeRemaining(): string {
+    const minutes = Math.floor(this.secondsRemaining / 60);
+    const seconds = this.secondsRemaining % 60;
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  }
+
+  onSubmit(): void {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    if (this.isExpired) {
+      this.toastService.error({ detail: 'This code has expired. Request a new one.' });
+      return;
+    }
+
+    this.isSubmitting = true;
+
+    this.authService.verifyOtp({ challengeId: this.challengeId, code: this.form.value.code }).subscribe({
+      next: () => {
+        this.isSubmitting = false;
+        this.router.navigateByUrl(this.returnUrl);
+      },
+      error: (error) => {
+        this.isSubmitting = false;
+        const message = error?.error?.decentMessage || 'Incorrect or expired code.';
+        this.toastService.error({ detail: message });
+
+        // Locked/expired sessions can't be retried in place - send the candidate back to log in
+        // again rather than leaving them stuck on a dead code-entry screen.
+        if (error?.status === 401) {
+          this.form.reset();
+        }
+      },
+    });
+  }
+
+  onResend(): void {
+    if (this.isResending || this.resendCooldown > 0) return;
+
+    this.isResending = true;
+    this.authService.resendOtp({ challengeId: this.challengeId }).subscribe({
+      next: (response) => {
+        this.isResending = false;
+        this.toastService.success({ detail: 'A new code has been sent.' });
+        this.startCooldown();
+        if (response.content?.expiresAtUtc) {
+          this.startExpiryCountdown(response.content.expiresAtUtc);
+        }
+      },
+      error: (error) => {
+        this.isResending = false;
+        const message = error?.error?.decentMessage || 'This login session has expired. Please log in again.';
+        this.toastService.error({ detail: message });
+        this.router.navigateByUrl('/login');
+      },
+    });
+  }
+
+  private startCooldown(): void {
+    this.resendCooldown = RESEND_COOLDOWN_SECONDS;
+    this.clearCooldown();
+    this.cooldownTimer = setInterval(() => {
+      this.resendCooldown -= 1;
+      if (this.resendCooldown <= 0) {
+        this.clearCooldown();
+      }
+    }, 1000);
+  }
+
+  private clearCooldown(): void {
+    if (this.cooldownTimer) {
+      clearInterval(this.cooldownTimer);
+      this.cooldownTimer = null;
+    }
+  }
+
+  private startExpiryCountdown(expiresAtUtc: string): void {
+    this.otpExpiresAt = new Date(expiresAtUtc).getTime();
+    this.isExpired = false;
+    this.clearExpiryTimer();
+    this.tickExpiryCountdown();
+    this.expiryTimer = setInterval(() => this.tickExpiryCountdown(), 1000);
+  }
+
+  private tickExpiryCountdown(): void {
+    if (this.otpExpiresAt === null) return;
+
+    this.secondsRemaining = Math.max(0, Math.round((this.otpExpiresAt - Date.now()) / 1000));
+    if (this.secondsRemaining === 0) {
+      this.isExpired = true;
+      this.clearExpiryTimer();
+    }
+  }
+
+  private clearExpiryTimer(): void {
+    if (this.expiryTimer) {
+      clearInterval(this.expiryTimer);
+      this.expiryTimer = null;
+    }
+  }
+}

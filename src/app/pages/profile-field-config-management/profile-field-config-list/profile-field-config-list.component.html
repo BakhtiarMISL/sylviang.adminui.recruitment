@@ -1,0 +1,71 @@
+<section class="page-container" *ngIf="form">
+  <h3 class="table-title mb-3">Candidate Profile Field Config</h3>
+  <p class="mb-4 text-sm text-gray-500">
+    Name, Email, and CV are always mandatory and cannot be configured here. Leave "Job Posting" blank for a global default; a posting-specific row overrides the global default for that one posting's apply form.
+  </p>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="table-container mb-4 p-4">
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <p-floatlabel variant="in">
+        <p-select inputId="field" class="w-full" [options]="fieldOptions" formControlName="field"></p-select>
+        <label for="field">Field</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="in">
+        <p-inputnumber inputId="jobPostingId" class="w-full" formControlName="jobPostingId" [useGrouping]="false"></p-inputnumber>
+        <label for="jobPostingId">Job Posting ID (optional)</label>
+      </p-floatlabel>
+      <small class="text-neutral">The numeric ID from the Job Vacancy list, e.g. 3</small>
+
+      <p-floatlabel variant="in">
+        <p-select inputId="visibility" class="w-full" [options]="visibilityOptions" formControlName="visibility"></p-select>
+        <label for="visibility">Visibility</label>
+      </p-floatlabel>
+    </div>
+
+    <small class="mt-3 block text-red-500" *ngIf="errorMessage">{{ errorMessage }}</small>
+
+    <div class="mt-4">
+      <button pButton type="submit">
+        <i class="fa fa-plus"></i>
+        <span>Add Config</span>
+      </button>
+    </div>
+  </form>
+
+  <div *ngIf="loading" class="space-y-3">
+    <p-skeleton height="3rem" *ngFor="let i of [1, 2, 3]"></p-skeleton>
+  </div>
+
+  <div *ngIf="!loading && configs.length === 0" class="table-container">
+    <div class="not-found">
+      <i class="fa fa-magnifying-glass-minus"></i>
+      <p>No field configs yet - every field defaults to Optional.</p>
+    </div>
+  </div>
+
+  <p-table *ngIf="!loading && configs.length > 0" [value]="configs" styleClass="p-datatable-sm">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Field</th>
+        <th>Scope</th>
+        <th>Visibility</th>
+        <th style="width: 8rem">Actions</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-config>
+      <tr>
+        <td>{{ config.field }}</td>
+        <td>{{ config.jobPostingId ? 'Posting #' + config.jobPostingId : 'Global' }}</td>
+        <td>{{ config.visibility }}</td>
+        <td>
+          <button pButton size="small" severity="danger" (click)="deleteConfig(config, $event)">
+            <i class="fa fa-trash"></i>
+          </button>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+
+  <p-confirmDialog></p-confirmDialog>
+</section>

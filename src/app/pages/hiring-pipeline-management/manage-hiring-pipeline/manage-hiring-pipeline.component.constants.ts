@@ -10,6 +10,10 @@ export const SuggestedStageTypes: string[] = [
   'OnlineTest',
   'CodingTest',
   'TechnicalAssessment',
+  'WrittenTest',
+  'AptitudeTest',
+  'PsychometricTest',
+  'PracticalAssessment',
   'Assignment',
   'PortfolioReview',
   'CaseStudy',
@@ -30,6 +34,7 @@ export const SuggestedStageTypes: string[] = [
   'Joining',
   'Onboarding',
   'Rejected',
+  'Custom / General',
 ];
 
 export function newStage(displayOrder: number): IPipelineStage {
@@ -38,10 +43,6 @@ export function newStage(displayOrder: number): IPipelineStage {
     stageType: '',
     displayOrder,
     isMandatory: true,
-    notifyCandidateOnEnter: true,
-    notifyInterviewersOnAssign: true,
-    allowCandidateReschedule: false,
     manualApprovalRequired: false,
-    interviewerEmployeeIds: [],
   };
 }

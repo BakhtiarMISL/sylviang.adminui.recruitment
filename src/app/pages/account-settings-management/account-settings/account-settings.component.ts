@@ -24,6 +24,10 @@ export class AccountSettingsComponent implements OnInit {
       email: [null, [Validators.required, Validators.email, Validators.maxLength(200)]],
     });
 
+    this.otpForm = this.fb.group({
+      otpCode: [null, [Validators.required]],
+    });
+
     this.passwordForm = this.fb.group({
       currentPassword: [null, [Validators.required]],
       newPassword: [null, [Validators.required, Validators.minLength(8)]],
@@ -46,6 +50,16 @@ export class AccountSettingsComponent implements OnInit {
   savingEmail = false;
   emailSaveError = '';
   emailSaveSuccess = false;
+
+  // Two-step email change: request sends an OTP to the NEW address, confirm applies it.
+  otpForm: FormGroup;
+  otpFormSubmitted = false;
+  awaitingOtp = false;
+  pendingEmail = '';
+  challengeId = '';
+  otpExpiresAtUtc: string | null = null;
+  confirmingOtp = false;
+  otpError = '';
 
   passwordForm: FormGroup;
   passwordFormSubmitted = false;
@@ -119,21 +133,78 @@ export class AccountSettingsComponent implements OnInit {
       return;
     }
 
+    const newEmail = this.emailForm.getRawValue().email;
     this.savingEmail = true;
-    this.accountSettingsService.updateEmail(this.emailForm.getRawValue()).subscribe({
+    this.accountSettingsService.requestEmailChange({ newEmail }).subscribe({
       next: (response) => {
         this.savingEmail = false;
-        if (response && !response.hasError) {
-          this.emailSaveSuccess = true;
+        if (response && !response.hasError && response.content) {
+          this.pendingEmail = newEmail;
+          this.challengeId = response.content.challengeId;
+          this.otpExpiresAtUtc = response.content.expiresAtUtc;
+          this.awaitingOtp = true;
+          this.otpForm.reset();
+          this.otpFormSubmitted = false;
+          this.otpError = '';
         } else {
-          this.emailSaveError = response?.decentMessage || 'Failed to update email.';
+          this.emailSaveError = response?.decentMessage || 'Failed to start email change.';
         }
       },
       error: (error) => {
         this.savingEmail = false;
-        this.emailSaveError = error?.error?.decentMessage || 'Failed to update email.';
+        this.emailSaveError = error?.error?.decentMessage || 'Failed to start email change.';
       },
     });
+  }
+
+  get of() {
+    return this.otpForm.controls;
+  }
+
+  hasOtpError(): boolean {
+    const field = this.otpForm.get('otpCode');
+    return !!(field && field.invalid && (field.dirty || field.touched || this.otpFormSubmitted));
+  }
+
+  confirmEmailChange(): void {
+    this.otpFormSubmitted = true;
+    this.otpError = '';
+
+    if (this.otpForm.invalid) {
+      this.otpForm.markAllAsTouched();
+      return;
+    }
+
+    this.confirmingOtp = true;
+    this.accountSettingsService.confirmEmailChange({ challengeId: this.challengeId, otpCode: this.otpForm.getRawValue().otpCode }).subscribe({
+      next: (response) => {
+        this.confirmingOtp = false;
+        if (response && !response.hasError) {
+          this.emailSaveSuccess = true;
+          this.awaitingOtp = false;
+          this.pendingEmail = '';
+          this.loadAccount();
+        } else {
+          this.otpError = response?.decentMessage || 'Incorrect or expired code.';
+        }
+      },
+      error: (error) => {
+        this.confirmingOtp = false;
+        this.otpError = error?.error?.decentMessage || 'Incorrect or expired code.';
+      },
+    });
+  }
+
+  cancelEmailChange(): void {
+    this.awaitingOtp = false;
+    this.pendingEmail = '';
+    this.challengeId = '';
+    this.otpForm.reset();
+    this.otpFormSubmitted = false;
+    this.otpError = '';
+    if (this.account) {
+      this.emailForm.patchValue({ email: this.account.email });
+    }
   }
 
   hasPasswordError(fieldName: string): boolean {

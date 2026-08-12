@@ -18,3 +18,8 @@ export const ExperienceBucketOptions = [
 
 export const RESUME_MAX_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
 export const RESUME_ALLOWED_EXTENSIONS = ['.pdf', '.doc', '.docx'];
+
+// EP-17/US-127 fix: proof for a claimed Special Category (e.g. Freedom Fighter) - without this,
+// TryMatchAsync never waives the fee, see JobApplicationService.SubmitAsync.
+export const WAIVER_PROOF_MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
+export const WAIVER_PROOF_ALLOWED_EXTENSIONS = ['.pdf', '.jpg', '.jpeg', '.png'];
