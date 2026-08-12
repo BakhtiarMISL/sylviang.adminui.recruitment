@@ -19,7 +19,17 @@ export class QuestionGroupListComponent implements OnInit {
   ) {}
 
   groups: IQuestionGroupResponse[] = [];
+  filteredGroups: IQuestionGroupResponse[] = [];
   loading = false;
+  filtersCollapsed = true;
+
+  filterSearch = '';
+  filterStatus: boolean | null = null;
+  statusOptions = [
+    { label: 'All', value: null },
+    { label: 'Active', value: true },
+    { label: 'Inactive', value: false },
+  ];
 
   get skeletonItems() {
     return Array(3)
@@ -40,15 +50,37 @@ export class QuestionGroupListComponent implements OnInit {
     this.questionGroupService.getAll().subscribe({
       next: (response) => {
         this.groups = !response.hasError && response.content ? response.content : [];
+        this.applyFilters();
         this.loading = false;
         this.cdr.detectChanges();
       },
       error: () => {
         this.groups = [];
+        this.applyFilters();
         this.loading = false;
         this.cdr.detectChanges();
       },
     });
+  }
+
+  // Small, non-paginated dataset (matches this page's existing card-list rendering) - filtering
+  // in memory over the already-loaded groups rather than round-tripping to the backend.
+  applyFilters(): void {
+    this.filtersCollapsed = true;
+    const search = this.filterSearch.trim().toLowerCase();
+    this.filteredGroups = this.groups.filter((g) => {
+      const matchesSearch = !search || g.name.toLowerCase().includes(search) || (g.description ?? '').toLowerCase().includes(search);
+      const matchesStatus = this.filterStatus === null || g.isActive === this.filterStatus;
+      return matchesSearch && matchesStatus;
+    });
+  }
+
+  resetFilters(): void {
+    this.filterSearch = '';
+    this.filterStatus = null;
+    // applyFilters() collapses the panel (Apply-button behavior) - reopen it after.
+    this.applyFilters();
+    this.filtersCollapsed = false;
   }
 
   toggleActiveStatus(group: IQuestionGroupResponse, event: Event): void {

@@ -60,6 +60,36 @@
       ></p-select>
       <label for="specialCategoryId">Special Category (if applicable)</label>
     </p-floatlabel>
+
+    <div *ngIf="f['specialCategoryId'].value" class="mt-2">
+      <label class="mb-1 block text-sm text-neutral">Proof Document</label>
+
+      <div *ngIf="waiverProofFile" class="flex items-center justify-between rounded-md border border-gray-200 bg-gray-50 p-3">
+        <span class="flex items-center gap-2 text-sm text-gray-800">
+          <i class="fas fa-circle-check text-primary"></i>
+          {{ waiverProofFile.name }}
+        </span>
+        <button pButton type="button" severity="secondary" size="small" (click)="clearWaiverProofFile()">
+          <span>Remove</span>
+        </button>
+      </div>
+
+      <ng-container *ngIf="!waiverProofFile">
+        <label for="waiverProofDocument" class="upload-dropzone">
+          <i class="fas fa-file-arrow-up"></i>
+          <span class="upload-dropzone-text">
+            <strong>Click to upload proof for this category</strong>
+            <small>PDF, JPG or PNG, up to 5MB</small>
+          </span>
+        </label>
+        <input type="file" id="waiverProofDocument" accept=".pdf,.jpg,.jpeg,.png" (change)="onWaiverProofFileSelected($event)" class="sr-only file-picker-input" />
+      </ng-container>
+
+      <div *ngIf="waiverProofFileError" class="invalid mt-2">{{ waiverProofFileError }}</div>
+      <p *ngIf="claimsSpecialCategoryWithoutProof" class="mt-2 text-sm text-amber-700">
+        <i class="fa fa-triangle-exclamation mr-1"></i>Without proof, the application fee will not be waived - you will still be redirected to payment.
+      </p>
+    </div>
   </div>
 
   <div *ngIf="referralSourceOptions.length > 0">

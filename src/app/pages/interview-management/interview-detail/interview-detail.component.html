@@ -16,7 +16,7 @@
       <div>
         <h4 class="text-lg font-medium text-gray-900 dark:text-white">{{ interview.candidateName }}</h4>
         <p class="text-sm text-gray-600 dark:text-gray-300">
-          {{ interview.scheduledStartAt | date: 'dd-MMM-yyyy HH:mm' }} - {{ interview.scheduledEndAt | date: 'HH:mm' }}
+          {{ interview.scheduledStartAt | date: 'dd-MMM-yyyy h:mm a' }} - {{ interview.scheduledEndAt | date: 'h:mm a' }}
           &middot; {{ interview.interviewType }} &middot; Round {{ interview.round }}{{ interview.roundConfigName ? ' (' + interview.roundConfigName + ')' : '' }}
         </p>
         <p class="text-sm text-gray-600 dark:text-gray-300" *ngIf="interview.interviewType === InterviewTypeEnum.InPerson">
@@ -123,6 +123,7 @@
         [(ngModel)]="rescheduleStartAt"
         [ngModelOptions]="{ standalone: true }"
         [showTime]="true"
+        hourFormat="12"
         [showIcon]="true"
         [appendTo]="'body'"
         dateFormat="dd-M-yy"

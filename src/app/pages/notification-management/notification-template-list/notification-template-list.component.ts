@@ -21,6 +21,7 @@ export class NotificationTemplateListComponent implements OnInit {
   items: INotificationTemplateResponse[] = [];
   loading = false;
   errorMessage = '';
+  searchTerm = '';
 
   get skeletonItems() {
     return Array(4)

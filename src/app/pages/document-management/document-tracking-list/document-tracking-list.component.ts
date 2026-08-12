@@ -1,10 +1,25 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { UI_CONFIG } from '@app/@core/constants';
 import { BreadcrumbService } from '@app/@core/services';
 import { DocumentAcceptanceStatusEnum, DocumentTypeEnum } from '@app/@core/enums/recruitment.enum';
 import { DocumentTrackingService } from '@app/@core/services/recruitment/document-tracking/document-tracking.service';
 import { IDocumentTrackingFilterRequest, IDocumentTrackingItemResponse } from '@core/interfaces/recruitment-management/document-tracking.interface';
+import { Base_URL } from '@env/environment';
 import { ConfirmationService } from 'primeng/api';
+
+// Every DocumentTypeEnum value that DocumentTrackingService actually aggregates (has a real
+// generated-document entity behind it). RejectionLetter/ExperienceCertificate/RelievingLetter
+// are template-only enum values with no generation feature built yet - listing them here would
+// just filter to an always-empty result.
+const TRACKED_DOCUMENT_TYPES = [
+  DocumentTypeEnum.OfferLetter,
+  DocumentTypeEnum.AppointmentLetter,
+  DocumentTypeEnum.JoiningBooklet,
+  DocumentTypeEnum.MedicalReferral,
+  DocumentTypeEnum.TargetLetter,
+  DocumentTypeEnum.OfficeNote,
+];
 
 @Component({
   selector: 'app-document-tracking-list',
@@ -17,6 +32,7 @@ export class DocumentTrackingListComponent implements OnInit {
     private documentTrackingService: DocumentTrackingService,
     private confirmationService: ConfirmationService,
     private breadcrumbService: BreadcrumbService,
+    private route: ActivatedRoute,
     private cdr: ChangeDetectorRef,
   ) {}
 
@@ -27,20 +43,17 @@ export class DocumentTrackingListComponent implements OnInit {
   UI_CONFIG = UI_CONFIG;
   rows: number = UI_CONFIG.defaultPageSize;
   currentPage = 1;
+  filtersCollapsed = true;
+
+  // Set only when arriving from an application's Documents tab (?jobApplicationId=) - scopes the
+  // list to that one application's generated documents instead of every document in the system.
+  jobApplicationId: number | null = null;
 
   filterDocumentType: DocumentTypeEnum | null = null;
   filterAcceptanceStatus: DocumentAcceptanceStatusEnum | null = null;
 
   documentTypeOptions = Object.values(DocumentTypeEnum)
-    .filter((value) =>
-      [
-        DocumentTypeEnum.OfferLetter,
-        DocumentTypeEnum.AppointmentLetter,
-        DocumentTypeEnum.JoiningBooklet,
-        DocumentTypeEnum.MedicalReferral,
-        DocumentTypeEnum.TargetLetter,
-      ].includes(value),
-    )
+    .filter((value) => TRACKED_DOCUMENT_TYPES.includes(value))
     .map((value) => ({ label: value, value }));
   acceptanceStatusOptions = Object.values(DocumentAcceptanceStatusEnum).map((value) => ({ label: value, value }));
 
@@ -55,13 +68,20 @@ export class DocumentTrackingListComponent implements OnInit {
       { title: 'System Administration', icon: 'fa-solid fa-gears', href: '/document-management/offer-letter-list' },
       { title: 'Document Tracking', icon: 'fa-solid fa-list-check', href: '/document-management/document-tracking-list' },
     ]);
-    this.loadItems();
+
+    this.route.queryParamMap.subscribe((params) => {
+      const idParam = params.get('jobApplicationId');
+      this.jobApplicationId = idParam ? +idParam : null;
+      this.currentPage = 1;
+      this.loadItems();
+    });
   }
 
   private buildFilter(): IDocumentTrackingFilterRequest {
     return {
       documentType: this.filterDocumentType ?? undefined,
       acceptanceStatus: this.filterAcceptanceStatus ?? undefined,
+      jobApplicationId: this.jobApplicationId ?? undefined,
       page: this.currentPage,
       pageSize: this.rows,
     };
@@ -87,6 +107,7 @@ export class DocumentTrackingListComponent implements OnInit {
 
   applyFilters(): void {
     this.currentPage = 1;
+    this.filtersCollapsed = true;
     this.loadItems();
   }
 
@@ -94,6 +115,7 @@ export class DocumentTrackingListComponent implements OnInit {
     this.filterDocumentType = null;
     this.filterAcceptanceStatus = null;
     this.currentPage = 1;
+    this.filtersCollapsed = false;
     this.loadItems();
   }
 
@@ -109,6 +131,11 @@ export class DocumentTrackingListComponent implements OnInit {
 
   isDeclined(item: IDocumentTrackingItemResponse): boolean {
     return item.acceptanceStatus === DocumentAcceptanceStatusEnum.Declined;
+  }
+
+  getPdfUrl(item: IDocumentTrackingItemResponse): string {
+    if (!item.generatedPdfPath) return '';
+    return `${Base_URL}${item.generatedPdfPath.startsWith('/') ? '' : '/'}${item.generatedPdfPath}`;
   }
 
   followUp(item: IDocumentTrackingItemResponse, event: Event): void {

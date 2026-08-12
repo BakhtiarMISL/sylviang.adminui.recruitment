@@ -43,7 +43,7 @@
           <h4 class="text-md font-medium text-gray-900 dark:text-white">Panelist Employee ID: {{ evaluation.employeeId }}</h4>
           <p class="text-sm text-gray-600 dark:text-gray-300">{{ evaluation.scorecardName }}</p>
           <p class="text-xs text-gray-500 dark:text-gray-400">
-            Submitted {{ evaluation.submittedAt | date: 'dd-MMM-yyyy HH:mm' }} by {{ evaluation.submittedByUserName || '-' }}
+            Submitted {{ evaluation.submittedAt | date: 'dd-MMM-yyyy h:mm a' }} by {{ evaluation.submittedByUserName || '-' }}
           </p>
         </div>
         <div class="flex flex-col items-end gap-1">

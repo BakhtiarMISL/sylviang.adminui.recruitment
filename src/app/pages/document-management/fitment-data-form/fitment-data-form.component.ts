@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { BreadcrumbService } from '@app/@core/services';
 import { FitmentDataService } from '@app/@core/services/recruitment/fitment-data/fitment-data.service';
+import { JobApplicationService } from '@app/@core/services/recruitment/job-application/job-application.service';
 
 // EP-12 US-097: manual-entry grade/designation/salary structure per JobApplication. Mirrors
 // OfferLetterFormComponent's ?jobApplicationId= locked-field pattern; create-or-update via a
@@ -17,6 +18,7 @@ export class FitmentDataFormComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private fitmentDataService: FitmentDataService,
+    private jobApplicationService: JobApplicationService,
     private route: ActivatedRoute,
     private breadcrumbService: BreadcrumbService,
   ) {}
@@ -28,6 +30,11 @@ export class FitmentDataFormComponent implements OnInit {
   errorMessage = '';
   successMessage = '';
   jobApplicationIdLocked = false;
+
+  // Existing Fitment Data (if this application already has a row) is authoritative for
+  // Designation; the job vacancy's own Title is only a fallback default. Guards against the two
+  // async loads racing - see loadJobPostingTitle.
+  private fitmentDesignationApplied = false;
 
   ngOnInit(): void {
     this.breadcrumbService.setBreadcrumbs([
@@ -50,6 +57,18 @@ export class FitmentDataFormComponent implements OnInit {
 
     if (jobApplicationIdParam) {
       this.load(+jobApplicationIdParam);
+      this.loadJobPostingTitle(+jobApplicationIdParam);
+    } else {
+      // Free-entry mode: HR types the Job Application ID directly into the form (no
+      // ?jobApplicationId= query param) - previously nothing fetched until Save, so existing
+      // Fitment Data (or the job title fallback) never appeared.
+      this.form.get('jobApplicationId')?.valueChanges.subscribe((id) => {
+        this.fitmentDesignationApplied = false;
+        if (id && id > 0) {
+          this.load(id);
+          this.loadJobPostingTitle(id);
+        }
+      });
     }
   }
 
@@ -59,11 +78,26 @@ export class FitmentDataFormComponent implements OnInit {
       next: (response) => {
         this.loading = false;
         if (!response.hasError && response.content) {
+          if (response.content.designation) this.fitmentDesignationApplied = true;
           this.form.patchValue(response.content);
         }
       },
       error: () => {
         this.loading = false;
+      },
+    });
+  }
+
+  // Fallback default when this application has no Fitment Data row yet - see
+  // fitmentDesignationApplied.
+  private loadJobPostingTitle(jobApplicationId: number): void {
+    this.jobApplicationService.getDetail(jobApplicationId).subscribe({
+      next: (response) => {
+        const title = response && !response.hasError ? response.content?.jobPostingTitle : null;
+        if (!title || this.fitmentDesignationApplied) return;
+        if (!this.form.get('designation')?.value) {
+          this.form.patchValue({ designation: title });
+        }
       },
     });
   }

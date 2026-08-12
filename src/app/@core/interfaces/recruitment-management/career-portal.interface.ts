@@ -1,4 +1,5 @@
 import { CircularTypeEnum, EducationLevelEnum, EmploymentTypeEnum } from '@app/@core/enums/recruitment.enum';
+import { IJobVacancyAttachmentResponse } from '@app/@core/interfaces/recruitment-management/job-vacancy-attachment.interface';
 
 export interface IPublicJobPostingResponse {
   jobPostingId: number;
@@ -20,6 +21,7 @@ export interface IPublicJobPostingResponse {
   requiredDistrict?: string;
   applicationFeeAmount?: number;
   applicationFeeCurrency?: string;
+  attachments?: IJobVacancyAttachmentResponse[];
 }
 
 export interface IJobApplicationSubmitRequest {

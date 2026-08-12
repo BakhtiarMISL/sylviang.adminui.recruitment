@@ -23,7 +23,7 @@
       <tr>
         <th>Name</th>
         <th>Type</th>
-        <th>Permissions Granted</th>
+        <th>Effective Access</th>
         <th style="width: 14rem">Actions</th>
       </tr>
     </ng-template>
@@ -35,7 +35,7 @@
             {{ role.isSystemRole ? 'System' : 'Custom' }}
           </span>
         </td>
-        <td>{{ role.permissions.length }}</td>
+        <td>{{ accessSummary(role) }}</td>
         <td>
           <div class="flex gap-2">
             <button pButton size="small" severity="secondary" [routerLink]="['/access-control', 'manage-role', role.roleId]">

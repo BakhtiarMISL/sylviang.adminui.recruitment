@@ -45,10 +45,10 @@
         <td>{{ item.joiningDate | date: 'dd-MMM-yyyy' }}</td>
         <td>{{ item.status }}</td>
         <td>
-          <span *ngIf="item.decisionAt">{{ item.decisionAt | date: 'dd-MMM-yyyy HH:mm' }}</span>
+          <span *ngIf="item.decisionAt">{{ item.decisionAt | date: 'dd-MMM-yyyy h:mm a' }}</span>
           <div class="text-xs text-red-500" *ngIf="item.declineReason">{{ item.declineReason }}</div>
         </td>
-        <td>{{ item.generatedAt | date: 'dd-MMM-yyyy HH:mm' }}</td>
+        <td>{{ item.generatedAt | date: 'dd-MMM-yyyy h:mm a' }}</td>
         <td class="actions-cell flex gap-2">
           <a pButton size="small" severity="secondary" [href]="getPdfUrl(item)" target="_blank" rel="noopener noreferrer">
             <i class="fa fa-download"></i>

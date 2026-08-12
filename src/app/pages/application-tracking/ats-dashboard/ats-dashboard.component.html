@@ -412,7 +412,6 @@
                 </div>
               </th>
             }
-            <th style="width: 6rem" class="text-center">Actions</th>
           </tr>
         </ng-template>
 
@@ -429,11 +428,15 @@
               <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
               <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
               <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
-              <td><p-skeleton width="3rem" height="1rem"></p-skeleton></td>
             </tr>
           } @else {
-            <tr [class.row-stale]="application.isStale" [pTooltip]="application.isStale ? 'Days in current stage exceeds the stale threshold' : ''">
-              <td><p-tableCheckbox [value]="application"></p-tableCheckbox></td>
+            <tr
+              class="row-clickable"
+              [class.row-stale]="application.isStale"
+              [pTooltip]="application.isStale ? 'Days in current stage exceeds the stale threshold' : ''"
+              (click)="openDetail(application)"
+            >
+              <td (click)="$event.stopPropagation()"><p-tableCheckbox [value]="application"></p-tableCheckbox></td>
               <td>{{ application.candidateName }}</td>
               <td>{{ application.jobPostingTitle || '-' }}</td>
               <td>{{ formatEnumLabel(application.source) }}</td>
@@ -444,21 +447,16 @@
                 </span>
               </td>
               <td>{{ application.currentStageName || 'Not started' }}</td>
-              <td>{{ application.lastUpdatedAt ? (application.lastUpdatedAt | date: 'dd-MMM-yyyy HH:mm') : '-' }}</td>
+              <td>{{ application.lastUpdatedAt ? (application.lastUpdatedAt | date: 'dd-MMM-yyyy h:mm a') : '-' }}</td>
               <td>{{ application.daysInCurrentStage ?? '-' }}</td>
               <td>{{ application.assignedHrUserName || '-' }}</td>
-              <td class="text-center">
-                <button (click)="openDetail(application)" class="text-primary" pTooltip="View Detail">
-                  <i class="fa fa-eye"></i>
-                </button>
-              </td>
             </tr>
           }
         </ng-template>
 
         <ng-template pTemplate="emptymessage">
           <tr>
-            <td colspan="11" class="not-found">
+            <td colspan="10" class="not-found">
               <div>
                 <i class="fa fa-magnifying-glass-minus"></i>
                 <p>No applications found</p>

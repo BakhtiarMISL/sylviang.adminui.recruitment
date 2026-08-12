@@ -27,8 +27,11 @@ const routes: Routes = [
       loadChildren: () => import('./candidate-management/candidate-management.module').then((m) => m.CandidateManagementModule),
     },
     {
+      // CV Bank merged into the Candidates page (Search tab) - kept as a redirect so old
+      // bookmarks/links still resolve.
       path: 'cv-bank',
-      loadChildren: () => import('./cv-bank-management/cv-bank-management.module').then((m) => m.CvBankManagementModule),
+      redirectTo: 'candidates',
+      pathMatch: 'full',
     },
     {
       path: 'talent-pools',
@@ -56,10 +59,6 @@ const routes: Routes = [
     {
       path: 'shortlist-filters',
       loadChildren: () => import('./shortlist-filter-management/shortlist-filter-management.module').then((m) => m.ShortlistFilterManagementModule),
-    },
-    {
-      path: 'candidate-recommendations',
-      loadChildren: () => import('./candidate-recommendation-management/candidate-recommendation-management.module').then((m) => m.CandidateRecommendationManagementModule),
     },
     {
       path: 'exam-questions',

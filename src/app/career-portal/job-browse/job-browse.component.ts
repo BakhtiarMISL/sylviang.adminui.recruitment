@@ -5,7 +5,6 @@ import { JobApplicationService } from '@app/@core/services/recruitment/job-appli
 import { UI_CONFIG } from '@app/@core/constants';
 import { AuthService } from '@core/services/auth/auth.service';
 import { UserRoleEnum } from '@core/enums/user-role.enum';
-import { SortEvent } from 'primeng/api';
 import { EmploymentTypeOptions, ExperienceBucketOptions } from '../career-portal.constants';
 import { JobBrowseColumns } from './job-browse.component.constants';
 
@@ -52,13 +51,10 @@ export class JobBrowseComponent implements OnInit, AfterViewInit {
   experienceBucketOptions = ExperienceBucketOptions;
 
   sortOptions = JobBrowseColumns.filter((col) => col.sortable !== false).map((col) => ({ label: col.label, value: col.field }));
-  // Table view (logged-in / Shell-nested) sorts via column header click instead of the card view's dropdown.
-  columns = JobBrowseColumns;
   filtersCollapsed = true;
 
   searchTerm = '';
   location = '';
-  departmentId: number | null = null;
   employmentType: string | null = null;
   maxExperienceYears: number | null = null;
 
@@ -110,7 +106,6 @@ export class JobBrowseComponent implements OnInit, AfterViewInit {
   resetFilters(): void {
     this.searchTerm = '';
     this.location = '';
-    this.departmentId = null;
     this.employmentType = null;
     this.maxExperienceYears = null;
     this.currentPage = 1;
@@ -126,7 +121,6 @@ export class JobBrowseComponent implements OnInit, AfterViewInit {
       pageSize: this.rows,
       ...(this.searchTerm && this.searchTerm.trim() && { searchTerm: this.searchTerm.trim() }),
       ...(this.location && this.location.trim() && { location: this.location.trim() }),
-      ...(this.departmentId !== null && this.departmentId !== undefined && { departmentId: this.departmentId }),
       ...(this.employmentType && { employmentType: this.employmentType }),
       ...(this.maxExperienceYears !== null && this.maxExperienceYears !== undefined && { maxExperienceYears: this.maxExperienceYears }),
       ...(this.sortField && { sortBy: this.sortField }),
@@ -168,13 +162,6 @@ export class JobBrowseComponent implements OnInit, AfterViewInit {
 
   toggleSortDirection(): void {
     this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
-    this.currentPage = 1;
-    this.loadJobPostings();
-  }
-
-  onSort(event: SortEvent): void {
-    this.sortField = event.field || null;
-    this.sortDirection = event.order === 1 ? 'asc' : 'desc';
     this.currentPage = 1;
     this.loadJobPostings();
   }

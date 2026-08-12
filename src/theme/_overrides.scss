@@ -96,24 +96,36 @@
   @apply text-black/80 dark:text-white/80 !important;
 }
 
-// PrimeNG's own floatlabel-in padding-top token isn't resolving in this theme setup, so the
-// floated label sits directly on top of the textarea's first line instead of above it - most
-// visible on multi-line values. Force the clearance directly rather than depend on the token.
-.p-floatlabel-in .p-textarea {
-  padding-top: 1.5rem !important;
+// The PrimeNG float-label positioning tokens are not available in this theme. A floating label
+// then remains on top of its value (especially in textareas, selects and input numbers). Render
+// every float label as a stable label above its control instead, which gives every field type the
+// same accessible, non-overlapping layout.
+.p-floatlabel {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.25rem;
+  width: 100%;
 }
-
-// Same missing token, on p-select's inner label span - the floated label sits on top of the
-// selected value / placeholder text instead of above it. p-select's box-sizing:border-box and
-// fixed height mean padding-top alone just squeezes the line, so the box also needs to grow.
+.p-floatlabel > label {
+  position: static !important;
+  order: -1;
+  transform: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: 0.75rem !important;
+  line-height: 1.25rem !important;
+  pointer-events: auto !important;
+}
+.p-floatlabel-in .p-textarea {
+  padding-top: 0.5rem !important;
+}
 .p-floatlabel-in .p-select {
-  height: auto !important;
-  min-height: 4.75rem !important;
+  min-height: 0 !important;
 }
 .p-floatlabel-in .p-select-label {
   height: auto !important;
-  padding-top: 3.4rem !important;
-  padding-bottom: 0.75rem !important;
+  padding-top: 0.5rem !important;
+  padding-bottom: 0.5rem !important;
 }
 
 // --------------------------------------------Input Number Css Override--------------------------------------------

@@ -7,44 +7,54 @@
 
 <ng-container *ngIf="!loading && application">
   <section class="page-container">
-    <div class="form-container">
-      <div><span class="field-label">Candidate Name</span><div class="field-value">{{ application.candidateName }}</div></div>
-      <div><span class="field-label">Job Title</span><div class="field-value">{{ application.jobPostingTitle || '-' }}</div></div>
-      <div><span class="field-label">Email</span><div class="field-value">{{ application.candidateEmail || '-' }}</div></div>
-      <div><span class="field-label">Phone</span><div class="field-value">{{ application.candidatePhone || '-' }}</div></div>
-      <div><span class="field-label">Source / Candidate Type</span><div class="field-value">{{ formatEnumLabel(application.source) }}</div></div>
-      <div><span class="field-label">Applied Date</span><div class="field-value">{{ application.appliedDate ? (application.appliedDate | date: 'dd-MMM-yyyy') : '-' }}</div></div>
-      <div><span class="field-label">Current Status</span><div><span class="status-badge">{{ formatEnumLabel(application.applicationStatus) }}</span></div></div>
-      <div *ngIf="application.resumeUrl">
-        <span class="field-label">CV</span>
-        <div><a [href]="getFileUrl(application.resumeUrl)" target="_blank" rel="noopener noreferrer" class="text-primary"><i class="fa fa-download"></i> View Resume</a></div>
+    <div class="candidate-header">
+      <div class="candidate-header-top">
+        <div class="candidate-avatar" aria-hidden="true">{{ candidateInitials }}</div>
+
+        <div class="candidate-header-main">
+          <div class="candidate-header-title-row">
+            <h2 class="candidate-name">{{ application.candidateName }}</h2>
+            <span class="inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium bg-info-50 dark:bg-info-900/20 text-info-700 dark:text-info-400 border-info-200 dark:border-info-800">
+              {{ formatEnumLabel(application.applicationStatus) }}
+            </span>
+          </div>
+          <div class="candidate-job-title">{{ application.jobPostingTitle || '-' }}</div>
+
+          <div class="candidate-meta-row">
+            <span class="candidate-meta-item"><i class="fa-regular fa-envelope"></i>{{ application.candidateEmail || '-' }}</span>
+            <span class="candidate-meta-item"><i class="fa-solid fa-phone"></i>{{ application.candidatePhone || '-' }}</span>
+            <span class="candidate-meta-item"><i class="fa-solid fa-tag"></i>{{ formatEnumLabel(application.source) }}</span>
+            <span class="candidate-meta-item"><i class="fa-regular fa-calendar"></i>Applied {{ application.appliedDate ? (application.appliedDate | date: 'dd-MMM-yyyy') : '-' }}</span>
+            <a *ngIf="application.resumeUrl" class="candidate-meta-item candidate-meta-link" [href]="getFileUrl(application.resumeUrl)" target="_blank" rel="noopener noreferrer">
+              <i class="fa fa-download"></i>View Resume
+            </a>
+          </div>
+        </div>
       </div>
-      <div class="sm:col-span-2" *ngIf="application.coverLetter">
+
+      <div class="candidate-cover-letter" *ngIf="application.coverLetter">
         <span class="field-label">Cover Letter</span>
         <div class="field-value">{{ application.coverLetter }}</div>
       </div>
-    </div>
 
-    <div class="mt-3 flex gap-2 flex-wrap items-center">
-      <button pButton type="button" size="small" severity="secondary" [disabled]="!recommendationAccepted" (click)="goToGenerateOfferLetter()">
-        <i class="fa fa-file-signature"></i>
-        <span>Generate Offer Letter</span>
-      </button>
-      <a pButton size="small" severity="secondary" [routerLink]="['/document-management/offer-letter-list']" [queryParams]="{ jobApplicationId: jobApplicationId }">
-        <i class="fa fa-list"></i>
-        <span>View Offer Letters</span>
-      </a>
-      <button pButton type="button" size="small" severity="secondary" [disabled]="!offerLetterAccepted" (click)="goToGenerateMedicalLetter()">
-        <i class="fa fa-file-medical"></i>
-        <span>Generate Medical Letter</span>
-      </button>
-      <button pButton type="button" size="small" severity="secondary" [disabled]="!offerLetterAccepted" (click)="goToGenerateTargetLetter()">
-        <i class="fa fa-bullseye"></i>
-        <span>Generate Target Letter</span>
-      </button>
+      <!-- EP-17/US-127 fix: HR can now verify the claimed category against its proof - a waived
+           application with no WaiverProofDocumentUrl was applied before this fix shipped. -->
+      <div class="candidate-cover-letter" *ngIf="application.specialCategoryName">
+        <span class="field-label">Special Category Claimed</span>
+        <div class="field-value">
+          {{ application.specialCategoryName }}
+          <ng-container *ngIf="application.waiverRuleName">
+            — fee waived by rule "{{ application.waiverRuleName }}" ({{ application.waivedAt | date: 'dd-MMM-yyyy' }})
+          </ng-container>
+          <a *ngIf="application.waiverProofDocumentUrl" class="candidate-meta-link ml-2" [href]="getFileUrl(application.waiverProofDocumentUrl)" target="_blank" rel="noopener noreferrer">
+            <i class="fa fa-download"></i>View Proof Document
+          </a>
+          <span *ngIf="application.waiverRuleName && !application.waiverProofDocumentUrl" class="text-danger-600 ml-2">
+            <i class="fa fa-triangle-exclamation"></i>No proof on file (applied before verification was added)
+          </span>
+        </div>
+      </div>
     </div>
-    <small class="text-neutral block" *ngIf="recommendationAccepted === false">Generate Offer Letter requires an Accepted Final Selection recommendation.</small>
-    <small class="text-neutral block" *ngIf="offerLetterAccepted === false">Generate Medical/Target Letter requires an Accepted offer letter.</small>
   </section>
 
   <section class="page-container">
@@ -55,21 +65,6 @@
           {{ isTerminalStatus ? 'Status' : 'What to do next' }}
         </span>
         <span class="text-sm font-medium text-black dark:text-white">{{ nextStep.text }}</span>
-        <div class="flex items-center gap-2 mt-1" *ngIf="suggestedStatus">
-          <span class="text-xs text-neutral dark:text-white/60">Current Status ("{{ formatEnumLabel(application.applicationStatus) }}") looks out of date -</span>
-          <button
-            pButton
-            type="button"
-            size="small"
-            severity="success"
-            [disabled]="updating"
-            [loading]="updating"
-            (click)="applySuggestedStatus()"
-          >
-            <i class="fa fa-forward"></i>
-            <span>Move to {{ suggestedStatusLabel }}</span>
-          </button>
-        </div>
       </div>
     </div>
 
@@ -92,87 +87,129 @@
   </section>
 
   <section class="page-container">
-    <h3 class="form-section-header">Pipeline Progress</h3>
-    <app-pipeline-progress-tracker
-      [jobApplicationId]="jobApplicationId"
-      [resumeUrl]="application.resumeUrl"
-      (nextStepStateChange)="onTrackerStateChange($event)"
-    ></app-pipeline-progress-tracker>
-  </section>
-
-  <section class="page-container">
-    <div class="form-container">
-      <h3 class="form-section-header">Update Status</h3>
-
-      <div *ngIf="updateError" class="invalid sm:col-span-2 lg:col-span-3 xl:col-span-4">{{ updateError }}</div>
-      <div *ngIf="updateSuccess" class="success-message sm:col-span-2 lg:col-span-3 xl:col-span-4">Status updated.</div>
-
-      <div class="sm:col-span-2 lg:col-span-3 xl:col-span-4 text-sm text-neutral" *ngIf="nextStatusOptions.length === 0">
-        No further transitions available from {{ formatEnumLabel(application.applicationStatus) }}.
+    <div class="detail-tabs">
+      <div class="tab-bar" role="tablist">
+        <button
+          *ngFor="let tab of tabs"
+          #tabBtnRef
+          type="button"
+          role="tab"
+          class="tab-btn"
+          [class.active]="activeTab === tab.key"
+          [attr.aria-selected]="activeTab === tab.key"
+          (click)="setActiveTab(tab.key)"
+        >
+          <i [class]="tab.icon"></i>
+          <span>{{ tab.label }}</span>
+        </button>
+        <div
+          class="tab-indicator"
+          [style.left.px]="tabRects[activeTabIndex]?.left || 0"
+          [style.width.px]="tabRects[activeTabIndex]?.width || 0"
+        ></div>
       </div>
 
-      <ng-container *ngIf="nextStatusOptions.length > 0">
-        <div>
-          <p-floatlabel variant="in">
-            <p-select
-              inputId="nextStatus"
-              [options]="nextStatusOptions"
-              [(ngModel)]="selectedNextStatus"
-              (ngModelChange)="onNextStatusChange($event)"
-              optionLabel="label"
-              optionValue="value"
-              [appendTo]="'body'"
-              [autoDisplayFirst]="false"
-              class="w-full"
-            ></p-select>
-            <label for="nextStatus">Move To</label>
-          </p-floatlabel>
-        </div>
+      <div class="tab-panel" *ngIf="activeTab === 'pipeline'">
+        <app-pipeline-progress-tracker
+          [jobApplicationId]="jobApplicationId"
+          [resumeUrl]="application.resumeUrl"
+          (nextStepStateChange)="onTrackerStateChange($event)"
+        ></app-pipeline-progress-tracker>
+      </div>
 
-        <div *ngIf="requiresReason()">
-          <p-floatlabel variant="in">
-            <p-select
-              inputId="reasonId"
-              [options]="reasonOptions"
-              [(ngModel)]="selectedReasonId"
-              optionLabel="label"
-              optionValue="applicationStatusReasonId"
-              [appendTo]="'body'"
-              [autoDisplayFirst]="false"
-              class="w-full"
-            ></p-select>
-            <label for="reasonId">Reason *</label>
-          </p-floatlabel>
-        </div>
-
-        <div class="sm:col-span-2 lg:col-span-3 xl:col-span-4">
-          <textarea pInputText [(ngModel)]="note" rows="3" class="w-full" maxlength="2000" placeholder="Private note (visible only to HR/Admin)"></textarea>
-        </div>
-
-        <div class="sm:col-span-2 lg:col-span-3 xl:col-span-4">
-          <button pButton type="button" [disabled]="!canUpdateStatus() || updating" (click)="updateStatus()">
-            <i class="fas fa-save"></i>
-            <span>{{ updating ? 'Updating...' : 'Update Status' }}</span>
+      <div class="tab-panel" *ngIf="activeTab === 'documents'">
+        <div class="doc-actions">
+          <button pButton type="button" size="small" severity="secondary" [disabled]="!stagesCompleted" (click)="goToGenerateOfferLetter()">
+            <i class="fa fa-file-signature"></i>
+            <span>Generate Offer Letter</span>
+          </button>
+          <button pButton type="button" size="small" severity="secondary" [disabled]="!offerLetterAccepted" (click)="goToGenerateMedicalLetter()">
+            <i class="fa fa-file-medical"></i>
+            <span>Generate Medical Letter</span>
+          </button>
+          <button pButton type="button" size="small" severity="secondary" [disabled]="!offerLetterAccepted" (click)="goToGenerateTargetLetter()">
+            <i class="fa fa-bullseye"></i>
+            <span>Generate Target Letter</span>
+          </button>
+          <button pButton type="button" size="small" severity="secondary" [disabled]="!acceptedOfferLetterId" (click)="goToGenerateAppointmentLetter()">
+            <i class="fa fa-file-contract"></i>
+            <span>Generate Appointment Letter</span>
           </button>
         </div>
-      </ng-container>
-    </div>
-  </section>
+        <small class="text-neutral block mt-2" *ngIf="!stagesCompleted">Generate Offer Letter requires every pipeline stage to be Completed.</small>
+        <small class="text-neutral block mt-1" *ngIf="offerLetterAccepted === false">Generate Medical/Target/Appointment Letter requires an Accepted offer letter.</small>
+      </div>
 
-  <section class="page-container">
-    <div class="form-container">
-      <h3 class="form-section-header">Status History</h3>
+      <div class="tab-panel" *ngIf="activeTab === 'status'">
+        <div class="status-update-block" *ngIf="!isTerminalStatus">
+          <h3 class="form-section-header">Reject / Withdraw</h3>
+          <p class="text-sm text-neutral">
+            Every routine forward step (interview scheduled, stages completed, offer generated/accepted) advances the status
+            automatically. These two are the only moves that still need a person to decide.
+          </p>
 
-      <div class="sm:col-span-2 text-sm text-neutral" *ngIf="application.statusHistory.length === 0">No status changes recorded yet.</div>
-      <div class="sm:col-span-2" *ngIf="application.statusHistory.length > 0">
-        <div class="history-entry" *ngFor="let entry of application.statusHistory">
-          <div>
-            <span *ngIf="entry.fromStatus">{{ formatEnumLabel(entry.fromStatus) }} → </span><strong>{{ formatEnumLabel(entry.toStatus) }}</strong>
-            <span class="text-sm text-neutral ml-2">{{ entry.changedAt | date: 'dd-MMM-yyyy HH:mm' }}</span>
-            <span class="text-sm text-neutral ml-2" *ngIf="entry.changedByUserName">by {{ entry.changedByUserName }}</span>
+          <div *ngIf="updateError" class="invalid">{{ updateError }}</div>
+          <div *ngIf="updateSuccess" class="success-message">Status updated.</div>
+
+          <div class="reject-withdraw-actions" *ngIf="!rejectWithdrawTarget">
+            <button pButton type="button" severity="danger" [outlined]="true" (click)="openRejectWithdraw(ApplicationStatusEnum.Rejected)">
+              <i class="fa fa-ban"></i>
+              <span>Reject Application</span>
+            </button>
+            <button pButton type="button" severity="secondary" [outlined]="true" (click)="openRejectWithdraw(ApplicationStatusEnum.Withdrawn)">
+              <i class="fa fa-right-from-bracket"></i>
+              <span>Mark Withdrawn</span>
+            </button>
           </div>
-          <div class="text-sm text-neutral" *ngIf="entry.reasonLabel">Reason: {{ entry.reasonLabel }}</div>
-          <div class="text-sm text-neutral" *ngIf="entry.note">Note: {{ entry.note }}</div>
+
+          <div class="status-update-grid" *ngIf="rejectWithdrawTarget">
+            <div>
+              <p-floatlabel variant="in">
+                <p-select
+                  inputId="reasonId"
+                  [options]="reasonOptions"
+                  [(ngModel)]="selectedReasonId"
+                  optionLabel="label"
+                  optionValue="applicationStatusReasonId"
+                  [appendTo]="'body'"
+                  [autoDisplayFirst]="false"
+                  class="w-full"
+                ></p-select>
+                <label for="reasonId">Reason *</label>
+              </p-floatlabel>
+            </div>
+
+            <div class="sm:col-span-2">
+              <textarea pInputText [(ngModel)]="note" rows="3" class="w-full" maxlength="2000" placeholder="Private note (visible only to HR/Admin)"></textarea>
+            </div>
+
+            <div class="sm:col-span-2 flex gap-2">
+              <button pButton type="button" [severity]="rejectWithdrawTarget === ApplicationStatusEnum.Rejected ? 'danger' : undefined" [disabled]="!canConfirmRejectWithdraw() || updating" (click)="confirmRejectWithdraw()">
+                <i class="fas fa-save"></i>
+                <span>{{ updating ? 'Saving...' : 'Confirm ' + formatEnumLabel(rejectWithdrawTarget) }}</span>
+              </button>
+              <button pButton type="button" severity="secondary" [disabled]="updating" (click)="cancelRejectWithdraw()">
+                <span>Cancel</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="status-history-block">
+          <h3 class="form-section-header">Status History</h3>
+
+          <div class="text-sm text-neutral" *ngIf="application.statusHistory.length === 0">No status changes recorded yet.</div>
+          <div *ngIf="application.statusHistory.length > 0">
+            <div class="history-entry" *ngFor="let entry of application.statusHistory">
+              <div>
+                <span *ngIf="entry.fromStatus">{{ formatEnumLabel(entry.fromStatus) }} → </span><strong>{{ formatEnumLabel(entry.toStatus) }}</strong>
+                <span class="text-sm text-neutral ml-2">{{ entry.changedAt | date: 'dd-MMM-yyyy h:mm a' }}</span>
+                <span class="text-sm text-neutral ml-2" *ngIf="entry.changedByUserName">by {{ entry.changedByUserName }}</span>
+              </div>
+              <div class="text-sm text-neutral" *ngIf="entry.reasonLabel">Reason: {{ entry.reasonLabel }}</div>
+              <div class="text-sm text-neutral" *ngIf="entry.note">Note: {{ entry.note }}</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -60,6 +60,18 @@
           </div>
         </div>
 
+        <!-- Attachments -->
+        <div class="mt-6" *ngIf="jobPosting.attachments && jobPosting.attachments.length > 0">
+          <h2 class="text-base font-medium text-gray-900">Attachments</h2>
+          <ul class="mt-1 space-y-1">
+            <li *ngFor="let attachment of jobPosting.attachments">
+              <a [href]="getAttachmentDownloadUrl(attachment)" target="_blank" rel="noopener" class="text-sm text-primary hover:underline">
+                <i class="fa fa-paperclip mr-1"></i>{{ attachment.fileName }}
+              </a>
+            </li>
+          </ul>
+        </div>
+
         <!-- Fee info -->
         <div class="mt-4 rounded-md bg-blue-50 p-3 text-sm text-blue-800" *ngIf="jobPosting.applicationFeeAmount">
           An application fee of {{ jobPosting.applicationFeeAmount }} {{ jobPosting.applicationFeeCurrency }} applies (non-refundable). You'll be redirected to pay it securely after submitting your application.

@@ -20,7 +20,23 @@
     </div>
   </div>
 
-  <p-table *ngIf="!loading && items.length > 0" [value]="items" styleClass="p-datatable-sm">
+  <p-table
+    *ngIf="!loading && items.length > 0"
+    #dt
+    [value]="items"
+    styleClass="p-datatable-sm"
+    [paginator]="true"
+    [rows]="10"
+    [rowsPerPageOptions]="[10, 25, 50]"
+    [globalFilterFields]="globalFilterFields"
+    [showCurrentPageReport]="true"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords}"
+  >
+    <ng-template pTemplate="caption">
+      <div class="flex justify-end">
+        <input pInputText type="text" [(ngModel)]="searchTerm" (input)="dt.filterGlobal(searchTerm, 'contains')" placeholder="Search" class="w-64" />
+      </div>
+    </ng-template>
     <ng-template pTemplate="header">
       <tr>
         <th *ngFor="let field of config.fields">{{ field.label }}</th>
@@ -40,6 +56,16 @@
               <i class="fa fa-trash"></i>
               <span>Delete</span>
             </button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td [attr.colspan]="config.fields.length + 1" class="not-found">
+          <div>
+            <i class="fa fa-magnifying-glass-minus"></i>
+            <p>No matching {{ config.title.toLowerCase() }}.</p>
           </div>
         </td>
       </tr>

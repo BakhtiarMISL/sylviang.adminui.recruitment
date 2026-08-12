@@ -9,11 +9,14 @@ import { INotificationTemplateResponse } from '@core/interfaces/recruitment-mana
 import { IEventTemplateMappingResponse } from '@core/interfaces/recruitment-management/event-template-mapping.interface';
 
 const EVENT_OPTIONS = Object.values(RecruitmentEventEnum).map((value) => ({ label: value, value }));
+// Only Email has a working transport wired in the dispatch pipeline; SMS/In-App/Push mappings
+// would save but never be looked up (NotificationDispatchService only queries Email mappings), so
+// they are disabled here to stop admins creating dead config until those channels are built.
 const CHANNEL_OPTIONS = [
-  { label: 'Email', value: NotificationChannelEnum.Email },
-  { label: 'SMS', value: NotificationChannelEnum.Sms },
-  { label: 'In-App', value: NotificationChannelEnum.InApp },
-  { label: 'Push', value: NotificationChannelEnum.Push },
+  { label: 'Email', value: NotificationChannelEnum.Email, disabled: false },
+  { label: 'SMS (not configured yet)', value: NotificationChannelEnum.Sms, disabled: true },
+  { label: 'In-App (not configured yet)', value: NotificationChannelEnum.InApp, disabled: true },
+  { label: 'Push (not configured yet)', value: NotificationChannelEnum.Push, disabled: true },
 ];
 const RECIPIENT_OPTIONS = [
   { label: 'Candidate', value: NotificationRecipientTypeEnum.Candidate },

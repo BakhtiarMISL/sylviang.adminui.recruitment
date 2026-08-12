@@ -42,11 +42,11 @@
         </td>
         <td>
           <div class="flex gap-2">
-            <button pButton size="small" severity="secondary" [routerLink]="['/access-control', 'manage-user-account', account.userAccountId]">
+            <button pButton size="small" severity="secondary" *ngIf="canManage(account)" [routerLink]="['/access-control', 'manage-user-account', account.userAccountId]">
               <i class="fa fa-edit"></i>
               <span>Edit</span>
             </button>
-            <button pButton size="small" [severity]="account.isActive ? 'danger' : 'success'" (click)="toggleActive(account, $event)">
+            <button pButton size="small" *ngIf="canChangeActiveState(account)" [severity]="account.isActive ? 'danger' : 'success'" (click)="toggleActive(account, $event)">
               <i class="fa" [ngClass]="account.isActive ? 'fa-ban' : 'fa-check'"></i>
               <span>{{ account.isActive ? 'Deactivate' : 'Activate' }}</span>
             </button>

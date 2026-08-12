@@ -12,13 +12,23 @@ export class PaymentService {
 
   API_URL = BASE_URL_Recruitment + '/payment';
 
-  /** Opens (or re-opens, after a failed/cancelled attempt) an SSLCommerz checkout session. */
-  initiatePayment(jobApplicationId: number) {
-    return this.httpClient.post<ApiResponse<IPaymentInitiateResponse>>(`${this.API_URL}/initiate/${jobApplicationId}`, {});
+  /**
+   * Opens (or re-opens, after a failed/cancelled attempt) an SSLCommerz checkout session.
+   * candidateEmail is the email the applicant typed at apply time - the backend checks it
+   * against the application's own record as an ownership proof, since this endpoint is
+   * anonymous and jobApplicationId alone is a guessable sequential number.
+   */
+  initiatePayment(jobApplicationId: number, candidateEmail: string) {
+    return this.httpClient.post<ApiResponse<IPaymentInitiateResponse>>(
+      `${this.API_URL}/initiate/${jobApplicationId}?candidateEmail=${encodeURIComponent(candidateEmail)}`,
+      {},
+    );
   }
 
-  /** Polled by the payment-result page until the IPN handler resolves the outcome. */
-  getPaymentStatus(jobApplicationId: number) {
-    return this.httpClient.get<ApiResponse<IPaymentStatusResponse>>(`${this.API_URL}/status/${jobApplicationId}`);
+  /** Polled by the payment-result page until the IPN handler resolves the outcome. Same ownership check as initiatePayment. */
+  getPaymentStatus(jobApplicationId: number, candidateEmail: string) {
+    return this.httpClient.get<ApiResponse<IPaymentStatusResponse>>(
+      `${this.API_URL}/status/${jobApplicationId}?candidateEmail=${encodeURIComponent(candidateEmail)}`,
+    );
   }
 }

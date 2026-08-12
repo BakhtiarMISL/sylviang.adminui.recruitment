@@ -13,7 +13,7 @@
     <div class="table-container p-4" [ngClass]="{ 'text-orange-600': item.status === StatusEnum.NeedsCorrection, 'text-green-600': item.status === StatusEnum.Approved }">
       <i class="fa fa-circle-info"></i>
       Status: <strong>{{ item.status }}</strong>
-      <span *ngIf="item.submittedAt"> - submitted {{ item.submittedAt | date: 'dd-MMM-yyyy HH:mm' }}</span>
+      <span *ngIf="item.submittedAt"> - submitted {{ item.submittedAt | date: 'dd-MMM-yyyy h:mm a' }}</span>
       <div *ngIf="item.status === StatusEnum.NeedsCorrection && item.correctionComment" class="mt-2">
         <strong>Correction requested:</strong> {{ item.correctionComment }}
       </div>

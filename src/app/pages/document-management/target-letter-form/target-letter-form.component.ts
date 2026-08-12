@@ -36,6 +36,12 @@ export class TargetLetterFormComponent implements OnInit {
   offerLetter: IOfferLetterResponse | null = null;
   templateOptions: { label: string; value: number }[] = [];
   templates: IDocumentTemplateResponse[] = [];
+  // renderPreview() is async (documentTemplateService.preview() is an HTTP call) - without this,
+  // clicking Generate right after typing/picking a template (before the response lands) submits
+  // with finalBody still empty, since a *disabled* control is excluded from form.invalid and
+  // getRawValue() just returns whatever's currently there. Backend then 400s with a bare
+  // "Validation Failed" the candidate/HR never sees an obvious cause for.
+  previewRendering = false;
 
   ngOnInit(): void {
     this.breadcrumbService.setBreadcrumbs([
@@ -113,13 +119,21 @@ export class TargetLetterFormComponent implements OnInit {
       Designation: this.offerLetter.designation,
       Kpis: this.form.get('kpis')?.value ?? '',
       Objectives: this.form.get('objectives')?.value ?? '',
+      // No candidate-facing "My Target Letters" page exists (unlike Offer/Appointment Letter) -
+      // points at the dashboard instead of leaving the template's {{PortalLink}} unsubstituted.
+      PortalLink: `${window.location.origin}/dashboard`,
     };
 
+    this.previewRendering = true;
     this.documentTemplateService.preview({ body: template.body, placeholderValues }).subscribe({
       next: (response) => {
         const rendered = !response.hasError && response.content ? response.content.renderedBody : '';
         bodyControl?.setValue(rendered);
         bodyControl?.enable();
+        this.previewRendering = false;
+      },
+      error: () => {
+        this.previewRendering = false;
       },
     });
   }
@@ -128,7 +142,7 @@ export class TargetLetterFormComponent implements OnInit {
     this.formSubmitted = true;
     this.errorMessage = '';
 
-    if (this.form.invalid || !this.offerLetter) {
+    if (this.form.invalid || !this.offerLetter || this.previewRendering) {
       this.form.markAllAsTouched();
       return;
     }

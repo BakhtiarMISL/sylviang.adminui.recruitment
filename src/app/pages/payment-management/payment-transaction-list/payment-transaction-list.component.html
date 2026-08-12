@@ -118,7 +118,7 @@
         </td>
         <td>{{ item.amount | number: '1.2-2' }} {{ item.currency }}</td>
         <td>{{ item.transactionId }}</td>
-        <td>{{ item.paidAt ? (item.paidAt | date: 'dd-MMM-yy HH:mm') : '-' }}</td>
+        <td>{{ item.paidAt ? (item.paidAt | date: 'dd-MMM-yy h:mm a') : '-' }}</td>
       </tr>
     </ng-template>
   </p-table>

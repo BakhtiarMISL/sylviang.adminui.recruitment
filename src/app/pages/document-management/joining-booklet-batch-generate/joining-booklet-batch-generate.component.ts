@@ -9,6 +9,7 @@ import {
   IJoiningBookletEligibleCandidateResponse,
 } from '@core/interfaces/recruitment-management/joining-booklet.interface';
 import { IDocumentTemplateResponse } from '@core/interfaces/recruitment-management/document-template.interface';
+import { DateTimeUtility } from '@app/@core/utils/date-time.utility';
 
 @Component({
   selector: 'app-joining-booklet-batch-generate',
@@ -94,7 +95,10 @@ export class JoiningBookletBatchGenerateComponent implements OnInit {
         offerLetterIds: this.selectedCandidates.map((c) => c.offerLetterId),
         documentTemplateId: this.documentTemplateId,
         batchLabel: this.batchLabel.trim(),
-        joiningDate: this.joiningDate.toISOString(),
+        // .toISOString() shifts to UTC (the exact anti-pattern the Exam/Interview timezone fix
+        // replaced everywhere else) - a local-midnight joining date turns into an 18:00-the-day-
+        // before UTC stamp on the generated booklet.
+        joiningDate: DateTimeUtility.toLocalDateTimeString(this.joiningDate)!,
       })
       .subscribe({
         next: (response) => {

@@ -3,8 +3,11 @@
     <div class="table-container mb-4 p-4">
       <h3 class="table-title mb-3">{{ isEditMode ? (isSystemRole ? 'View Role' : 'Edit Role') : 'Add Role' }}</h3>
 
-      <small class="mb-3 block text-blue-600" *ngIf="isSystemRole">
+      <small class="mb-3 block text-blue-600" *ngIf="isSystemRole && !hasFullSystemAccess">
         This is a system role — its name and permissions are managed by the application and cannot be edited here.
+      </small>
+      <small class="mb-3 block text-blue-600" *ngIf="hasFullSystemAccess">
+        This system role has full application access. The permissions below are effective permissions and are managed by the application.
       </small>
 
       <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -17,7 +20,7 @@
         </div>
       </div>
 
-      <h4 class="mt-4 mb-2 font-medium text-gray-900 dark:text-white">Permission Matrix</h4>
+      <h4 class="mt-4 mb-2 font-medium text-gray-900 dark:text-white">{{ hasFullSystemAccess ? 'Effective Permission Matrix' : 'Permission Matrix' }}</h4>
       <div class="table-container overflow-x-auto">
         <p-table [value]="matrix" styleClass="p-datatable-sm">
           <ng-template pTemplate="header">

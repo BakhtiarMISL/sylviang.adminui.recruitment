@@ -1,11 +1,13 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { IJobEligibilityResponse, IPublicJobPostingResponse } from '@app/@core/interfaces/recruitment-management/career-portal.interface';
+import { IJobVacancyAttachmentResponse } from '@app/@core/interfaces/recruitment-management/job-vacancy-attachment.interface';
 import { IMyApplication } from '@app/@core/interfaces/recruitment-management/job-application.interface';
 import { CareerPortalService } from '@app/@core/services/recruitment/career-portal/career-portal.service';
 import { JobApplicationService } from '@app/@core/services/recruitment/job-application/job-application.service';
 import { AuthService } from '@core/services/auth/auth.service';
 import { UserRoleEnum } from '@core/enums/user-role.enum';
+import { Base_URL } from '@env/environment';
 
 @Component({
   selector: 'app-job-detail',
@@ -109,6 +111,12 @@ export class JobDetailComponent implements OnInit {
 
   goToLogin(): void {
     this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
+  }
+
+  getAttachmentDownloadUrl(attachment: IJobVacancyAttachmentResponse): string {
+    if (!attachment.downloadUrl) return '';
+    if (/^https?:\/\//i.test(attachment.downloadUrl)) return attachment.downloadUrl;
+    return `${Base_URL}${attachment.downloadUrl.startsWith('/') ? '' : '/'}${attachment.downloadUrl}`;
   }
 
   get hasEligibilityInfo(): boolean {

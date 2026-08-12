@@ -3,6 +3,7 @@ import { DocumentAcceptanceStatusEnum, DocumentTypeEnum } from '@app/@core/enums
 export interface IDocumentTrackingFilterRequest {
   documentType?: DocumentTypeEnum;
   acceptanceStatus?: DocumentAcceptanceStatusEnum;
+  jobApplicationId?: number;
   page?: number;
   pageSize?: number;
 }
@@ -15,4 +16,5 @@ export interface IDocumentTrackingItemResponse {
   recipientEmail?: string;
   generatedAt: string;
   acceptanceStatus: DocumentAcceptanceStatusEnum;
+  generatedPdfPath?: string;
 }

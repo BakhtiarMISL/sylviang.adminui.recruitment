@@ -51,10 +51,13 @@
               <label [for]="'stageName' + i">Stage Name</label>
             </p-floatlabel>
 
-            <p-floatlabel variant="in">
-              <p-autoComplete [id]="'stageType' + i" [(ngModel)]="stage.stageType" [ngModelOptions]="{ standalone: true }" [suggestions]="filteredStageTypes" (completeMethod)="filterStageType($event)" [dropdown]="true" class="w-full"></p-autoComplete>
+            <div>
+              <p-floatlabel variant="in">
+              <p-select [inputId]="'stageType' + i" [(ngModel)]="stage.stageType" [ngModelOptions]="{ standalone: true }" [options]="suggestedStageTypes" class="w-full" appendTo="body"></p-select>
               <label [for]="'stageType' + i">Stage Type</label>
-            </p-floatlabel>
+              </p-floatlabel>
+              <small class="text-gray-500">Choose Custom / General for a normal stage without specialised system automation.</small>
+            </div>
 
             <div>
               <p-floatlabel variant="in">
@@ -80,16 +83,16 @@
             </p-floatlabel>
 
             <p-floatlabel variant="in">
-              <p-inputnumber [inputId]="'maxMarks' + i" class="w-full" [(ngModel)]="stage.maxMarks" [ngModelOptions]="{ standalone: true }" [min]="0"></p-inputnumber>
-              <label [for]="'maxMarks' + i">Max Marks (if this stage is an assessment)</label>
+              <p-inputnumber [inputId]="'maxMarks' + i" class="w-full" [(ngModel)]="stage.maxMarks" [ngModelOptions]="{ standalone: true }" [min]="1"></p-inputnumber>
+              <label [for]="'maxMarks' + i">Max Marks (assessment only)</label>
             </p-floatlabel>
 
             <div>
               <p-floatlabel variant="in">
-                <p-inputnumber [inputId]="'passMarks' + i" class="w-full" [(ngModel)]="stage.passMarks" [ngModelOptions]="{ standalone: true }" [min]="0"></p-inputnumber>
-                <label [for]="'passMarks' + i">Pass Marks</label>
+                <p-inputnumber [inputId]="'passMarks' + i" class="w-full" [(ngModel)]="stage.passMarks" [ngModelOptions]="{ standalone: true }" [min]="1"></p-inputnumber>
+                <label [for]="'passMarks' + i">Pass Marks (assessment only)</label>
               </p-floatlabel>
-              <small class="text-red-500" *ngIf="marksAreInvalid(stage)">Pass marks must not exceed max marks.</small>
+              <small class="text-red-500" *ngIf="marksAreInvalid(stage)">Set both marks (greater than zero), keep pass marks within max marks, and set them when automatic progression is selected.</small>
             </div>
 
             <div class="sm:col-span-2 lg:col-span-3">
@@ -123,7 +126,7 @@
                 ></p-select>
                 <label [for]="'autoProgressionTarget' + i">Auto-progress to (if Score ≥ Pass Marks)</label>
               </p-floatlabel>
-              <small class="text-gray-500" *ngIf="stage.autoProgressionTargetDisplayOrder != null && stage.passMarks == null">Set Pass Marks above for this to actually trigger.</small>
+              <small class="text-gray-500">Optional. When selected, the candidate advances only after this stage is completed with a score meeting its Pass Marks.</small>
             </div>
 
             <div class="flex flex-col gap-2 sm:col-span-2 lg:col-span-3">

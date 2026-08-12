@@ -4,7 +4,7 @@
   <ng-container *ngIf="item">
     <div class="table-container mb-4 p-4">
       <h3 class="table-title mb-1">{{ item.documentTemplateName }}</h3>
-      <span class="text-neutral">Generated {{ item.generatedAt | date: 'dd-MMM-yyyy HH:mm' }}</span>
+      <span class="text-neutral">Generated {{ item.generatedAt | date: 'dd-MMM-yyyy h:mm a' }}</span>
     </div>
 
     <div class="table-container p-2">

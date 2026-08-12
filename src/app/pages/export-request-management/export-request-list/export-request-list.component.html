@@ -74,7 +74,7 @@
         <td>{{ item.exportType }}</td>
         <td>{{ item.format }}</td>
         <td>{{ item.requestedByUserName || '-' }}</td>
-        <td>{{ item.requestedAt | date: 'dd-MMM-yy HH:mm' }}</td>
+        <td>{{ item.requestedAt | date: 'dd-MMM-yy h:mm a' }}</td>
         <td>{{ item.rowCount ?? '-' }}</td>
         <td>
           <span

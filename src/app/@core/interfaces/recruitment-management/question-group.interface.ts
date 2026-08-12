@@ -13,6 +13,7 @@ export interface IQuestionGroupResponse {
 export interface IQuestionGroupLookupResponse {
   questionGroupId: number;
   name: string;
+  activeQuestionCount: number;
 }
 
 export interface ISetActiveStatusRequest {

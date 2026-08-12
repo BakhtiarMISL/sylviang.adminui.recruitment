@@ -1,6 +1,6 @@
 <form [formGroup]="jobVacancyForm" (ngSubmit)="onSubmit()" class="page-container">
   <!-- Basic Info -->
-  <section class="form-container">
+  <section class="form-container basic-info-container">
     <h3 class="form-section-header">{{ isEditMode ? 'Update Job Vacancy' : 'Add Job Vacancy' }}</h3>
 
     <!-- Hiring Pipeline -->
@@ -129,7 +129,7 @@
     </div>
 
     <!-- Location -->
-    <div>
+    <div class="basic-location">
       <p-floatlabel variant="in">
         <input pInputText inputId="location" formControlName="location" maxlength="200" class="w-full" [class.ng-invalid]="hasError('location')" [class.ng-dirty]="hasError('location')" (blur)="f['location'].markAsTouched()" />
         <label for="location">Location</label>
@@ -237,16 +237,16 @@
 
     <div>
       <p-floatlabel variant="in">
-        <p-inputnumber inputId="minAge" formControlName="minAge" class="w-full" [min]="0" [useGrouping]="false" [class.ng-invalid]="hasError('minAge')" [class.ng-dirty]="hasError('minAge')" (onBlur)="f['minAge'].markAsTouched()"></p-inputnumber>
-        <label for="minAge">Minimum Age</label>
+        <p-inputnumber inputId="minAge" formControlName="minAge" class="w-full" [min]="18" [max]="80" [minFractionDigits]="0" [maxFractionDigits]="0" [useGrouping]="false" [class.ng-invalid]="hasError('minAge')" [class.ng-dirty]="hasError('minAge')" (onBlur)="f['minAge'].markAsTouched()"></p-inputnumber>
+        <label for="minAge">Minimum Age (years)</label>
       </p-floatlabel>
       <div *ngIf="hasError('minAge')" class="invalid">{{ getErrorMessage('minAge') }}</div>
     </div>
 
     <div>
       <p-floatlabel variant="in">
-        <p-inputnumber inputId="maxAge" formControlName="maxAge" class="w-full" [min]="0" [useGrouping]="false" [class.ng-invalid]="hasError('maxAge')" [class.ng-dirty]="hasError('maxAge')" (onBlur)="f['maxAge'].markAsTouched()"></p-inputnumber>
-        <label for="maxAge">Maximum Age</label>
+        <p-inputnumber inputId="maxAge" formControlName="maxAge" class="w-full" [min]="18" [max]="80" [minFractionDigits]="0" [maxFractionDigits]="0" [useGrouping]="false" [class.ng-invalid]="hasError('maxAge')" [class.ng-dirty]="hasError('maxAge')" (onBlur)="f['maxAge'].markAsTouched()"></p-inputnumber>
+        <label for="maxAge">Maximum Age (years)</label>
       </p-floatlabel>
       <div *ngIf="hasError('maxAge')" class="invalid">{{ getErrorMessage('maxAge') }}</div>
     </div>

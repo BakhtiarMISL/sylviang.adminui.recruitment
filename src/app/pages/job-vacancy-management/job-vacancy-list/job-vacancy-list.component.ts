@@ -30,12 +30,14 @@ export class JobVacancyListComponent implements OnInit, AfterViewInit {
   rows = UI_CONFIG.defaultPageSize;
   currentPage = 1;
 
-  // Default to newest-posted-first - previously '' meant no ORDER BY at all was sent to the
-  // backend, so the list came back in whatever incidental order Postgres returned rows in
-  // (oldest-first in practice), not the most recently posted vacancies HR actually wants to see.
-  sortBy: string = 'postingDate';
-  sortDirection: string = 'desc';
+  // Leave the initial sort unset so the vacancy endpoint applies its deterministic default:
+  // CreatedAt DESC, then JobPostingId DESC. User-selected column sorts still populate these.
+  sortBy: string = '';
+  sortDirection: string = '';
   searchTerm = '';
+  filtersCollapsed = true;
+  postingDateTo: Date | null = null;
+  closingDateTo: Date | null = null;
 
   // EP-15/US-113: additive "My Postings" filter - client-side paginated since a single
   // user's own postings is a small, unpaginated backend result (GET .../my-postings).
@@ -66,11 +68,17 @@ export class JobVacancyListComponent implements OnInit, AfterViewInit {
 
   applySearch() {
     this.currentPage = 1;
+    this.filtersCollapsed = true;
     this.loadJobVacancies();
   }
 
   resetSearch() {
     this.searchTerm = '';
+    this.postingDateTo = null;
+    this.closingDateTo = null;
+    this.myPostingsOnly = false;
+    this.currentPage = 1;
+    this.filtersCollapsed = false;
     this.loadJobVacancies();
   }
 
@@ -86,6 +94,8 @@ export class JobVacancyListComponent implements OnInit, AfterViewInit {
       page: this.currentPage,
       pageSize: this.rows,
       ...(this.searchTerm && this.searchTerm.trim() && { searchTerm: this.searchTerm.trim() }),
+      ...(this.postingDateTo && { postingDateTo: this.toDateParameter(this.postingDateTo) }),
+      ...(this.closingDateTo && { closingDateTo: this.toDateParameter(this.closingDateTo) }),
       ...(this.sortBy && { sortBy: this.sortBy }),
       ...(this.sortDirection && { sortDirection: this.sortDirection }),
     };
@@ -114,6 +124,7 @@ export class JobVacancyListComponent implements OnInit, AfterViewInit {
 
   toggleMyPostingsOnly(): void {
     this.currentPage = 1;
+    this.filtersCollapsed = true;
     this.loadJobVacancies();
   }
 
@@ -162,6 +173,13 @@ export class JobVacancyListComponent implements OnInit, AfterViewInit {
     this.sortDirection = event.order === 1 ? 'asc' : 'desc';
     this.currentPage = 1;
     this.loadJobVacancies();
+  }
+
+  private toDateParameter(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   formatEnumLabel(value: string | null | undefined): string {

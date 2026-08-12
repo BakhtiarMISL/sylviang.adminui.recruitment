@@ -20,7 +20,7 @@
 
   <div *ngIf="!loading" class="grid grid-cols-1 gap-4">
     <div *ngFor="let pipeline of pipelines" class="rounded-lg bg-white p-4 shadow-sm dark:bg-dark">
-      <div class="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+      <div class="flex flex-col gap-3">
         <div>
           <div class="flex items-center gap-2">
             <h4 class="text-lg font-medium text-gray-900 dark:text-white">{{ pipeline.name }}</h4>

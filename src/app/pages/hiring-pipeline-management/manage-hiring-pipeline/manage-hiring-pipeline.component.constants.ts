@@ -34,6 +34,7 @@ export const SuggestedStageTypes: string[] = [
   'Joining',
   'Onboarding',
   'Rejected',
+  'Custom / General',
 ];
 
 export function newStage(displayOrder: number): IPipelineStage {

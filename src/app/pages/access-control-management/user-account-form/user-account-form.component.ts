@@ -27,6 +27,7 @@ export class UserAccountFormComponent implements OnInit {
   isEditMode = false;
   userAccountId: number | null = null;
   errorMessage = '';
+  submitting = false;
 
   ngOnInit(): void {
     this.route.paramMap.subscribe((params) => {
@@ -48,7 +49,6 @@ export class UserAccountFormComponent implements OnInit {
     this.form = this.fb.group({
       email: [null, this.isEditMode ? [] : [Validators.required, Validators.email]],
       fullName: [null, [Validators.required, Validators.maxLength(200)]],
-      password: [null, this.isEditMode ? [] : [Validators.required, Validators.minLength(8)]],
       roleIds: [[], [Validators.required]],
     });
   }
@@ -64,7 +64,10 @@ export class UserAccountFormComponent implements OnInit {
   private loadRoleOptions(): void {
     this.roleService.getAll().subscribe({
       next: (response) => {
-        this.roleOptions = !response.hasError && response.content ? response.content : [];
+        const roles = !response.hasError && response.content ? response.content : [];
+        // Candidate is self-service only (register/apply flow) - never assignable to a staff
+        // user account through this screen. Backend rejects it too (UserAccountService).
+        this.roleOptions = roles.filter((role) => role.name !== 'Candidate');
       },
       error: () => {
         this.roleOptions = [];
@@ -97,6 +100,10 @@ export class UserAccountFormComponent implements OnInit {
   }
 
   onSubmit(): void {
+    if (this.submitting) {
+      return;
+    }
+
     this.formSubmitted = true;
     this.errorMessage = '';
 
@@ -104,6 +111,8 @@ export class UserAccountFormComponent implements OnInit {
       this.form.markAllAsTouched();
       return;
     }
+
+    this.submitting = true;
 
     if (this.isEditMode && this.userAccountId) {
       const request: IUserAccountUpdateRequest = {
@@ -116,17 +125,18 @@ export class UserAccountFormComponent implements OnInit {
             this.router.navigate(['/access-control/user-account-list']);
           } else {
             this.errorMessage = response?.decentMessage || 'Failed to update user account';
+            this.submitting = false;
           }
         },
         error: (error) => {
           this.errorMessage = error?.error?.decentMessage || 'Failed to update user account';
+          this.submitting = false;
         },
       });
     } else {
       const request: IUserAccountCreateRequest = {
         email: this.form.value.email,
         fullName: this.form.value.fullName,
-        password: this.form.value.password,
         roleIds: this.form.value.roleIds,
       };
       this.userAccountService.create(request).subscribe({
@@ -135,10 +145,12 @@ export class UserAccountFormComponent implements OnInit {
             this.router.navigate(['/access-control/user-account-list']);
           } else {
             this.errorMessage = response?.decentMessage || 'Failed to invite user';
+            this.submitting = false;
           }
         },
         error: (error) => {
           this.errorMessage = error?.error?.decentMessage || 'Failed to invite user';
+          this.submitting = false;
         },
       });
     }

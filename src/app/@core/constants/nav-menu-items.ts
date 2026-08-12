@@ -66,12 +66,6 @@ export const webSidebarMenuItems: IMenuItem[] = [
         icon: 'fa-solid fa-users',
       },
       {
-        href: '/cv-bank',
-        title: 'CV Bank',
-        active: false,
-        icon: 'fa-solid fa-magnifying-glass',
-      },
-      {
         href: '/talent-pools/talent-pool-list',
         title: 'Talent Pools',
         active: false,
@@ -103,9 +97,7 @@ export const webSidebarMenuItems: IMenuItem[] = [
         active: false,
         icon: 'fa-solid fa-people-arrows',
       },
-      // ── Selection ── (everything below is Admin+HR per each route's own roleData - moved
-      // Final Selection Recommendations, the one genuinely Admin-only item here, down next to
-      // Account Settings/Application Settings so it doesn't sit under a misleading heading.)
+      // ── Selection ──
       {
         href: '/final-selection-pool/final-selection-pool-list',
         title: 'Final Selection Pool',
@@ -123,6 +115,12 @@ export const webSidebarMenuItems: IMenuItem[] = [
         title: 'Office Notes',
         active: false,
         icon: 'fa-solid fa-file-pen',
+      },
+      {
+        href: '/document-management/document-tracking-list',
+        title: 'Generated Documents',
+        active: false,
+        icon: 'fa-solid fa-list-check',
       },
       // ── Payment ──
       {
@@ -205,13 +203,6 @@ export const webSidebarMenuItems: IMenuItem[] = [
     title: 'Account Settings',
     active: false,
     icon: 'fa-solid fa-user-gear',
-  },
-  {
-    href: '/candidate-recommendations/candidate-recommendation-list',
-    title: 'Final Selection Recommendations',
-    active: false,
-    icon: 'fa-solid fa-star',
-    roles: [UserRoleEnum.Admin],
   },
   {
     href: '/application-settings',
@@ -359,6 +350,25 @@ export const webSidebarMenuItems: IMenuItem[] = [
         icon: 'fa-solid fa-book',
       },
       {
+        href: '/profile-field-config/profile-field-config-list',
+        title: 'Profile Field Config',
+        active: false,
+        icon: 'fa-solid fa-sliders',
+      },
+    ],
+  },
+  // Split out from System Administration (which stays Admin-only) so SuperAdmin - a narrow
+  // support/ops role, not a bigger Admin - can reach exactly what it actually needs: inviting/
+  // managing HR/Admin accounts and impersonating one (the "Impersonate" button lives inline on
+  // the User Accounts row, no separate page for it). Roles stays Admin-only below - designing
+  // role/permission structures is an Admin call, not part of SuperAdmin's job.
+  {
+    title: 'Access Control',
+    active: false,
+    icon: 'fa-solid fa-user-shield',
+    roles: [UserRoleEnum.Admin, UserRoleEnum.SuperAdmin],
+    subItems: [
+      {
         href: '/access-control/user-account-list',
         title: 'User Accounts',
         active: false,
@@ -366,15 +376,10 @@ export const webSidebarMenuItems: IMenuItem[] = [
       },
       {
         href: '/access-control/role-list',
+        roles: [UserRoleEnum.Admin],
         title: 'Roles',
         active: false,
         icon: 'fa-solid fa-user-shield',
-      },
-      {
-        href: '/profile-field-config/profile-field-config-list',
-        title: 'Profile Field Config',
-        active: false,
-        icon: 'fa-solid fa-sliders',
       },
     ],
   },

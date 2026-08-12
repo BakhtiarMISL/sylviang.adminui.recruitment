@@ -1,6 +1,7 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { UI_CONFIG } from '@app/@core/constants';
 import { BreadcrumbService } from '@app/@core/services';
+import { DateTimeUtility } from '@app/@core/utils/date-time.utility';
 import {
   IPaymentTransactionListItem,
   PaymentTransactionStatusEnum,
@@ -68,8 +69,8 @@ export class PaymentTransactionListComponent implements OnInit {
       jobPostingId: this.filterJobPostingId ?? undefined,
       paymentStatus: this.filterStatus ?? undefined,
       candidateName: this.filterCandidateName || undefined,
-      dateFrom: this.filterDateFrom ? this.filterDateFrom.toISOString() : undefined,
-      dateTo: this.filterDateTo ? this.filterDateTo.toISOString() : undefined,
+      dateFrom: this.filterDateFrom ? DateTimeUtility.formatDateForAPI(this.filterDateFrom) : undefined,
+      dateTo: this.filterDateTo ? DateTimeUtility.formatDateForAPI(this.filterDateTo) : undefined,
       page: this.currentPage,
       pageSize: this.rows,
     };

@@ -2,6 +2,59 @@
   display: block;
 }
 
+// Use a stable three-column grid for the basic job details. This keeps the short
+// controls aligned and lets the location and long-text fields use the full row.
+.basic-info-container {
+  @media (min-width: 640px) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+
+    > .form-section-header,
+    > .col-span-full,
+    > .basic-location {
+      grid-column: span 3 / span 3;
+    }
+  }
+}
+
+// PrimeNG select controls have a taller default than text and number inputs.
+// Use one shared control height so the grid rows line up precisely.
+::ng-deep .basic-info-container {
+  .p-select,
+  .p-inputtext,
+  .p-inputnumber-input {
+    box-sizing: border-box;
+    height: 2.75rem;
+    min-height: 2.75rem;
+  }
+
+  .p-select {
+    align-items: center;
+  }
+}
+
+// Keep labels above every control. The markup places labels after their controls
+// for PrimeNG float-label support, so flex ordering gives the form a conventional,
+// readable layout without label/input overlap.
+::ng-deep .form-container .p-floatlabel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+
+  label {
+    position: static !important;
+    display: block !important;
+    order: -1;
+    transform: none !important;
+    margin: 0 !important;
+    font-size: 0.875rem !important;
+    line-height: 1.25;
+  }
+
+  > :not(label) {
+    width: 100%;
+  }
+}
+
 // .form-container is a shared 4-column-at-xl grid utility. Sections with only 2-3 short
 // fields (Salary Range, Visibility & Dates, Application Fee) stretch it wide and leave half
 // the card empty at desktop widths - cap those specific sections at 2 columns instead.

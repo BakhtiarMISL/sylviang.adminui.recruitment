@@ -59,19 +59,19 @@ const routes: Routes = [
     path: 'appointment-letter-list',
     component: AppointmentLetterListComponent,
     canActivate: [RoleGuard],
-    data: roleData,
+    data: adminHrRoleData,
   },
   {
     path: 'manage-appointment-letter',
     component: AppointmentLetterFormComponent,
     canActivate: [RoleGuard],
-    data: roleData,
+    data: adminHrRoleData,
   },
   {
     path: 'document-tracking-list',
     component: DocumentTrackingListComponent,
     canActivate: [RoleGuard],
-    data: roleData,
+    data: adminHrRoleData,
   },
   {
     path: 'joining-booklet-list',

@@ -46,7 +46,6 @@ export interface IUserAccountResponse {
 export interface IUserAccountCreateRequest {
   email: string;
   fullName: string;
-  password: string;
   roleIds: number[];
 }
 

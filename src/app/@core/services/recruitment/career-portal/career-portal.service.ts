@@ -25,7 +25,10 @@ export class CareerPortalService {
   // resume is optional - omitting it tells the backend to reuse whatever resume the candidate
   // already has on file in their profile Documents (JobApplicationService.SubmitAsync), instead
   // of forcing a re-upload of the same file on every application.
-  apply(jobPostingId: number, request: IJobApplicationSubmitRequest, resume: File | null) {
+  //
+  // waiverProofDocument backs a claimed specialCategoryId (e.g. Freedom Fighter) - without it the
+  // backend records the category but never waives the fee (JobApplicationService.SubmitAsync).
+  apply(jobPostingId: number, request: IJobApplicationSubmitRequest, resume: File | null, waiverProofDocument: File | null = null) {
     const formData = new FormData();
     formData.append('candidateName', request.candidateName);
     formData.append('candidateEmail', request.candidateEmail);
@@ -34,6 +37,7 @@ export class CareerPortalService {
     if (request.specialCategoryId) formData.append('specialCategoryId', String(request.specialCategoryId));
     if (request.referralSourceId) formData.append('referralSourceId', String(request.referralSourceId));
     if (resume) formData.append('resume', resume, resume.name);
+    if (waiverProofDocument) formData.append('waiverProofDocument', waiverProofDocument, waiverProofDocument.name);
     // No payment happens here for fee-bearing postings (see PaymentRedirectUrl in the response) -
     // a generic "success" toast at this point would tell the candidate they're done when they
     // still owe payment. apply-form.component handles messaging per branch instead.

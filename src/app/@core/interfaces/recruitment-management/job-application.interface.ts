@@ -65,6 +65,10 @@ export interface IJobApplicationDetail {
   applicationStatus: ApplicationStatusEnum;
   appliedDate?: string;
   source: ApplicationSourceEnum;
+  specialCategoryName?: string;
+  waiverProofDocumentUrl?: string;
+  waiverRuleName?: string;
+  waivedAt?: string;
   statusHistory: IApplicationStatusHistoryEntry[];
 }
 

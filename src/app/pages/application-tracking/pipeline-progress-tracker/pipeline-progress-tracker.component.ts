@@ -1,9 +1,7 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
-import { InterviewStatusEnum, RecommendationStatusEnum, StageProgressStatusEnum } from '@app/@core/enums/recruitment.enum';
-import { ICandidateRecommendationResponse } from '@app/@core/interfaces/recruitment-management/candidate-recommendation.interface';
+import { InterviewStatusEnum, StageProgressStatusEnum } from '@app/@core/enums/recruitment.enum';
 import { IInterviewResponse } from '@app/@core/interfaces/recruitment-management/interview.interface';
 import { IJobApplicationPipelineProgress, IPipelineStageProgress } from '@app/@core/interfaces/recruitment-management/pipeline-progress.interface';
-import { CandidateRecommendationService } from '@app/@core/services/recruitment/candidate-recommendation/candidate-recommendation.service';
 import { InterviewService } from '@app/@core/services/recruitment/interview/interview.service';
 import { JobApplicationService } from '@app/@core/services/recruitment/job-application/job-application.service';
 import { ToastService } from '@app/@core/services/misc/toast.service';
@@ -19,15 +17,15 @@ interface StageEditState {
 }
 
 /** What the "what do I do next" banner on the parent Application Detail page needs, re-derived
- * from this tracker's own state rather than duplicating the pipeline/recommendation/interview
- * fetches up in the parent - this component already knows all of it. */
+ * from this tracker's own state rather than duplicating the pipeline/interview fetches up in the
+ * parent - this component already knows all of it. */
 export interface IPipelineTrackerNextStepState {
   hasPipeline: boolean;
   blockingStageName: string | null;
   blockingStageIsInterview: boolean;
+  blockingStageIsExam: boolean;
   pendingInterviewRound: number | null;
-  hasRecommendation: boolean;
-  recommendationStatus: string | null;
+  allStagesCompleted: boolean;
 }
 
 @Component({
@@ -39,7 +37,6 @@ export interface IPipelineTrackerNextStepState {
 export class PipelineProgressTrackerComponent implements OnInit, OnChanges {
   constructor(
     private jobApplicationService: JobApplicationService,
-    private candidateRecommendationService: CandidateRecommendationService,
     private interviewService: InterviewService,
     private toast: ToastService,
   ) {}
@@ -58,34 +55,40 @@ export class PipelineProgressTrackerComponent implements OnInit, OnChanges {
   editState: StageEditState | null = null;
   saving = false;
 
-  // Final selection recommendation (US-049)
-  recommendation: ICandidateRecommendationResponse | null = null;
-  recommendDialogVisible = false;
-  recommendJustification = '';
-  submittingRecommendation = false;
+  // Stage cards are dense (description + passing criteria + required documents + duration, on
+  // top of the action area) - collapsed by default so the card reads as name/status/action at a
+  // glance, expandable per-card when HR actually needs the spec text.
+  expandedStageIds = new Set<number>();
 
-  // EP-08: interviews scheduled for this job application - not scoped per stage since the
-  // schedule-interview form doesn't set PipelineStageId (soft ref, optional), so shown as one
-  // flat list rather than attached to a specific stage card.
+  toggleStageDetails(stage: IPipelineStageProgress): void {
+    if (this.expandedStageIds.has(stage.pipelineStageId)) {
+      this.expandedStageIds.delete(stage.pipelineStageId);
+    } else {
+      this.expandedStageIds.add(stage.pipelineStageId);
+    }
+  }
+
+  isStageExpanded(stage: IPipelineStageProgress): boolean {
+    return this.expandedStageIds.has(stage.pipelineStageId);
+  }
+
+  // EP-08: interviews scheduled for this job application, scoped per stage card via
+  // interview.pipelineStageId - every interview-type stage now schedules through this same
+  // Interview entity (not just the old TechnicalInterview-only flow), so each card filters down
+  // to its own rounds instead of showing one flat list.
   interviews: IInterviewResponse[] = [];
   loadingInterviews = false;
 
   ngOnInit(): void {
     this.load();
-    this.loadRecommendation();
     this.loadInterviews();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['jobApplicationId'] && !changes['jobApplicationId'].firstChange) {
       this.load();
-      this.loadRecommendation();
       this.loadInterviews();
     }
-  }
-
-  get hasInterviewStage(): boolean {
-    return !!this.progress?.stages?.some((s) => (s.stageType || '').toLowerCase().includes('interview'));
   }
 
   loadInterviews(): void {
@@ -131,8 +134,8 @@ export class PipelineProgressTrackerComponent implements OnInit, OnChanges {
   }
 
   /** Re-derives and emits the next-step summary from whatever's loaded so far - called after
-   * each of the three independent fetches (stages/recommendation/interviews) settles, so the
-   * parent banner updates incrementally rather than waiting on all three every time. */
+   * each of the two independent fetches (stages/interviews) settles, so the parent banner
+   * updates incrementally rather than waiting on both every time. */
   private emitNextStepState(): void {
     const blocking = this.blockingStage;
     const blockingIsInterview = !!blocking && (blocking.stageType || '').toLowerCase().includes('interview');
@@ -141,9 +144,9 @@ export class PipelineProgressTrackerComponent implements OnInit, OnChanges {
       hasPipeline: !!this.progress?.hasPipeline,
       blockingStageName: blocking?.stageName ?? null,
       blockingStageIsInterview: blockingIsInterview,
-      pendingInterviewRound: blockingIsInterview && this.pendingInterview ? this.pendingInterview.round : null,
-      hasRecommendation: !!this.recommendation,
-      recommendationStatus: this.recommendation?.status ?? null,
+      blockingStageIsExam: !!blocking && this.isExamDrivenStage(blocking),
+      pendingInterviewRound: blockingIsInterview ? this.pendingInterviewForStage(blocking)?.round ?? null : null,
+      allStagesCompleted: !!this.progress?.hasPipeline && !blocking,
     });
   }
 
@@ -199,19 +202,6 @@ export class PipelineProgressTrackerComponent implements OnInit, OnChanges {
       });
   }
 
-  // ── Final selection recommendation (US-049) ─────────────────────
-
-  loadRecommendation(): void {
-    if (!this.jobApplicationId) return;
-
-    this.candidateRecommendationService.getLatest(this.jobApplicationId).subscribe({
-      next: (response) => {
-        this.recommendation = response && !response.hasError ? response.content : null;
-        this.emitNextStepState();
-      },
-    });
-  }
-
   // Stage types that come AFTER the final-selection decision (offer/onboarding), not part of the
   // evaluation itself - mirrors PipelineStageTypes.PostDecision on the backend.
   private static readonly POST_DECISION_STAGE_TYPES = ['Offer', 'Joining', 'Onboarding'];
@@ -236,24 +226,29 @@ export class PipelineProgressTrackerComponent implements OnInit, OnChanges {
     );
   }
 
-  /** Whatever's blocking the Technical Interview stage from starting (reuses blockingPriorStage
-   * against that stage) - gates the Schedule Interview button. Pipelines without a
-   * TechnicalInterview-typed stage aren't gated at all (nothing to block against). */
-  get blockingStageBeforeInterview(): IPipelineStageProgress | null {
-    const interviewStage = this.progress?.stages?.find((s) => (s.stageType || '').toLowerCase() === 'technicalinterview');
-    return interviewStage ? this.blockingPriorStage(interviewStage) : null;
+  /** Interviews scheduled specifically for this stage card - every interview-type stage now goes
+   * through the same Interview entity, tagged with the PipelineStageId it was scheduled for. */
+  interviewsForStage(stage: IPipelineStageProgress): IInterviewResponse[] {
+    return this.interviews.filter((i) => i.pipelineStageId === stage.pipelineStageId);
   }
 
-  /** An already-scheduled round that hasn't resolved yet (Scheduled/Rescheduled). Multi-round
-   * interviews are a real feature here, so this doesn't block scheduling forever - only while the
-   * current round hasn't been marked Completed/Cancelled/NoShow, since scheduling another round on
-   * top of an unresolved one would just double-book the candidate. */
-  get pendingInterview(): IInterviewResponse | null {
-    return this.interviews.find((i) => i.status === InterviewStatusEnum.Scheduled || i.status === InterviewStatusEnum.Rescheduled) || null;
+  /** An already-scheduled round for THIS stage that hasn't resolved yet (Scheduled/Rescheduled).
+   * Multi-round interviews are a real feature here, so this doesn't block scheduling forever -
+   * only while the current round hasn't been marked Completed/Cancelled/NoShow, since scheduling
+   * another round on top of an unresolved one would just double-book the candidate. */
+  pendingInterviewForStage(stage: IPipelineStageProgress): IInterviewResponse | null {
+    return (
+      this.interviewsForStage(stage).find((i) => i.status === InterviewStatusEnum.Scheduled || i.status === InterviewStatusEnum.Rescheduled) ||
+      null
+    );
   }
 
-  get scheduleInterviewDisabled(): boolean {
-    return !!this.blockingStageBeforeInterview || !!this.pendingInterview;
+  scheduleInterviewDisabled(stage: IPipelineStageProgress): boolean {
+    return !!this.blockingPriorStage(stage) || !!this.pendingInterviewForStage(stage);
+  }
+
+  scheduleExamDisabled(stage: IPipelineStageProgress): boolean {
+    return !!this.blockingPriorStage(stage);
   }
 
   /** The earliest incomplete mandatory stage ahead of this one, blocking it from advancing - or null if clear. */
@@ -287,17 +282,24 @@ export class PipelineProgressTrackerComponent implements OnInit, OnChanges {
     }
   }
 
-  /** StageType is free text (admin-defined in the pipeline builder), so this is a substring
-   * heuristic rather than an enum check - covers HrInterview/PanelInterview/ManagerInterview/etc.,
-   * none of which have any dedicated backend module, so these generic fields are their only place
-   * to record scheduling. TechnicalInterview is excluded on purpose: that one's scheduling is
-   * already owned by the real Interview entity (Schedule Interview button, its own date/venue/
-   * meeting link, feeding MarkResultAsync's auto-complete) - showing these fields too would just be
-   * a second, disconnected copy of the same data. Screening/assessment/offer/onboarding stages
-   * don't involve a live meeting at all, so they're excluded the same way. */
+  /** Whether this stage schedules/tracks through the real Interview entity (Schedule Interview
+   * link, its own date/venue/meeting link, feeding MarkResultAsync's auto-complete) rather than
+   * a manual date/score box - covers TechnicalInterview/HrInterview/PanelInterview/ManagerInterview/
+   * etc, any stage type whose name contains "interview". */
+  isInterviewStage(stage: IPipelineStageProgress): boolean {
+    return (stage.stageType || '').toLowerCase().includes('interview');
+  }
+
+  /** Whether this stage's own manual "Scheduled Date" / "Meeting Link" fields apply - stages that
+   * already schedule through a real module (Interview entity, Exams) don't need a second,
+   * disconnected copy of the same data, and post-decision stages (Offer/Joining/Onboarding) don't
+   * involve a live meeting at all. Everything else (SalaryNegotiation, ReferenceCheck,
+   * BackgroundVerification, MedicalExamination, PhoneScreening, GroupDiscussion, ...) has no
+   * dedicated backend module, so these generic fields are their only place to record scheduling. */
   stageNeedsScheduling(stage: IPipelineStageProgress): boolean {
+    if (this.isInterviewStage(stage) || this.isExamDrivenStage(stage)) return false;
     const type = (stage.stageType || '').toLowerCase();
-    return type.includes('interview') && type !== 'technicalinterview';
+    return !PipelineProgressTrackerComponent.POST_DECISION_STAGE_TYPES.some((t) => t.toLowerCase() === type);
   }
 
   /** MaxMarks is only ever set on assessment-type stages (written test, aptitude test, etc. -
@@ -306,6 +308,21 @@ export class PipelineProgressTrackerComponent implements OnInit, OnChanges {
    * numeric score applies here - not stage type substring matching. */
   stageNeedsScore(stage: IPipelineStageProgress): boolean {
     return stage.maxMarks != null;
+  }
+
+  // Mirrors JobApplicationStageProgressService.TechnicalAssessmentStageTypeAliases on the
+  // backend - that service already auto-completes a stage of one of these types (score +
+  // Completed status, LastUpdatedByUserName "system:exam-score") the moment an ExamEnrollment
+  // tied to this candidate gets scored. The manual Update box below stays enabled regardless
+  // (not every assessment stage is a formal system-run exam - paper tests, take-homes, etc.
+  // have no other way to record a score), this hint just points HR at the system-backed path
+  // first so a real exam isn't silently skipped in favor of typing a number in by hand.
+  private static readonly EXAM_DRIVEN_STAGE_TYPES = [
+    'technicalassessment', 'onlinetest', 'codingtest', 'writtentest', 'aptitudetest', 'psychometrictest', 'practicalassessment',
+  ];
+
+  isExamDrivenStage(stage: IPipelineStageProgress): boolean {
+    return PipelineProgressTrackerComponent.EXAM_DRIVEN_STAGE_TYPES.includes((stage.stageType || '').toLowerCase());
   }
 
   /** Required Documents is admin-entered free text (same as StageType) - matching against it
@@ -320,32 +337,5 @@ export class PipelineProgressTrackerComponent implements OnInit, OnChanges {
   getResumeFileUrl(): string {
     if (!this.resumeUrl) return '';
     return `${Base_URL}${this.resumeUrl.startsWith('/') ? '' : '/'}${this.resumeUrl}`;
-  }
-
-  canRecommend(): boolean {
-    return !this.recommendation && !this.blockingStage;
-  }
-
-  openRecommendDialog(): void {
-    this.recommendJustification = '';
-    this.recommendDialogVisible = true;
-  }
-
-  confirmRecommend(): void {
-    if (!this.recommendJustification.trim()) return;
-
-    this.submittingRecommendation = true;
-    this.candidateRecommendationService.create(this.jobApplicationId, { justification: this.recommendJustification.trim() }).subscribe({
-      next: () => {
-        this.submittingRecommendation = false;
-        this.recommendDialogVisible = false;
-        this.toast.success({ detail: 'Recommendation submitted for review.' });
-        this.loadRecommendation();
-      },
-      error: (error) => {
-        this.submittingRecommendation = false;
-        this.toast.error({ detail: error?.error?.decentMessage || 'Failed to submit recommendation.' });
-      },
-    });
   }
 }

@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { formatDate } from '@angular/common';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BreadcrumbService } from '@app/@core/services';
@@ -35,6 +36,12 @@ export class AppointmentLetterFormComponent implements OnInit {
   offerLetter: IOfferLetterResponse | null = null;
   templateOptions: { label: string; value: number }[] = [];
   templates: IDocumentTemplateResponse[] = [];
+  // onTemplateChange() is async (documentTemplateService.preview() is an HTTP call) - without
+  // this, clicking Generate right after picking a template (before the response lands) submits
+  // with finalBody still empty, since a *disabled* control is excluded from form.invalid and
+  // getRawValue() just returns whatever's currently there. Backend then 400s with a bare
+  // "Validation Failed" the candidate/HR never sees an obvious cause for.
+  previewRendering = false;
 
   ngOnInit(): void {
     this.breadcrumbService.setBreadcrumbs([
@@ -102,15 +109,24 @@ export class AppointmentLetterFormComponent implements OnInit {
       CandidateName: this.offerLetter.candidateName,
       Designation: this.offerLetter.designation,
       OfferedSalary: String(this.offerLetter.offeredSalary),
-      JoiningDate: this.offerLetter.joiningDate,
+      JoiningDate: formatDate(this.offerLetter.joiningDate, 'dd-MMM-yyyy', 'en-US'),
       ReportingManager: this.offerLetter.reportingManager ?? '',
+      // Mirrors OfferLetterService.BuildPlaceholderValues' server-side PortalLink (that render
+      // path builds it from PortalSettings) - this one has no such config, so it's built from
+      // the origin actually serving this page instead, same effective value in dev and prod.
+      PortalLink: `${window.location.origin}/candidate-profile/appointment-letters`,
     };
 
+    this.previewRendering = true;
     this.documentTemplateService.preview({ body: template.body, placeholderValues }).subscribe({
       next: (response) => {
         const rendered = !response.hasError && response.content ? response.content.renderedBody : '';
         bodyControl?.setValue(rendered);
         bodyControl?.enable();
+        this.previewRendering = false;
+      },
+      error: () => {
+        this.previewRendering = false;
       },
     });
   }
@@ -119,7 +135,7 @@ export class AppointmentLetterFormComponent implements OnInit {
     this.formSubmitted = true;
     this.errorMessage = '';
 
-    if (this.form.invalid) {
+    if (this.form.invalid || this.previewRendering) {
       this.form.markAllAsTouched();
       return;
     }

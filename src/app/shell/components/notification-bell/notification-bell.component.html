@@ -33,7 +33,7 @@
       class="w-full text-left px-3 py-2 border-b border-borderLight dark:border-neutral last:border-0 hover:bg-borderLight/40 dark:hover:bg-neutral/40 duration-150"
     >
       <div class="text-sm font-medium text-dark dark:text-borderLight">{{ eventLabel(item) }}</div>
-      <div class="text-xs text-neutral">{{ (item.sentAt || item.createdAt) | date: 'dd-MMM-yy HH:mm' }}</div>
+      <div class="text-xs text-neutral">{{ (item.sentAt || item.createdAt) | date: 'dd-MMM-yy h:mm a' }}</div>
     </button>
   </div>
 </div>

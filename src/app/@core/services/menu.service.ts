@@ -32,6 +32,7 @@ export class MenuService {
   private loadFallbackMenu(): void {
     const role = this._authService.getRole();
     const baseItems = this.filterByRole(webSidebarMenuItems, role);
+    const expandedMap = this.getExpandedMap(this.menuSubject.value);
 
     // Internal Job Board and Pre-Boarding carry no `roles` restriction of their own - both are
     // gated on a per-candidate condition instead (CandidateProfile.IsInternal, and having a
@@ -44,14 +45,26 @@ export class MenuService {
       }).subscribe({
         next: ({ profile, eligible }) => {
           const filtered = this.filterInternalJobBoard(baseItems, profile.content?.isInternal ?? false);
-          this.menuSubject.next(this.transformMenuItems(this.filterPreBoarding(filtered, eligible.content ?? false)));
+          this.menuSubject.next(this.transformMenuItems(this.filterPreBoarding(filtered, eligible.content ?? false), expandedMap));
         },
-        error: () => this.menuSubject.next(this.transformMenuItems(this.filterPreBoarding(this.filterInternalJobBoard(baseItems, false), false))),
+        error: () =>
+          this.menuSubject.next(
+            this.transformMenuItems(this.filterPreBoarding(this.filterInternalJobBoard(baseItems, false), false), expandedMap),
+          ),
       });
       return;
     }
 
-    this.menuSubject.next(this.transformMenuItems(baseItems));
+    this.menuSubject.next(this.transformMenuItems(baseItems, expandedMap));
+  }
+
+  /** Keyed by title (stable across rebuilds; href is often undefined on parent items). */
+  private getExpandedMap(items: IMenuItem[], map: Map<string, boolean> = new Map()): Map<string, boolean> {
+    items.forEach((item) => {
+      if (item.expanded) map.set(item.title, true);
+      if (item.subItems) this.getExpandedMap(item.subItems, map);
+    });
+    return map;
   }
 
   private filterInternalJobBoard(items: IMenuItem[], isInternal: boolean): IMenuItem[] {
@@ -74,11 +87,11 @@ export class MenuService {
       }));
   }
 
-  private transformMenuItems(items: IMenuItem[]): IMenuItem[] {
+  private transformMenuItems(items: IMenuItem[], expandedMap?: Map<string, boolean>): IMenuItem[] {
     return items.map((item) => ({
       ...item,
-      expanded: false,
-      subItems: item.subItems ? this.transformMenuItems(item.subItems) : undefined,
+      expanded: expandedMap?.get(item.title) ?? false,
+      subItems: item.subItems ? this.transformMenuItems(item.subItems, expandedMap) : undefined,
     }));
   }
 

@@ -21,6 +21,7 @@ export class EventTemplateMappingListComponent implements OnInit {
   items: IEventTemplateMappingResponse[] = [];
   loading = false;
   errorMessage = '';
+  searchTerm = '';
 
   get skeletonItems() {
     return Array(4)

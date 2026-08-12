@@ -134,6 +134,13 @@
   color: #4338ca;
 }
 
+// Row navigates to Application Detail on click (checkbox cell stops propagation so selecting
+// doesn't also navigate) - cursor is the only affordance needed, hover background already comes
+// from the shared even/odd row styling in _overrides.scss.
+::ng-deep tr.row-clickable {
+  cursor: pointer;
+}
+
 // EP-14 US-109 AC2: rows exceeding the stale-days threshold are highlighted.
 ::ng-deep tr.row-stale {
   background: #fef2f2 !important;

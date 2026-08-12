@@ -33,6 +33,10 @@ export class PaymentResultComponent implements OnInit, OnDestroy {
 
   jobApplicationId: number | null = null;
   hintStatus: string | null = null;
+  // Backend-resolved and appended to the redirect URL that lands on this page (see
+  // PaymentController.ConfirmAndRedirectToFrontendResult) - stands in for an ownership proof
+  // since this page has no other way to know it and Initiate/GetStatus require it.
+  private candidateEmail = '';
   status: IPaymentStatusResponse | null = null;
   polling = true;
   timedOut = false;
@@ -46,6 +50,7 @@ export class PaymentResultComponent implements OnInit, OnDestroy {
     this.route.queryParamMap.subscribe((params) => {
       const idParam = params.get('jobApplicationId');
       this.hintStatus = params.get('status');
+      this.candidateEmail = params.get('candidateEmail') || '';
       if (idParam) {
         this.jobApplicationId = +idParam;
         this.pollStatus();
@@ -62,7 +67,7 @@ export class PaymentResultComponent implements OnInit, OnDestroy {
   private pollStatus(): void {
     if (!this.jobApplicationId) return;
 
-    this.paymentService.getPaymentStatus(this.jobApplicationId).subscribe({
+    this.paymentService.getPaymentStatus(this.jobApplicationId, this.candidateEmail).subscribe({
       next: (response) => {
         if (response && !response.hasError && response.content) {
           this.status = response.content;
@@ -102,7 +107,7 @@ export class PaymentResultComponent implements OnInit, OnDestroy {
     this.retryingPayment = true;
     this.retryError = '';
 
-    this.paymentService.initiatePayment(this.jobApplicationId).subscribe({
+    this.paymentService.initiatePayment(this.jobApplicationId, this.candidateEmail).subscribe({
       next: (response) => {
         this.retryingPayment = false;
         if (response && !response.hasError && response.content?.success && response.content.gatewayRedirectUrl) {

@@ -20,7 +20,23 @@
     </div>
   </div>
 
-  <p-table *ngIf="!loading && items.length > 0" [value]="items" styleClass="p-datatable-sm">
+  <p-table
+    *ngIf="!loading && items.length > 0"
+    #dt
+    [value]="items"
+    styleClass="p-datatable-sm"
+    [paginator]="true"
+    [rows]="10"
+    [rowsPerPageOptions]="[10, 25, 50]"
+    [globalFilterFields]="['recruitmentEvent', 'channel', 'recipientType', 'notificationTemplateName']"
+    [showCurrentPageReport]="true"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords}"
+  >
+    <ng-template pTemplate="caption">
+      <div class="flex justify-end">
+        <input pInputText type="text" [(ngModel)]="searchTerm" (input)="dt.filterGlobal(searchTerm, 'contains')" placeholder="Search" class="w-64" />
+      </div>
+    </ng-template>
     <ng-template pTemplate="header">
       <tr>
         <th>Event</th>
@@ -29,6 +45,16 @@
         <th>Template</th>
         <th>Status</th>
         <th style="width: 12rem">Actions</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="6" class="not-found">
+          <div>
+            <i class="fa fa-magnifying-glass-minus"></i>
+            <p>No matching event mappings.</p>
+          </div>
+        </td>
       </tr>
     </ng-template>
     <ng-template pTemplate="body" let-item>

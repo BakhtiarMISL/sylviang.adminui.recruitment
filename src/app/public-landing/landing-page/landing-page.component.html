@@ -69,13 +69,6 @@
     </div>
   </section>
 
-  <!-- MISL product family -->
-  <app-products-overview [products]="products" [activeId]="activeProductId()" (productSelected)="onProductSelected($event)" />
-
-  <div #productSectionsHost>
-    <app-product-section *ngFor="let product of products; let i = index" [product]="product" [reversed]="i % 2 === 1" />
-  </div>
-
   <!-- About / value proposition -->
   <section id="about" class="mx-auto max-w-[1240px] px-4 py-20 sm:px-8">
     <div appReveal class="mx-auto mb-12 max-w-2xl text-center">

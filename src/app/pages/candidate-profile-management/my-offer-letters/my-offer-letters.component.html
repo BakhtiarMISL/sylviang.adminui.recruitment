@@ -39,7 +39,7 @@
             {{ item.status }}
           </span>
         </td>
-        <td>{{ item.generatedAt | date: 'dd-MMM-yyyy HH:mm' }}</td>
+        <td>{{ item.generatedAt | date: 'dd-MMM-yyyy h:mm a' }}</td>
         <td>
           <a pButton size="small" [routerLink]="['/candidate-profile/offer-letters', item.offerLetterId]">
             <i class="fa fa-eye"></i>

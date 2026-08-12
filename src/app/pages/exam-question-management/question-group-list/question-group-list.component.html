@@ -7,19 +7,50 @@
     </button>
   </div>
 
+  <app-filter-panel [(collapsed)]="filtersCollapsed">
+    <div class="filter-bar">
+      <p-floatlabel variant="in">
+        <input pInputText inputId="filterSearch" class="w-full" [(ngModel)]="filterSearch" (keydown.enter)="applyFilters()" />
+        <label for="filterSearch">Search Groups</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="in">
+        <p-select
+          inputId="filterStatus"
+          class="w-40"
+          [options]="statusOptions"
+          [(ngModel)]="filterStatus"
+          optionLabel="label"
+          optionValue="value"
+          [appendTo]="'body'"
+        ></p-select>
+        <label for="filterStatus">Status</label>
+      </p-floatlabel>
+
+      <button pButton (click)="applyFilters()">
+        <i class="fa fa-filter"></i>
+        <span>Apply</span>
+      </button>
+      <button pButton severity="secondary" (click)="resetFilters()">
+        <i class="fa fa-rotate-left"></i>
+        <span>Reset</span>
+      </button>
+    </div>
+  </app-filter-panel>
+
   <div *ngIf="loading" class="space-y-3">
     <p-skeleton height="4rem" *ngFor="let i of skeletonItems"></p-skeleton>
   </div>
 
-  <div *ngIf="!loading && groups.length === 0" class="table-container">
+  <div *ngIf="!loading && filteredGroups.length === 0" class="table-container">
     <div class="not-found">
       <i class="fa fa-magnifying-glass-minus"></i>
-      <p>No question groups configured yet.</p>
+      <p>No question groups match these filters.</p>
     </div>
   </div>
 
   <div *ngIf="!loading" class="grid grid-cols-1 gap-4">
-    <div *ngFor="let group of groups" class="rounded-lg bg-white p-4 shadow-sm dark:bg-dark">
+    <div *ngFor="let group of filteredGroups" class="rounded-lg bg-white p-4 shadow-sm dark:bg-dark">
       <div class="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
         <div>
           <div class="flex items-center gap-2">

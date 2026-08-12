@@ -16,6 +16,7 @@
               optionValue="jobPostingId"
               [appendTo]="'body'"
               [autoDisplayFirst]="false"
+              [disabled]="jobApplicationIdLocked"
               (onChange)="onJobPostingChange()"
             ></p-select>
             <label for="jobPostingId">Job Posting</label>
@@ -38,6 +39,7 @@
               styleClass="w-full"
               formControlName="scheduledStartAt"
               [showTime]="true"
+              hourFormat="12"
               [showIcon]="true"
               dateFormat="dd-M-yy"
               [class.ng-invalid]="hasError('scheduledStartAt')"
@@ -109,19 +111,19 @@
 
         <div *ngIf="!isInPerson">
           <p-floatlabel variant="in">
-            <p-select
-              inputId="questionGroupId"
+            <p-multiselect
+              inputId="questionGroupIds"
               class="w-full"
               [options]="questionGroups"
-              formControlName="questionGroupId"
+              formControlName="questionGroupIds"
               optionLabel="name"
               optionValue="questionGroupId"
+              display="chip"
               [appendTo]="'body'"
-              [autoDisplayFirst]="false"
-            ></p-select>
-            <label for="questionGroupId">Question Group</label>
+            ></p-multiselect>
+            <label for="questionGroupIds">Question Groups</label>
           </p-floatlabel>
-          <small class="text-red-500" *ngIf="hasError('questionGroupId')">Question group is required.</small>
+          <small class="text-red-500" *ngIf="hasError('questionGroupIds')">At least one question group is required.</small>
         </div>
 
         <div *ngIf="!isInPerson" class="flex items-center gap-2 sm:col-span-2">
@@ -134,6 +136,9 @@
     <!-- Section 2: Candidate Picker -->
     <div class="table-container mb-4 p-4" [class.opacity-50]="!examForm.value.jobPostingId" [class.pointer-events-none]="!examForm.value.jobPostingId">
       <h3 class="table-title mb-3">2. Select Shortlisted Candidates</h3>
+      <p class="mb-3 text-sm text-gray-600 dark:text-gray-300" *ngIf="jobApplicationIdLocked">
+        Enrolling this candidate only.
+      </p>
 
       <div *ngIf="!examForm.value.jobPostingId" class="not-found">
         <i class="fa fa-magnifying-glass-minus"></i>

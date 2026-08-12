@@ -45,6 +45,19 @@ export class RoleListComponent implements OnInit {
     });
   }
 
+  accessSummary(role: IRoleResponse): string {
+    if (role.name === 'Admin' || role.name === 'SuperAdmin') {
+      return 'Full system access';
+    }
+
+    if (role.name === 'Candidate') {
+      return 'Self-service access';
+    }
+
+    const count = role.permissions.length;
+    return count === 1 ? '1 direct permission' : `${count} direct permissions`;
+  }
+
   deleteRole(role: IRoleResponse, event: Event): void {
     this.confirmationService.confirm({
       target: event.target as EventTarget,

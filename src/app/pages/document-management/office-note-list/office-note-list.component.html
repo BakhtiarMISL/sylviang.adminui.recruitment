@@ -35,7 +35,7 @@
         <td>{{ item.candidateName }}</td>
         <td>{{ item.documentTemplateName }}</td>
         <td>{{ item.enclosuresSummary }}</td>
-        <td>{{ item.generatedAt | date: 'dd-MMM-yyyy HH:mm' }}</td>
+        <td>{{ item.generatedAt | date: 'dd-MMM-yyyy h:mm a' }}</td>
         <td>
           <a [href]="getPdfUrl(item)" target="_blank" pButton size="small" severity="secondary">
             <i class="fa fa-file-pdf"></i>

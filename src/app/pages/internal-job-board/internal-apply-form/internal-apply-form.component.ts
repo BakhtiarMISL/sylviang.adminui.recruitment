@@ -6,7 +6,7 @@ import { IMasterDataItem } from '@app/@core/interfaces/recruitment-management/ma
 import { InternalJobBoardService } from '@app/@core/services/recruitment/internal-job-board/internal-job-board.service';
 import { MasterDataService } from '@app/@core/services/recruitment/master-data/master-data.service';
 import { PaymentService } from '@app/@core/services/recruitment/payment/payment.service';
-import { RESUME_ALLOWED_EXTENSIONS, RESUME_MAX_SIZE_BYTES } from '../internal-job-board.constants';
+import { RESUME_ALLOWED_EXTENSIONS, RESUME_MAX_SIZE_BYTES, WAIVER_PROOF_ALLOWED_EXTENSIONS, WAIVER_PROOF_MAX_SIZE_BYTES } from '../internal-job-board.constants';
 
 @Component({
   selector: 'app-internal-apply-form',
@@ -93,6 +93,8 @@ export class InternalApplyFormComponent implements OnInit {
   formSubmitted = false;
   selectedFile: File | null = null;
   fileError = '';
+  waiverProofFile: File | null = null;
+  waiverProofFileError = '';
   submitting = false;
   submitError = '';
   submitted = false;
@@ -156,6 +158,43 @@ export class InternalApplyFormComponent implements OnInit {
     this.selectedFile = file;
   }
 
+  // EP-17/US-127 fix: a category alone no longer waives the fee (JobApplicationService.SubmitAsync
+  // requires proof) - surface that plainly instead of letting the candidate believe picking a
+  // category is enough.
+  get claimsSpecialCategoryWithoutProof(): boolean {
+    return !!this.applyForm.value.specialCategoryId && !this.waiverProofFile;
+  }
+
+  onWaiverProofFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.waiverProofFileError = '';
+    this.waiverProofFile = null;
+
+    if (!input.files || input.files.length === 0) return;
+
+    const file = input.files[0];
+    const extension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+
+    if (!WAIVER_PROOF_ALLOWED_EXTENSIONS.includes(extension)) {
+      this.waiverProofFileError = `Proof document must be one of: ${WAIVER_PROOF_ALLOWED_EXTENSIONS.join(', ')}`;
+      input.value = '';
+      return;
+    }
+
+    if (file.size > WAIVER_PROOF_MAX_SIZE_BYTES) {
+      this.waiverProofFileError = 'Proof document file size must not exceed 5MB';
+      input.value = '';
+      return;
+    }
+
+    this.waiverProofFile = file;
+  }
+
+  clearWaiverProofFile(): void {
+    this.waiverProofFile = null;
+    this.waiverProofFileError = '';
+  }
+
   onSubmit(): void {
     this.formSubmitted = true;
     this.submitError = '';
@@ -171,7 +210,7 @@ export class InternalApplyFormComponent implements OnInit {
 
     this.submitting = true;
 
-    this.internalJobBoardService.apply(this.jobPostingId, this.applyForm.value, this.selectedFile).subscribe({
+    this.internalJobBoardService.apply(this.jobPostingId, this.applyForm.value, this.selectedFile, this.waiverProofFile).subscribe({
       next: (response) => {
         this.submitting = false;
         if (response && !response.hasError && response.content) {
@@ -202,7 +241,7 @@ export class InternalApplyFormComponent implements OnInit {
     this.retryingPayment = true;
     this.retryError = '';
 
-    this.paymentService.initiatePayment(this.submitResult.jobApplicationId).subscribe({
+    this.paymentService.initiatePayment(this.submitResult.jobApplicationId, this.applyForm.value.candidateEmail).subscribe({
       next: (response) => {
         this.retryingPayment = false;
         if (response && !response.hasError && response.content?.success && response.content.gatewayRedirectUrl) {

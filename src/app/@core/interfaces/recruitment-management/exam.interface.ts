@@ -9,7 +9,7 @@ export interface IExamCreateRequest {
   passMarks: number;
   examType: ExamTypeEnum;
   examVenueId?: number | null;
-  questionGroupId?: number | null;
+  questionGroupIds?: number[] | null;
   showResultsToCandidate: boolean;
 }
 
@@ -24,8 +24,8 @@ export interface IExamResponse {
   examType: ExamTypeEnum;
   examVenueId?: number | null;
   examVenueName?: string | null;
-  questionGroupId?: number | null;
-  questionGroupName?: string | null;
+  questionGroupIds: number[];
+  questionGroupNames: string[];
   seatPlanGeneratedAt?: string | null;
   isActive: boolean;
   showResultsToCandidate: boolean;

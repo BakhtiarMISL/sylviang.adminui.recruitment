@@ -1,4 +1,4 @@
-export const Base_URL = 'http://localhost:8888';
+export const Base_URL = 'http://localhost:8188';
 export const production = false;
 export const version = '-dev';
 export const defaultLanguage = 'en-US';

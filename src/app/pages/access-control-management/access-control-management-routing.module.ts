@@ -7,6 +7,10 @@ import { UserAccountFormComponent } from './user-account-form/user-account-form.
 import { RoleListComponent } from './role-list/role-list.component';
 import { RoleFormComponent } from './role-form/role-form.component';
 
+// SuperAdmin needs the user-account routes too - it's where they invite/manage HR/Admin accounts
+// and impersonate one (see nav-menu-items.ts's "Access Control" entry). Role management stays
+// Admin-only - designing role/permission structures isn't part of SuperAdmin's job.
+const userAccountRoleData = { roles: [UserRoleEnum.Admin, UserRoleEnum.SuperAdmin] };
 const roleData = { roles: [UserRoleEnum.Admin] };
 
 const routes: Routes = [
@@ -14,19 +18,19 @@ const routes: Routes = [
     path: 'user-account-list',
     component: UserAccountListComponent,
     canActivate: [RoleGuard],
-    data: roleData,
+    data: userAccountRoleData,
   },
   {
     path: 'manage-user-account',
     component: UserAccountFormComponent,
     canActivate: [RoleGuard],
-    data: roleData,
+    data: userAccountRoleData,
   },
   {
     path: 'manage-user-account/:id',
     component: UserAccountFormComponent,
     canActivate: [RoleGuard],
-    data: roleData,
+    data: userAccountRoleData,
   },
   {
     path: 'role-list',

@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { BreadcrumbService } from '@app/@core/services';
 import { IRoleCreateRequest, IRoleUpdateRequest, PermissionActionEnum } from '@core/interfaces/recruitment-management/access-control.interface';
 import { RoleService } from '@core/services/recruitment/access-control/access-control.service';
-import { buildEmptyMatrix, IPermissionMatrixRow, matrixFromGrants, matrixToGrants, PermissionActions } from './role-form.component.constants';
+import { buildEmptyMatrix, buildFullMatrix, IPermissionMatrixRow, matrixFromGrants, matrixToGrants, PermissionActions } from './role-form.component.constants';
 
 @Component({
   selector: 'app-role-form',
@@ -28,6 +28,7 @@ export class RoleFormComponent implements OnInit {
   formSubmitted = false;
   isEditMode = false;
   isSystemRole = false;
+  hasFullSystemAccess = false;
   roleId: number | null = null;
   errorMessage = '';
 
@@ -62,8 +63,9 @@ export class RoleFormComponent implements OnInit {
       next: (response) => {
         if (response && !response.hasError && response.content) {
           this.isSystemRole = response.content.isSystemRole;
+          this.hasFullSystemAccess = response.content.name === 'Admin' || response.content.name === 'SuperAdmin';
           this.form.patchValue({ name: response.content.name });
-          this.matrix = matrixFromGrants(response.content.permissions);
+          this.matrix = this.hasFullSystemAccess ? buildFullMatrix() : matrixFromGrants(response.content.permissions);
           if (this.isSystemRole) {
             this.form.disable();
           }

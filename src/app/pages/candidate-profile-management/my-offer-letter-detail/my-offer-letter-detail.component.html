@@ -15,7 +15,7 @@
           >
             {{ item.status }}
           </span>
-          <span class="text-xs text-neutral" *ngIf="item.decisionAt"> &middot; decided {{ item.decisionAt | date: 'dd-MMM-yyyy HH:mm' }}</span>
+          <span class="text-xs text-neutral" *ngIf="item.decisionAt"> &middot; decided {{ item.decisionAt | date: 'dd-MMM-yyyy h:mm a' }}</span>
         </div>
 
         <div class="flex gap-2" *ngIf="isUndecided">

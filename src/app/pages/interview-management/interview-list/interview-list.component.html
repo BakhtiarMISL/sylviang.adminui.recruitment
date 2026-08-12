@@ -71,7 +71,7 @@
           </span>
         </div>
         <p class="text-sm text-gray-600 dark:text-gray-300">
-          {{ interview.scheduledStartAt | date: 'dd-MMM-yyyy HH:mm' }} &middot; {{ interview.interviewType }} &middot; Round {{ interview.round }}
+          {{ interview.scheduledStartAt | date: 'dd-MMM-yyyy h:mm a' }} &middot; {{ interview.interviewType }} &middot; Round {{ interview.round }}
         </p>
         <p class="text-sm text-gray-600 dark:text-gray-300">
           {{ interview.interviewType === 'InPerson' ? (interview.venueName || '-') + ' / ' + (interview.roomName || '-') : (interview.meetingLink || '-') }}
@@ -129,7 +129,7 @@
               <td>{{ interview.candidateName }}</td>
               <td>{{ interview.interviewType }}</td>
               <td>{{ interview.interviewType === 'InPerson' ? (interview.venueName || '-') + ' / ' + (interview.roomName || '-') : (interview.meetingLink || '-') }}</td>
-              <td>{{ interview.scheduledStartAt | date: 'dd-MMM-yyyy HH:mm' }}</td>
+              <td>{{ interview.scheduledStartAt | date: 'dd-MMM-yyyy h:mm a' }}</td>
               <td>{{ interview.round }}</td>
               <td>
                 <span

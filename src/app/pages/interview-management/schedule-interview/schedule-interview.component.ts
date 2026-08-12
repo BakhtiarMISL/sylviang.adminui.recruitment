@@ -47,6 +47,12 @@ export class ScheduleInterviewComponent implements OnInit {
   // restricts to) that one candidate.
   jobApplicationIdLocked = false;
 
+  // Set alongside jobApplicationIdLocked when arriving from a specific stage card's "Schedule
+  // Interview" link (?pipelineStageId=Y) - ties the created Interview to that exact stage so
+  // MarkResultAsync's auto-complete (and the stage-prerequisite gate) target the right card
+  // instead of guessing by StageType. Absent when arriving from the general interview list.
+  pipelineStageId: number | null = null;
+
   scheduleForm!: FormGroup;
   formSubmitted = false;
   errorMessage = '';
@@ -105,6 +111,8 @@ export class ScheduleInterviewComponent implements OnInit {
 
     const lockedJobApplicationId = this.route.snapshot.queryParamMap.get('jobApplicationId');
     if (lockedJobApplicationId) {
+      const lockedPipelineStageId = this.route.snapshot.queryParamMap.get('pipelineStageId');
+      this.pipelineStageId = lockedPipelineStageId ? +lockedPipelineStageId : null;
       this.lockToJobApplication(+lockedJobApplicationId);
     }
   }
@@ -328,6 +336,7 @@ export class ScheduleInterviewComponent implements OnInit {
 
       const request = {
         jobApplicationId: candidate.jobApplicationId,
+        pipelineStageId: this.pipelineStageId ?? undefined,
         interviewType: this.scheduleForm.value.interviewType,
         interviewVenueId: this.isInPerson ? this.scheduleForm.value.interviewVenueId : null,
         interviewRoomId: this.isInPerson ? this.scheduleForm.value.interviewRoomId : null,

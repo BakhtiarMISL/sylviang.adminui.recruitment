@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { UI_CONFIG } from '@app/@core/constants';
 import { ApplicationStatusEnum, ExamTypeEnum } from '@app/@core/enums/recruitment.enum';
 import { IExamVenueLookupResponse } from '@app/@core/interfaces/recruitment-management/exam-venue.interface';
@@ -33,9 +33,14 @@ export class ScheduleExamComponent implements OnInit {
     private jobApplicationService: JobApplicationService,
     private toast: ToastService,
     private router: Router,
+    private route: ActivatedRoute,
     private breadcrumbService: BreadcrumbService,
     private cdr: ChangeDetectorRef,
   ) {}
+
+  // Set when arriving from a specific candidate's Application Detail page (?jobApplicationId=X) -
+  // same lock pattern as ScheduleInterviewComponent.jobApplicationIdLocked.
+  jobApplicationIdLocked = false;
 
   examForm!: FormGroup;
   formSubmitted = false;
@@ -80,7 +85,7 @@ export class ScheduleExamComponent implements OnInit {
       passMarks: [40, [Validators.required, Validators.min(0)]],
       examType: [ExamTypeEnum.InPerson, [Validators.required]],
       examVenueId: [null],
-      questionGroupId: [null],
+      questionGroupIds: [null],
       showResultsToCandidate: [false],
     });
 
@@ -89,6 +94,37 @@ export class ScheduleExamComponent implements OnInit {
     this.loadJobPostings();
     this.loadExamVenues();
     this.loadQuestionGroups();
+
+    const lockedJobApplicationId = this.route.snapshot.queryParamMap.get('jobApplicationId');
+    if (lockedJobApplicationId) {
+      this.lockToJobApplication(+lockedJobApplicationId);
+    }
+  }
+
+  private lockToJobApplication(jobApplicationId: number): void {
+    this.jobApplicationService.getDetail(jobApplicationId).subscribe({
+      next: (response) => {
+        if (!response || response.hasError || !response.content) return;
+        const detail = response.content;
+
+        this.jobApplicationIdLocked = true;
+        this.examForm.patchValue({ jobPostingId: detail.jobPostingId });
+
+        const candidate: IJobApplicationListItem = {
+          jobApplicationId: detail.jobApplicationId,
+          candidateName: detail.candidateName,
+          jobPostingId: detail.jobPostingId,
+          jobPostingTitle: detail.jobPostingTitle,
+          source: detail.source,
+          appliedDate: detail.appliedDate,
+          applicationStatus: detail.applicationStatus,
+        };
+        this.candidates = [candidate];
+        this.selectedCandidates = [candidate];
+        this.candidatesTotalRecords = 1;
+        this.cdr.detectChanges();
+      },
+    });
   }
 
   get f() {
@@ -114,13 +150,15 @@ export class ScheduleExamComponent implements OnInit {
 
   onExamTypeChange(): void {
     const examVenueControl = this.examForm.get('examVenueId');
-    const questionGroupControl = this.examForm.get('questionGroupId');
+    const questionGroupControl = this.examForm.get('questionGroupIds');
     if (this.isInPerson) {
       examVenueControl?.setValidators([Validators.required]);
       questionGroupControl?.clearValidators();
       questionGroupControl?.setValue(null);
     } else {
-      questionGroupControl?.setValidators([Validators.required]);
+      // Validators.required alone treats an empty array as present (not null) - minLength(1)
+      // closes that gap so a multi-select with nothing picked still fails validation.
+      questionGroupControl?.setValidators([Validators.required, Validators.minLength(1)]);
       examVenueControl?.clearValidators();
       examVenueControl?.setValue(null);
     }
@@ -146,10 +184,14 @@ export class ScheduleExamComponent implements OnInit {
     });
   }
 
+  // Question count appended to the label ("C# & .NET (24)") so HR can see a group is empty
+  // before picking it - an exam whose only linked group has 0 active questions ships with an
+  // empty paper (see ExamTakingService.StartExamAsync).
   private loadQuestionGroups(): void {
     this.questionGroupService.getLookup().subscribe({
       next: (response) => {
-        this.questionGroups = response && !response.hasError && response.content ? response.content : [];
+        const groups = response && !response.hasError && response.content ? response.content : [];
+        this.questionGroups = groups.map((g) => ({ ...g, name: `${g.name} (${g.activeQuestionCount})` }));
         this.cdr.detectChanges();
       },
     });
@@ -235,7 +277,7 @@ export class ScheduleExamComponent implements OnInit {
       passMarks: this.examForm.value.passMarks,
       examType: this.examForm.value.examType,
       examVenueId: this.isInPerson ? this.examForm.value.examVenueId : null,
-      questionGroupId: this.isInPerson ? null : this.examForm.value.questionGroupId,
+      questionGroupIds: this.isInPerson ? null : this.examForm.value.questionGroupIds,
       showResultsToCandidate: this.isInPerson ? false : !!this.examForm.value.showResultsToCandidate,
     };
 

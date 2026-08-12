@@ -21,6 +21,7 @@ export class DocumentTemplateListComponent implements OnInit {
   items: IDocumentTemplateResponse[] = [];
   loading = false;
   errorMessage = '';
+  searchTerm = '';
 
   get skeletonItems() {
     return Array(4)

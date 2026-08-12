@@ -3,67 +3,82 @@
     <h3 class="table-title">Recruitment Analytics</h3>
   </div>
 
-  <div class="flex flex-wrap items-end gap-3 mb-4">
-    <p-floatlabel variant="in">
-      <p-select
-        inputId="filterJobPostingId"
-        class="w-56"
-        [options]="vacancyOptions"
-        [(ngModel)]="filterJobPostingId"
-        optionLabel="title"
-        optionValue="jobPostingId"
-        [showClear]="true"
-        [appendTo]="'body'"
-      ></p-select>
-      <label for="filterJobPostingId">Vacancy</label>
-    </p-floatlabel>
+  <app-filter-panel [(collapsed)]="filtersCollapsed">
+    <div class="filter-bar">
+      <p-floatlabel variant="in">
+        <p-select
+          inputId="filterJobPostingId"
+          class="w-56"
+          [options]="vacancyOptions"
+          [(ngModel)]="filterJobPostingId"
+          optionLabel="title"
+          optionValue="jobPostingId"
+          [showClear]="true"
+          [appendTo]="'body'"
+        ></p-select>
+        <label for="filterJobPostingId">Vacancy</label>
+      </p-floatlabel>
 
-    <p-floatlabel variant="in">
-      <p-inputnumber inputId="filterDepartmentId" styleClass="w-32" [(ngModel)]="filterDepartmentId" [useGrouping]="false"></p-inputnumber>
-      <label for="filterDepartmentId">Department ID</label>
-    </p-floatlabel>
+      <p-floatlabel variant="in">
+        <p-select
+          inputId="filterDepartmentId"
+          class="w-48"
+          [options]="departmentOptions"
+          [(ngModel)]="filterDepartmentId"
+          optionLabel="name"
+          optionValue="departmentId"
+          [showClear]="true"
+          [appendTo]="'body'"
+        ></p-select>
+        <label for="filterDepartmentId">Department</label>
+      </p-floatlabel>
 
-    <p-floatlabel variant="in">
-      <p-datepicker inputId="filterDateFrom" styleClass="w-40" [(ngModel)]="filterDateFrom" [showIcon]="true" dateFormat="dd-M-yy"></p-datepicker>
-      <label for="filterDateFrom">From</label>
-    </p-floatlabel>
+      <p-floatlabel variant="in">
+        <p-datepicker inputId="filterDateFrom" styleClass="w-40" [(ngModel)]="filterDateFrom" [showIcon]="true" dateFormat="dd-M-yy"></p-datepicker>
+        <label for="filterDateFrom">From</label>
+      </p-floatlabel>
 
-    <p-floatlabel variant="in">
-      <p-datepicker inputId="filterDateTo" styleClass="w-40" [(ngModel)]="filterDateTo" [showIcon]="true" dateFormat="dd-M-yy"></p-datepicker>
-      <label for="filterDateTo">To</label>
-    </p-floatlabel>
+      <p-floatlabel variant="in">
+        <p-datepicker inputId="filterDateTo" styleClass="w-40" [(ngModel)]="filterDateTo" [showIcon]="true" dateFormat="dd-M-yy"></p-datepicker>
+        <label for="filterDateTo">To</label>
+      </p-floatlabel>
 
-    <p-floatlabel variant="in">
-      <p-select
-        inputId="filterIsInternal"
-        class="w-40"
-        [options]="candidateTypeOptions"
-        [(ngModel)]="filterIsInternal"
-        optionLabel="label"
-        optionValue="value"
-        [appendTo]="'body'"
-      ></p-select>
-      <label for="filterIsInternal">Candidate Type</label>
-    </p-floatlabel>
+      <p-floatlabel variant="in">
+        <p-select
+          inputId="filterIsInternal"
+          class="w-40"
+          [options]="candidateTypeOptions"
+          [(ngModel)]="filterIsInternal"
+          optionLabel="label"
+          optionValue="value"
+          [appendTo]="'body'"
+        ></p-select>
+        <label for="filterIsInternal">Candidate Type</label>
+      </p-floatlabel>
 
-    <p-floatlabel variant="in">
-      <p-select
-        inputId="filterEmploymentType"
-        class="w-40"
-        [options]="employmentTypeOptions"
-        [(ngModel)]="filterEmploymentType"
-        optionLabel="label"
-        optionValue="value"
-        [appendTo]="'body'"
-      ></p-select>
-      <label for="filterEmploymentType">Employment Type</label>
-    </p-floatlabel>
+      <p-floatlabel variant="in">
+        <p-select
+          inputId="filterEmploymentType"
+          class="w-40"
+          [options]="employmentTypeOptions"
+          [(ngModel)]="filterEmploymentType"
+          optionLabel="label"
+          optionValue="value"
+          [appendTo]="'body'"
+        ></p-select>
+        <label for="filterEmploymentType">Employment Type</label>
+      </p-floatlabel>
 
-    <button pButton [disabled]="loading" (click)="runReport()">
-      <i class="fa fa-magnifying-glass"></i>
-      <span>Run Report</span>
-    </button>
-  </div>
+      <button pButton [disabled]="loading" (click)="runReport()">
+        <i class="fa fa-magnifying-glass"></i>
+        <span>Run Report</span>
+      </button>
+      <button pButton severity="secondary" (click)="resetFilters()">
+        <i class="fa fa-rotate-left"></i>
+        <span>Reset</span>
+      </button>
+    </div>
+  </app-filter-panel>
 
   <small class="mb-3 block text-red-500" *ngIf="errorMessage">{{ errorMessage }}</small>
 

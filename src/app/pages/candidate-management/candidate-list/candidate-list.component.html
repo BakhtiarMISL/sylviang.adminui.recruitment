@@ -1,7 +1,7 @@
-<section class="page-container">
+<div>
   <app-filter-panel [(collapsed)]="filtersCollapsed">
   <div class="flex justify-between items-center gap-3">
-    <div class="flex items-end gap-3">
+    <div class="filter-bar">
       <p-floatlabel variant="in">
         <input type="text" pInputText id="searchInput" class="w-full" [(ngModel)]="searchTerm" name="searchInput" (keyup.enter)="applySearch()" />
         <label for="searchInput">Search by name or email</label>
@@ -17,20 +17,9 @@
           [appendTo]="'body'"
           display="chip"
           class="w-full"
-          styleClass="min-w-56"
         ></p-multiSelect>
         <label for="filterTags">Tags (any of)</label>
       </p-floatlabel>
-
-      <button pButton (click)="applySearch()">
-        <i class="fa fa-search"></i>
-        <span>Search</span>
-      </button>
-
-      <button *ngIf="searchTerm || filterTags.length > 0" severity="secondary" pButton (click)="resetSearch()">
-        <i class="fa fa-times"></i>
-        <span>Reset</span>
-      </button>
 
       <p-floatlabel variant="in">
         <p-multiSelect
@@ -40,11 +29,21 @@
           optionValue="talentPoolId"
           [(ngModel)]="selectedPoolIds"
           (onChange)="applyPoolFilter()"
-          styleClass="min-w-48"
+          class="w-full"
           [appendTo]="'body'"
         ></p-multiSelect>
         <label for="poolFilter">Talent Pools</label>
       </p-floatlabel>
+
+      <button pButton (click)="applySearch()">
+        <i class="fa fa-search"></i>
+        <span>Search</span>
+      </button>
+
+      <button *ngIf="searchTerm || filterTags.length > 0 || selectedPoolIds.length > 0" severity="secondary" pButton (click)="resetSearch()">
+        <i class="fa fa-times"></i>
+        <span>Reset</span>
+      </button>
     </div>
   </div>
   </app-filter-panel>
@@ -134,7 +133,7 @@
       </p-table>
     </div>
   </div>
-</section>
+</div>
 
 <p-dialog header="Add to Talent Pool" [(visible)]="showAddToPoolDialog" [modal]="true" [style]="{ width: '28rem' }">
   <div class="form-container" *ngIf="!addToPoolSuccess">

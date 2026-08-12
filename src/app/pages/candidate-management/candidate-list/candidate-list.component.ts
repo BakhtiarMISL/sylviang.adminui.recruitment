@@ -145,6 +145,8 @@ export class CandidateListComponent implements OnInit {
   resetSearch(): void {
     this.searchTerm = '';
     this.filterTags = [];
+    this.selectedPoolIds = [];
+    this.currentPage = 1;
     this.filtersCollapsed = false;
     this.loadCandidates();
   }

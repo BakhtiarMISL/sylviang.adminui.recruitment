@@ -46,7 +46,7 @@ export class LoginComponent {
     this.authService.login(this.form.value).subscribe({
       next: (response) => {
         this.isSubmitting = false;
-        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/dashboard';
+        const returnUrl = this.sanitizeReturnUrl(this.route.snapshot.queryParamMap.get('returnUrl'));
 
         // EP-09 Feature 2: candidate login gated by OTP - no token issued yet, route to the
         // code-entry screen instead of the dashboard.
@@ -65,5 +65,16 @@ export class LoginComponent {
         this.toastService.error({ detail: message });
       },
     });
+  }
+
+  // returnUrl comes straight from the query string (attacker-controllable in the URL bar).
+  // navigateByUrl already resolves against Angular's own route table rather than doing a raw
+  // browser navigation, so "returnUrl=https://evil.com" just fails to match a route today - but
+  // require a same-app internal path explicitly rather than relying on that as the only guard.
+  private sanitizeReturnUrl(returnUrl: string | null): string {
+    if (returnUrl && returnUrl.startsWith('/') && !returnUrl.startsWith('//')) {
+      return returnUrl;
+    }
+    return '/dashboard';
   }
 }

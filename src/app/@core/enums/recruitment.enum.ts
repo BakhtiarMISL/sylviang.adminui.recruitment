@@ -82,12 +82,6 @@ export enum StageTypeEnum {
   PracticalAssessment = 'PracticalAssessment',
 }
 
-export enum RecommendationStatusEnum {
-  Pending = 'Pending',
-  Accepted = 'Accepted',
-  Rejected = 'Rejected',
-}
-
 export enum QuestionTypeEnum {
   McqSingle = 'McqSingle',
   McqMultiple = 'McqMultiple',
@@ -164,10 +158,22 @@ export enum RecruitmentEventEnum {
   AdmitCardIssued = 'AdmitCardIssued',
   ExamResultPublished = 'ExamResultPublished',
   AccountCreatedOtp = 'AccountCreatedOtp',
+  PasswordResetRequested = 'PasswordResetRequested',
   OfferLetterAvailable = 'OfferLetterAvailable',
   OfferAccepted = 'OfferAccepted',
   OfferDeclined = 'OfferDeclined',
   AppointmentLetterGenerated = 'AppointmentLetterGenerated',
+  JoiningBookletAvailable = 'JoiningBookletAvailable',
+  MedicalLetterAvailable = 'MedicalLetterAvailable',
+  TargetLetterAvailable = 'TargetLetterAvailable',
+  PreBoardingRequested = 'PreBoardingRequested',
+  PreBoardingSubmitted = 'PreBoardingSubmitted',
+  PreBoardingApproved = 'PreBoardingApproved',
+  PreBoardingCorrectionRequested = 'PreBoardingCorrectionRequested',
+  ExportRequestReady = 'ExportRequestReady',
+  ExportRequestFailed = 'ExportRequestFailed',
+  EmailChangeRequested = 'EmailChangeRequested',
+  ApplicationRejected = 'ApplicationRejected',
 }
 
 /** EP-09: delivery channel a NotificationTemplate is written for. */

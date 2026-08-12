@@ -104,7 +104,7 @@
       <div class="history-entry" *ngFor="let version of versions">
         <div>
           <strong>v{{ version.versionNumber }}</strong>
-          <span class="text-sm text-neutral ml-2" *ngIf="version.createdAt">{{ version.createdAt | date: 'dd-MMM-yyyy HH:mm' }}</span>
+          <span class="text-sm text-neutral ml-2" *ngIf="version.createdAt">{{ version.createdAt | date: 'dd-MMM-yyyy h:mm a' }}</span>
         </div>
         <div class="text-sm text-neutral" *ngIf="version.subject">Subject: {{ version.subject }}</div>
         <div class="text-sm text-neutral">{{ version.body }}</div>

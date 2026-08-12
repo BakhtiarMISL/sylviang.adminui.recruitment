@@ -37,7 +37,7 @@
         <td>{{ item.batchLabel }}</td>
         <td>{{ item.joiningDate | date: 'dd-MMM-yyyy' }}</td>
         <td>{{ item.documentTemplateName }}</td>
-        <td>{{ item.generatedAt | date: 'dd-MMM-yyyy HH:mm' }}</td>
+        <td>{{ item.generatedAt | date: 'dd-MMM-yyyy h:mm a' }}</td>
         <td>
           <a pButton size="small" severity="secondary" [href]="getPdfUrl(item)" target="_blank" rel="noopener noreferrer">
             <i class="fa fa-download"></i>

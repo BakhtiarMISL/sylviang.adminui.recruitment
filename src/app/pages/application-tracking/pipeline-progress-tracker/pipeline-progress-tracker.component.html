@@ -9,90 +9,92 @@
 
   <div class="no-pipeline" *ngIf="!loading && !loadError && progress && !progress.hasPipeline">No hiring pipeline is configured for this job posting.</div>
 
-  <div class="recommendation-panel" *ngIf="!loading">
-    <ng-container *ngIf="recommendation; else noRecommendation">
-      <div class="recommendation-status" [ngClass]="'recommendation-status-' + recommendation.status.toLowerCase()">
-        <span class="recommendation-status-label">Final Selection: {{ formatEnumLabel(recommendation.status) }}</span>
-        <span class="recommendation-meta">Recommended by {{ recommendation.recommendedByUserName }} on {{ recommendation.recommendedAt | date: 'dd-MMM-yyyy' }}</span>
-        <div class="recommendation-justification">{{ recommendation.justification }}</div>
-        <div class="recommendation-review" *ngIf="recommendation.status !== 'Pending'">
-          <span>Reviewed by {{ recommendation.reviewedByUserName }} on {{ recommendation.reviewedAt | date: 'dd-MMM-yyyy' }}</span>
-          <div *ngIf="recommendation.reviewComments">{{ recommendation.reviewComments }}</div>
-        </div>
-      </div>
-    </ng-container>
-    <ng-template #noRecommendation>
-      <span class="recommendation-meta">No final selection recommendation yet.</span>
-    </ng-template>
-
-    <button
-      pButton
-      type="button"
-      [outlined]="true"
-      size="small"
-      [disabled]="!canRecommend()"
-      (click)="openRecommendDialog()"
-    >
-      <i class="fa fa-star"></i>
-      <span>Recommend for Final Selection</span>
-    </button>
-    <span class="recommendation-meta" *ngIf="blockingStage && (!recommendation || recommendation.status !== 'Pending')">
-      Complete '{{ blockingStage.stageName }}' before recommending for final selection.
-    </span>
-  </div>
-
-  <div class="recommendation-panel" *ngIf="!loading && (hasInterviewStage || interviews.length > 0)">
-    <div class="recommendation-status">
-      <div class="flex items-center justify-between gap-3">
-        <span class="recommendation-status-label">Interviews</span>
-        <button
-          pButton
-          type="button"
-          [outlined]="true"
-          size="small"
-          [disabled]="scheduleInterviewDisabled"
-          [routerLink]="['/interviews/schedule-interview']"
-          [queryParams]="{ jobApplicationId: jobApplicationId }"
-        >
-          <i class="fa fa-plus"></i>
-          <span>Schedule Interview</span>
-        </button>
-      </div>
-
-      <span class="recommendation-meta" *ngIf="blockingStageBeforeInterview as blocker">Complete '{{ blocker.stageName }}' before scheduling an interview.</span>
-      <span class="recommendation-meta" *ngIf="!blockingStageBeforeInterview && pendingInterview">Round {{ pendingInterview.round }} hasn't been marked complete yet.</span>
-      <span class="recommendation-meta" *ngIf="!loadingInterviews && interviews.length === 0">No interviews scheduled yet.</span>
-
-      <div *ngFor="let interview of interviews" class="stage-field interview-row">
-        <span>
-          Round {{ interview.round }}{{ interview.roundConfigName ? ' (' + interview.roundConfigName + ')' : '' }} &middot;
-          {{ interview.interviewType }} &middot; {{ interview.scheduledStartAt | date: 'dd-MMM-yyyy HH:mm' }} &middot; {{ interview.status }}
-          <ng-container *ngIf="interview.result !== 'Pending'"> &middot; Result: {{ interview.result }}</ng-container>
-        </span>
-        <a [routerLink]="['/interviews/interview', interview.interviewId]" class="interview-row-view">
-          <i class="fa fa-eye"></i>
-          <span>View</span>
-        </a>
-      </div>
-    </div>
-  </div>
-
   <div class="tracker-row" *ngIf="!loading && !loadError && progress && progress.hasPipeline">
     <div class="stage-card" *ngFor="let stage of progress.stages" [ngClass]="'status-' + stage.status">
       <div class="stage-card-header">
         <span class="stage-name">{{ stage.stageName }}</span>
         <span class="status-badge">{{ formatEnumLabel(stage.status) }}</span>
       </div>
-      <div class="stage-type">{{ formatEnumLabel(stage.stageType) }}</div>
+      <div class="stage-type-row">
+        <span class="stage-type">{{ formatEnumLabel(stage.stageType) }}</span>
+        <button pButton type="button" [outlined]="true" size="small" class="stage-details-toggle" (click)="toggleStageDetails(stage)">
+          <i class="fa-solid fa-chevron-right" [class.rotated]="isStageExpanded(stage)"></i>
+          <span>Details</span>
+        </button>
+      </div>
 
-      <div class="stage-field notes" *ngIf="stage.stageDescription">{{ stage.stageDescription }}</div>
-      <div class="stage-field text-sm text-neutral" *ngIf="stage.passingCriteria">Passing criteria: {{ stage.passingCriteria }}</div>
-      <div class="stage-field text-sm text-neutral" *ngIf="stage.requiredDocuments">Required documents: {{ stage.requiredDocuments }}</div>
-      <div class="stage-field text-sm text-neutral" *ngIf="stage.estimatedDurationMinutes">Est. duration: {{ stage.estimatedDurationMinutes }} min</div>
+      <div class="stage-details" *ngIf="isStageExpanded(stage)">
+        <div class="stage-field notes" *ngIf="stage.stageDescription">{{ stage.stageDescription }}</div>
+        <div class="stage-field text-sm text-neutral" *ngIf="stage.passingCriteria">Passing criteria: {{ stage.passingCriteria }}</div>
+        <div class="stage-field text-sm text-neutral" *ngIf="stage.requiredDocuments">Required documents: {{ stage.requiredDocuments }}</div>
+        <div class="stage-field text-sm text-neutral" *ngIf="stage.estimatedDurationMinutes">Est. duration: {{ stage.estimatedDurationMinutes }} min</div>
+      </div>
+
       <div class="stage-field" *ngIf="stageNeedsResumeLink(stage)">
         <i class="fa fa-download"></i>
         <a [href]="getResumeFileUrl()" target="_blank" rel="noopener noreferrer">View Resume</a>
       </div>
+
+      <!-- One blocked notice covers the whole card - no point repeating "complete X first" under
+           every individual action below when nothing in this card is actionable yet. -->
+      <div class="stage-blocked-banner" *ngIf="blockingPriorStage(stage) as blocker">
+        <i class="fa-solid fa-lock"></i>
+        <span>Blocked until '{{ blocker.stageName }}' is Completed.</span>
+      </div>
+
+      <!-- Interview-type stages: schedule + track through the real Interview entity, scoped to this stage. -->
+      <ng-container *ngIf="isInterviewStage(stage) && !blockingPriorStage(stage)">
+        <div class="stage-field flex items-center justify-between gap-3">
+          <button
+            pButton
+            type="button"
+            [outlined]="true"
+            size="small"
+            [disabled]="scheduleInterviewDisabled(stage)"
+            [routerLink]="['/interviews/schedule-interview']"
+            [queryParams]="{ jobApplicationId: jobApplicationId, pipelineStageId: stage.pipelineStageId }"
+          >
+            <i class="fa fa-plus"></i>
+            <span>Schedule Interview</span>
+          </button>
+        </div>
+        <span class="stage-field text-sm text-neutral" *ngIf="pendingInterviewForStage(stage) as pending">Round {{ pending.round }} hasn't been marked complete yet.</span>
+        <span class="stage-field text-sm text-neutral" *ngIf="!loadingInterviews && interviewsForStage(stage).length === 0">No interviews scheduled yet for this stage.</span>
+
+        <div *ngFor="let interview of interviewsForStage(stage)" class="stage-field interview-row">
+          <span>
+            Round {{ interview.round }}{{ interview.roundConfigName ? ' (' + interview.roundConfigName + ')' : '' }} &middot;
+            {{ interview.interviewType }} &middot; {{ interview.scheduledStartAt | date: 'dd-MMM-yyyy h:mm a' }} &middot; {{ interview.status }}
+            <ng-container *ngIf="interview.result !== 'Pending'"> &middot; Result: {{ interview.result }}</ng-container>
+          </span>
+          <a [routerLink]="['/interviews/interview', interview.interviewId]" class="interview-row-view">
+            <i class="fa fa-eye"></i>
+            <span>View</span>
+          </a>
+        </div>
+      </ng-container>
+
+      <!-- Exam-driven stages: enroll through the Exams module, pre-filled for this candidate. -->
+      <ng-container *ngIf="isExamDrivenStage(stage) && !blockingPriorStage(stage)">
+        <div class="stage-field flex items-center justify-between gap-3">
+          <button
+            pButton
+            type="button"
+            [outlined]="true"
+            size="small"
+            [disabled]="scheduleExamDisabled(stage)"
+            [routerLink]="['/exams/schedule-exam']"
+            [queryParams]="{ jobApplicationId: jobApplicationId }"
+          >
+            <i class="fa fa-plus"></i>
+            <span>Schedule Exam</span>
+          </button>
+        </div>
+        <div class="stage-field text-sm text-neutral">
+          <i class="fa-solid fa-circle-info"></i>
+          <span>Score auto-fills here once this candidate's exam is scored. See the <a [routerLink]="['/exams/exam-list']">Exams</a> module for enrolled exams.</span>
+        </div>
+      </ng-container>
 
       <ng-container *ngIf="editingStageId !== stage.pipelineStageId">
         <div class="stage-field" *ngIf="stage.scheduledDate">
@@ -116,13 +118,13 @@
           class="edit-btn"
           [outlined]="true"
           size="small"
-          [disabled]="!!blockingPriorStage(stage) || isSystemManagedStage(stage)"
+          *ngIf="!blockingPriorStage(stage)"
+          [disabled]="isSystemManagedStage(stage)"
           (click)="startEdit(stage)"
         >
           <i class="fa fa-pen"></i>
           <span>Update</span>
         </button>
-        <span class="stage-field text-sm text-neutral" *ngIf="blockingPriorStage(stage) as blocker">Complete '{{ blocker.stageName }}' first.</span>
         <span class="stage-field text-sm text-neutral" *ngIf="!blockingPriorStage(stage) && isSystemManagedStage(stage)">{{ systemManagedStageHint(stage) }}</span>
       </ng-container>
 
@@ -146,7 +148,7 @@
         <ng-container *ngIf="stageNeedsScheduling(stage)">
           <div class="edit-field">
             <p-floatlabel variant="in">
-              <p-datepicker [inputId]="'date-' + stage.pipelineStageId" [(ngModel)]="editState.scheduledDate" [showTime]="true" hourFormat="12" dateFormat="dd-M-yy" [showIcon]="true" class="w-full"></p-datepicker>
+              <p-datepicker [inputId]="'date-' + stage.pipelineStageId" [(ngModel)]="editState.scheduledDate" [showTime]="true" hourFormat="12" dateFormat="dd-M-yy" [showIcon]="true" [appendTo]="'body'" class="w-full"></p-datepicker>
               <label [for]="'date-' + stage.pipelineStageId">Scheduled Date</label>
             </p-floatlabel>
           </div>
@@ -185,18 +187,3 @@
     </div>
   </div>
 </div>
-
-<p-dialog header="Recommend for Final Selection" [(visible)]="recommendDialogVisible" [modal]="true" [style]="{ width: '28rem', maxWidth: '95vw' }">
-  <div class="recommend-form">
-    <textarea pInputText [(ngModel)]="recommendJustification" rows="4" class="w-full" maxlength="2000" placeholder="Justification (required)"></textarea>
-    <div class="flex gap-2 pb-2">
-      <button pButton type="button" [disabled]="!recommendJustification.trim() || submittingRecommendation" [loading]="submittingRecommendation" (click)="confirmRecommend()">
-        <i class="fa fa-check"></i>
-        <span>Submit</span>
-      </button>
-      <button pButton type="button" severity="secondary" [disabled]="submittingRecommendation" (click)="recommendDialogVisible = false">
-        <span>Cancel</span>
-      </button>
-    </div>
-  </div>
-</p-dialog>

@@ -25,7 +25,7 @@
     <ng-template pTemplate="body" let-item>
       <tr>
         <td>{{ item.documentTemplateName }}</td>
-        <td>{{ item.generatedAt | date: 'dd-MMM-yyyy HH:mm' }}</td>
+        <td>{{ item.generatedAt | date: 'dd-MMM-yyyy h:mm a' }}</td>
         <td>
           <a pButton size="small" [routerLink]="['/candidate-profile/appointment-letters', item.appointmentLetterId]">
             <i class="fa fa-eye"></i>

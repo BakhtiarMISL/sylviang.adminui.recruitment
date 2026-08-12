@@ -31,6 +31,17 @@ export class UserAccountListComponent implements OnInit {
     return this.authService.getRole() === UserRoleEnum.SuperAdmin;
   }
 
+  canManage(account: IUserAccountResponse): boolean {
+    return this.isSuperAdmin || !account.roleNames.includes('SuperAdmin');
+  }
+
+  canChangeActiveState(account: IUserAccountResponse): boolean {
+    // The API is the authority, but hiding this destructive action prevents a user from
+    // accidentally trying to lock themselves out. In an impersonated session getUser()
+    // represents the impersonated identity, which is the account the API will protect.
+    return this.canManage(account) && (!account.isActive || account.email !== this.authService.getUser()?.username);
+  }
+
   get skeletonItems() {
     return Array(3)
       .fill({})
@@ -58,6 +69,8 @@ export class UserAccountListComponent implements OnInit {
   }
 
   toggleActive(account: IUserAccountResponse, event: Event): void {
+    if (!this.canChangeActiveState(account)) return;
+
     const nextState = !account.isActive;
     this.confirmationService.confirm({
       target: event.target as EventTarget,

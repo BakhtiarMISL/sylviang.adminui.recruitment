@@ -120,6 +120,14 @@
       </div>
     </a>
 
+    <a *ngIf="role === UserRoleEnum.SuperAdmin" routerLink="/access-control/user-account-list" class="quick-link-card">
+      <div class="quick-link-icon"><i class="fa-solid fa-users-gear text-xl text-primary"></i></div>
+      <div>
+        <p class="font-semibold text-dark dark:text-white">User Accounts</p>
+        <p class="text-sm text-neutral dark:text-white/50">Manage HR and administrator accounts</p>
+      </div>
+    </a>
+
     <a *ngIf="role === UserRoleEnum.Admin || role === UserRoleEnum.HR" routerLink="/exam-questions/exam-question-list" class="quick-link-card">
       <div class="quick-link-icon"><i class="fa-solid fa-circle-question text-xl text-primary"></i></div>
       <div>

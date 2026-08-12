@@ -32,6 +32,16 @@ export function buildEmptyMatrix(): IPermissionMatrixRow[] {
   }));
 }
 
+export function buildFullMatrix(): IPermissionMatrixRow[] {
+  return PermissionModules.map((module) => ({
+    module,
+    grants: PermissionActions.reduce(
+      (acc, action) => ({ ...acc, [action]: true }),
+      {} as Record<PermissionActionEnum, boolean>,
+    ),
+  }));
+}
+
 export function matrixFromGrants(grants: IPermissionGrant[]): IPermissionMatrixRow[] {
   const matrix = buildEmptyMatrix();
   for (const grant of grants) {

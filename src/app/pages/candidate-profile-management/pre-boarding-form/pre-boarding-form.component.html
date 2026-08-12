@@ -12,7 +12,7 @@
   <form *ngIf="!loading && item" [formGroup]="form" class="space-y-6">
     <div *ngIf="isLocked" class="table-container p-4 text-green-600">
       <i class="fa fa-check-circle"></i>
-      Your pre-boarding submission has been received{{ item.submittedAt ? ' on ' + (item.submittedAt | date: 'dd-MMM-yyyy HH:mm') : '' }} and is now locked for editing.
+      Your pre-boarding submission has been received{{ item.submittedAt ? ' on ' + (item.submittedAt | date: 'dd-MMM-yyyy h:mm a') : '' }} and is now locked for editing.
     </div>
 
     <div *ngIf="needsCorrection" class="table-container p-4 text-orange-600">

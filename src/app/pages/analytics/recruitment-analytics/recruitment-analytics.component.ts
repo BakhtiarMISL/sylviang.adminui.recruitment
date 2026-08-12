@@ -2,6 +2,7 @@ import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { BreadcrumbService } from '@app/@core/services';
 import { ApplicationStatusEnum, EmploymentTypeEnum } from '@core/enums/recruitment.enum';
 import { IJobVacancyResponse } from '@core/interfaces/recruitment-management/job-vacancy.interface';
+import { IMasterDataItem } from '@core/interfaces/recruitment-management/master-data.interface';
 import {
   ICandidateSourceAnalyticsRequest,
   ICandidateSourceAnalyticsResponse,
@@ -14,6 +15,7 @@ import {
 } from '@core/interfaces/recruitment-management/analytics.interface';
 import { AnalyticsService } from '@core/services/recruitment/analytics/analytics.service';
 import { JobVacancyService } from '@core/services/recruitment/job-vacancy/job-vacancy.service';
+import { MasterDataService } from '@app/@core/services/recruitment/master-data/master-data.service';
 import { saveFileResponse } from '@core/services/recruitment/cv-bank/cv-bank.service';
 import { UIChart } from 'primeng/chart';
 import { forkJoin } from 'rxjs';
@@ -43,11 +45,13 @@ export class RecruitmentAnalyticsComponent implements OnInit {
   constructor(
     private analyticsService: AnalyticsService,
     private jobVacancyService: JobVacancyService,
+    private masterDataService: MasterDataService,
     private breadcrumbService: BreadcrumbService,
     private cdr: ChangeDetectorRef,
   ) {}
 
   vacancyOptions: IJobVacancyResponse[] = [];
+  departmentOptions: IMasterDataItem[] = [];
   candidateTypeOptions = [
     { label: 'All', value: null },
     { label: 'Internal', value: true },
@@ -64,6 +68,7 @@ export class RecruitmentAnalyticsComponent implements OnInit {
   loading = false;
   exporting = false;
   errorMessage = '';
+  filtersCollapsed = true;
 
   funnel: IRecruitmentFunnelResponse | null = null;
   timeToHire: ITimeToHireResponse | null = null;
@@ -95,6 +100,12 @@ export class RecruitmentAnalyticsComponent implements OnInit {
     this.jobVacancyService.getAllJobVacancies().subscribe({
       next: (response) => {
         this.vacancyOptions = !response.hasError && response.content ? response.content : [];
+      },
+    });
+
+    this.masterDataService.getAll('department').subscribe({
+      next: (response) => {
+        this.departmentOptions = !response.hasError && response.content ? response.content : [];
       },
     });
 
@@ -139,6 +150,7 @@ export class RecruitmentAnalyticsComponent implements OnInit {
   }
 
   runReport(): void {
+    this.filtersCollapsed = true;
     this.loading = true;
     this.errorMessage = '';
 
@@ -167,6 +179,19 @@ export class RecruitmentAnalyticsComponent implements OnInit {
         this.cdr.detectChanges();
       },
     });
+  }
+
+  resetFilters(): void {
+    this.filterJobPostingId = null;
+    this.filterDepartmentId = null;
+    this.filterDateFrom = null;
+    this.filterDateTo = null;
+    this.filterIsInternal = null;
+    this.filterEmploymentType = null;
+    // runReport() collapses the panel (Apply-button behavior) - reopen it after, since Reset
+    // should leave the now-cleared filters visible rather than hiding them again.
+    this.runReport();
+    this.filtersCollapsed = false;
   }
 
   private buildCharts(): void {

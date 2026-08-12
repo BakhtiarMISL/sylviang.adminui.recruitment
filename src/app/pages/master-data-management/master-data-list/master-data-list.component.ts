@@ -24,6 +24,11 @@ export class MasterDataListComponent implements OnInit {
   items: IMasterDataItem[] = [];
   loading = false;
   errorMessage = '';
+  searchTerm = '';
+
+  get globalFilterFields(): string[] {
+    return this.config.fields.map((field) => field.key);
+  }
 
   get skeletonItems() {
     return Array(4)

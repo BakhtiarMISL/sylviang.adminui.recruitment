@@ -1,13 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, OnInit, QueryList, ViewChildren } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ApplicationStatusEnum, OfferLetterStatusEnum, RecommendationStatusEnum } from '@app/@core/enums/recruitment.enum';
+import { ApplicationStatusEnum, OfferLetterStatusEnum } from '@app/@core/enums/recruitment.enum';
 import { IApplicationStatusReason, IJobApplicationDetail } from '@app/@core/interfaces/recruitment-management/job-application.interface';
 import { JobApplicationService } from '@app/@core/services/recruitment/job-application/job-application.service';
-import { CandidateRecommendationService } from '@app/@core/services/recruitment/candidate-recommendation/candidate-recommendation.service';
 import { OfferLetterService } from '@app/@core/services/recruitment/offer-letter/offer-letter.service';
 import { BreadcrumbService } from '@app/@core/services';
 import { Base_URL } from '@env/environment';
-import { ApplicationStatusOptions, ApplicationStatusTransitions, StatusesRequiringReason } from '../application-status-transitions.constants';
+import { StatusesRequiringReason } from '../application-status-transitions.constants';
 import { IPipelineTrackerNextStepState } from '../pipeline-progress-tracker/pipeline-progress-tracker.component';
 
 type NextStepTone = 'info' | 'warning' | 'success' | 'danger' | 'neutral';
@@ -19,6 +18,8 @@ interface NextStep {
 }
 
 type StepState = 'done' | 'current' | 'upcoming';
+
+type DetailTab = 'pipeline' | 'documents' | 'status';
 
 // Matching pair per tone: outer card background/border, and icon/text accent color - kept as one
 // table so a new tone can't accidentally end up with a card/icon color mismatch.
@@ -36,12 +37,13 @@ const NEXT_STEP_TONE_CLASSES: Record<NextStepTone, { card: string; accent: strin
   templateUrl: './application-detail.component.html',
   styleUrl: './application-detail.component.scss',
 })
-export class ApplicationDetailComponent implements OnInit {
+export class ApplicationDetailComponent implements OnInit, AfterViewInit {
+  readonly ApplicationStatusEnum = ApplicationStatusEnum;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private jobApplicationService: JobApplicationService,
-    private candidateRecommendationService: CandidateRecommendationService,
     private offerLetterService: OfferLetterService,
     private breadcrumbService: BreadcrumbService,
   ) {}
@@ -51,12 +53,66 @@ export class ApplicationDetailComponent implements OnInit {
   loading = true;
   loadError = '';
 
-  // Mirrors offer-letter-form.component.ts's own gate - shown here too so HR sees the button is
-  // blocked before clicking through into the form, not after.
-  recommendationAccepted: boolean | null = null;
+  // Everything below the header (stage cards, doc generation, status/history) used to sit on one
+  // long scroll - split into tabs so HR sees one task area at a time. Header/next-step/stepper
+  // stay outside the tabs since those are "at a glance" info, not a task.
+  readonly tabs: { key: DetailTab; label: string; icon: string }[] = [
+    { key: 'pipeline', label: 'Pipeline Stages', icon: 'fa-solid fa-diagram-project' },
+    { key: 'documents', label: 'Documents', icon: 'fa-solid fa-file-signature' },
+    { key: 'status', label: 'Status & History', icon: 'fa-solid fa-clock-rotate-left' },
+  ];
+  activeTab: DetailTab = 'pipeline';
 
-  // Mirrors medical-letter-form.component.ts's / target-letter-form.component.ts's own gate -
-  // same reasoning as recommendationAccepted above.
+  // Measured from the real DOM rather than assumed-equal-width math - tab labels ("Status &
+  // History" vs "Documents") aren't the same width, so a %-based indicator would land in the
+  // wrong spot. Re-measured on view init and window resize; a tab switch itself doesn't move
+  // any button, so it doesn't need to trigger a re-measure.
+  @ViewChildren('tabBtnRef') private tabBtnEls!: QueryList<ElementRef<HTMLButtonElement>>;
+  tabRects: { left: number; width: number }[] = [];
+
+  ngAfterViewInit(): void {
+    // Deferred to a macrotask (not just a microtask/Promise) in both cases - measuring
+    // synchronously mutates tabRects (read by the template) after that same view has already
+    // been checked, which Angular flags as NG0100 in dev mode; a Promise microtask can still
+    // land inside the same zone.js task and trip the same check, setTimeout reliably lands in
+    // the next one. QueryList.changes fires when the tab bar first renders (e.g. once the async
+    // `application` load completes and the *ngIf reveals it) and again on any later structural
+    // change, so both the initial measure and this subscription need the same deferral.
+    this.tabBtnEls.changes.subscribe(() => setTimeout(() => this.measureTabs()));
+    setTimeout(() => this.measureTabs());
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.measureTabs();
+  }
+
+  private measureTabs(): void {
+    const els = this.tabBtnEls?.toArray() ?? [];
+    if (!els.length) return;
+    const barLeft = els[0].nativeElement.parentElement!.getBoundingClientRect().left;
+    this.tabRects = els.map((el) => {
+      const r = el.nativeElement.getBoundingClientRect();
+      return { left: r.left - barLeft, width: r.width };
+    });
+  }
+
+  setActiveTab(tab: DetailTab): void {
+    this.activeTab = tab;
+  }
+
+  get activeTabIndex(): number {
+    return this.tabs.findIndex((t) => t.key === this.activeTab);
+  }
+
+  get candidateInitials(): string {
+    const name = this.application?.candidateName?.trim();
+    if (!name) return '?';
+    const parts = name.split(/\s+/);
+    return ((parts[0]?.[0] || '') + (parts.length > 1 ? parts[parts.length - 1]?.[0] || '' : '')).toUpperCase();
+  }
+
+  // Mirrors medical-letter-form.component.ts's / target-letter-form.component.ts's own gate.
   offerLetterAccepted: boolean | null = null;
 
   // Whether ANY offer letter has been generated yet (regardless of status) - separate from
@@ -65,11 +121,16 @@ export class ApplicationDetailComponent implements OnInit {
   hasOfferLetter = false;
 
   // Fed by app-pipeline-progress-tracker's (nextStepStateChange) output - that component already
-  // loads stages/recommendation/interviews, no reason to re-fetch any of it up here.
+  // loads stages/interviews, no reason to re-fetch any of it up here.
   trackerState: IPipelineTrackerNextStepState | null = null;
 
-  nextStatusOptions: { label: string; value: ApplicationStatusEnum }[] = [];
-  selectedNextStatus: ApplicationStatusEnum | null = null;
+  // The only two manual status moves left for HR to make - every routine forward hop
+  // (Shortlisted -> InterviewScheduled -> Interviewed -> Offered -> Hired) now auto-advances
+  // server-side the moment its underlying event happens (interview scheduled, stages Completed,
+  // offer generated/accepted - see InterviewService/JobApplicationStageProgressService/
+  // OfferLetterService's AutoTransition helpers). Reject/Withdraw need a human judgment call and
+  // a reason, so those stay manual.
+  rejectWithdrawTarget: ApplicationStatusEnum.Rejected | ApplicationStatusEnum.Withdrawn | null = null;
   reasonOptions: IApplicationStatusReason[] = [];
   selectedReasonId: number | null = null;
   note = '';
@@ -84,32 +145,26 @@ export class ApplicationDetailComponent implements OnInit {
       { title: 'Application Detail', icon: 'fa-solid fa-file-lines', href: `/applications/${this.jobApplicationId}` },
     ]);
     this.loadApplication();
-    this.loadRecommendation();
     this.loadOfferLetterStatus();
   }
 
-  private loadRecommendation(): void {
-    this.candidateRecommendationService.getLatest(this.jobApplicationId).subscribe({
-      next: (response) => {
-        const recommendation = response && !response.hasError ? response.content : null;
-        this.recommendationAccepted = recommendation?.status === RecommendationStatusEnum.Accepted;
-      },
-      error: () => {
-        this.recommendationAccepted = false;
-      },
-    });
-  }
+  // AppointmentLetterFormComponent is keyed by offerLetterId (not jobApplicationId, unlike
+  // Medical/Target Letter) - needs the actual Accepted offer's id, not just a boolean.
+  acceptedOfferLetterId: number | null = null;
 
   private loadOfferLetterStatus(): void {
     this.offerLetterService.getAll(this.jobApplicationId).subscribe({
       next: (response) => {
         const offerLetters = response && !response.hasError && response.content ? response.content : [];
         this.hasOfferLetter = offerLetters.length > 0;
-        this.offerLetterAccepted = offerLetters.some((o) => o.status === OfferLetterStatusEnum.Accepted);
+        const accepted = offerLetters.find((o) => o.status === OfferLetterStatusEnum.Accepted);
+        this.offerLetterAccepted = !!accepted;
+        this.acceptedOfferLetterId = accepted?.offerLetterId ?? null;
       },
       error: () => {
         this.hasOfferLetter = false;
         this.offerLetterAccepted = false;
+        this.acceptedOfferLetterId = null;
       },
     });
   }
@@ -118,8 +173,12 @@ export class ApplicationDetailComponent implements OnInit {
     this.trackerState = state;
   }
 
+  get stagesCompleted(): boolean {
+    return !!this.trackerState?.allStagesCompleted;
+  }
+
   goToGenerateOfferLetter(): void {
-    if (!this.recommendationAccepted) return;
+    if (!this.stagesCompleted) return;
     this.router.navigate(['/document-management/manage-offer-letter'], { queryParams: { jobApplicationId: this.jobApplicationId } });
   }
 
@@ -133,6 +192,11 @@ export class ApplicationDetailComponent implements OnInit {
     this.router.navigate(['/document-management/manage-target-letter'], { queryParams: { jobApplicationId: this.jobApplicationId } });
   }
 
+  goToGenerateAppointmentLetter(): void {
+    if (!this.acceptedOfferLetterId) return;
+    this.router.navigate(['/document-management/manage-appointment-letter'], { queryParams: { offerLetterId: this.acceptedOfferLetterId } });
+  }
+
   loadApplication(): void {
     this.loading = true;
     this.loadError = '';
@@ -141,10 +205,6 @@ export class ApplicationDetailComponent implements OnInit {
         this.loading = false;
         if (response && !response.hasError && response.content) {
           this.application = response.content;
-          this.nextStatusOptions = (ApplicationStatusTransitions[this.application.applicationStatus] || []).map((value) => ({
-            label: ApplicationStatusOptions.find((o) => o.value === value)?.label || value,
-            value,
-          }));
         } else {
           this.loadError = response?.decentMessage || 'Failed to load application.';
         }
@@ -166,30 +226,31 @@ export class ApplicationDetailComponent implements OnInit {
     return value.replace(/([a-z])([A-Z])/g, '$1 $2');
   }
 
-  onNextStatusChange(status: ApplicationStatusEnum | null): void {
+  openRejectWithdraw(status: ApplicationStatusEnum.Rejected | ApplicationStatusEnum.Withdrawn): void {
+    this.rejectWithdrawTarget = status;
     this.selectedReasonId = null;
+    this.note = '';
+    this.updateError = '';
+    this.updateSuccess = false;
     this.reasonOptions = [];
 
-    if (status && StatusesRequiringReason.includes(status)) {
-      this.jobApplicationService.getStatusReasons(status).subscribe({
-        next: (response) => {
-          this.reasonOptions = response && !response.hasError && response.content ? response.content : [];
-        },
-      });
-    }
+    this.jobApplicationService.getStatusReasons(status).subscribe({
+      next: (response) => {
+        this.reasonOptions = response && !response.hasError && response.content ? response.content : [];
+      },
+    });
   }
 
-  requiresReason(): boolean {
-    return !!this.selectedNextStatus && StatusesRequiringReason.includes(this.selectedNextStatus);
+  cancelRejectWithdraw(): void {
+    this.rejectWithdrawTarget = null;
   }
 
-  canUpdateStatus(): boolean {
-    if (!this.selectedNextStatus) return false;
-    return !this.requiresReason() || !!this.selectedReasonId;
+  canConfirmRejectWithdraw(): boolean {
+    return !!this.rejectWithdrawTarget && StatusesRequiringReason.includes(this.rejectWithdrawTarget) && !!this.selectedReasonId;
   }
 
-  updateStatus(): void {
-    if (!this.selectedNextStatus) return;
+  confirmRejectWithdraw(): void {
+    if (!this.rejectWithdrawTarget || !this.canConfirmRejectWithdraw()) return;
 
     this.updating = true;
     this.updateError = '';
@@ -197,7 +258,7 @@ export class ApplicationDetailComponent implements OnInit {
 
     this.jobApplicationService
       .updateStatus(this.jobApplicationId, {
-        toStatus: this.selectedNextStatus,
+        toStatus: this.rejectWithdrawTarget,
         reasonId: this.selectedReasonId ?? undefined,
         note: this.note || undefined,
       })
@@ -205,7 +266,7 @@ export class ApplicationDetailComponent implements OnInit {
         next: () => {
           this.updating = false;
           this.updateSuccess = true;
-          this.selectedNextStatus = null;
+          this.rejectWithdrawTarget = null;
           this.selectedReasonId = null;
           this.note = '';
           this.loadApplication();
@@ -255,20 +316,13 @@ export class ApplicationDetailComponent implements OnInit {
           ? { text: `Waiting: Round ${t.pendingInterviewRound} interview is scheduled — mark its result once it's done.`, tone: 'warning', icon: 'fa-hourglass-half' }
           : { text: `Next: Schedule an interview for the '${t.blockingStageName}' stage.`, tone: 'info', icon: 'fa-arrow-right-long' };
       }
+      if (t.blockingStageIsExam) {
+        return { text: `Next: Schedule and enroll this candidate in an exam (Exams module) for the '${t.blockingStageName}' stage — score fills in automatically once it's graded.`, tone: 'info', icon: 'fa-arrow-right-long' };
+      }
       return { text: `Next: Complete the '${t.blockingStageName}' stage — click Update on that stage card below.`, tone: 'info', icon: 'fa-arrow-right-long' };
     }
 
-    if (t?.hasPipeline && !t.hasRecommendation) {
-      return { text: 'Next: Recommend this candidate for Final Selection.', tone: 'info', icon: 'fa-arrow-right-long' };
-    }
-    if (t?.recommendationStatus === 'Pending') {
-      return { text: 'Waiting: the Final Selection recommendation is pending review.', tone: 'warning', icon: 'fa-hourglass-half' };
-    }
-    if (t?.recommendationStatus === 'Rejected') {
-      return { text: 'Final Selection recommendation was rejected — decide the next status below.', tone: 'danger', icon: 'fa-circle-xmark' };
-    }
-
-    if (this.recommendationAccepted) {
+    if (this.stagesCompleted) {
       if (!this.hasOfferLetter) {
         return { text: 'Next: Generate the Offer Letter.', tone: 'info', icon: 'fa-arrow-right-long' };
       }
@@ -285,61 +339,9 @@ export class ApplicationDetailComponent implements OnInit {
     return NEXT_STEP_TONE_CLASSES[this.nextStep.tone];
   }
 
-  /** True once every mandatory pre-decision pipeline stage (which includes any interview-type
-   * stage) is Completed - the interview categorically already happened at that point, even if
-   * the live Interview entity's own status still reads "Scheduled" from an earlier round that
-   * got superseded. Offer/Onboarding stages don't count (blockingStage already excludes them). */
-  private get interviewStageCleared(): boolean {
-    const t = this.trackerState;
-    return !!t && t.hasPipeline && !t.blockingStageName;
-  }
-
-  /** One evidence check per forward hop, keyed by the status it fires FROM. Deliberately only
-   * ever suggests the SINGLE next hop, never skips ahead even when evidence supports a much
-   * later status (e.g. offer already accepted but current status is still Shortlisted) - HR
-   * still has to walk the dropdown one real milestone at a time, same as the backend enforces,
-   * so the suggestion does the same walk instead of trying to jump straight to the end. Applied
-   * is deliberately excluded: its two legal forward hops (Screening or Shortlisted) are a genuine
-   * either/or in this workflow that nothing here can safely pick between. */
-  private get forwardHopEvidence(): Partial<Record<ApplicationStatusEnum, { hop: ApplicationStatusEnum; reached: boolean }>> {
-    return {
-      [ApplicationStatusEnum.Screening]: { hop: ApplicationStatusEnum.Shortlisted, reached: !!this.trackerState?.hasPipeline },
-      [ApplicationStatusEnum.Shortlisted]: {
-        hop: ApplicationStatusEnum.InterviewScheduled,
-        reached: !!this.trackerState?.pendingInterviewRound || this.interviewStageCleared,
-      },
-      [ApplicationStatusEnum.InterviewScheduled]: { hop: ApplicationStatusEnum.Interviewed, reached: this.interviewStageCleared },
-      [ApplicationStatusEnum.Interviewed]: { hop: ApplicationStatusEnum.Offered, reached: this.hasOfferLetter },
-      [ApplicationStatusEnum.Offered]: { hop: ApplicationStatusEnum.Hired, reached: !!this.offerLetterAccepted },
-    };
-  }
-
-  get suggestedStatus(): ApplicationStatusEnum | null {
-    if (!this.application || this.isTerminalStatus) return null;
-    const entry = this.forwardHopEvidence[this.application.applicationStatus];
-    return entry?.reached ? entry.hop : null;
-  }
-
-  get suggestedStatusLabel(): string {
-    const status = this.suggestedStatus;
-    return status ? ApplicationStatusOptions.find((o) => o.value === status)?.label || status : '';
-  }
-
-  /** None of the statuses ever suggested here (Hired/Offered/Interviewed/InterviewScheduled) are
-   * in StatusesRequiringReason, so this can fire straight through updateStatus() without opening
-   * the Reason field the manual dropdown flow needs for Rejected/Withdrawn. */
-  applySuggestedStatus(): void {
-    const suggested = this.suggestedStatus;
-    if (!suggested) return;
-    this.selectedNextStatus = suggested;
-    this.selectedReasonId = null;
-    this.updateStatus();
-  }
-
   get steps(): { label: string; state: StepState }[] {
     const t = this.trackerState;
     const stagesDone = !t || !t.hasPipeline || !t.blockingStageName;
-    const recommendDone = t?.recommendationStatus === 'Accepted';
     const offerDone = this.hasOfferLetter;
     const acceptDone = !!this.offerLetterAccepted;
     const hiredDone = this.application?.applicationStatus === ApplicationStatusEnum.Hired;
@@ -348,8 +350,7 @@ export class ApplicationDetailComponent implements OnInit {
 
     return [
       { label: 'Pipeline Stages', state: stepState(stagesDone, !stagesDone) },
-      { label: 'Final Selection', state: stepState(recommendDone, stagesDone && !recommendDone) },
-      { label: 'Offer Letter', state: stepState(offerDone, recommendDone && !offerDone) },
+      { label: 'Offer Letter', state: stepState(offerDone, stagesDone && !offerDone) },
       { label: 'Offer Accepted', state: stepState(acceptDone, offerDone && !acceptDone) },
       { label: 'Hired', state: stepState(hiredDone, acceptDone && !hiredDone) },
     ];

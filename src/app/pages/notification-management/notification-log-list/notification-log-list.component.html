@@ -132,7 +132,7 @@
           </span>
           <div class="text-xs text-red-500" *ngIf="item.failureReason">{{ item.failureReason }}</div>
         </td>
-        <td>{{ item.sentAt ? (item.sentAt | date: 'dd-MMM-yy HH:mm') : '-' }}</td>
+        <td>{{ item.sentAt ? (item.sentAt | date: 'dd-MMM-yy h:mm a') : '-' }}</td>
         <td>
           <button pButton size="small" severity="secondary" *ngIf="isFailed(item)" (click)="retry(item)">
             <i class="fa fa-rotate-right"></i>

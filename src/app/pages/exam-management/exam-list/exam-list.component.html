@@ -93,7 +93,7 @@
           } @else {
             <tr class="cursor-pointer" (click)="openDetail(exam)">
               <td>{{ exam.title }}</td>
-              <td>{{ exam.scheduledStartAt | date: 'dd-MMM-yyyy HH:mm' }}</td>
+              <td>{{ exam.scheduledStartAt | date: 'dd-MMM-yyyy h:mm a' }}</td>
               <td>{{ exam.examType }}</td>
               <td>{{ exam.examType === 'InPerson' ? (exam.examVenueName || '-') : 'Online' }}</td>
               <td>

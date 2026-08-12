@@ -2,6 +2,7 @@ import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { IPaymentStatusResponse } from '@app/@core/interfaces/recruitment-management/payment.interface';
 import { PaymentService } from '@app/@core/services/recruitment/payment/payment.service';
+import { AuthService } from '@core/services/auth/auth.service';
 
 const POLL_INTERVAL_MS = 3000;
 const MAX_POLL_ATTEMPTS = 20; // ~1 minute - the IPN usually lands within a few seconds of the browser redirect.
@@ -22,6 +23,7 @@ export class InternalPaymentResultComponent implements OnInit, OnDestroy {
     private paymentService: PaymentService,
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef,
+    private authService: AuthService,
   ) {}
 
   jobApplicationId: number | null = null;
@@ -32,6 +34,11 @@ export class InternalPaymentResultComponent implements OnInit, OnDestroy {
   retryingPayment = false;
   retryError = '';
 
+  // Ownership proof PaymentService.InitiateAsync/GetStatusAsync check against the application's
+  // own CandidateEmail - prefers the redirect's own query param (career-portal's flow appends
+  // it), falls back to the logged-in employee's own username, which is their email.
+  private candidateEmail = '';
+
   private pollAttempts = 0;
   private pollTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -39,6 +46,7 @@ export class InternalPaymentResultComponent implements OnInit, OnDestroy {
     this.route.queryParamMap.subscribe((params) => {
       const idParam = params.get('jobApplicationId');
       this.hintStatus = params.get('status');
+      this.candidateEmail = params.get('candidateEmail') || this.authService.getUser()?.username || '';
       if (idParam) {
         this.jobApplicationId = +idParam;
         this.pollStatus();
@@ -55,7 +63,7 @@ export class InternalPaymentResultComponent implements OnInit, OnDestroy {
   private pollStatus(): void {
     if (!this.jobApplicationId) return;
 
-    this.paymentService.getPaymentStatus(this.jobApplicationId).subscribe({
+    this.paymentService.getPaymentStatus(this.jobApplicationId, this.candidateEmail).subscribe({
       next: (response) => {
         if (response && !response.hasError && response.content) {
           this.status = response.content;
@@ -95,7 +103,7 @@ export class InternalPaymentResultComponent implements OnInit, OnDestroy {
     this.retryingPayment = true;
     this.retryError = '';
 
-    this.paymentService.initiatePayment(this.jobApplicationId).subscribe({
+    this.paymentService.initiatePayment(this.jobApplicationId, this.candidateEmail).subscribe({
       next: (response) => {
         this.retryingPayment = false;
         if (response && !response.hasError && response.content?.success && response.content.gatewayRedirectUrl) {

@@ -41,7 +41,7 @@ export class OtpVerifyComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.challengeId = this.route.snapshot.queryParamMap.get('challengeId') || '';
-    this.returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/dashboard';
+    this.returnUrl = this.sanitizeReturnUrl(this.route.snapshot.queryParamMap.get('returnUrl'));
 
     if (!this.challengeId) {
       this.router.navigateByUrl('/login');
@@ -57,6 +57,14 @@ export class OtpVerifyComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.clearCooldown();
     this.clearExpiryTimer();
+  }
+
+  // Same hardening as LoginComponent - returnUrl is attacker-controllable via the query string.
+  private sanitizeReturnUrl(returnUrl: string | null): string {
+    if (returnUrl && returnUrl.startsWith('/') && !returnUrl.startsWith('//')) {
+      return returnUrl;
+    }
+    return '/dashboard';
   }
 
   get code() {

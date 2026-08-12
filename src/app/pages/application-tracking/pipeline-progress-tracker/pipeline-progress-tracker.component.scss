@@ -92,6 +92,52 @@
   color: var(--text-color-secondary, #6b7280);
 }
 
+.stage-type-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+// Collapsed by default - description/passing-criteria/required-documents/duration are the
+// bulkiest, least-often-needed part of the card, so they're the part that folds away instead of
+// always eating vertical space. A real pButton (text variant) instead of a bare <button> so it
+// picks up the same hover/focus treatment as every other button in the app.
+.stage-details-toggle {
+  padding: 0.15rem 0.4rem !important;
+  font-size: 0.7rem !important;
+
+  i {
+    font-size: 0.6rem;
+    transition: transform 150ms ease-out;
+
+    &.rotated {
+      transform: rotate(90deg);
+    }
+  }
+}
+
+.stage-blocked-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text-color-secondary, #6b7280);
+  background: var(--surface-100, #f4f4f5);
+
+  i {
+    font-size: 0.7rem;
+  }
+}
+
+.stage-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
 .interview-row {
   justify-content: space-between;
   width: 100%;
@@ -137,64 +183,12 @@
   margin-top: 0.5rem;
 }
 
-.recommendation-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-  padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
-  background: var(--surface-100, #f4f4f5);
-}
-
-.recommendation-status {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-}
-
-.recommendation-status-label {
-  font-weight: 600;
-  font-size: 0.85rem;
-}
-
-.recommendation-status-accepted .recommendation-status-label {
-  color: #15803d;
-}
-
-.recommendation-status-rejected .recommendation-status-label {
-  color: #b91c1c;
-}
-
-.recommendation-meta {
-  font-size: 0.75rem;
-  color: var(--text-color-secondary, #6b7280);
-}
-
-.recommendation-justification {
-  font-size: 0.85rem;
-  white-space: pre-wrap;
-}
-
-.recommendation-review {
-  font-size: 0.8rem;
-  color: var(--text-color-secondary, #6b7280);
-}
-
-.recommend-form {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
 // PrimeNG's button label/icon otherwise renders white regardless of variant when this
 // component is hosted inside a p-dialog (button's own color themes correctly - only the
 // projected <span>/<i> children don't inherit it there) - white-on-white was invisible.
 :host ::ng-deep {
   .edit-btn,
-  .edit-actions button,
-  .recommendation-panel button,
-  .recommend-form button {
+  .edit-actions button {
     span,
     i {
       color: inherit;

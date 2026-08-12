@@ -21,6 +21,12 @@ export class ImpersonationBannerComponent implements OnInit, OnDestroy {
   ending = false;
 
   private expiresAtMs = 0;
+  // Tracks which impersonation session expiresAtMs/targetFullName were loaded from, so a
+  // session that starts *after* this banner was already mounted (i.e. every real case - the
+  // banner lives in the shell from login onward) gets picked up on the next tick instead of
+  // ticking against the stale 0-default from ngOnInit, which reads as "already expired" and
+  // immediately auto-restores the original session.
+  private loadedSessionId: number | null = null;
   private tickHandle: ReturnType<typeof setInterval> | null = null;
 
   get isImpersonating(): boolean {
@@ -28,7 +34,7 @@ export class ImpersonationBannerComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.refreshInfo();
+    this.tick();
     this.tickHandle = setInterval(() => this.tick(), 1000);
   }
 
@@ -36,16 +42,18 @@ export class ImpersonationBannerComponent implements OnInit, OnDestroy {
     if (this.tickHandle) clearInterval(this.tickHandle);
   }
 
-  private refreshInfo(): void {
-    const info = this.authService.getImpersonationInfo();
-    if (!info) return;
-    this.targetFullName = info.targetFullName;
-    this.expiresAtMs = new Date(info.expiresAtUtc).getTime();
-    this.tick();
-  }
-
   private tick(): void {
-    if (!this.isImpersonating) return;
+    const info = this.authService.getImpersonationInfo();
+    if (!info) {
+      this.loadedSessionId = null;
+      return;
+    }
+
+    if (info.sessionId !== this.loadedSessionId) {
+      this.loadedSessionId = info.sessionId;
+      this.targetFullName = info.targetFullName;
+      this.expiresAtMs = new Date(info.expiresAtUtc).getTime();
+    }
 
     const remainingMs = this.expiresAtMs - Date.now();
     if (remainingMs <= 0) {
