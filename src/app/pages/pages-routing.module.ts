@@ -111,6 +111,10 @@ const routes: Routes = [
       loadChildren: () => import('./access-control-management/access-control-management.module').then((m) => m.AccessControlManagementModule),
     },
     {
+      path: 'company-management',
+      loadChildren: () => import('./company-management/company-management.module').then((m) => m.CompanyManagementModule),
+    },
+    {
       path: 'profile-field-config',
       loadChildren: () =>
         import('./profile-field-config-management/profile-field-config-management.module').then((m) => m.ProfileFieldConfigManagementModule),

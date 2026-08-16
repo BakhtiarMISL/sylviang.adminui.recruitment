@@ -24,34 +24,23 @@
         <small class="mt-1 block text-red-500" *ngIf="logoError">{{ logoError }}</small>
       </div>
 
+      <div class="mb-6">
+        <div class="mb-2 flex items-center justify-between">
+          <label class="block text-sm font-medium text-gray-700">Company Identity</label>
+          <a routerLink="/company-management" class="text-sm text-primary hover:underline">Edit in Company Management</a>
+        </div>
+        <div class="grid grid-cols-1 gap-3 rounded border border-gray-200 p-3 sm:grid-cols-2">
+          <div><span class="block text-xs text-gray-500">Company Name</span>{{ companyIdentity.companyName || '-' }}</div>
+          <div><span class="block text-xs text-gray-500">Address</span>{{ companyIdentity.addressLine || '-' }}</div>
+          <div><span class="block text-xs text-gray-500">Phone</span>{{ companyIdentity.phone || '-' }}</div>
+          <div><span class="block text-xs text-gray-500">Email</span>{{ companyIdentity.email || '-' }}</div>
+          <div><span class="block text-xs text-gray-500">Website</span>{{ companyIdentity.website || '-' }}</div>
+        </div>
+        <small class="mt-1 block text-neutral">These fields are pulled from Company Management and shown on every generated document.</small>
+      </div>
+
       <form [formGroup]="settingsForm" (ngSubmit)="onSubmit()">
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <p-floatlabel variant="in">
-            <input pInputText id="companyName" class="w-full" formControlName="companyName" />
-            <label for="companyName">Company Name</label>
-          </p-floatlabel>
-
-          <p-floatlabel variant="in">
-            <input pInputText id="addressLine" class="w-full" formControlName="addressLine" />
-            <label for="addressLine">Address</label>
-          </p-floatlabel>
-
-          <p-floatlabel variant="in">
-            <input pInputText id="phone" class="w-full" formControlName="phone" />
-            <label for="phone">Phone</label>
-          </p-floatlabel>
-
-          <p-floatlabel variant="in">
-            <input pInputText id="email" class="w-full" formControlName="email" />
-            <label for="email">Email</label>
-          </p-floatlabel>
-
-          <p-floatlabel variant="in">
-            <input pInputText id="website" class="w-full" formControlName="website" />
-            <label for="website">Website</label>
-          </p-floatlabel>
-          <small class="text-neutral">e.g. https://sylviahcm.com</small>
-
           <div>
             <p-floatlabel variant="in">
               <p-select inputId="fontFamily" [options]="fontFamilyOptions" [appendTo]="'body'" optionLabel="label" optionValue="value" formControlName="fontFamily" class="w-full"></p-select>

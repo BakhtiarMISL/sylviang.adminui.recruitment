@@ -26,7 +26,6 @@ export class ApplicationSettingsComponent implements OnInit {
   ngOnInit(): void {
     this.settingsForm = this.fb.group({
       minimumProfileCompletenessPercentage: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
-      hrNotificationEmail: [null, [Validators.email]],
     });
 
     this.breadcrumbService.setBreadcrumbs([{ title: 'Application Settings', icon: 'fa-solid fa-sliders', href: '/application-settings' }]);
@@ -41,7 +40,6 @@ export class ApplicationSettingsComponent implements OnInit {
         if (response && !response.hasError && response.content) {
           this.settingsForm.patchValue({
             minimumProfileCompletenessPercentage: response.content.minimumProfileCompletenessPercentage,
-            hrNotificationEmail: response.content.hrNotificationEmail,
           });
         }
         this.loading = false;

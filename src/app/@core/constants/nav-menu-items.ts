@@ -118,9 +118,15 @@ export const webSidebarMenuItems: IMenuItem[] = [
       },
       {
         href: '/document-management/document-tracking-list',
-        title: 'Generated Documents',
+        title: 'Document Tracking',
         active: false,
         icon: 'fa-solid fa-list-check',
+      },
+      {
+        href: '/document-management/joining-booklet-list',
+        title: 'Joining Booklets',
+        active: false,
+        icon: 'fa-solid fa-book',
       },
       // ── Payment ──
       {
@@ -209,7 +215,7 @@ export const webSidebarMenuItems: IMenuItem[] = [
     title: 'Application Settings',
     active: false,
     icon: 'fa-solid fa-sliders',
-    roles: [UserRoleEnum.Admin],
+    roles: [UserRoleEnum.Admin, UserRoleEnum.HR],
   },
   {
     title: 'System Administration',
@@ -356,6 +362,15 @@ export const webSidebarMenuItems: IMenuItem[] = [
         icon: 'fa-solid fa-sliders',
       },
     ],
+  },
+  // Multi-tenant: SuperAdmin-only. Company Admin/HR never see this - they manage their own
+  // company's recruitment data, never the company record itself or any other tenant's.
+  {
+    title: 'Companies',
+    active: false,
+    icon: 'fa-solid fa-building',
+    href: '/company-management/company-list',
+    roles: [UserRoleEnum.SuperAdmin],
   },
   // Split out from System Administration (which stays Admin-only) so SuperAdmin - a narrow
   // support/ops role, not a bigger Admin - can reach exactly what it actually needs: inviting/

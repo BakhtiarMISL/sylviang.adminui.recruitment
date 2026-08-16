@@ -118,7 +118,13 @@
       </div>
 
       <div class="tab-panel" *ngIf="activeTab === 'documents'">
-        <div class="doc-actions">
+        <div class="documents-workflow">
+          <div class="tab-section-heading">
+            <span class="section-eyebrow">Candidate documents</span>
+            <h3>Generate employment documents</h3>
+            <p>Create documents as the candidate progresses through the hiring process.</p>
+          </div>
+          <div class="document-action-grid">
           <button pButton type="button" size="small" severity="secondary" [disabled]="!stagesCompleted" (click)="goToGenerateOfferLetter()">
             <i class="fa fa-file-signature"></i>
             <span>Generate Offer Letter</span>
@@ -135,6 +141,7 @@
             <i class="fa fa-file-contract"></i>
             <span>Generate Appointment Letter</span>
           </button>
+          </div>
         </div>
         <small class="text-neutral block mt-2" *ngIf="!stagesCompleted">Generate Offer Letter requires every pipeline stage to be Completed.</small>
         <small class="text-neutral block mt-1" *ngIf="offerLetterAccepted === false">Generate Medical/Target/Appointment Letter requires an Accepted offer letter.</small>
@@ -142,8 +149,11 @@
 
       <div class="tab-panel" *ngIf="activeTab === 'status'">
         <div class="status-update-block" *ngIf="!isTerminalStatus">
-          <h3 class="form-section-header">Reject / Withdraw</h3>
-          <p class="text-sm text-neutral">
+          <div class="tab-section-heading">
+            <span class="section-eyebrow">Manual decision</span>
+            <h3>Reject or withdraw application</h3>
+          </div>
+          <p class="status-update-description">
             Every routine forward step (interview scheduled, stages completed, offer generated/accepted) advances the status
             automatically. These two are the only moves that still need a person to decide.
           </p>
@@ -196,18 +206,28 @@
         </div>
 
         <div class="status-history-block">
-          <h3 class="form-section-header">Status History</h3>
+          <div class="tab-section-heading">
+            <span class="section-eyebrow">Activity log</span>
+            <h3>Status history</h3>
+            <p>A complete record of this application’s progress.</p>
+          </div>
 
           <div class="text-sm text-neutral" *ngIf="application.statusHistory.length === 0">No status changes recorded yet.</div>
           <div *ngIf="application.statusHistory.length > 0">
+            <div class="history-timeline">
             <div class="history-entry" *ngFor="let entry of application.statusHistory">
-              <div>
-                <span *ngIf="entry.fromStatus">{{ formatEnumLabel(entry.fromStatus) }} → </span><strong>{{ formatEnumLabel(entry.toStatus) }}</strong>
-                <span class="text-sm text-neutral ml-2">{{ entry.changedAt | date: 'dd-MMM-yyyy h:mm a' }}</span>
-                <span class="text-sm text-neutral ml-2" *ngIf="entry.changedByUserName">by {{ entry.changedByUserName }}</span>
+              <div class="history-marker"><i class="fa fa-circle-check"></i></div>
+              <div class="history-entry-content">
+                <div class="history-transition">
+                  <span *ngIf="entry.fromStatus" class="history-from-status">{{ formatEnumLabel(entry.fromStatus) }}</span>
+                  <i *ngIf="entry.fromStatus" class="fa fa-arrow-right history-arrow"></i>
+                  <strong>{{ formatEnumLabel(entry.toStatus) }}</strong>
+                </div>
+                <div class="history-meta"><span>{{ entry.changedAt | date: 'dd-MMM-yyyy h:mm a' }}</span><span *ngIf="entry.changedByUserName">by {{ entry.changedByUserName }}</span></div>
+                <div class="history-note" *ngIf="entry.reasonLabel"><span>Reason</span>{{ entry.reasonLabel }}</div>
+                <div class="history-note" *ngIf="entry.note"><span>Note</span>{{ entry.note }}</div>
               </div>
-              <div class="text-sm text-neutral" *ngIf="entry.reasonLabel">Reason: {{ entry.reasonLabel }}</div>
-              <div class="text-sm text-neutral" *ngIf="entry.note">Note: {{ entry.note }}</div>
+            </div>
             </div>
           </div>
         </div>

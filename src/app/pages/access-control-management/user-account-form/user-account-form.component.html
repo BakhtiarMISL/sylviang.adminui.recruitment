@@ -37,6 +37,22 @@
           </p-floatlabel>
           <small class="text-red-500" *ngIf="hasError('roleIds')">At least one role must be assigned.</small>
         </div>
+
+        <div class="sm:col-span-2" *ngIf="showCompanySelector">
+          <p-floatlabel variant="in">
+            <p-select
+              inputId="companyId"
+              class="w-full"
+              [options]="companyOptions"
+              formControlName="companyId"
+              optionLabel="name"
+              optionValue="companyId"
+              [disabled]="submitting"
+            ></p-select>
+            <label for="companyId">Company</label>
+          </p-floatlabel>
+          <small class="text-gray-500">Which company this user belongs to. Required for Admin/HR/custom roles.</small>
+        </div>
       </div>
 
       <p class="mt-3 text-sm text-gray-600" *ngIf="!isEditMode">

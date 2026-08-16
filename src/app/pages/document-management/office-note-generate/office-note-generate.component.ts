@@ -4,9 +4,11 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { BreadcrumbService } from '@app/@core/services';
 import { DocumentTemplateService } from '@app/@core/services/recruitment/document-template/document-template.service';
 import { OfficeNoteService } from '@app/@core/services/recruitment/office-note/office-note.service';
+import { FinalSelectionPoolService } from '@app/@core/services/recruitment/final-selection-pool/final-selection-pool.service';
 import { DocumentTypeEnum } from '@app/@core/enums/recruitment.enum';
 import { IDocumentTemplateResponse } from '@core/interfaces/recruitment-management/document-template.interface';
 import { IOfficeNoteEnclosureItemResponse } from '@core/interfaces/recruitment-management/office-note.interface';
+import { IFinalSelectionPoolResponse } from '@core/interfaces/recruitment-management/final-selection-pool.interface';
 
 // EP-12 US-129: HR generates an office note listing whichever onboarding enclosures (offer
 // letter/appointment letter/joining booklet) exist for a JobApplication. The enclosure checklist
@@ -22,6 +24,7 @@ export class OfficeNoteGenerateComponent implements OnInit {
     private fb: FormBuilder,
     private documentTemplateService: DocumentTemplateService,
     private officeNoteService: OfficeNoteService,
+    private finalSelectionPoolService: FinalSelectionPoolService,
     private route: ActivatedRoute,
     private router: Router,
     private breadcrumbService: BreadcrumbService,
@@ -34,6 +37,7 @@ export class OfficeNoteGenerateComponent implements OnInit {
   jobApplicationIdLocked = false;
 
   templateOptions: { label: string; value: number }[] = [];
+  applicationOptions: Array<IFinalSelectionPoolResponse & { label: string }> = [];
   enclosures: IOfficeNoteEnclosureItemResponse[] = [];
   loadingEnclosures = false;
 
@@ -54,10 +58,28 @@ export class OfficeNoteGenerateComponent implements OnInit {
     });
 
     this.loadTemplates();
+    this.loadApplicationOptions();
 
     if (jobApplicationIdParam) {
       this.loadEnclosures(+jobApplicationIdParam);
+    } else {
+      this.form.get('jobApplicationId')?.valueChanges.subscribe((id) => {
+        this.enclosures = [];
+        if (id && id > 0) this.loadEnclosures(id);
+      });
     }
+  }
+
+  private loadApplicationOptions(): void {
+    this.finalSelectionPoolService.getAll().subscribe({
+      next: (response) => {
+        const pools = !response.hasError && response.content ? response.content : [];
+        this.applicationOptions = pools.map((pool) => ({
+          ...pool,
+          label: `${pool.candidateName} - ${pool.designation} (Application #${pool.jobApplicationId})`,
+        }));
+      },
+    });
   }
 
   private loadTemplates(): void {

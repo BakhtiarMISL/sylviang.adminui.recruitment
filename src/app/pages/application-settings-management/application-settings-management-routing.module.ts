@@ -4,7 +4,7 @@ import { RoleGuard } from '@core/guards/role.guard';
 import { UserRoleEnum } from '@core/enums/user-role.enum';
 import { ApplicationSettingsComponent } from './application-settings/application-settings.component';
 
-const roleData = { roles: [UserRoleEnum.Admin] };
+const roleData = { roles: [UserRoleEnum.Admin, UserRoleEnum.HR] };
 
 const routes: Routes = [
   {

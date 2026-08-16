@@ -32,6 +32,9 @@ export class BrandingSettingsComponent implements OnInit {
 
   logoFilePath: string | null = null;
 
+  // Read-only, sourced live from Company - edit via Company Management, not here.
+  companyIdentity = { companyName: '', addressLine: '', phone: '', email: '', website: '' };
+
   readonly borderStyleOptions = [
     { label: 'None', value: 'None' },
     { label: 'Solid', value: 'Solid' },
@@ -49,11 +52,6 @@ export class BrandingSettingsComponent implements OnInit {
 
   ngOnInit(): void {
     this.settingsForm = this.fb.group({
-      companyName: [''],
-      addressLine: [''],
-      phone: [''],
-      email: [''],
-      website: [''],
       primaryColor: ['#7A2E2E'],
       secondaryColor: ['#1F2937'],
       accentColor: ['#DC2626'],
@@ -85,6 +83,13 @@ export class BrandingSettingsComponent implements OnInit {
         if (response && !response.hasError && response.content) {
           this.settingsForm.patchValue(response.content);
           this.logoFilePath = response.content.logoFilePath;
+          this.companyIdentity = {
+            companyName: response.content.companyName ?? '',
+            addressLine: response.content.addressLine ?? '',
+            phone: response.content.phone ?? '',
+            email: response.content.email ?? '',
+            website: response.content.website ?? '',
+          };
         }
         this.loading = false;
       },

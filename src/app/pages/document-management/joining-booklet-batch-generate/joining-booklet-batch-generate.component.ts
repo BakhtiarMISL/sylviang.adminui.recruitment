@@ -3,13 +3,21 @@ import { BreadcrumbService } from '@app/@core/services';
 import { DocumentTypeEnum } from '@app/@core/enums/recruitment.enum';
 import { DocumentTemplateService } from '@app/@core/services/recruitment/document-template/document-template.service';
 import { JoiningBookletService } from '@app/@core/services/recruitment/joining-booklet/joining-booklet.service';
+import { FinalSelectionPoolService } from '@core/services/recruitment/final-selection-pool/final-selection-pool.service';
 import { saveFileResponse } from '@app/@core/services/recruitment/cv-bank/cv-bank.service';
 import {
   IJoiningBookletBulkGenerateResponse,
   IJoiningBookletEligibleCandidateResponse,
 } from '@core/interfaces/recruitment-management/joining-booklet.interface';
 import { IDocumentTemplateResponse } from '@core/interfaces/recruitment-management/document-template.interface';
+import { IFinalSelectionPoolResponse } from '@core/interfaces/recruitment-management/final-selection-pool.interface';
 import { DateTimeUtility } from '@app/@core/utils/date-time.utility';
+
+interface BatchOption {
+  label: string;
+  joiningDate: string;
+  offerLetterIds: number[];
+}
 
 @Component({
   selector: 'app-joining-booklet-batch-generate',
@@ -21,6 +29,7 @@ export class JoiningBookletBatchGenerateComponent implements OnInit {
   constructor(
     private documentTemplateService: DocumentTemplateService,
     private joiningBookletService: JoiningBookletService,
+    private finalSelectionPoolService: FinalSelectionPoolService,
     private breadcrumbService: BreadcrumbService,
     private cdr: ChangeDetectorRef,
   ) {}
@@ -32,11 +41,13 @@ export class JoiningBookletBatchGenerateComponent implements OnInit {
   statusMessage = '';
   statusIsError = false;
 
-  batchLabel = '';
+  selectedBatch: BatchOption | null = null;
   joiningDate: Date | null = null;
   documentTemplateId: number | null = null;
 
   templateOptions: { label: string; value: number }[] = [];
+  batchOptions: BatchOption[] = [];
+  private allEligibleCandidates: IJoiningBookletEligibleCandidateResponse[] = [];
   eligibleCandidates: IJoiningBookletEligibleCandidateResponse[] = [];
   selectedCandidates: IJoiningBookletEligibleCandidateResponse[] = [];
 
@@ -51,6 +62,7 @@ export class JoiningBookletBatchGenerateComponent implements OnInit {
 
     this.loadTemplates();
     this.loadEligibleCandidates();
+    this.loadBatches();
   }
 
   private loadTemplates(): void {
@@ -68,23 +80,81 @@ export class JoiningBookletBatchGenerateComponent implements OnInit {
     this.loading = true;
     this.joiningBookletService.getEligibleCandidates().subscribe({
       next: (response) => {
-        this.eligibleCandidates = !response.hasError && response.content ? response.content : [];
+        this.allEligibleCandidates = !response.hasError && response.content ? response.content : [];
+        this.applyBatchCandidates();
         this.loading = false;
         this.cdr.detectChanges();
       },
       error: () => {
-        this.eligibleCandidates = [];
+        this.allEligibleCandidates = [];
+        this.applyBatchCandidates();
         this.loading = false;
         this.cdr.detectChanges();
       },
     });
   }
 
+  private loadBatches(): void {
+    this.finalSelectionPoolService.getAll().subscribe({
+      next: (response) => {
+        const poolItems: IFinalSelectionPoolResponse[] = !response.hasError && response.content ? response.content : [];
+        const batches = new Map<string, BatchOption>();
+
+        poolItems
+          .filter((item) => !!item.batchLabel?.trim())
+          .forEach((item) => {
+            const label = item.batchLabel!.trim();
+            const existing = batches.get(label);
+            if (existing) {
+              existing.offerLetterIds.push(item.offerLetterId);
+            } else {
+              batches.set(label, { label, joiningDate: item.joiningDate, offerLetterIds: [item.offerLetterId] });
+            }
+          });
+
+        this.batchOptions = [...batches.values()].sort((a, b) => a.label.localeCompare(b.label));
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.batchOptions = [];
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  onBatchChange(): void {
+    this.formSubmitted = false;
+    this.statusMessage = '';
+    this.lastGenerateResponse = null;
+    this.selectedCandidates = [];
+    this.joiningDate = this.selectedBatch ? this.parseLocalDate(this.selectedBatch.joiningDate) : null;
+    this.applyBatchCandidates();
+  }
+
+  private applyBatchCandidates(): void {
+    if (!this.selectedBatch) {
+      this.eligibleCandidates = [];
+      return;
+    }
+
+    const offerLetterIds = new Set(this.selectedBatch.offerLetterIds);
+    this.eligibleCandidates = this.allEligibleCandidates.filter((candidate) => offerLetterIds.has(candidate.offerLetterId));
+  }
+
+  private parseLocalDate(value: string): Date {
+    const [year, month, day] = value.slice(0, 10).split('-').map(Number);
+    return new Date(year, month - 1, day);
+  }
+
+  get batchLabel(): string {
+    return this.selectedBatch?.label ?? '';
+  }
+
   generateBatch(): void {
     this.formSubmitted = true;
     this.statusMessage = '';
 
-    if (!this.batchLabel.trim() || !this.joiningDate || !this.documentTemplateId || this.selectedCandidates.length === 0) {
+    if (!this.selectedBatch || !this.joiningDate || !this.documentTemplateId || this.selectedCandidates.length === 0) {
       return;
     }
 

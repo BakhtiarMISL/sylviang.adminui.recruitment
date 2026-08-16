@@ -77,13 +77,13 @@ const routes: Routes = [
     path: 'joining-booklet-list',
     component: JoiningBookletListComponent,
     canActivate: [RoleGuard],
-    data: roleData,
+    data: adminHrRoleData,
   },
   {
     path: 'joining-booklet-batch-generate',
     component: JoiningBookletBatchGenerateComponent,
     canActivate: [RoleGuard],
-    data: roleData,
+    data: adminHrRoleData,
   },
   {
     path: 'manage-medical-letter',

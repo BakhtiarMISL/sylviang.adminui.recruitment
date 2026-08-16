@@ -3,7 +3,9 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { BreadcrumbService } from '@app/@core/services';
 import { FitmentDataService } from '@app/@core/services/recruitment/fitment-data/fitment-data.service';
+import { FinalSelectionPoolService } from '@app/@core/services/recruitment/final-selection-pool/final-selection-pool.service';
 import { JobApplicationService } from '@app/@core/services/recruitment/job-application/job-application.service';
+import { IFinalSelectionPoolResponse } from '@core/interfaces/recruitment-management/final-selection-pool.interface';
 
 // EP-12 US-097: manual-entry grade/designation/salary structure per JobApplication. Mirrors
 // OfferLetterFormComponent's ?jobApplicationId= locked-field pattern; create-or-update via a
@@ -18,6 +20,7 @@ export class FitmentDataFormComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private fitmentDataService: FitmentDataService,
+    private finalSelectionPoolService: FinalSelectionPoolService,
     private jobApplicationService: JobApplicationService,
     private route: ActivatedRoute,
     private breadcrumbService: BreadcrumbService,
@@ -30,6 +33,7 @@ export class FitmentDataFormComponent implements OnInit {
   errorMessage = '';
   successMessage = '';
   jobApplicationIdLocked = false;
+  applicationOptions: Array<IFinalSelectionPoolResponse & { label: string }> = [];
 
   // Existing Fitment Data (if this application already has a row) is authoritative for
   // Designation; the job vacancy's own Title is only a fallback default. Guards against the two
@@ -55,6 +59,8 @@ export class FitmentDataFormComponent implements OnInit {
       totalDeductions: [0, [Validators.min(0)]],
     });
 
+    this.loadApplicationOptions();
+
     if (jobApplicationIdParam) {
       this.load(+jobApplicationIdParam);
       this.loadJobPostingTitle(+jobApplicationIdParam);
@@ -70,6 +76,18 @@ export class FitmentDataFormComponent implements OnInit {
         }
       });
     }
+  }
+
+  private loadApplicationOptions(): void {
+    this.finalSelectionPoolService.getAll().subscribe({
+      next: (response) => {
+        const pools = !response.hasError && response.content ? response.content : [];
+        this.applicationOptions = pools.map((pool) => ({
+          ...pool,
+          label: `${pool.candidateName} — ${pool.designation} (Application #${pool.jobApplicationId})`,
+        }));
+      },
+    });
   }
 
   private load(jobApplicationId: number): void {

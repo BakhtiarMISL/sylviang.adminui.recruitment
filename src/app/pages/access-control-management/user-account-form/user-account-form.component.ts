@@ -2,8 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BreadcrumbService } from '@app/@core/services';
+import { AuthService } from '@core/services/auth/auth.service';
+import { UserRoleEnum } from '@core/enums/user-role.enum';
 import { IRoleResponse, IUserAccountCreateRequest, IUserAccountUpdateRequest } from '@core/interfaces/recruitment-management/access-control.interface';
+import { ICompanyResponse } from '@core/interfaces/recruitment-management/company.interface';
 import { RoleService, UserAccountService } from '@core/services/recruitment/access-control/access-control.service';
+import { CompanyService } from '@core/services/recruitment/company/company.service';
 
 @Component({
   selector: 'app-user-account-form',
@@ -16,6 +20,8 @@ export class UserAccountFormComponent implements OnInit {
     private fb: FormBuilder,
     private userAccountService: UserAccountService,
     private roleService: RoleService,
+    private companyService: CompanyService,
+    private authService: AuthService,
     private route: ActivatedRoute,
     private router: Router,
     private breadcrumbService: BreadcrumbService,
@@ -23,11 +29,33 @@ export class UserAccountFormComponent implements OnInit {
 
   form!: FormGroup;
   roleOptions: IRoleResponse[] = [];
+  companyOptions: ICompanyResponse[] = [];
   formSubmitted = false;
   isEditMode = false;
   userAccountId: number | null = null;
   errorMessage = '';
   submitting = false;
+
+  get isSuperAdmin(): boolean {
+    return this.authService.getRole() === UserRoleEnum.SuperAdmin;
+  }
+
+  // A caller who isn't SuperAdmin (a Company Admin inviting HR) is locked to their own company -
+  // the backend enforces this regardless, but there's no point showing a selector they can't use.
+  get showCompanySelector(): boolean {
+    return this.isSuperAdmin && !this.isSelectedRolesSuperAdminOnly();
+  }
+
+  get companyRequired(): boolean {
+    return !this.isEditMode && !this.isSelectedRolesSuperAdminOnly();
+  }
+
+  private isSelectedRolesSuperAdminOnly(): boolean {
+    const selectedIds: number[] = this.form?.get('roleIds')?.value ?? [];
+    if (selectedIds.length === 0) return false;
+
+    return selectedIds.every((id) => this.roleOptions.find((r) => r.roleId === id)?.name === 'SuperAdmin');
+  }
 
   ngOnInit(): void {
     this.route.paramMap.subscribe((params) => {
@@ -36,6 +64,10 @@ export class UserAccountFormComponent implements OnInit {
       this.userAccountId = idParam ? +idParam : null;
       this.buildForm();
       this.loadRoleOptions();
+
+      if (this.isSuperAdmin) {
+        this.loadCompanyOptions();
+      }
 
       if (this.userAccountId) {
         this.loadAccount(this.userAccountId);
@@ -50,6 +82,7 @@ export class UserAccountFormComponent implements OnInit {
       email: [null, this.isEditMode ? [] : [Validators.required, Validators.email]],
       fullName: [null, [Validators.required, Validators.maxLength(200)]],
       roleIds: [[], [Validators.required]],
+      companyId: [null],
     });
   }
 
@@ -75,6 +108,17 @@ export class UserAccountFormComponent implements OnInit {
     });
   }
 
+  private loadCompanyOptions(): void {
+    this.companyService.getAll().subscribe({
+      next: (response) => {
+        this.companyOptions = !response.hasError && response.content ? response.content : [];
+      },
+      error: () => {
+        this.companyOptions = [];
+      },
+    });
+  }
+
   private loadAccount(id: number): void {
     this.userAccountService.getById(id).subscribe({
       next: (response) => {
@@ -83,6 +127,7 @@ export class UserAccountFormComponent implements OnInit {
             email: response.content.email,
             fullName: response.content.fullName,
             roleIds: response.content.roleIds,
+            companyId: response.content.companyId,
           });
         } else {
           this.router.navigate(['/access-control/user-account-list']);
@@ -112,6 +157,11 @@ export class UserAccountFormComponent implements OnInit {
       return;
     }
 
+    if (this.showCompanySelector && this.companyRequired && !this.form.value.companyId) {
+      this.errorMessage = 'A company must be selected.';
+      return;
+    }
+
     this.submitting = true;
 
     if (this.isEditMode && this.userAccountId) {
@@ -138,6 +188,7 @@ export class UserAccountFormComponent implements OnInit {
         email: this.form.value.email,
         fullName: this.form.value.fullName,
         roleIds: this.form.value.roleIds,
+        companyId: this.isSuperAdmin ? this.form.value.companyId : null,
       };
       this.userAccountService.create(request).subscribe({
         next: (response) => {

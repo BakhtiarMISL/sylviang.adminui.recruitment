@@ -9,6 +9,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputTextModule } from 'primeng/inputtext';
 import { MultiSelectModule } from 'primeng/multiselect';
+import { SelectModule } from 'primeng/select';
 import { SkeletonModule } from 'primeng/skeleton';
 import { TableModule } from 'primeng/table';
 import { AccessControlManagementRoutingModule } from './access-control-management-routing.module';
@@ -34,6 +35,7 @@ import { RoleFormComponent } from './role-form/role-form.component';
     TableModule,
     CheckboxModule,
     MultiSelectModule,
+    SelectModule,
   ],
 })
 export class AccessControlManagementModule {}

@@ -25,6 +25,7 @@ export class ReconciliationReportComponent implements OnInit {
   exporting = false;
   errorMessage = '';
   summary: IReconciliationResponse | null = null;
+  filtersCollapsed = true;
 
   filterJobPostingId: number | null = null;
   // Default to the current calendar month, same idiom as other date-range reports in this app.
@@ -55,6 +56,7 @@ export class ReconciliationReportComponent implements OnInit {
   }
 
   runReport(): void {
+    this.filtersCollapsed = true;
     this.loading = true;
     this.errorMessage = '';
     this.paymentReportService.getReconciliation(this.buildRequest()).subscribe({
@@ -70,6 +72,14 @@ export class ReconciliationReportComponent implements OnInit {
         this.cdr.detectChanges();
       },
     });
+  }
+
+  resetFilters(): void {
+    this.filterJobPostingId = null;
+    this.filterDateFrom = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    this.filterDateTo = new Date();
+    this.runReport();
+    this.filtersCollapsed = false;
   }
 
   export(format: 'xlsx' | 'pdf'): void {

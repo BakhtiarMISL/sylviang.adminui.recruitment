@@ -11,11 +11,13 @@
       <label for="locationInput" class="whitespace-nowrap">Location</label>
     </p-floatlabel>
 
-    <p-floatlabel variant="in">
-      <p-inputnumber inputId="departmentIdInput" class="w-full" [(ngModel)]="departmentId" name="departmentIdInput" [useGrouping]="false"></p-inputnumber>
-      <label for="departmentIdInput" class="whitespace-nowrap">Department ID</label>
-    </p-floatlabel>
-    <small class="text-neutral">Numeric department ID, e.g. 3</small>
+    <div class="flex flex-col gap-1">
+      <p-floatlabel variant="in">
+        <p-inputnumber inputId="departmentIdInput" class="w-full" [(ngModel)]="departmentId" name="departmentIdInput" [useGrouping]="false"></p-inputnumber>
+        <label for="departmentIdInput" class="whitespace-nowrap">Department ID</label>
+      </p-floatlabel>
+      <small class="text-neutral">Numeric department ID, e.g. 3</small>
+    </div>
 
     <p-floatlabel variant="in">
       <p-select

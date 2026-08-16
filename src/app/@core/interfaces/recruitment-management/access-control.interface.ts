@@ -41,12 +41,15 @@ export interface IUserAccountResponse {
   isActive: boolean;
   roleIds: number[];
   roleNames: string[];
+  companyId: number | null;
+  companyName: string | null;
 }
 
 export interface IUserAccountCreateRequest {
   email: string;
   fullName: string;
   roleIds: number[];
+  companyId?: number | null;
 }
 
 export interface IUserAccountUpdateRequest {

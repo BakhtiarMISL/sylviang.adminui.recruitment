@@ -5,16 +5,25 @@
     <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
       <div>
         <p-floatlabel variant="in">
-          <input pInputText id="batchLabel" class="w-full" [(ngModel)]="batchLabel" />
+          <p-select
+            inputId="batchLabel"
+            class="w-full"
+            [options]="batchOptions"
+            [(ngModel)]="selectedBatch"
+            optionLabel="label"
+            [appendTo]="'body'"
+            placeholder="Select a batch"
+            (onChange)="onBatchChange()"
+          ></p-select>
           <label for="batchLabel">Batch Label</label>
         </p-floatlabel>
-        <small class="text-red-500" *ngIf="formSubmitted && !batchLabel.trim()">Batch label is required.</small>
-        <small class="text-neutral" *ngIf="!(formSubmitted && !batchLabel.trim())">e.g. August-2026-Batch-1</small>
+        <small class="text-red-500" *ngIf="formSubmitted && !selectedBatch">Batch is required.</small>
+        <small class="text-neutral" *ngIf="!(formSubmitted && !selectedBatch)">Batches are managed in the Final Selection Pool.</small>
       </div>
 
       <div>
         <p-floatlabel variant="in">
-          <p-datepicker inputId="joiningDate" [(ngModel)]="joiningDate" dateFormat="dd-M-yy" [showIcon]="true" styleClass="w-full"></p-datepicker>
+          <p-datepicker inputId="joiningDate" [(ngModel)]="joiningDate" dateFormat="dd-M-yy" [showIcon]="false" [readonlyInput]="true" styleClass="w-full"></p-datepicker>
           <label for="joiningDate">Joining Date</label>
         </p-floatlabel>
         <small class="text-red-500" *ngIf="formSubmitted && !joiningDate">Joining date is required.</small>
@@ -50,7 +59,7 @@
     <div class="table-title-container flex justify-between items-center">
       <h3 class="table-title">
         Accepted-Offer Candidates
-        <span class="table-title-info" *ngIf="eligibleCandidates.length > 0">({{ eligibleCandidates.length }} eligible)</span>
+        <span class="table-title-info" *ngIf="selectedBatch">({{ eligibleCandidates.length }} eligible)</span>
       </h3>
 
       <div class="flex gap-2">
@@ -71,13 +80,13 @@
       </div>
     </div>
 
-    <div *ngIf="!loading && eligibleCandidates.length === 0" class="not-found">
+    <div *ngIf="!loading && selectedBatch && eligibleCandidates.length === 0" class="not-found">
       <i class="fa fa-magnifying-glass-minus"></i>
       <p>No candidates with an Accepted offer letter found.</p>
     </div>
 
     <p-table
-      *ngIf="loading || eligibleCandidates.length > 0"
+      *ngIf="(loading && selectedBatch) || (selectedBatch && eligibleCandidates.length > 0)"
       [value]="loading ? skeletonItems : eligibleCandidates"
       [(selection)]="selectedCandidates"
       dataKey="offerLetterId"
@@ -112,7 +121,9 @@
   </div>
 
   <div class="table-container mt-4" *ngIf="lastGenerateResponse">
-    <h3 class="table-title mb-3">Batch Results</h3>
+    <div class="table-title-container">
+      <h3 class="table-title">Batch Results</h3>
+    </div>
     <p-table [value]="lastGenerateResponse.results" styleClass="p-datatable-sm">
       <ng-template pTemplate="header">
         <tr>

@@ -6,18 +6,23 @@
       <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
           <p-floatlabel variant="in">
-            <input
-              pInputText
-              id="jobApplicationId"
-              type="number"
+            <p-select
+              inputId="jobApplicationId"
               class="w-full"
               formControlName="jobApplicationId"
-              [readOnly]="jobApplicationIdLocked"
-            />
-            <label for="jobApplicationId">Job Application ID</label>
+              [options]="applicationOptions"
+              optionLabel="label"
+              optionValue="jobApplicationId"
+              [filter]="true"
+              filterBy="candidateName,designation,label"
+              [showClear]="!jobApplicationIdLocked"
+              [disabled]="jobApplicationIdLocked"
+              [appendTo]="'body'"
+            ></p-select>
+            <label for="jobApplicationId">Candidate application</label>
           </p-floatlabel>
-          <small class="text-red-500" *ngIf="hasError('jobApplicationId')">Job Application ID is required.</small>
-          <small class="text-neutral" *ngIf="!hasError('jobApplicationId') && !jobApplicationIdLocked">The numeric ID shown on the ATS Dashboard / application detail page, e.g. 3</small>
+          <small class="text-red-500" *ngIf="hasError('jobApplicationId')">Select a candidate application.</small>
+          <small class="text-neutral" *ngIf="!hasError('jobApplicationId') && !jobApplicationIdLocked">Choose a candidate from the Final Selection Pool. Search by candidate name or designation.</small>
         </div>
 
         <div>
@@ -48,7 +53,7 @@
         </div>
       </div>
 
-      <div class="mt-4" *ngIf="jobApplicationIdLocked">
+      <div class="mt-4" *ngIf="form.get('jobApplicationId')?.value">
         <h4 class="font-medium mb-2">Enclosures</h4>
         <ul class="space-y-1">
           <li *ngFor="let enclosure of enclosures">

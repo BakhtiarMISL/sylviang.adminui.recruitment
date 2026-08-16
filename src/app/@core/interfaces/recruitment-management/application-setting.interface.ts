@@ -5,5 +5,4 @@ export interface IApplicationSettingResponse {
 
 export interface IApplicationSettingUpdateRequest {
   minimumProfileCompletenessPercentage: number;
-  hrNotificationEmail: string | null;
 }
