@@ -1,7 +1,9 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { IUserAccountResponse } from '@core/interfaces/recruitment-management/access-control.interface';
+import { ICompanyResponse } from '@core/interfaces/recruitment-management/company.interface';
 import { UserAccountService } from '@core/services/recruitment/access-control/access-control.service';
+import { CompanyService } from '@core/services/recruitment/company/company.service';
 import { AuthService } from '@core/services/auth/auth.service';
 import { ImpersonationService } from '@core/services/recruitment/impersonation/impersonation.service';
 import { UserRoleEnum } from '@core/enums/user-role.enum';
@@ -16,6 +18,7 @@ import { ConfirmationService } from 'primeng/api';
 export class UserAccountListComponent implements OnInit {
   constructor(
     private userAccountService: UserAccountService,
+    private companyService: CompanyService,
     private confirmationService: ConfirmationService,
     private impersonationService: ImpersonationService,
     private authService: AuthService,
@@ -24,8 +27,36 @@ export class UserAccountListComponent implements OnInit {
   ) {}
 
   accounts: IUserAccountResponse[] = [];
+  companyOptions: ICompanyResponse[] = [];
   loading = false;
   impersonatingId: number | null = null;
+
+  filtersCollapsed = true;
+  selectedCompanyId: number | null = null;
+  selectedRole: string | null = null;
+  roleFilterOptions = [
+    { label: 'Admin', value: 'Admin' },
+    { label: 'HR', value: 'HR' },
+    { label: 'SuperAdmin', value: 'SuperAdmin' },
+  ];
+
+  get filteredAccounts(): IUserAccountResponse[] {
+    return this.accounts.filter((account) => {
+      const companyMatch = !this.selectedCompanyId || account.companyId === this.selectedCompanyId;
+      const roleMatch = !this.selectedRole || account.roleNames.includes(this.selectedRole);
+      return companyMatch && roleMatch;
+    });
+  }
+
+  applyFilters(): void {
+    this.filtersCollapsed = true;
+  }
+
+  resetFilters(): void {
+    this.selectedCompanyId = null;
+    this.selectedRole = null;
+    this.filtersCollapsed = false;
+  }
 
   get isSuperAdmin(): boolean {
     return this.authService.getRole() === UserRoleEnum.SuperAdmin;
@@ -50,6 +81,18 @@ export class UserAccountListComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadAccounts();
+    if (this.isSuperAdmin) this.loadCompanyOptions();
+  }
+
+  private loadCompanyOptions(): void {
+    this.companyService.getAll().subscribe({
+      next: (response) => {
+        this.companyOptions = !response.hasError && response.content ? response.content : [];
+      },
+      error: () => {
+        this.companyOptions = [];
+      },
+    });
   }
 
   loadAccounts(): void {

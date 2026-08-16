@@ -12,6 +12,8 @@ export interface ICompanyResponse {
   address: string | null;
   website: string | null;
   industry: string | null;
+  tradeLicenseNumber: string | null;
+  binNumber: string | null;
   status: CompanyStatusEnum;
   createdAt: string | null;
   jobPostingCount: number;
@@ -25,6 +27,8 @@ export interface ICompanyCreateRequest {
   address?: string | null;
   website?: string | null;
   industry?: string | null;
+  tradeLicenseNumber?: string | null;
+  binNumber?: string | null;
 }
 
 export interface ICompanyUpdateRequest extends ICompanyCreateRequest {}

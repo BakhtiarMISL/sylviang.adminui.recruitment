@@ -2,6 +2,7 @@ import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { BreadcrumbService } from '@app/@core/services';
 import { CompanyStatusEnum, ICompanyResponse } from '@core/interfaces/recruitment-management/company.interface';
 import { CompanyService } from '@core/services/recruitment/company/company.service';
+import { Base_URL } from '@env/environment';
 import { ConfirmationService } from 'primeng/api';
 
 @Component({
@@ -57,6 +58,11 @@ export class CompanyListComponent implements OnInit {
 
   isActive(company: ICompanyResponse): boolean {
     return company.status === CompanyStatusEnum.Active;
+  }
+
+  getLogoUrl(path: string | null): string {
+    if (!path) return '';
+    return `${Base_URL}${path.startsWith('/') ? '' : '/'}${path}`;
   }
 
   toggleActive(company: ICompanyResponse, event: Event): void {

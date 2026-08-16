@@ -3,17 +3,20 @@
     <div class="table-container mb-4 p-4">
       <h3 class="table-title mb-3">{{ isEditMode ? 'Edit Company' : 'Create Company' }}</h3>
 
-      <div class="mb-4 flex items-center gap-3" *ngIf="isEditMode">
-        <img *ngIf="logoUrl" [src]="logoUrl" alt="" class="h-16 w-16 rounded object-cover border" />
-        <div class="flex h-16 w-16 items-center justify-center rounded border bg-gray-50 text-gray-400" *ngIf="!logoUrl">
-          <i class="fa fa-building fa-lg"></i>
-        </div>
-        <div>
-          <label class="cursor-pointer text-sm font-medium text-primary">
-            <input type="file" accept="image/*" class="hidden" (change)="onLogoSelected($event)" [disabled]="uploadingLogo" />
-            {{ uploadingLogo ? 'Uploading…' : 'Upload logo' }}
-          </label>
-        </div>
+      <div class="mb-6">
+        <label class="mb-2 block text-sm font-medium text-gray-700">Company Logo</label>
+        <img *ngIf="logoUrl" [src]="logoUrl" class="media-preview" alt="Company logo" />
+
+        <label for="companyLogoFile" class="upload-dropzone" [class.disabled]="uploadingLogo">
+          <i class="fas" [class.fa-spinner]="uploadingLogo" [class.fa-spin]="uploadingLogo" [class.fa-cloud-upload-alt]="!uploadingLogo"></i>
+          <span class="upload-dropzone-text">
+            <strong>{{ uploadingLogo ? 'Uploading...' : pendingLogoFile ? 'Change logo' : 'Click to upload logo' }}</strong>
+            <small>{{ !isEditMode && pendingLogoFile ? 'Will be uploaded on Create' : 'JPG, PNG or SVG' }}</small>
+          </span>
+        </label>
+        <input id="companyLogoFile" type="file" (change)="onLogoSelected($event)" accept=".jpg,.jpeg,.png,.svg" [disabled]="uploadingLogo" class="sr-only file-picker-input" />
+
+        <small class="mt-1 block text-red-500" *ngIf="logoError">{{ logoError }}</small>
       </div>
 
       <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -59,6 +62,22 @@
             <input pInputText id="industry" class="w-full" formControlName="industry" [disabled]="submitting" />
             <label for="industry">Industry</label>
           </p-floatlabel>
+        </div>
+
+        <div>
+          <p-floatlabel variant="in">
+            <input pInputText id="tradeLicenseNumber" class="w-full" formControlName="tradeLicenseNumber" [disabled]="submitting" />
+            <label for="tradeLicenseNumber">Trade License Number</label>
+          </p-floatlabel>
+          <small class="block text-gray-500">e.g. TRAD/DNCC/123456/2024</small>
+        </div>
+
+        <div>
+          <p-floatlabel variant="in">
+            <input pInputText id="binNumber" class="w-full" formControlName="binNumber" [disabled]="submitting" />
+            <label for="binNumber">BIN (Business Identification Number)</label>
+          </p-floatlabel>
+          <small class="block text-gray-500">e.g. 000123456-0102</small>
         </div>
       </div>
 

@@ -7,6 +7,43 @@
     </button>
   </div>
 
+  <app-filter-panel *ngIf="isSuperAdmin" [(collapsed)]="filtersCollapsed">
+    <div class="filter-bar">
+      <p-floatlabel variant="in">
+        <p-select
+          inputId="companyFilter"
+          [options]="companyOptions"
+          [(ngModel)]="selectedCompanyId"
+          (onChange)="applyFilters()"
+          optionLabel="name"
+          optionValue="companyId"
+          [showClear]="true"
+          class="w-full"
+        ></p-select>
+        <label for="companyFilter">Company</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="in">
+        <p-select
+          inputId="roleFilter"
+          [options]="roleFilterOptions"
+          [(ngModel)]="selectedRole"
+          (onChange)="applyFilters()"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+          class="w-full"
+        ></p-select>
+        <label for="roleFilter">Role</label>
+      </p-floatlabel>
+
+      <button *ngIf="selectedCompanyId || selectedRole" severity="secondary" pButton (click)="resetFilters()">
+        <i class="fa fa-times"></i>
+        <span>Reset</span>
+      </button>
+    </div>
+  </app-filter-panel>
+
   <div *ngIf="loading" class="space-y-3">
     <p-skeleton height="3rem" *ngFor="let i of skeletonItems"></p-skeleton>
   </div>
@@ -18,7 +55,14 @@
     </div>
   </div>
 
-  <p-table *ngIf="!loading && accounts.length > 0" [value]="accounts" styleClass="p-datatable-sm">
+  <div *ngIf="!loading && accounts.length > 0 && filteredAccounts.length === 0" class="table-container">
+    <div class="not-found">
+      <i class="fa fa-magnifying-glass-minus"></i>
+      <p>No user accounts match the selected filters.</p>
+    </div>
+  </div>
+
+  <p-table *ngIf="!loading && filteredAccounts.length > 0" [value]="filteredAccounts" styleClass="p-datatable-sm">
     <ng-template pTemplate="header">
       <tr>
         <th>Name</th>

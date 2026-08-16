@@ -156,11 +156,16 @@ export const webSidebarMenuItems: IMenuItem[] = [
       },
     ],
   },
+  // The route itself deliberately allows ANY authenticated role (see
+  // internal-job-board-routing.module.ts) - Admin/HR manage postings here, Candidates/employees
+  // browse and apply. Excluded here for SuperAdmin only, a nav-declutter choice (platform ops has
+  // no practical use for it), not a route restriction - SuperAdmin can still reach it directly.
   {
     href: '/internal-jobs/job-list',
     title: 'Internal Job Board',
     active: false,
     icon: 'fa-solid fa-building',
+    roles: [UserRoleEnum.Admin, UserRoleEnum.HR, UserRoleEnum.Candidate],
   },
   {
     href: '/candidate-profile',
