@@ -1,5 +1,6 @@
-import { AfterViewInit, Component, ElementRef, HostListener, OnInit, QueryList, ViewChildren } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, QueryList, ViewChildren } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { ApplicationStatusEnum, OfferLetterStatusEnum } from '@app/@core/enums/recruitment.enum';
 import { IApplicationStatusReason, IJobApplicationDetail } from '@app/@core/interfaces/recruitment-management/job-application.interface';
 import { JobApplicationService } from '@app/@core/services/recruitment/job-application/job-application.service';
@@ -37,7 +38,7 @@ const NEXT_STEP_TONE_CLASSES: Record<NextStepTone, { card: string; accent: strin
   templateUrl: './application-detail.component.html',
   styleUrl: './application-detail.component.scss',
 })
-export class ApplicationDetailComponent implements OnInit, AfterViewInit {
+export class ApplicationDetailComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly ApplicationStatusEnum = ApplicationStatusEnum;
 
   constructor(
@@ -138,14 +139,26 @@ export class ApplicationDetailComponent implements OnInit, AfterViewInit {
   updateError = '';
   updateSuccess = false;
 
+  private routeSub: Subscription | null = null;
+
   ngOnInit(): void {
-    this.jobApplicationId = Number(this.route.snapshot.paramMap.get('id'));
-    this.breadcrumbService.setBreadcrumbs([
-      { title: 'ATS Dashboard', icon: 'fa-solid fa-list-check', href: '/applications' },
-      { title: 'Application Detail', icon: 'fa-solid fa-file-lines', href: `/applications/${this.jobApplicationId}` },
-    ]);
-    this.loadApplication();
-    this.loadOfferLetterStatus();
+    // Subscribes rather than reading route.snapshot once - RouteReusableStrategy reuses this
+    // component instance when navigating between two application-detail URLs (same route,
+    // different :id), so a one-time snapshot read left the page silently showing the previous
+    // application's data on that navigation.
+    this.routeSub = this.route.paramMap.subscribe((params) => {
+      this.jobApplicationId = Number(params.get('id'));
+      this.breadcrumbService.setBreadcrumbs([
+        { title: 'ATS Dashboard', icon: 'fa-solid fa-list-check', href: '/applications' },
+        { title: 'Application Detail', icon: 'fa-solid fa-file-lines', href: `/applications/${this.jobApplicationId}` },
+      ]);
+      this.loadApplication();
+      this.loadOfferLetterStatus();
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.routeSub?.unsubscribe();
   }
 
   // AppointmentLetterFormComponent is keyed by offerLetterId (not jobApplicationId, unlike

@@ -1,5 +1,6 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { BreadcrumbService } from '@app/@core/services';
 import { PreBoardingSubmissionStatusEnum } from '@core/enums/recruitment.enum';
 import { IPreBoardingSubmissionResponse } from '@core/interfaces/recruitment-management/pre-boarding.interface';
@@ -14,7 +15,7 @@ import { PreBoardingService } from '@core/services/recruitment/pre-boarding/pre-
   templateUrl: './pre-boarding-review.component.html',
   styleUrl: './pre-boarding-review.component.scss',
 })
-export class PreBoardingReviewComponent implements OnInit {
+export class PreBoardingReviewComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private preBoardingService: PreBoardingService,
@@ -46,14 +47,24 @@ export class PreBoardingReviewComponent implements OnInit {
     );
   }
 
+  private routeSub: Subscription | null = null;
+
   ngOnInit(): void {
     this.breadcrumbService.setBreadcrumbs([
       { title: 'Final Selection Pool', icon: 'fa-solid fa-clipboard-check', href: '/final-selection-pool/final-selection-pool-list' },
       { title: 'Pre-Boarding Review', icon: 'fa-solid fa-clipboard-check', href: '' },
     ]);
 
-    this.finalSelectionPoolId = Number(this.route.snapshot.paramMap.get('finalSelectionPoolId'));
-    this.load();
+    // Subscribed rather than a one-time snapshot read - RouteReusableStrategy reuses this
+    // component instance across navigations between two pool ids.
+    this.routeSub = this.route.paramMap.subscribe((params) => {
+      this.finalSelectionPoolId = Number(params.get('finalSelectionPoolId'));
+      this.load();
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.routeSub?.unsubscribe();
   }
 
   private load(): void {

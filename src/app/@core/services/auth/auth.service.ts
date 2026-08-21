@@ -78,16 +78,22 @@ export class AuthService {
     );
   }
 
+  // Callers always show their own tailored success toast for this - let the interceptor's
+  // generic decentMessage toast fire here too and it doubles up.
   resendOtp(request: IResendOtpRequest): Observable<ApiResponse<IResendOtpResponse>> {
-    return this.httpClient.post<ApiResponse<IResendOtpResponse>>(`${this.API_URL}/resend-otp`, request);
+    const context = new HttpContext().set(DISABLE_TOAST, true);
+    return this.httpClient.post<ApiResponse<IResendOtpResponse>>(`${this.API_URL}/resend-otp`, request, { context });
   }
 
   register(request: IRegisterRequest): Observable<ApiResponse<IRegisterResponse>> {
     return this.httpClient.post<ApiResponse<IRegisterResponse>>(`${this.API_URL}/register`, request);
   }
 
+  // Same reasoning as resendOtp: both call sites (initial request + resend) show their own
+  // toast, so the interceptor's auto toast would stack a second, redundant one.
   forgotPassword(request: IForgotPasswordRequest): Observable<ApiResponse<IForgotPasswordResponse>> {
-    return this.httpClient.post<ApiResponse<IForgotPasswordResponse>>(`${this.API_URL}/forgot-password`, request);
+    const context = new HttpContext().set(DISABLE_TOAST, true);
+    return this.httpClient.post<ApiResponse<IForgotPasswordResponse>>(`${this.API_URL}/forgot-password`, request, { context });
   }
 
   resetPassword(request: IResetPasswordRequest): Observable<ApiResponse<null>> {

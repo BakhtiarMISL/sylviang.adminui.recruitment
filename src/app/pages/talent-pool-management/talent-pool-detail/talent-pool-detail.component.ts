@@ -1,5 +1,6 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { ICandidateProfileSummaryResponse } from '@app/@core/interfaces/recruitment-management/candidate-profile.interface';
 import { IJobVacancyResponse } from '@app/@core/interfaces/recruitment-management/job-vacancy.interface';
 import { ITalentPoolDetailResponse } from '@app/@core/interfaces/recruitment-management/talent-pool.interface';
@@ -15,7 +16,7 @@ import { ConfirmationService } from 'primeng/api';
   templateUrl: './talent-pool-detail.component.html',
   styleUrl: './talent-pool-detail.component.scss',
 })
-export class TalentPoolDetailComponent implements OnInit {
+export class TalentPoolDetailComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private talentPoolService: TalentPoolService,
@@ -39,13 +40,23 @@ export class TalentPoolDetailComponent implements OnInit {
   fastTrackError = '';
   fastTrackResult: { fastTrackedCount: number; alreadyAppliedCount: number; skippedCount: number } | null = null;
 
+  private routeSub: Subscription | null = null;
+
   ngOnInit(): void {
-    this.talentPoolId = Number(this.route.snapshot.paramMap.get('id'));
-    this.breadcrumbService.setBreadcrumbs([
-      { title: 'Talent Pools', icon: 'fa-solid fa-users', href: '/talent-pools' },
-      { title: 'Pool Detail', icon: 'fa-solid fa-users', href: `/talent-pools/talent-pool-detail/${this.talentPoolId}` },
-    ]);
-    this.loadPool();
+    // Subscribed rather than a one-time snapshot read - RouteReusableStrategy reuses this
+    // component instance across navigations between two talent-pool ids.
+    this.routeSub = this.route.paramMap.subscribe((params) => {
+      this.talentPoolId = Number(params.get('id'));
+      this.breadcrumbService.setBreadcrumbs([
+        { title: 'Talent Pools', icon: 'fa-solid fa-users', href: '/talent-pools' },
+        { title: 'Pool Detail', icon: 'fa-solid fa-users', href: `/talent-pools/talent-pool-detail/${this.talentPoolId}` },
+      ]);
+      this.loadPool();
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.routeSub?.unsubscribe();
   }
 
   loadPool(): void {

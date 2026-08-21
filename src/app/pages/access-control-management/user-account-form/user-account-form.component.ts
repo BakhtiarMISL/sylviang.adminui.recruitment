@@ -99,8 +99,9 @@ export class UserAccountFormComponent implements OnInit {
       next: (response) => {
         const roles = !response.hasError && response.content ? response.content : [];
         // Candidate is self-service only (register/apply flow) - never assignable to a staff
-        // user account through this screen. Backend rejects it too (UserAccountService).
-        this.roleOptions = roles.filter((role) => role.name !== 'Candidate');
+        // user account through this screen. SuperAdmin can only be assigned by a SuperAdmin
+        // caller. Backend rejects both too (UserAccountService.EnsureCallerCanAssign).
+        this.roleOptions = roles.filter((role) => role.name !== 'Candidate' && (this.isSuperAdmin || role.name !== 'SuperAdmin'));
       },
       error: () => {
         this.roleOptions = [];

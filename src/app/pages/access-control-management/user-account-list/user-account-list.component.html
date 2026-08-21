@@ -77,7 +77,7 @@
       <tr>
         <td>{{ account.fullName }}</td>
         <td>{{ account.email }}</td>
-        <td *ngIf="isSuperAdmin">{{ account.companyName || '-' }}</td>
+        <td *ngIf="isSuperAdmin">{{ account.roleNames.includes('SuperAdmin') ? '-' : (account.companyName || '-') }}</td>
         <td>
           <span *ngFor="let name of account.roleNames" class="mr-1 rounded-md bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-200">{{ name }}</span>
         </td>

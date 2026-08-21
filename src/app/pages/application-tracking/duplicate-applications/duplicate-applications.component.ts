@@ -1,5 +1,6 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { IJobApplicationDuplicateGroup } from '@app/@core/interfaces/recruitment-management/job-application.interface';
 import { JobApplicationService } from '@app/@core/services/recruitment/job-application/job-application.service';
 import { ToastService } from '@app/@core/services/misc/toast.service';
@@ -18,7 +19,7 @@ interface DuplicateGroupRow {
   templateUrl: './duplicate-applications.component.html',
   styleUrl: './duplicate-applications.component.scss',
 })
-export class DuplicateApplicationsComponent implements OnInit {
+export class DuplicateApplicationsComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -35,16 +36,27 @@ export class DuplicateApplicationsComponent implements OnInit {
   loading = true;
   resolvingIndex: number | null = null;
 
+  private routeSub: Subscription | null = null;
+
   ngOnInit(): void {
-    this.jobPostingId = Number(this.route.snapshot.paramMap.get('jobPostingId'));
-    this.jobPostingTitle = this.route.snapshot.queryParamMap.get('title') || `#${this.jobPostingId}`;
+    // Subscribed, not a one-time snapshot read - RouteReusableStrategy reuses this component
+    // instance across navigations to a different jobPostingId, so a snapshot read left the page
+    // showing the previous vacancy's duplicate groups.
+    this.routeSub = this.route.paramMap.subscribe((params) => {
+      this.jobPostingId = Number(params.get('jobPostingId'));
+      this.jobPostingTitle = this.route.snapshot.queryParamMap.get('title') || `#${this.jobPostingId}`;
 
-    this.breadcrumbService.setBreadcrumbs([
-      { title: 'ATS Dashboard', icon: 'fa-solid fa-list-check', href: '/applications' },
-      { title: 'Duplicates', icon: 'fa-solid fa-clone', href: `/applications/duplicates/${this.jobPostingId}` },
-    ]);
+      this.breadcrumbService.setBreadcrumbs([
+        { title: 'ATS Dashboard', icon: 'fa-solid fa-list-check', href: '/applications' },
+        { title: 'Duplicates', icon: 'fa-solid fa-clone', href: `/applications/duplicates/${this.jobPostingId}` },
+      ]);
 
-    this.load();
+      this.load();
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.routeSub?.unsubscribe();
   }
 
   load(): void {

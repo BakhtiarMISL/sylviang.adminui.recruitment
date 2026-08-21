@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { AutoCompleteCompleteEvent } from 'primeng/autocomplete';
 import {
   IBloodGroupResponse,
@@ -21,7 +22,7 @@ import { Base_URL } from '@env/environment';
   templateUrl: './candidate-detail.component.html',
   styleUrl: './candidate-detail.component.scss',
 })
-export class CandidateDetailComponent implements OnInit {
+export class CandidateDetailComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private candidateProfileService: CandidateProfileService,
@@ -59,19 +60,33 @@ export class CandidateDetailComponent implements OnInit {
   addingTag = false;
   addTagError = '';
 
+  private routeSub: Subscription | null = null;
+
   ngOnInit(): void {
-    this.candidateProfileId = Number(this.route.snapshot.paramMap.get('id'));
-    this.breadcrumbService.setBreadcrumbs([
-      { title: 'Candidates', icon: 'fa-solid fa-users', href: '/candidates' },
-      { title: 'Candidate Profile', icon: 'fa-solid fa-id-card', href: `/candidates/${this.candidateProfileId}` },
-    ]);
-    this.loadProfile();
-    this.loadTags();
+    // The lookup fetches below don't depend on candidateProfileId, so they stay outside the
+    // subscription and only run once. The id-dependent load calls are subscribed rather than
+    // read from route.snapshot once, because RouteReusableStrategy reuses this component instance
+    // when navigating between two candidate-detail URLs - a snapshot read left the page silently
+    // showing the previous candidate's profile on that navigation.
+    this.routeSub = this.route.paramMap.subscribe((params) => {
+      this.candidateProfileId = Number(params.get('id'));
+      this.breadcrumbService.setBreadcrumbs([
+        { title: 'Candidates', icon: 'fa-solid fa-users', href: '/candidates' },
+        { title: 'Candidate Profile', icon: 'fa-solid fa-id-card', href: `/candidates/${this.candidateProfileId}` },
+      ]);
+      this.loadProfile();
+      this.loadTags();
+    });
+
     this.candidateProfileService.getGenders().subscribe({ next: (r) => (this.genders = !r.hasError && r.content ? r.content : []) });
     this.candidateProfileService.getMaritalStatuses().subscribe({ next: (r) => (this.maritalStatuses = !r.hasError && r.content ? r.content : []) });
     this.candidateProfileService.getReligions().subscribe({ next: (r) => (this.religions = !r.hasError && r.content ? r.content : []) });
     this.candidateProfileService.getBloodGroups().subscribe({ next: (r) => (this.bloodGroups = !r.hasError && r.content ? r.content : []) });
     this.candidateProfileService.getDegrees().subscribe({ next: (r) => (this.degrees = !r.hasError && r.content ? r.content : []) });
+  }
+
+  ngOnDestroy(): void {
+    this.routeSub?.unsubscribe();
   }
 
   genderName(id?: number | null): string {

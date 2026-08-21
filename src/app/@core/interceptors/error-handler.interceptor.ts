@@ -124,7 +124,12 @@ export class ErrorHandlerInterceptor implements HttpInterceptor {
   // never force-logout a visitor over a stale/expired token attached by AuthInterceptor —
   // a 401 here just means "treat as anonymous", not "session invalid".
   private _isPublicEndpointRequest(request: HttpRequest<any>): boolean {
-    return request.url.includes('/career-portal');
+    // /payment/ included: PaymentController is entirely [AllowAnonymous], and the payment-result
+    // page polls its status endpoint on a loop right after the applicant comes back from
+    // SSLCommerz. If their token expired while they were on the gateway, AuthInterceptor still
+    // attached the stale one and the first poll's 401 logged them out and bounced them to /login
+    // mid-confirmation - losing the result of a payment that had actually gone through.
+    return request.url.includes('/career-portal') || request.url.includes('/payment/');
   }
 
   private _isApiResponseBody(body: unknown): body is { hasError: boolean; decentMessage: string } {

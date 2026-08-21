@@ -172,7 +172,7 @@ export class CompanyFormComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.companyService.uploadLogo(newCompanyId, file).subscribe({
+    this.companyService.uploadLogo(newCompanyId, file, true).subscribe({
       next: (response) => {
         if (response && !response.hasError && response.content) {
           this.toastService.success({ detail: 'Company created and logo uploaded.' });
@@ -231,7 +231,7 @@ export class CompanyFormComponent implements OnInit, OnDestroy {
         },
       });
     } else {
-      this.companyService.create(request).subscribe({
+      this.companyService.create(request, !!this.pendingLogoFile).subscribe({
         next: (response) => {
           if (response && !response.hasError && response.content) {
             this.uploadPendingLogo(response.content);

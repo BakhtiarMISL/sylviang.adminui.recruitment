@@ -1,11 +1,16 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { IPaymentStatusResponse } from '@app/@core/interfaces/recruitment-management/payment.interface';
 import { PaymentService } from '@app/@core/services/recruitment/payment/payment.service';
 import { AuthService } from '@core/services/auth/auth.service';
 
 const POLL_INTERVAL_MS = 3000;
 const MAX_POLL_ATTEMPTS = 20; // ~1 minute - the IPN usually lands within a few seconds of the browser redirect.
+// A run of failures means the endpoint itself is unhappy (server error, or an expired token on the
+// status call), not that the IPN is still in flight. Retrying 20 times at a flat 3 s just left the
+// applicant staring at "Confirming your payment..." for the full minute before the timeout copy.
+const MAX_CONSECUTIVE_ERRORS = 2;
 
 /**
  * Internal-job-board twin of career-portal's PaymentResultComponent (SSLCommerz's browser-return
@@ -40,10 +45,16 @@ export class InternalPaymentResultComponent implements OnInit, OnDestroy {
   private candidateEmail = '';
 
   private pollAttempts = 0;
+  private consecutiveErrors = 0;
   private pollTimer: ReturnType<typeof setTimeout> | null = null;
+  private queryParamsSubscription: Subscription | null = null;
 
   ngOnInit(): void {
-    this.route.queryParamMap.subscribe((params) => {
+    this.queryParamsSubscription = this.route.queryParamMap.subscribe((params) => {
+      // Any later emission on this same route restarts the poll - without clearing the pending
+      // timer first, the old chain kept running alongside the new one, both decrementing the
+      // shared attempt budget.
+      this.resetPolling();
       const idParam = params.get('jobApplicationId');
       this.hintStatus = params.get('status');
       this.candidateEmail = params.get('candidateEmail') || this.authService.getUser()?.username || '';
@@ -57,6 +68,7 @@ export class InternalPaymentResultComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.queryParamsSubscription?.unsubscribe();
     if (this.pollTimer) clearTimeout(this.pollTimer);
   }
 
@@ -65,6 +77,7 @@ export class InternalPaymentResultComponent implements OnInit, OnDestroy {
 
     this.paymentService.getPaymentStatus(this.jobApplicationId, this.candidateEmail).subscribe({
       next: (response) => {
+        this.consecutiveErrors = 0;
         if (response && !response.hasError && response.content) {
           this.status = response.content;
           if (this.isResolved(this.status)) {
@@ -75,8 +88,24 @@ export class InternalPaymentResultComponent implements OnInit, OnDestroy {
         }
         this.scheduleNextPoll();
       },
-      error: () => this.scheduleNextPoll(),
+      error: () => {
+        this.consecutiveErrors++;
+        if (this.consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
+          this.polling = false;
+          this.timedOut = true;
+          this.cdr.detectChanges();
+          return;
+        }
+        this.scheduleNextPoll();
+      },
     });
+  }
+
+  private resetPolling(): void {
+    if (this.pollTimer) clearTimeout(this.pollTimer);
+    this.pollTimer = null;
+    this.pollAttempts = 0;
+    this.consecutiveErrors = 0;
   }
 
   private scheduleNextPoll(): void {
@@ -91,7 +120,17 @@ export class InternalPaymentResultComponent implements OnInit, OnDestroy {
   }
 
   private isResolved(status: IPaymentStatusResponse): boolean {
-    return status.paymentStatus === 'Success' || status.paymentStatus === 'Failed';
+    // 'Cancelled' was missing here, so an applicant who backed out at SSLCommerz never hit a
+    // terminal state: the page polled all 20 attempts and then showed the timed-out "we couldn't
+    // confirm your payment" copy instead of the cancel message the template already carries.
+    if (status.paymentStatus === 'Success' || status.paymentStatus === 'Failed' || status.paymentStatus === 'Cancelled') {
+      return true;
+    }
+
+    // The gateway told us on the redirect itself that the applicant cancelled or the charge
+    // failed, and the backend already recorded that outcome before redirecting here - there is no
+    // later IPN that can turn either into a success, so there is nothing left to wait for.
+    return this.hintStatus === 'cancel' || this.hintStatus === 'fail';
   }
 
   get isSuccess(): boolean {

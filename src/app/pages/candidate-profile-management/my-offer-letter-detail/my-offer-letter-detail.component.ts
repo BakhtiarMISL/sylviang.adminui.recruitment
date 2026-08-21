@@ -1,6 +1,7 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { BreadcrumbService } from '@app/@core/services';
 import { OfferLetterCandidateService } from '@app/@core/services/recruitment/offer-letter-candidate/offer-letter-candidate.service';
 import { IOfferLetterResponse } from '@core/interfaces/recruitment-management/offer-letter.interface';
@@ -12,7 +13,7 @@ import { Base_URL } from '@env/environment';
   templateUrl: './my-offer-letter-detail.component.html',
   styleUrl: './my-offer-letter-detail.component.scss',
 })
-export class MyOfferLetterDetailComponent implements OnInit {
+export class MyOfferLetterDetailComponent implements OnInit, OnDestroy {
   constructor(
     private offerLetterCandidateService: OfferLetterCandidateService,
     private route: ActivatedRoute,
@@ -35,14 +36,23 @@ export class MyOfferLetterDetailComponent implements OnInit {
     return !!this.item && (this.item.status === 'Generated' || this.item.status === 'Sent');
   }
 
+  private routeSub: Subscription | null = null;
+
   ngOnInit(): void {
     this.breadcrumbService.setBreadcrumbs([
       { title: 'My Offer Letters', icon: 'fa-solid fa-file-signature', href: '/candidate-profile/offer-letters' },
       { title: 'View Offer Letter', icon: 'fa-solid fa-eye', href: '' },
     ]);
 
-    const id = Number(this.route.snapshot.paramMap.get('id'));
-    this.load(id);
+    // Subscribed rather than a one-time snapshot read - RouteReusableStrategy reuses this
+    // component instance across navigations between two letter ids.
+    this.routeSub = this.route.paramMap.subscribe((params) => {
+      this.load(Number(params.get('id')));
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.routeSub?.unsubscribe();
   }
 
   private load(id: number): void {

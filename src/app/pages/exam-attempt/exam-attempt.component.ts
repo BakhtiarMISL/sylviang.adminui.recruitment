@@ -1,5 +1,6 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { ExamAttemptStatusEnum, QuestionTypeEnum } from '@app/@core/enums/recruitment.enum';
 import { IExamPaperResponse, IExamSubmitResultResponse, IMyExamEnrollmentResponse } from '@app/@core/interfaces/recruitment-management/exam-taking.interface';
 import { BreadcrumbService } from '@app/@core/services';
@@ -47,6 +48,7 @@ export class ExamAttemptComponent implements OnInit, OnDestroy {
   submitting = false;
   remainingSeconds = 0;
   private timerHandle: ReturnType<typeof setInterval> | null = null;
+  private routeSub: Subscription | null = null;
 
   ngOnInit(): void {
     this.breadcrumbService.setBreadcrumbs([
@@ -54,17 +56,31 @@ export class ExamAttemptComponent implements OnInit, OnDestroy {
       { title: 'Exam', icon: 'fa-solid fa-file-pen', href: '' },
     ]);
 
-    const idParam = this.route.snapshot.paramMap.get('enrollmentId');
-    this.enrollmentId = idParam ? +idParam : 0;
-    if (!this.enrollmentId) {
-      this.router.navigate(['/my-applications']);
-      return;
-    }
+    // Subscribed rather than a one-time snapshot read - RouteReusableStrategy reuses this
+    // component instance across navigations between two enrollment ids. Without this, an
+    // in-progress exam's timer/answers could bleed into whichever exam the candidate opens next
+    // on the same route. clearTimer() + resetting attempt state guards against exactly that.
+    this.routeSub = this.route.paramMap.subscribe((params) => {
+      this.clearTimer();
+      this.myExam = null;
+      this.paper = null;
+      this.submitResult = null;
+      this.answers = {};
+      this.remainingSeconds = 0;
 
-    this.load();
+      const idParam = params.get('enrollmentId');
+      this.enrollmentId = idParam ? +idParam : 0;
+      if (!this.enrollmentId) {
+        this.router.navigate(['/my-applications']);
+        return;
+      }
+
+      this.load();
+    });
   }
 
   ngOnDestroy(): void {
+    this.routeSub?.unsubscribe();
     this.clearTimer();
   }
 
