@@ -1,0 +1,55 @@
+<section class="page-container">
+  <div class="flex justify-between items-center gap-3 mb-4">
+    <h3 class="table-title">Interview Venues</h3>
+    <button pButton [routerLink]="['/interview-venues/manage-interview-venue']">
+      <i class="fa fa-plus"></i>
+      <span>Add Venue</span>
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="space-y-3">
+    <p-skeleton height="4rem" *ngFor="let i of skeletonItems"></p-skeleton>
+  </div>
+
+  <div *ngIf="!loading && venues.length === 0" class="table-container">
+    <div class="not-found">
+      <i class="fa fa-magnifying-glass-minus"></i>
+      <p>No interview venues configured yet.</p>
+    </div>
+  </div>
+
+  <div *ngIf="!loading" class="grid grid-cols-1 gap-4">
+    <div *ngFor="let venue of venues" class="rounded-lg bg-white p-4 shadow-sm dark:bg-dark">
+      <div class="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+        <div>
+          <div class="flex items-center gap-2">
+            <h4 class="text-lg font-medium text-gray-900 dark:text-white">{{ venue.venueName }}</h4>
+            <span
+              class="rounded-full px-2 py-0.5 text-xs font-medium"
+              [ngClass]="venue.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'"
+            >
+              {{ venue.isActive ? 'Active' : 'Inactive' }}
+            </span>
+          </div>
+          <p class="text-sm text-gray-600 dark:text-gray-300">{{ venue.location }}</p>
+          <p class="text-sm text-gray-600 dark:text-gray-300">{{ venue.roomCount }} room(s)</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <button pButton severity="secondary" (click)="manageRooms(venue)">
+            <i class="fa fa-door-open"></i>
+            <span>Manage Rooms</span>
+          </button>
+          <button pButton severity="secondary" [routerLink]="['/interview-venues/manage-interview-venue', venue.interviewVenueId]">
+            <i class="fa fa-edit"></i>
+            <span>Edit</span>
+          </button>
+          <button pButton [severity]="venue.isActive ? 'danger' : 'success'" (click)="toggleActiveStatus(venue, $event)">
+            <i class="fa" [ngClass]="venue.isActive ? 'fa-ban' : 'fa-check'"></i>
+            <span>{{ venue.isActive ? 'Deactivate' : 'Activate' }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

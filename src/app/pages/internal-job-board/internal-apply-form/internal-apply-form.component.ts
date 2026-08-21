@@ -1,8 +1,12 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { IJobApplicationSubmitResponse } from '@app/@core/interfaces/recruitment-management/career-portal.interface';
+import { CandidateProfileService } from '@app/@core/services/recruitment/candidate-profile/candidate-profile.service';
+import { IJobApplicationSubmitResponse, IJobEligibilityResponse } from '@app/@core/interfaces/recruitment-management/career-portal.interface';
+import { IMasterDataItem } from '@app/@core/interfaces/recruitment-management/master-data.interface';
 import { InternalJobBoardService } from '@app/@core/services/recruitment/internal-job-board/internal-job-board.service';
-import { RESUME_ALLOWED_EXTENSIONS, RESUME_MAX_SIZE_BYTES } from '../internal-job-board.constants';
+import { MasterDataService } from '@app/@core/services/recruitment/master-data/master-data.service';
+import { PaymentService } from '@app/@core/services/recruitment/payment/payment.service';
+import { RESUME_ALLOWED_EXTENSIONS, RESUME_MAX_SIZE_BYTES, WAIVER_PROOF_ALLOWED_EXTENSIONS, WAIVER_PROOF_MAX_SIZE_BYTES } from '../internal-job-board.constants';
 
 @Component({
   selector: 'app-internal-apply-form',
@@ -10,18 +14,78 @@ import { RESUME_ALLOWED_EXTENSIONS, RESUME_MAX_SIZE_BYTES } from '../internal-jo
   templateUrl: './internal-apply-form.component.html',
   styleUrl: './internal-apply-form.component.scss',
 })
-export class InternalApplyFormComponent {
+export class InternalApplyFormComponent implements OnInit {
   @Input() jobPostingId!: number;
+  @Input() eligibilityResult: IJobEligibilityResponse | null = null;
+  acknowledgedIneligibility = false;
+
+  /** US-024 AC4: ineligible candidates can still apply, but must re-acknowledge the warning first. */
+  get needsAcknowledgement(): boolean {
+    return !!this.eligibilityResult && !this.eligibilityResult.isEligible;
+  }
 
   constructor(
     private fb: FormBuilder,
     private internalJobBoardService: InternalJobBoardService,
+    private paymentService: PaymentService,
+    private candidateProfileService: CandidateProfileService,
+    private masterDataService: MasterDataService,
   ) {
     this.applyForm = this.fb.group({
       candidateName: [null, [Validators.required]],
       candidateEmail: [null, [Validators.required, Validators.email]],
       candidatePhone: [null],
       coverLetter: [null],
+      specialCategoryId: [null],
+      referralSourceId: [null],
+    });
+  }
+
+  // EP-17/US-127: optional at apply time - feeds fee-waiver rule matching. Options come from the
+  // admin-managed master-data lookups.
+  specialCategoryOptions: { label: string; value: number }[] = [];
+  referralSourceOptions: { label: string; value: number }[] = [];
+
+  // US-005 AC1: pre-fill from the logged-in candidate's own profile (Core-HR-populated for
+  // internal candidates) instead of the blank manual-entry form used previously. Candidate can
+  // still edit before submitting.
+  ngOnInit(): void {
+    // Internal candidates are already logged in with a profile on file - prefill from it so
+    // they don't have to retype what's already known, rather than forcing a blank form every time.
+    this.candidateProfileService.getMyProfile().subscribe({
+      next: (response) => {
+        if (response && !response.hasError && response.content) {
+          const profile = response.content;
+          this.applyForm.patchValue({
+            candidateName: profile.fullName || null,
+            candidateEmail: profile.email || null,
+            candidatePhone: profile.phone || null,
+          });
+        }
+      },
+      // Prefill is a convenience, not a requirement - leave the form blank on failure rather
+      // than blocking the candidate from applying.
+      error: () => {},
+    });
+
+    this.loadOptionalDropdowns();
+  }
+
+  private loadOptionalDropdowns(): void {
+    this.masterDataService.getAll('special-category').subscribe({
+      next: (response) => {
+        const items: IMasterDataItem[] = !response.hasError && response.content ? response.content : [];
+        this.specialCategoryOptions = items.map((item) => ({ label: item['name'] as string, value: item['specialCategoryId'] as number }));
+      },
+      error: () => {},
+    });
+
+    this.masterDataService.getAll('referral-source').subscribe({
+      next: (response) => {
+        const items: IMasterDataItem[] = !response.hasError && response.content ? response.content : [];
+        this.referralSourceOptions = items.map((item) => ({ label: item['name'] as string, value: item['referralSourceId'] as number }));
+      },
+      error: () => {},
     });
   }
 
@@ -29,10 +93,17 @@ export class InternalApplyFormComponent {
   formSubmitted = false;
   selectedFile: File | null = null;
   fileError = '';
+  waiverProofFile: File | null = null;
+  waiverProofFileError = '';
   submitting = false;
   submitError = '';
   submitted = false;
   submitResult: IJobApplicationSubmitResponse | null = null;
+  // EP-17: true when the application was saved but the SSLCommerz redirect couldn't be started
+  // (gateway outage at submit time) - the candidate can retry from here.
+  paymentPending = false;
+  retryingPayment = false;
+  retryError = '';
 
   get f() {
     return this.applyForm.controls;
@@ -74,15 +145,54 @@ export class InternalApplyFormComponent {
 
     if (!RESUME_ALLOWED_EXTENSIONS.includes(extension)) {
       this.fileError = `Resume must be one of: ${RESUME_ALLOWED_EXTENSIONS.join(', ')}`;
+      input.value = '';
       return;
     }
 
     if (file.size > RESUME_MAX_SIZE_BYTES) {
       this.fileError = 'Resume file size must not exceed 10MB';
+      input.value = '';
       return;
     }
 
     this.selectedFile = file;
+  }
+
+  // EP-17/US-127 fix: a category alone no longer waives the fee (JobApplicationService.SubmitAsync
+  // requires proof) - surface that plainly instead of letting the candidate believe picking a
+  // category is enough.
+  get claimsSpecialCategoryWithoutProof(): boolean {
+    return !!this.applyForm.value.specialCategoryId && !this.waiverProofFile;
+  }
+
+  onWaiverProofFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.waiverProofFileError = '';
+    this.waiverProofFile = null;
+
+    if (!input.files || input.files.length === 0) return;
+
+    const file = input.files[0];
+    const extension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+
+    if (!WAIVER_PROOF_ALLOWED_EXTENSIONS.includes(extension)) {
+      this.waiverProofFileError = `Proof document must be one of: ${WAIVER_PROOF_ALLOWED_EXTENSIONS.join(', ')}`;
+      input.value = '';
+      return;
+    }
+
+    if (file.size > WAIVER_PROOF_MAX_SIZE_BYTES) {
+      this.waiverProofFileError = 'Proof document file size must not exceed 5MB';
+      input.value = '';
+      return;
+    }
+
+    this.waiverProofFile = file;
+  }
+
+  clearWaiverProofFile(): void {
+    this.waiverProofFile = null;
+    this.waiverProofFileError = '';
   }
 
   onSubmit(): void {
@@ -93,19 +203,24 @@ export class InternalApplyFormComponent {
       this.fileError = 'Resume is required';
     }
 
-    if (this.applyForm.invalid || !this.selectedFile) {
+    if (this.applyForm.invalid || !this.selectedFile || (this.needsAcknowledgement && !this.acknowledgedIneligibility)) {
       this.applyForm.markAllAsTouched();
       return;
     }
 
     this.submitting = true;
 
-    this.internalJobBoardService.apply(this.jobPostingId, this.applyForm.value, this.selectedFile).subscribe({
+    this.internalJobBoardService.apply(this.jobPostingId, this.applyForm.value, this.selectedFile, this.waiverProofFile).subscribe({
       next: (response) => {
         this.submitting = false;
         if (response && !response.hasError && response.content) {
-          this.submitted = true;
           this.submitResult = response.content;
+          if (this.submitResult.paymentRequired && this.submitResult.paymentRedirectUrl) {
+            window.location.href = this.submitResult.paymentRedirectUrl;
+            return;
+          }
+          this.submitted = true;
+          this.paymentPending = !!this.submitResult.paymentRequired;
         } else {
           this.submitError = response?.decentMessage || 'Failed to submit application. Please try again.';
         }
@@ -117,6 +232,27 @@ export class InternalApplyFormComponent {
         } else {
           this.submitError = error?.error?.decentMessage || 'Failed to submit application. Please try again.';
         }
+      },
+    });
+  }
+
+  retryPayment(): void {
+    if (!this.submitResult) return;
+    this.retryingPayment = true;
+    this.retryError = '';
+
+    this.paymentService.initiatePayment(this.submitResult.jobApplicationId, this.applyForm.value.candidateEmail).subscribe({
+      next: (response) => {
+        this.retryingPayment = false;
+        if (response && !response.hasError && response.content?.success && response.content.gatewayRedirectUrl) {
+          window.location.href = response.content.gatewayRedirectUrl;
+        } else {
+          this.retryError = response?.content?.failureReason || response?.decentMessage || 'Could not start payment. Please try again.';
+        }
+      },
+      error: (error) => {
+        this.retryingPayment = false;
+        this.retryError = error?.error?.decentMessage || 'Could not start payment. Please try again.';
       },
     });
   }

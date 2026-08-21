@@ -1,0 +1,16 @@
+<section class="page-container">
+  <p-tabs [(value)]="activeTab">
+    <p-tablist>
+      <p-tab value="0"><i class="fa fa-users mr-2"></i>Browse</p-tab>
+      <p-tab value="1"><i class="fa fa-magnifying-glass mr-2"></i>Search</p-tab>
+    </p-tablist>
+    <p-tabpanels>
+      <p-tabpanel value="0">
+        <app-candidate-list></app-candidate-list>
+      </p-tabpanel>
+      <p-tabpanel value="1">
+        <app-cv-bank-search></app-cv-bank-search>
+      </p-tabpanel>
+    </p-tabpanels>
+  </p-tabs>
+</section>

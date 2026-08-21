@@ -1,10 +1,40 @@
 <section class="page-container">
-  <div class="flex justify-between items-center gap-3">
-    <!-- Search Input -->
-    <div class="flex items-end gap-3 mb-4">
+  <app-filter-panel [(collapsed)]="filtersCollapsed">
+    <div class="filter-bar">
       <p-floatlabel variant="in">
-        <input type="text" pInputText id="searchInput" class="w-full" [(ngModel)]="searchTerm" name="searchInput" (keyup.enter)="applySearch()" />
+        <input
+          type="text"
+          pInputText
+          id="searchInput"
+          class="w-full"
+          [(ngModel)]="searchTerm"
+          name="searchInput"
+          placeholder="e.g. Senior Developer, or Open"
+          (keyup.enter)="applySearch()"
+        />
         <label for="searchInput">Search job vacancies</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="in">
+        <p-datepicker
+          inputId="postingDateTo"
+          [(ngModel)]="postingDateTo"
+          [showIcon]="true"
+          dateFormat="dd-M-yy"
+          styleClass="w-full"
+        ></p-datepicker>
+        <label for="postingDateTo">Posting Date</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="in">
+        <p-datepicker
+          inputId="closingDateTo"
+          [(ngModel)]="closingDateTo"
+          [showIcon]="true"
+          dateFormat="dd-M-yy"
+          styleClass="w-full"
+        ></p-datepicker>
+        <label for="closingDateTo">Closing Date</label>
       </p-floatlabel>
 
       <button pButton (click)="applySearch()">
@@ -12,11 +42,30 @@
         <span>Search</span>
       </button>
 
-      <button *ngIf="searchTerm" severity="secondary" pButton (click)="resetSearch()">
+      <button
+        *ngIf="searchTerm || postingDateTo || closingDateTo || myPostingsOnly"
+        severity="secondary"
+        pButton
+        (click)="resetSearch()"
+      >
         <i class="fa fa-times"></i>
         <span>Reset</span>
       </button>
+
+      <div class="filter-checkbox">
+        <p-checkbox
+          [(ngModel)]="myPostingsOnly"
+          [ngModelOptions]="{ standalone: true }"
+          [binary]="true"
+          inputId="myPostingsOnly"
+          (onChange)="toggleMyPostingsOnly()"
+        ></p-checkbox>
+        <label for="myPostingsOnly">My Postings Only</label>
+      </div>
     </div>
+  </app-filter-panel>
+
+  <div class="flex justify-end mb-3">
     <button [routerLink]="['/job-vacancy/manage-job-vacancy']" pButton>
       <i class="fa fa-plus"></i>
       <span>Add</span>
@@ -29,7 +78,11 @@
       <h3 class="table-title">
         Job Vacancy Table
         <span class="table-title-info" *ngIf="totalRecords > 0">
-          ({{ totalRecords }} total{{ selectedJobVacancies.length > 0 ? ', ' + selectedJobVacancies.length + ' selected' : '' }})
+          ({{ totalRecords }} total{{
+            selectedJobVacancies.length > 0
+              ? ", " + selectedJobVacancies.length + " selected"
+              : ""
+          }})
         </span>
       </h3>
     </div>
@@ -41,6 +94,8 @@
         [(selection)]="selectedJobVacancies"
         (selectionChange)="onSelectionChange($event)"
         dataKey="jobPostingId"
+        [sortField]="sortBy"
+        [sortOrder]="sortDirection === 'asc' ? 1 : -1"
         (onSort)="onSort($event)"
         [paginator]="true"
         [rows]="rows"
@@ -58,9 +113,15 @@
       >
         <ng-template pTemplate="header">
           <tr>
-            <th style="width: 3rem"><p-tableHeaderCheckbox></p-tableHeaderCheckbox></th>
+            <th style="width: 3rem">
+              <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+            </th>
             @for (col of columns; track col.field) {
-              <th [pSortableColumn]="col.sortable !== false ? col.field : null" [style.width]="col.width" class="group">
+              <th
+                [pSortableColumn]="col.sortable !== false ? col.field : null"
+                [style.width]="col.width"
+                class="group"
+              >
                 <div class="flex items-center gap-2">
                   {{ col.label }}
                   @if (col.sortable !== false) {
@@ -68,7 +129,8 @@
                       class="transition-opacity duration-150"
                       [ngClass]="{
                         'opacity-100': sortedColumn === col.field,
-                        'opacity-0 group-hover:opacity-100': sortedColumn !== col.field,
+                        'opacity-0 group-hover:opacity-100':
+                          sortedColumn !== col.field,
                       }"
                     >
                       <p-sortIcon [field]="col.field"></p-sortIcon>
@@ -102,16 +164,47 @@
               <td>{{ vacancy.title }}</td>
               <td>{{ formatEnumLabel(vacancy.employmentType) }}</td>
               <td>{{ formatEnumLabel(vacancy.circularType) }}</td>
-              <td>{{ vacancy.hiringPipelineName || '-' }}</td>
+              <td>{{ vacancy.hiringPipelineName || "-" }}</td>
               <td>{{ formatEnumLabel(vacancy.status) }}</td>
               <td>{{ vacancy.numberOfPositions }}</td>
-              <td>{{ vacancy.postingDate ? (vacancy.postingDate | date: 'dd-MMM-yyyy') : '-' }}</td>
-              <td>{{ vacancy.closingDate ? (vacancy.closingDate | date: 'dd-MMM-yyyy') : '-' }}</td>
               <td>
-                <button [routerLink]="['/job-vacancy/manage-job-vacancy', vacancy.jobPostingId]" class="text-primary mr-2">
+                {{
+                  vacancy.postingDate
+                    ? (vacancy.postingDate | date: "dd-MMM-yyyy")
+                    : "-"
+                }}
+              </td>
+              <td>
+                {{
+                  vacancy.closingDate
+                    ? (vacancy.closingDate | date: "dd-MMM-yyyy")
+                    : "-"
+                }}
+              </td>
+              <td>
+                <button
+                  [routerLink]="[
+                    '/job-vacancy/manage-job-vacancy',
+                    vacancy.jobPostingId,
+                  ]"
+                  class="text-primary mr-2"
+                >
                   <i class="fa fa-edit"></i>
                 </button>
-                <button class="text-danger" (click)="deleteJobVacancy(vacancy, $event)">
+                <button
+                  [routerLink]="[
+                    '/interviews/interview-round-config',
+                    vacancy.jobPostingId,
+                  ]"
+                  class="text-primary mr-2"
+                  title="Configure Interview Rounds"
+                >
+                  <i class="fa fa-layer-group"></i>
+                </button>
+                <button
+                  class="text-danger"
+                  (click)="deleteJobVacancy(vacancy, $event)"
+                >
                   <i class="fa fa-trash"></i>
                 </button>
               </td>

@@ -22,6 +22,7 @@
       <div *ngIf="hasError('shiftCode')" class="invalid">
         {{ getErrorMessage('shiftCode') }}
       </div>
+      <small class="text-neutral" *ngIf="!hasError('shiftCode')">e.g. GEN, MORN, NIGHT</small>
     </div>
 
     <!-- Shift Name -->

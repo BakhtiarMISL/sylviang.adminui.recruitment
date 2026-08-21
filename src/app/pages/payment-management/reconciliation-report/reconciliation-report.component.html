@@ -1,0 +1,79 @@
+<section class="page-container">
+  <div class="flex justify-between items-center gap-3 mb-4">
+    <h3 class="table-title">Reconciliation Report</h3>
+  </div>
+
+  <app-filter-panel [(collapsed)]="filtersCollapsed">
+    <div class="filter-bar">
+      <p-floatlabel variant="in">
+        <p-datepicker inputId="filterDateFrom" styleClass="w-40" [(ngModel)]="filterDateFrom" [showIcon]="true" dateFormat="dd-M-yy"></p-datepicker>
+        <label for="filterDateFrom">From</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="in">
+        <p-datepicker inputId="filterDateTo" styleClass="w-40" [(ngModel)]="filterDateTo" [showIcon]="true" dateFormat="dd-M-yy"></p-datepicker>
+        <label for="filterDateTo">To</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="in">
+        <p-select
+          inputId="filterJobPostingId"
+          class="w-56"
+          [options]="vacancyOptions"
+          [(ngModel)]="filterJobPostingId"
+          optionLabel="title"
+          optionValue="jobPostingId"
+          [showClear]="true"
+          [appendTo]="'body'"
+        ></p-select>
+        <label for="filterJobPostingId">Vacancy</label>
+      </p-floatlabel>
+
+      <button pButton [disabled]="loading" (click)="runReport()">
+        <i class="fa fa-magnifying-glass"></i>
+        <span>Run Report</span>
+      </button>
+      <button pButton severity="secondary" (click)="resetFilters()">
+        <i class="fa fa-rotate-left"></i>
+        <span>Reset</span>
+      </button>
+    </div>
+  </app-filter-panel>
+
+  <small class="mb-3 block text-red-500" *ngIf="errorMessage">{{ errorMessage }}</small>
+
+  <div *ngIf="loading" class="space-y-3">
+    <p-skeleton height="6rem"></p-skeleton>
+  </div>
+
+  <div *ngIf="!loading && summary" class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+    <div class="table-container p-4">
+      <div class="text-sm text-neutral">Paid</div>
+      <div class="text-2xl font-semibold text-green-600">{{ summary.paidCount }}</div>
+      <div class="text-sm text-neutral">{{ summary.paidAmount | number: '1.2-2' }}</div>
+    </div>
+    <div class="table-container p-4">
+      <div class="text-sm text-neutral">Failed</div>
+      <div class="text-2xl font-semibold text-red-500">{{ summary.failedCount }}</div>
+    </div>
+    <div class="table-container p-4">
+      <div class="text-sm text-neutral">Waived</div>
+      <div class="text-2xl font-semibold text-amber-600">{{ summary.waivedCount }}</div>
+    </div>
+    <div class="table-container p-4">
+      <div class="text-sm text-neutral">Net</div>
+      <div class="text-2xl font-semibold">{{ summary.netAmount | number: '1.2-2' }}</div>
+    </div>
+  </div>
+
+  <div *ngIf="summary" class="mt-4 flex gap-2">
+    <button pButton severity="secondary" [disabled]="exporting" (click)="export('xlsx')">
+      <i class="fa fa-file-excel"></i>
+      <span>Export Excel</span>
+    </button>
+    <button pButton severity="secondary" [disabled]="exporting" (click)="export('pdf')">
+      <i class="fa fa-file-pdf"></i>
+      <span>Export PDF</span>
+    </button>
+  </div>
+</section>

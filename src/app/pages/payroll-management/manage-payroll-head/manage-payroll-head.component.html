@@ -19,6 +19,7 @@
         <label for="headCode">Head Code *</label>
       </p-floatlabel>
       <div *ngIf="hasError('headCode')" class="invalid">{{ getErrorMessage('headCode') }}</div>
+      <small class="text-neutral" *ngIf="!hasError('headCode')">e.g. BASIC, HRA, PF</small>
     </div>
 
     <!-- Head Name -->

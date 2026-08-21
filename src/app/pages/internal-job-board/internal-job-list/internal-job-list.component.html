@@ -1,5 +1,6 @@
 <section class="page-container">
-  <div class="grid grid-cols-1 gap-3 mb-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+  <app-filter-panel [(collapsed)]="filtersCollapsed">
+  <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
     <p-floatlabel variant="in">
       <input type="text" pInputText id="searchInput" class="w-full" [(ngModel)]="searchTerm" name="searchInput" (keyup.enter)="applyFilters()" />
       <label for="searchInput" class="whitespace-nowrap">Search job postings</label>
@@ -10,10 +11,13 @@
       <label for="locationInput" class="whitespace-nowrap">Location</label>
     </p-floatlabel>
 
-    <p-floatlabel variant="in">
-      <p-inputnumber inputId="departmentIdInput" class="w-full" [(ngModel)]="departmentId" name="departmentIdInput" [useGrouping]="false"></p-inputnumber>
-      <label for="departmentIdInput" class="whitespace-nowrap">Department ID</label>
-    </p-floatlabel>
+    <div class="flex flex-col gap-1">
+      <p-floatlabel variant="in">
+        <p-inputnumber inputId="departmentIdInput" class="w-full" [(ngModel)]="departmentId" name="departmentIdInput" [useGrouping]="false"></p-inputnumber>
+        <label for="departmentIdInput" class="whitespace-nowrap">Department ID</label>
+      </p-floatlabel>
+      <small class="text-neutral">Numeric department ID, e.g. 3</small>
+    </div>
 
     <p-floatlabel variant="in">
       <p-select
@@ -53,12 +57,13 @@
         <span>Search</span>
       </button>
 
-      <button pButton severity="secondary" (click)="resetFilters()">
+      <button *ngIf="searchTerm || location || departmentId || employmentType || maxExperienceYears" pButton severity="secondary" (click)="resetFilters()">
         <i class="fa fa-times"></i>
         <span>Reset</span>
       </button>
     </div>
   </div>
+  </app-filter-panel>
 
   <!-- Internal Job Postings Table -->
   <div class="table-container">

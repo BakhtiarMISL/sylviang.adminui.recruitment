@@ -1,0 +1,103 @@
+<section class="page-container" *ngIf="form">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="table-container mb-4 p-4">
+      <h3 class="table-title mb-3">{{ isEditMode ? 'Edit' : 'Add' }} Document Template</h3>
+
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div>
+          <p-floatlabel variant="in">
+            <p-select
+              inputId="documentType"
+              class="w-full"
+              [options]="documentTypeOptions"
+              formControlName="documentType"
+              optionLabel="label"
+              optionValue="value"
+              [appendTo]="'body'"
+            ></p-select>
+            <label for="documentType">Document Type</label>
+          </p-floatlabel>
+          <small class="text-neutral" *ngIf="isEditMode">Document type cannot be changed after creation.</small>
+        </div>
+
+        <div>
+          <p-floatlabel variant="in">
+            <input pInputText id="code" class="w-full" formControlName="code" />
+            <label for="code">Code</label>
+          </p-floatlabel>
+          <small class="text-red-500" *ngIf="hasError('code')">Code is required.</small>
+          <small class="text-neutral" *ngIf="!hasError('code')">e.g. OFFER_LETTER_STANDARD</small>
+        </div>
+
+        <div class="sm:col-span-2">
+          <p-floatlabel variant="in">
+            <input pInputText id="name" class="w-full" formControlName="name" />
+            <label for="name">Name</label>
+          </p-floatlabel>
+          <small class="text-red-500" *ngIf="hasError('name')">Name is required.</small>
+        </div>
+
+        <div class="sm:col-span-2">
+          <label for="body" class="text-sm font-medium block mb-1">Body — use {{ '{{PlaceholderName}}' }} for dynamic values</label>
+          <textarea pTextarea id="body" class="w-full" formControlName="body" rows="10"></textarea>
+          <small class="text-red-500" *ngIf="hasError('body')">Body is required.</small>
+        </div>
+      </div>
+
+      <small class="mt-3 block text-red-500" *ngIf="errorMessage">{{ errorMessage }}</small>
+
+      <div class="mt-4 flex gap-2">
+        <button pButton type="submit">
+          <i class="fa fa-save"></i>
+          <span>{{ isEditMode ? 'Save Changes' : 'Create Template' }}</span>
+        </button>
+        <button pButton type="button" severity="secondary" (click)="runPreview()" [disabled]="previewing">
+          <i class="fa fa-eye"></i>
+          <span>Preview</span>
+        </button>
+        <button pButton type="button" severity="secondary" *ngIf="isEditMode" (click)="toggleVersions()">
+          <i class="fa fa-clock-rotate-left"></i>
+          <span>{{ showVersions ? 'Hide' : 'Show' }} Version History</span>
+        </button>
+        <button pButton type="button" severity="secondary" [routerLink]="['/document-management/document-template-list']">
+          <span>Cancel</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="table-container mb-4 p-4" *ngIf="detectedPlaceholders.length > 0 || previewBody">
+      <h3 class="table-title mb-3">Preview</h3>
+
+      <div class="mb-3" *ngIf="detectedPlaceholders.length > 0">
+        <label class="text-sm font-medium">Sample values for detected placeholders</label>
+        <div class="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <div *ngFor="let token of detectedPlaceholders">
+            <p-floatlabel variant="in">
+              <input pInputText [id]="'preview-' + token" class="w-full" [(ngModel)]="previewValues[token]" [ngModelOptions]="{ standalone: true }" />
+              <label [for]="'preview-' + token">{{ token }}</label>
+            </p-floatlabel>
+          </div>
+        </div>
+        <button pButton type="button" size="small" severity="secondary" class="mt-2" (click)="runPreview()" [disabled]="previewing">
+          <span>Re-render</span>
+        </button>
+      </div>
+
+      <div *ngIf="previewBody">
+        <div class="rounded-lg border border-gray-200 bg-white p-3 dark:border-neutral dark:bg-dark" style="white-space: pre-wrap">{{ previewBody }}</div>
+      </div>
+    </div>
+
+    <div class="table-container p-4" *ngIf="showVersions">
+      <h3 class="table-title mb-3">Version History</h3>
+      <div class="text-sm text-neutral" *ngIf="versions.length === 0">No versions recorded yet.</div>
+      <div class="history-entry" *ngFor="let version of versions">
+        <div>
+          <strong>v{{ version.versionNumber }}</strong>
+          <span class="text-sm text-neutral ml-2" *ngIf="version.createdAt">{{ version.createdAt | date: 'dd-MMM-yyyy h:mm a' }}</span>
+        </div>
+        <div class="text-sm text-neutral" style="white-space: pre-wrap">{{ version.body }}</div>
+      </div>
+    </div>
+  </form>
+</section>

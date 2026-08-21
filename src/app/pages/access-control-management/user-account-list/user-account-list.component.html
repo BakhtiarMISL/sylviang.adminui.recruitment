@@ -1,0 +1,117 @@
+<section class="page-container">
+  <div class="flex justify-between items-center gap-3 mb-4">
+    <h3 class="table-title">User Accounts</h3>
+    <button pButton [routerLink]="['/access-control', 'manage-user-account']">
+      <i class="fa fa-plus"></i>
+      <span>Invite User</span>
+    </button>
+  </div>
+
+  <app-filter-panel *ngIf="isSuperAdmin" [(collapsed)]="filtersCollapsed">
+    <div class="filter-bar">
+      <p-floatlabel variant="in">
+        <p-select
+          inputId="companyFilter"
+          [options]="companyOptions"
+          [(ngModel)]="selectedCompanyId"
+          (onChange)="applyFilters()"
+          optionLabel="name"
+          optionValue="companyId"
+          [showClear]="true"
+          class="w-full"
+        ></p-select>
+        <label for="companyFilter">Company</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="in">
+        <p-select
+          inputId="roleFilter"
+          [options]="roleFilterOptions"
+          [(ngModel)]="selectedRole"
+          (onChange)="applyFilters()"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+          class="w-full"
+        ></p-select>
+        <label for="roleFilter">Role</label>
+      </p-floatlabel>
+
+      <button *ngIf="selectedCompanyId || selectedRole" severity="secondary" pButton (click)="resetFilters()">
+        <i class="fa fa-times"></i>
+        <span>Reset</span>
+      </button>
+    </div>
+  </app-filter-panel>
+
+  <div *ngIf="loading" class="space-y-3">
+    <p-skeleton height="3rem" *ngFor="let i of skeletonItems"></p-skeleton>
+  </div>
+
+  <div *ngIf="!loading && accounts.length === 0" class="table-container">
+    <div class="not-found">
+      <i class="fa fa-magnifying-glass-minus"></i>
+      <p>No user accounts yet.</p>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && accounts.length > 0 && filteredAccounts.length === 0" class="table-container">
+    <div class="not-found">
+      <i class="fa fa-magnifying-glass-minus"></i>
+      <p>No user accounts match the selected filters.</p>
+    </div>
+  </div>
+
+  <p-table *ngIf="!loading && filteredAccounts.length > 0" [value]="filteredAccounts" styleClass="p-datatable-sm">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th *ngIf="isSuperAdmin">Company</th>
+        <th>Roles</th>
+        <th>Status</th>
+        <th style="width: 14rem">Actions</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-account>
+      <tr>
+        <td>{{ account.fullName }}</td>
+        <td>{{ account.email }}</td>
+        <td *ngIf="isSuperAdmin">{{ account.roleNames.includes('SuperAdmin') ? '-' : (account.companyName || '-') }}</td>
+        <td>
+          <span *ngFor="let name of account.roleNames" class="mr-1 rounded-md bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-200">{{ name }}</span>
+        </td>
+        <td>
+          <span class="rounded-full px-2 py-0.5 text-xs font-medium" [ngClass]="account.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'">
+            {{ account.isActive ? 'Active' : 'Inactive' }}
+          </span>
+        </td>
+        <td>
+          <div class="flex gap-2">
+            <button pButton size="small" severity="secondary" *ngIf="canManage(account)" [routerLink]="['/access-control', 'manage-user-account', account.userAccountId]">
+              <i class="fa fa-edit"></i>
+              <span>Edit</span>
+            </button>
+            <button pButton size="small" *ngIf="canChangeActiveState(account)" [severity]="account.isActive ? 'danger' : 'success'" (click)="toggleActive(account, $event)">
+              <i class="fa" [ngClass]="account.isActive ? 'fa-ban' : 'fa-check'"></i>
+              <span>{{ account.isActive ? 'Deactivate' : 'Activate' }}</span>
+            </button>
+            <button
+              pButton
+              size="small"
+              severity="warn"
+              *ngIf="isSuperAdmin && (account.roleNames.includes('Admin') || account.roleNames.includes('HR'))"
+              [disabled]="impersonatingId === account.userAccountId"
+              (click)="impersonate(account)"
+            >
+              <i class="fa fa-user-secret"></i>
+              <span>Impersonate</span>
+            </button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+
+  <p-confirmDialog></p-confirmDialog>
+</section>
