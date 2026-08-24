@@ -20,7 +20,7 @@
           (onBlur)="f['hiringPipelineId'].markAsTouched()"
           (onChange)="f['hiringPipelineId'].markAsTouched()"
         ></p-select>
-        <label for="hiringPipelineId">Hiring Pipeline *</label>
+        <label for="hiringPipelineId" class="required-label">Hiring Pipeline</label>
       </p-floatlabel>
       <div *ngIf="hasError('hiringPipelineId')" class="invalid">{{ getErrorMessage('hiringPipelineId') }}</div>
     </div>
@@ -39,7 +39,7 @@
           [class.ng-dirty]="hasError('title')"
           (blur)="f['title'].markAsTouched()"
         />
-        <label for="title">Title *</label>
+        <label for="title" class="required-label">Title</label>
       </p-floatlabel>
       <div *ngIf="hasError('title')" class="invalid">{{ getErrorMessage('title') }}</div>
     </div>
@@ -57,7 +57,7 @@
           [class.ng-dirty]="hasError('numberOfPositions')"
           (onBlur)="f['numberOfPositions'].markAsTouched()"
         ></p-inputnumber>
-        <label for="numberOfPositions">Number of Positions *</label>
+        <label for="numberOfPositions" class="required-label">Number of Positions</label>
       </p-floatlabel>
       <div *ngIf="hasError('numberOfPositions')" class="invalid">{{ getErrorMessage('numberOfPositions') }}</div>
     </div>
@@ -79,7 +79,7 @@
           (onBlur)="f['employmentType'].markAsTouched()"
           (onChange)="f['employmentType'].markAsTouched()"
         ></p-select>
-        <label for="employmentType">Employment Type *</label>
+        <label for="employmentType" class="required-label">Employment Type</label>
       </p-floatlabel>
       <div *ngIf="hasError('employmentType')" class="invalid">{{ getErrorMessage('employmentType') }}</div>
     </div>
@@ -123,7 +123,7 @@
           (onBlur)="f['circularType'].markAsTouched()"
           (onChange)="f['circularType'].markAsTouched()"
         ></p-select>
-        <label for="circularType">Circular Type *</label>
+        <label for="circularType" class="required-label">Circular Type</label>
       </p-floatlabel>
       <div *ngIf="hasError('circularType')" class="invalid">{{ getErrorMessage('circularType') }}</div>
     </div>

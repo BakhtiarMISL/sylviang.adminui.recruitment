@@ -6,7 +6,7 @@
       <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <p-floatlabel variant="in">
           <input pInputText id="name" class="w-full" formControlName="name" />
-          <label for="name">Scorecard Name</label>
+          <label for="name" class="required-label">Scorecard Name</label>
         </p-floatlabel>
         <small class="text-red-500" *ngIf="hasError('name')">Scorecard name is required.</small>
 

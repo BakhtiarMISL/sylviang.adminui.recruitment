@@ -44,7 +44,7 @@
         [class.ng-dirty]="hasError('certificationName')"
         (blur)="f['certificationName'].markAsTouched()"
       />
-      <label for="certificationName">Certification Name *</label>
+      <label for="certificationName" class="required-label">Certification Name</label>
     </p-floatlabel>
     <div *ngIf="hasError('certificationName')" class="invalid">{{ getErrorMessage('certificationName') }}</div>
   </div>

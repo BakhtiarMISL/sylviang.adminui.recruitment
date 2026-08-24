@@ -2,7 +2,7 @@
   <div>
     <p-floatlabel variant="in">
       <input pInputText inputId="fullName" formControlName="fullName" maxlength="200" class="w-full" [class.ng-invalid]="hasError('fullName')" [class.ng-dirty]="hasError('fullName')" (blur)="f['fullName'].markAsTouched()" />
-      <label for="fullName">Full Name *</label>
+      <label for="fullName" class="required-label">Full Name</label>
     </p-floatlabel>
     <div *ngIf="hasError('fullName')" class="invalid">{{ getErrorMessage('fullName') }}</div>
   </div>

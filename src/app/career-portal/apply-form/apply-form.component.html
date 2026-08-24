@@ -18,7 +18,7 @@
   <div>
     <p-floatlabel variant="in">
       <input pInputText inputId="candidateName" formControlName="candidateName" class="w-full" [class.ng-invalid]="hasError('candidateName')" [class.ng-dirty]="hasError('candidateName')" (blur)="f['candidateName'].markAsTouched()" />
-      <label for="candidateName">Full Name *</label>
+      <label for="candidateName" class="required-label">Full Name</label>
     </p-floatlabel>
     <div *ngIf="hasError('candidateName')" class="invalid">{{ getErrorMessage('candidateName') }}</div>
   </div>
@@ -26,7 +26,7 @@
   <div>
     <p-floatlabel variant="in">
       <input pInputText inputId="candidateEmail" formControlName="candidateEmail" class="w-full" [class.ng-invalid]="hasError('candidateEmail')" [class.ng-dirty]="hasError('candidateEmail')" (blur)="f['candidateEmail'].markAsTouched()" />
-      <label for="candidateEmail">Email *</label>
+      <label for="candidateEmail" class="required-label">Email</label>
     </p-floatlabel>
     <div *ngIf="hasError('candidateEmail')" class="invalid">{{ getErrorMessage('candidateEmail') }}</div>
   </div>

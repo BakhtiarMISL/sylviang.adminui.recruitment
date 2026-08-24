@@ -13,7 +13,7 @@
       <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <p-floatlabel variant="in">
           <p-inputnumber inputId="minimumProfileCompletenessPercentage" class="w-full" formControlName="minimumProfileCompletenessPercentage" [min]="0" [max]="100" suffix="%" [useGrouping]="false"></p-inputnumber>
-          <label for="minimumProfileCompletenessPercentage">Minimum Profile Completeness</label>
+          <label for="minimumProfileCompletenessPercentage" class="required-label">Minimum Profile Completeness</label>
         </p-floatlabel>
         <small class="text-red-500" *ngIf="hasError('minimumProfileCompletenessPercentage')">Must be a number between 0 and 100.</small>
 

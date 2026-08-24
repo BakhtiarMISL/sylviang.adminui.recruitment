@@ -19,7 +19,7 @@
               [disabled]="jobApplicationIdLocked"
               (onChange)="onJobPostingChange()"
             ></p-select>
-            <label for="jobPostingId">Job Posting</label>
+            <label for="jobPostingId" class="required-label">Job Posting</label>
           </p-floatlabel>
           <small class="text-red-500" *ngIf="hasError('jobPostingId')">Job posting is required.</small>
         </div>
@@ -37,7 +37,7 @@
               [autoDisplayFirst]="false"
               (onChange)="onInterviewTypeChange()"
             ></p-select>
-            <label for="interviewType">Interview Type</label>
+            <label for="interviewType" class="required-label">Interview Type</label>
           </p-floatlabel>
         </div>
 
@@ -95,7 +95,7 @@
               [showIcon]="true"
               dateFormat="dd-M-yy"
             ></p-datepicker>
-            <label for="scheduledStartAt">{{ isBulk ? 'First Candidate Start Time' : 'Scheduled Date &amp; Time' }}</label>
+            <label for="scheduledStartAt" class="required-label">{{ isBulk ? 'First Candidate Start Time' : 'Scheduled Date &amp; Time' }}</label>
           </p-floatlabel>
           <small class="text-red-500" *ngIf="hasError('scheduledStartAt')">Scheduled date/time is required.</small>
         </div>
@@ -103,7 +103,7 @@
         <div>
           <p-floatlabel variant="in">
             <p-inputnumber inputId="durationMinutes" class="w-full" formControlName="durationMinutes" [min]="1"></p-inputnumber>
-            <label for="durationMinutes">Duration (minutes)</label>
+            <label for="durationMinutes" class="required-label">Duration (minutes)</label>
           </p-floatlabel>
           <small class="text-red-500" *ngIf="hasError('durationMinutes')">Duration is required.</small>
         </div>
@@ -111,7 +111,7 @@
         <div *ngIf="isBulk">
           <p-floatlabel variant="in">
             <p-inputnumber inputId="gapMinutes" class="w-full" formControlName="gapMinutes" [min]="0"></p-inputnumber>
-            <label for="gapMinutes">Gap Between Candidates (minutes)</label>
+            <label for="gapMinutes" class="required-label">Gap Between Candidates (minutes)</label>
           </p-floatlabel>
           <small class="text-red-500" *ngIf="hasError('gapMinutes')">Gap cannot be negative.</small>
         </div>
@@ -138,7 +138,7 @@
         <div>
           <p-floatlabel variant="in">
             <p-inputnumber inputId="round" class="w-full" formControlName="round" [min]="1"></p-inputnumber>
-            <label for="round">Round</label>
+            <label for="round" class="required-label">Round</label>
           </p-floatlabel>
         </div>
 

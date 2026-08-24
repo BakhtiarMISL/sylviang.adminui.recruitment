@@ -6,13 +6,13 @@
       <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <p-floatlabel variant="in">
           <input pInputText id="venueName" class="w-full" formControlName="venueName" />
-          <label for="venueName">Venue Name</label>
+          <label for="venueName" class="required-label">Venue Name</label>
         </p-floatlabel>
         <small class="text-red-500" *ngIf="hasError('venueName')">Venue name is required.</small>
 
         <p-floatlabel variant="in">
           <input pInputText id="location" class="w-full" formControlName="location" />
-          <label for="location">Location / Address</label>
+          <label for="location" class="required-label">Location / Address</label>
         </p-floatlabel>
         <small class="text-red-500" *ngIf="hasError('location')">Location is required.</small>
       </div>

@@ -6,13 +6,13 @@
     <p class="login-subtitle">Sign in to continue</p>
 
     <div class="login-field">
-      <label for="username">Username or Email</label>
+      <label for="username" class="required-label">Username or Email</label>
       <input id="username" type="text" pInputText formControlName="username" autocomplete="username" placeholder="Your email or username" />
       <small class="login-error" *ngIf="username?.invalid && username?.touched">Username or email is required.</small>
     </div>
 
     <div class="login-field">
-      <label for="password">Password</label>
+      <label for="password" class="required-label">Password</label>
       <input id="password" type="password" pInputText formControlName="password" autocomplete="current-password" />
       <small class="login-error" *ngIf="password?.invalid && password?.touched">Password is required.</small>
       <a routerLink="/login/forgot-password" class="text-primary font-medium hover:underline forgot-password-link">Forgot password?</a>

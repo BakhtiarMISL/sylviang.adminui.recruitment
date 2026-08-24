@@ -15,7 +15,7 @@
               optionValue="value"
               [appendTo]="'body'"
             ></p-select>
-            <label for="recruitmentEvent">Recruitment Event</label>
+            <label for="recruitmentEvent" class="required-label">Recruitment Event</label>
           </p-floatlabel>
           <small class="text-red-500" *ngIf="hasError('recruitmentEvent')">Event is required.</small>
         </div>
@@ -32,7 +32,7 @@
               optionDisabled="disabled"
               [appendTo]="'body'"
             ></p-select>
-            <label for="channel">Channel</label>
+            <label for="channel" class="required-label">Channel</label>
           </p-floatlabel>
           <small class="text-red-500" *ngIf="hasError('channel')">Channel is required.</small>
         </div>
@@ -48,7 +48,7 @@
               optionValue="value"
               [appendTo]="'body'"
             ></p-select>
-            <label for="recipientType">Recipient</label>
+            <label for="recipientType" class="required-label">Recipient</label>
           </p-floatlabel>
           <small class="text-red-500" *ngIf="hasError('recipientType')">Recipient is required.</small>
           <small class="text-neutral" *ngIf="isEditMode">Event, Channel and Recipient cannot be changed after creation.</small>
@@ -65,7 +65,7 @@
               optionValue="value"
               [appendTo]="'body'"
             ></p-select>
-            <label for="notificationTemplateId">Template</label>
+            <label for="notificationTemplateId" class="required-label">Template</label>
           </p-floatlabel>
           <small class="text-red-500" *ngIf="hasError('notificationTemplateId')">Template is required.</small>
         </div>

@@ -19,7 +19,7 @@
               [disabled]="jobApplicationIdLocked"
               (onChange)="onJobPostingChange()"
             ></p-select>
-            <label for="jobPostingId">Job Posting</label>
+            <label for="jobPostingId" class="required-label">Job Posting</label>
           </p-floatlabel>
           <small class="text-red-500" *ngIf="hasError('jobPostingId')">Job posting is required.</small>
         </div>
@@ -27,7 +27,7 @@
         <div>
           <p-floatlabel variant="in">
             <input pInputText id="title" class="w-full" formControlName="title" />
-            <label for="title">Exam Title</label>
+            <label for="title" class="required-label">Exam Title</label>
           </p-floatlabel>
           <small class="text-red-500" *ngIf="hasError('title')">Title is required.</small>
         </div>
@@ -45,7 +45,7 @@
               [class.ng-invalid]="hasError('scheduledStartAt')"
               [class.ng-dirty]="hasError('scheduledStartAt')"
             ></p-datepicker>
-            <label for="scheduledStartAt">Scheduled Date &amp; Time</label>
+            <label for="scheduledStartAt" class="required-label">Scheduled Date &amp; Time</label>
           </p-floatlabel>
           <small class="text-red-500" *ngIf="hasError('scheduledStartAt')">Scheduled date/time is required.</small>
         </div>
@@ -53,7 +53,7 @@
         <div>
           <p-floatlabel variant="in">
             <p-inputnumber inputId="durationMinutes" class="w-full" formControlName="durationMinutes" [min]="1"></p-inputnumber>
-            <label for="durationMinutes">Duration (minutes)</label>
+            <label for="durationMinutes" class="required-label">Duration (minutes)</label>
           </p-floatlabel>
           <small class="text-red-500" *ngIf="hasError('durationMinutes')">Duration is required.</small>
         </div>
@@ -61,7 +61,7 @@
         <div>
           <p-floatlabel variant="in">
             <p-inputnumber inputId="totalMarks" class="w-full" formControlName="totalMarks" [min]="1"></p-inputnumber>
-            <label for="totalMarks">Total Marks</label>
+            <label for="totalMarks" class="required-label">Total Marks</label>
           </p-floatlabel>
           <small class="text-red-500" *ngIf="hasError('totalMarks')">Total marks is required.</small>
         </div>
@@ -69,7 +69,7 @@
         <div>
           <p-floatlabel variant="in">
             <p-inputnumber inputId="passMarks" class="w-full" formControlName="passMarks" [min]="0"></p-inputnumber>
-            <label for="passMarks">Pass Marks</label>
+            <label for="passMarks" class="required-label">Pass Marks</label>
           </p-floatlabel>
           <small class="text-red-500" *ngIf="hasError('passMarks') && passMarksExceedsTotal">Pass marks cannot exceed total marks.</small>
           <small class="text-red-500" *ngIf="hasError('passMarks') && !passMarksExceedsTotal">Pass marks is required.</small>
@@ -88,7 +88,7 @@
               [autoDisplayFirst]="false"
               (onChange)="onExamTypeChange()"
             ></p-select>
-            <label for="examType">Exam Type</label>
+            <label for="examType" class="required-label">Exam Type</label>
           </p-floatlabel>
         </div>
 

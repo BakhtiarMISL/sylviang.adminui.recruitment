@@ -12,7 +12,7 @@
         <div>
           <p-floatlabel variant="in">
             <input pInputText id="medicalTestCenter" class="w-full" formControlName="medicalTestCenter" (blur)="onFieldChange()" />
-            <label for="medicalTestCenter">Medical Test Center</label>
+            <label for="medicalTestCenter" class="required-label">Medical Test Center</label>
           </p-floatlabel>
           <small class="text-red-500" *ngIf="hasError('medicalTestCenter')">Medical test center is required.</small>
           <small class="text-neutral" *ngIf="!hasError('medicalTestCenter')">e.g. Square Hospital, Dhaka</small>
@@ -21,7 +21,7 @@
         <div>
           <p-floatlabel variant="in">
             <input pInputText id="requiredTests" class="w-full" formControlName="requiredTests" (blur)="onFieldChange()" />
-            <label for="requiredTests">Required Tests</label>
+            <label for="requiredTests" class="required-label">Required Tests</label>
           </p-floatlabel>
           <small class="text-red-500" *ngIf="hasError('requiredTests')">Required tests are required.</small>
           <small class="text-neutral" *ngIf="!hasError('requiredTests')">e.g. Blood test, Chest X-ray, Urine analysis</small>
@@ -40,7 +40,7 @@
               placeholder="Select a Medical Letter template"
               (onChange)="onTemplateChange()"
             ></p-select>
-            <label for="documentTemplateId">Medical Letter Template</label>
+            <label for="documentTemplateId" class="required-label">Medical Letter Template</label>
           </p-floatlabel>
           <small class="text-red-500" *ngIf="hasError('documentTemplateId')">Template is required.</small>
           <small class="text-neutral" *ngIf="templateOptions.length === 0">
@@ -49,7 +49,7 @@
         </div>
 
         <div class="sm:col-span-2">
-          <label for="finalBody" class="text-sm font-medium block mb-1">Letter Content (review and adjust before finalizing)</label>
+          <label for="finalBody" class="text-sm font-medium block mb-1 required-label">Letter Content (review and adjust before finalizing)</label>
           <textarea pTextarea id="finalBody" class="w-full" rows="8" formControlName="finalBody"></textarea>
           <small class="text-red-500" *ngIf="hasError('finalBody')">Letter content is required.</small>
         </div>

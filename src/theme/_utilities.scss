@@ -18,6 +18,14 @@
   @apply text-danger text-sm;
 }
 
+// Marks a field label as required with a trailing red asterisk.
+.required-label {
+  &::after {
+    content: " *";
+    @apply text-danger;
+  }
+}
+
 .not-found {
   @apply text-center text-black dark:text-white;
   div {

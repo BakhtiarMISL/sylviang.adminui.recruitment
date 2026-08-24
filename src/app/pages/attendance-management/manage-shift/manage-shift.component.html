@@ -17,7 +17,7 @@
           [class.ng-dirty]="hasError('shiftCode')"
           (blur)="f['shiftCode'].markAsTouched()"
         />
-        <label for="shiftCode">Shift Code *</label>
+        <label for="shiftCode" class="required-label">Shift Code</label>
       </p-floatlabel>
       <div *ngIf="hasError('shiftCode')" class="invalid">
         {{ getErrorMessage('shiftCode') }}
@@ -38,7 +38,7 @@
           [class.ng-dirty]="hasError('shiftName')"
           (blur)="f['shiftName'].markAsTouched()"
         />
-        <label for="shiftName">Shift Name *</label>
+        <label for="shiftName" class="required-label">Shift Name</label>
       </p-floatlabel>
       <div *ngIf="hasError('shiftName')" class="invalid">
         {{ getErrorMessage('shiftName') }}
@@ -84,7 +84,7 @@
           (keydown)="onTimeFieldKeydown($event, 'loginTime')"
           (wheel)="onTimeFieldWheel($event, 'loginTime')"
         />
-        <label for="loginTime">Login Time *</label>
+        <label for="loginTime" class="required-label">Login Time</label>
       </p-floatlabel>
       <div *ngIf="hasError('loginTime')" class="invalid">
         {{ getErrorMessage('loginTime') }}
@@ -110,7 +110,7 @@
           (keydown)="onTimeFieldKeydown($event, 'logoutTime')"
           (wheel)="onTimeFieldWheel($event, 'logoutTime')"
         />
-        <label for="logoutTime">Logout Time *</label>
+        <label for="logoutTime" class="required-label">Logout Time</label>
       </p-floatlabel>
       <div *ngIf="hasError('logoutTime')" class="invalid">
         {{ getErrorMessage('logoutTime') }}
@@ -144,7 +144,7 @@
           (keydown)="onTimeFieldKeydown($event, 'loginLimitTime')"
           (wheel)="onTimeFieldWheel($event, 'loginLimitTime')"
         />
-        <label for="loginLimitTime">Login Limit Time *</label>
+        <label for="loginLimitTime" class="required-label">Login Limit Time</label>
       </p-floatlabel>
       <div *ngIf="hasError('loginLimitTime')" class="invalid">
         {{ getErrorMessage('loginLimitTime') }}
@@ -170,7 +170,7 @@
           (keydown)="onTimeFieldKeydown($event, 'logoutLimitTime')"
           (wheel)="onTimeFieldWheel($event, 'logoutLimitTime')"
         />
-        <label for="logoutLimitTime">Logout Limit Time *</label>
+        <label for="logoutLimitTime" class="required-label">Logout Limit Time</label>
       </p-floatlabel>
       <div *ngIf="hasError('logoutLimitTime')" class="invalid">
         {{ getErrorMessage('logoutLimitTime') }}
@@ -193,7 +193,7 @@
           [class.ng-dirty]="hasError('graceInMinutes')"
           (onBlur)="f['graceInMinutes'].markAsTouched()"
         ></p-inputnumber>
-        <label for="graceInMinutes">Grace Period *</label>
+        <label for="graceInMinutes" class="required-label">Grace Period</label>
         <div class="field-info" *ngIf="!hasError('graceInMinutes')">
           <i class="fas fa-info-circle" pTooltip="Type -1 to assign unlimited grace time" tooltipPosition="left" appendTo="body"></i>
         </div>
@@ -216,7 +216,7 @@
           [class.ng-dirty]="hasError('breakInMinutes')"
           (onBlur)="f['breakInMinutes'].markAsTouched()"
         ></p-inputnumber>
-        <label for="breakInMinutes">Break Time *</label>
+        <label for="breakInMinutes" class="required-label">Break Time</label>
       </p-floatlabel>
       <div *ngIf="hasError('breakInMinutes')" class="invalid">
         {{ getErrorMessage('breakInMinutes') }}
@@ -236,7 +236,7 @@
           [class.ng-dirty]="hasError('considerableInMinutes')"
           (onBlur)="f['considerableInMinutes'].markAsTouched()"
         ></p-inputnumber>
-        <label for="considerableInMinutes">Considerable Minutes *</label>
+        <label for="considerableInMinutes" class="required-label">Considerable Minutes</label>
         <div class="field-info" *ngIf="!hasError('considerableInMinutes')">
           <i class="fas fa-info-circle" pTooltip="Type -1 to assign unlimited considerable time"></i>
         </div>
@@ -282,7 +282,7 @@
           [class.ng-dirty]="hasError('minimumWorkingTimeInMinutes')"
           (onBlur)="f['minimumWorkingTimeInMinutes'].markAsTouched()"
         ></p-inputnumber>
-        <label for="minimumWorkingTimeInMinutes">Minimum Working Time *</label>
+        <label for="minimumWorkingTimeInMinutes" class="required-label">Minimum Working Time</label>
         <div class="field-info" *ngIf="!hasError('minimumWorkingTimeInMinutes')">
           <i class="fas fa-info-circle" pTooltip="Type -1 to assign unlimited minimum working time" tooltipPosition="left" appendTo="body"></i>
         </div>
@@ -324,7 +324,7 @@
           [class.ng-dirty]="hasError('maximumOvertimeMinutes')"
           (onBlur)="f['maximumOvertimeMinutes'].markAsTouched()"
         ></p-inputnumber>
-        <label for="maximumOvertimeMinutes">Maximum Overtime *</label>
+        <label for="maximumOvertimeMinutes" class="required-label">Maximum Overtime</label>
         <div class="field-info" *ngIf="!hasError('maximumOvertimeMinutes')">
           <i class="fas fa-info-circle" pTooltip="Type -1 to assign unlimited maximum overtime" tooltipPosition="left" appendTo="body"></i>
         </div>
