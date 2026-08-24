@@ -57,7 +57,7 @@
           <span>{{ skill.name }}</span>
         </ng-template>
       </p-autocomplete>
-      <label for="skillName">Skill *</label>
+      <label for="skillName" class="required-label">Skill</label>
     </p-floatlabel>
     <div *ngIf="hasError('skillName')" class="invalid">{{ getErrorMessage('skillName') }}</div>
   </div>

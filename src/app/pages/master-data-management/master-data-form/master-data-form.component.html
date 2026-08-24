@@ -16,7 +16,7 @@
               />
               <p-inputnumber *ngIf="field.type === 'number'" [inputId]="field.key" class="w-full" [formControlName]="field.key" [useGrouping]="false">
               </p-inputnumber>
-              <label [for]="field.key">{{ field.label }}</label>
+              <label [for]="field.key" [class.required-label]="field.required">{{ field.label }}</label>
             </p-floatlabel>
             <small class="text-red-500" *ngIf="hasError(field.key) && form.get(field.key)?.errors?.['required']">{{ field.label }} is required.</small>
             <small class="text-red-500" *ngIf="hasError(field.key) && form.get(field.key)?.errors?.['maxlength']">

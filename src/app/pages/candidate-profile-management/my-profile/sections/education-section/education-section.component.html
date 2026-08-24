@@ -87,7 +87,7 @@
       >
         <ng-template let-degree pTemplate="item">{{ degree.name }} - {{ degree.fullName }}</ng-template>
       </p-select>
-      <label for="degreeId">Degree *</label>
+      <label for="degreeId" class="required-label">Degree</label>
     </p-floatlabel>
     <div *ngIf="hasError('degreeId')" class="invalid">{{ getErrorMessage('degreeId') }}</div>
   </div>
@@ -123,7 +123,7 @@
           <span>{{ university.name }} ({{ university.code }})</span>
         </ng-template>
       </p-autocomplete>
-      <label for="institution">Institution *</label>
+      <label for="institution" class="required-label">Institution</label>
     </p-floatlabel>
     <small class="text-sm text-neutral">Type 3+ characters for university suggestions</small>
     <div *ngIf="hasError('institution')" class="invalid">{{ getErrorMessage('institution') }}</div>
@@ -139,7 +139,7 @@
   <div>
     <p-floatlabel variant="in">
       <p-inputnumber inputId="passingYear" formControlName="passingYear" class="w-full" [useGrouping]="false" [class.ng-invalid]="hasError('passingYear')" [class.ng-dirty]="hasError('passingYear')" (onBlur)="f['passingYear'].markAsTouched()"></p-inputnumber>
-      <label for="passingYear">Passing Year *</label>
+      <label for="passingYear" class="required-label">Passing Year</label>
     </p-floatlabel>
     <div *ngIf="hasError('passingYear')" class="invalid">{{ getErrorMessage('passingYear') }}</div>
   </div>
@@ -154,12 +154,12 @@
   <div>
     <p-floatlabel variant="in" *ngIf="f['gradingSystem'].value === 'Division'; else resultInput">
       <p-select inputId="result" [options]="divisionResultOptions" [appendTo]="'body'" [autoDisplayFirst]="false" optionLabel="label" optionValue="value" formControlName="result" class="w-full"></p-select>
-      <label for="result">Result *</label>
+      <label for="result" class="required-label">Result</label>
     </p-floatlabel>
     <ng-template #resultInput>
       <p-floatlabel variant="in">
         <input pInputText inputId="result" formControlName="result" maxlength="50" class="w-full" [class.ng-invalid]="hasError('result')" [class.ng-dirty]="hasError('result')" (blur)="f['result'].markAsTouched()" />
-        <label for="result">Result *{{ resultScale ? ' (out of ' + (resultScale | number: '1.2-2') + ')' : '' }}</label>
+        <label for="result" class="required-label">Result{{ resultScale ? ' (out of ' + (resultScale | number: '1.2-2') + ')' : '' }}</label>
       </p-floatlabel>
     </ng-template>
     <div *ngIf="hasError('result')" class="invalid">{{ getErrorMessage('result') }}</div>

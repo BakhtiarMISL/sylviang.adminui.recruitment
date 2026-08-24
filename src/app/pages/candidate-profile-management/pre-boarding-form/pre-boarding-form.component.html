@@ -25,19 +25,19 @@
       <div class="form-container">
         <p-floatlabel variant="in">
           <input type="text" pInputText formControlName="emergencyContactName" id="emergencyContactName" class="w-full" />
-          <label for="emergencyContactName">Full Name</label>
+          <label for="emergencyContactName" class="required-label">Full Name</label>
         </p-floatlabel>
         <small class="invalid" *ngIf="hasError('emergencyContactName')">Emergency contact name is required</small>
 
         <p-floatlabel variant="in">
           <input type="text" pInputText formControlName="emergencyContactRelationship" id="emergencyContactRelationship" class="w-full" />
-          <label for="emergencyContactRelationship">Relationship</label>
+          <label for="emergencyContactRelationship" class="required-label">Relationship</label>
         </p-floatlabel>
         <small class="invalid" *ngIf="hasError('emergencyContactRelationship')">Relationship is required</small>
 
         <p-floatlabel variant="in">
           <input type="text" pInputText formControlName="emergencyContactPhone" id="emergencyContactPhone" class="w-full" />
-          <label for="emergencyContactPhone">Phone</label>
+          <label for="emergencyContactPhone" class="required-label">Phone</label>
         </p-floatlabel>
         <small class="invalid" *ngIf="hasError('emergencyContactPhone')">Phone is required</small>
       </div>
@@ -68,7 +68,7 @@
       <div class="form-container">
         <p-floatlabel variant="in">
           <input type="text" pInputText formControlName="bankName" id="bankName" class="w-full" />
-          <label for="bankName">Bank Name</label>
+          <label for="bankName" class="required-label">Bank Name</label>
         </p-floatlabel>
         <small class="invalid" *ngIf="hasError('bankName')">Bank name is required</small>
 
@@ -79,13 +79,13 @@
 
         <p-floatlabel variant="in">
           <input type="text" pInputText formControlName="bankAccountName" id="bankAccountName" class="w-full" />
-          <label for="bankAccountName">Account Name</label>
+          <label for="bankAccountName" class="required-label">Account Name</label>
         </p-floatlabel>
         <small class="invalid" *ngIf="hasError('bankAccountName')">Account name is required</small>
 
         <p-floatlabel variant="in">
           <input type="text" pInputText formControlName="bankAccountNumber" id="bankAccountNumber" class="w-full" />
-          <label for="bankAccountNumber">Account Number</label>
+          <label for="bankAccountNumber" class="required-label">Account Number</label>
         </p-floatlabel>
         <small class="invalid" *ngIf="hasError('bankAccountNumber')">Account number is required</small>
 
@@ -123,19 +123,19 @@
           <div class="form-container">
             <p-floatlabel variant="in">
               <input type="text" pInputText formControlName="fullName" [id]="'nomineeFullName' + i" class="w-full" />
-              <label [for]="'nomineeFullName' + i">Full Name</label>
+              <label [for]="'nomineeFullName' + i" class="required-label">Full Name</label>
             </p-floatlabel>
             <small class="invalid" *ngIf="hasError('fullName', i)">Full name is required</small>
 
             <p-floatlabel variant="in">
               <input type="text" pInputText formControlName="relationship" [id]="'nomineeRelationship' + i" class="w-full" />
-              <label [for]="'nomineeRelationship' + i">Relationship</label>
+              <label [for]="'nomineeRelationship' + i" class="required-label">Relationship</label>
             </p-floatlabel>
             <small class="invalid" *ngIf="hasError('relationship', i)">Relationship is required</small>
 
             <p-floatlabel variant="in">
               <p-inputnumber formControlName="sharePercentage" [id]="'nomineeShare' + i" class="w-full" suffix="%" [min]="0" [max]="100"></p-inputnumber>
-              <label [for]="'nomineeShare' + i">Share %</label>
+              <label [for]="'nomineeShare' + i" class="required-label">Share %</label>
             </p-floatlabel>
             <small class="invalid" *ngIf="hasError('sharePercentage', i)">Share must be between 0 and 100</small>
 

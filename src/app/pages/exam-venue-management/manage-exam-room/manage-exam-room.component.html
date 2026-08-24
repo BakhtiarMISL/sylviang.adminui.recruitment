@@ -6,13 +6,13 @@
       <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <p-floatlabel variant="in">
           <input pInputText id="roomName" class="w-full" formControlName="roomName" />
-          <label for="roomName">Room Name</label>
+          <label for="roomName" class="required-label">Room Name</label>
         </p-floatlabel>
         <small class="text-red-500" *ngIf="hasError('roomName')">Room name is required.</small>
 
         <p-floatlabel variant="in">
           <p-inputnumber inputId="capacity" class="w-full" formControlName="capacity" [min]="1"></p-inputnumber>
-          <label for="capacity">Capacity</label>
+          <label for="capacity" class="required-label">Capacity</label>
         </p-floatlabel>
         <small class="text-red-500" *ngIf="hasError('capacity')">Capacity must be greater than zero.</small>
 

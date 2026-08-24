@@ -19,7 +19,7 @@
               [disabled]="jobApplicationIdLocked"
               [appendTo]="'body'"
             ></p-select>
-            <label for="jobApplicationId">Candidate application</label>
+            <label for="jobApplicationId" class="required-label">Candidate application</label>
           </p-floatlabel>
           <small class="text-red-500" *ngIf="hasError('jobApplicationId')">Select a candidate application.</small>
           <small class="text-neutral" *ngIf="!hasError('jobApplicationId') && !jobApplicationIdLocked">Choose a candidate from the Final Selection Pool. Search by candidate name or designation.</small>
@@ -28,7 +28,7 @@
         <div>
           <p-floatlabel variant="in">
             <input pInputText id="designation" class="w-full" formControlName="designation" />
-            <label for="designation">Designation</label>
+            <label for="designation" class="required-label">Designation</label>
           </p-floatlabel>
           <small class="text-red-500" *ngIf="hasError('designation')">Designation is required.</small>
         </div>
@@ -51,7 +51,7 @@
         <div>
           <p-floatlabel variant="in">
             <p-inputnumber inputId="basicSalary" formControlName="basicSalary" class="w-full" [min]="0" mode="decimal" [minFractionDigits]="2" styleClass="w-full"></p-inputnumber>
-            <label for="basicSalary">Basic Salary</label>
+            <label for="basicSalary" class="required-label">Basic Salary</label>
           </p-floatlabel>
           <small class="text-red-500" *ngIf="hasError('basicSalary')">Basic salary is required.</small>
         </div>

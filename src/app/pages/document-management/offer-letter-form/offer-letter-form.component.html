@@ -21,7 +21,7 @@
               formControlName="jobApplicationId"
               [readOnly]="jobApplicationIdLocked"
             />
-            <label for="jobApplicationId">Job Application ID</label>
+            <label for="jobApplicationId" class="required-label">Job Application ID</label>
           </p-floatlabel>
           <small class="text-red-500" *ngIf="hasError('jobApplicationId')">Job Application ID is required.</small>
           <small class="text-neutral" *ngIf="!hasError('jobApplicationId') && !jobApplicationIdLocked">The numeric ID shown on the ATS Dashboard / application detail page, e.g. 3</small>
@@ -39,7 +39,7 @@
               [appendTo]="'body'"
               placeholder="Select an Offer Letter template"
             ></p-select>
-            <label for="documentTemplateId">Offer Letter Template</label>
+            <label for="documentTemplateId" class="required-label">Offer Letter Template</label>
           </p-floatlabel>
           <small class="text-red-500" *ngIf="hasError('documentTemplateId')">Template is required.</small>
           <small class="text-neutral" *ngIf="templateOptions.length === 0">
@@ -50,7 +50,7 @@
         <div>
           <p-floatlabel variant="in">
             <input pInputText id="designation" class="w-full" formControlName="designation" />
-            <label for="designation">Designation</label>
+            <label for="designation" class="required-label">Designation</label>
           </p-floatlabel>
           <small class="text-red-500" *ngIf="hasError('designation')">Designation is required.</small>
         </div>
@@ -66,7 +66,7 @@
               [minFractionDigits]="2"
               styleClass="w-full"
             ></p-inputnumber>
-            <label for="offeredSalary">Offered Salary</label>
+            <label for="offeredSalary" class="required-label">Offered Salary</label>
           </p-floatlabel>
           <small class="text-red-500" *ngIf="hasError('offeredSalary')">Offered salary is required.</small>
         </div>
@@ -74,7 +74,7 @@
         <div>
           <p-floatlabel variant="in">
             <p-datepicker inputId="joiningDate" formControlName="joiningDate" dateFormat="dd-M-yy" [showIcon]="true" styleClass="w-full"></p-datepicker>
-            <label for="joiningDate">Joining Date</label>
+            <label for="joiningDate" class="required-label">Joining Date</label>
           </p-floatlabel>
           <small class="text-red-500" *ngIf="hasError('joiningDate')">Joining date is required.</small>
         </div>

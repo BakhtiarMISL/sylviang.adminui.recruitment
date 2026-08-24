@@ -19,7 +19,7 @@
               [disabled]="jobApplicationIdLocked"
               [appendTo]="'body'"
             ></p-select>
-            <label for="jobApplicationId">Candidate application</label>
+            <label for="jobApplicationId" class="required-label">Candidate application</label>
           </p-floatlabel>
           <small class="text-red-500" *ngIf="hasError('jobApplicationId')">Select a candidate application.</small>
           <small class="text-neutral" *ngIf="!hasError('jobApplicationId') && !jobApplicationIdLocked">Choose a candidate from the Final Selection Pool. Search by candidate name or designation.</small>
@@ -37,7 +37,7 @@
               [appendTo]="'body'"
               placeholder="Select an Office Note template"
             ></p-select>
-            <label for="documentTemplateId">Office Note Template</label>
+            <label for="documentTemplateId" class="required-label">Office Note Template</label>
           </p-floatlabel>
           <small class="text-red-500" *ngIf="hasError('documentTemplateId')">Template is required.</small>
           <small class="text-neutral" *ngIf="templateOptions.length === 0">

@@ -7,7 +7,7 @@
         <div *ngIf="!isEditMode">
           <p-floatlabel variant="in">
             <input pInputText id="email" class="w-full" formControlName="email" [disabled]="submitting" />
-            <label for="email">Email</label>
+            <label for="email" class="required-label">Email</label>
           </p-floatlabel>
           <small class="text-red-500" *ngIf="hasError('email') && form.get('email')?.errors?.['required']">Email is required.</small>
           <small class="text-red-500" *ngIf="hasError('email') && form.get('email')?.errors?.['email']">A valid email is required.</small>
@@ -16,7 +16,7 @@
         <div>
           <p-floatlabel variant="in">
             <input pInputText id="fullName" class="w-full" formControlName="fullName" [disabled]="submitting" />
-            <label for="fullName">Full Name</label>
+            <label for="fullName" class="required-label">Full Name</label>
           </p-floatlabel>
           <small class="text-red-500" *ngIf="hasError('fullName') && form.get('fullName')?.errors?.['required']">Full name is required.</small>
         </div>
@@ -33,7 +33,7 @@
               display="chip"
               [disabled]="submitting"
             ></p-multiSelect>
-            <label for="roleIds">Roles</label>
+            <label for="roleIds" class="required-label">Roles</label>
           </p-floatlabel>
           <small class="text-red-500" *ngIf="hasError('roleIds')">At least one role must be assigned.</small>
         </div>

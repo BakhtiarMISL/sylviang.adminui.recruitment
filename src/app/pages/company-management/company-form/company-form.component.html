@@ -23,7 +23,7 @@
         <div class="sm:col-span-2">
           <p-floatlabel variant="in">
             <input pInputText id="name" class="w-full" formControlName="name" [disabled]="submitting" />
-            <label for="name">Company Name</label>
+            <label for="name" class="required-label">Company Name</label>
           </p-floatlabel>
           <small class="text-red-500" *ngIf="hasError('name') && form.get('name')?.errors?.['required']">Company name is required.</small>
         </div>

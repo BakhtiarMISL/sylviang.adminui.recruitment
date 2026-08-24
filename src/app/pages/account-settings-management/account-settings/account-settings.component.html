@@ -37,7 +37,7 @@
     <div>
       <p-floatlabel variant="in">
         <input pInputText inputId="email" formControlName="email" maxlength="200" class="w-full" [class.ng-invalid]="hasEmailError('email')" [class.ng-dirty]="hasEmailError('email')" (blur)="ef['email'].markAsTouched()" />
-        <label for="email">Email *</label>
+        <label for="email" class="required-label">Email</label>
       </p-floatlabel>
       <div *ngIf="hasEmailError('email')" class="invalid">{{ getEmailErrorMessage('email') }}</div>
     </div>
@@ -60,7 +60,7 @@
     <div>
       <p-floatlabel variant="in">
         <input pInputText inputId="otpCode" formControlName="otpCode" maxlength="6" class="w-full" [class.ng-invalid]="hasOtpError()" [class.ng-dirty]="hasOtpError()" (blur)="of['otpCode'].markAsTouched()" />
-        <label for="otpCode">Verification Code *</label>
+        <label for="otpCode" class="required-label">Verification Code</label>
       </p-floatlabel>
       <div *ngIf="hasOtpError()" class="invalid">Verification code is required</div>
     </div>
@@ -96,7 +96,7 @@
           [class.ng-dirty]="hasPasswordError('currentPassword')"
           (blur)="pf['currentPassword'].markAsTouched()"
         />
-        <label for="currentPassword">Current Password *</label>
+        <label for="currentPassword" class="required-label">Current Password</label>
       </p-floatlabel>
       <div *ngIf="hasPasswordError('currentPassword')" class="invalid">{{ getPasswordErrorMessage('currentPassword') }}</div>
     </div>
@@ -113,7 +113,7 @@
           [class.ng-dirty]="hasPasswordError('newPassword')"
           (blur)="pf['newPassword'].markAsTouched()"
         />
-        <label for="newPassword">New Password *</label>
+        <label for="newPassword" class="required-label">New Password</label>
       </p-floatlabel>
       <div *ngIf="hasPasswordError('newPassword')" class="invalid">{{ getPasswordErrorMessage('newPassword') }}</div>
     </div>
@@ -130,7 +130,7 @@
           [class.ng-dirty]="hasPasswordError('confirmPassword')"
           (blur)="pf['confirmPassword'].markAsTouched()"
         />
-        <label for="confirmPassword">Confirm New Password *</label>
+        <label for="confirmPassword" class="required-label">Confirm New Password</label>
       </p-floatlabel>
       <div *ngIf="hasPasswordError('confirmPassword')" class="invalid">{{ getPasswordErrorMessage('confirmPassword') }}</div>
     </div>

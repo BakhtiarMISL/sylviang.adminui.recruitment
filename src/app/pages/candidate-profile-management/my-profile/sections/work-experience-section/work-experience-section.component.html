@@ -70,7 +70,7 @@
   <div>
     <p-floatlabel variant="in">
       <input pInputText inputId="companyName" formControlName="companyName" maxlength="200" class="w-full" [class.ng-invalid]="hasError('companyName')" [class.ng-dirty]="hasError('companyName')" (blur)="f['companyName'].markAsTouched()" />
-      <label for="companyName">Company Name *</label>
+      <label for="companyName" class="required-label">Company Name</label>
     </p-floatlabel>
     <div *ngIf="hasError('companyName')" class="invalid">{{ getErrorMessage('companyName') }}</div>
   </div>
@@ -78,7 +78,7 @@
   <div>
     <p-floatlabel variant="in">
       <input pInputText inputId="designation" formControlName="designation" maxlength="200" class="w-full" [class.ng-invalid]="hasError('designation')" [class.ng-dirty]="hasError('designation')" (blur)="f['designation'].markAsTouched()" />
-      <label for="designation">Designation *</label>
+      <label for="designation" class="required-label">Designation</label>
     </p-floatlabel>
     <div *ngIf="hasError('designation')" class="invalid">{{ getErrorMessage('designation') }}</div>
   </div>
@@ -86,7 +86,7 @@
   <div>
     <p-floatlabel variant="in">
       <p-datepicker inputId="startDate" formControlName="startDate" dateFormat="dd-M-yy" [showIcon]="true" [appendTo]="'body'" styleClass="w-full" [class.ng-invalid]="hasError('startDate')" [class.ng-dirty]="hasError('startDate')"></p-datepicker>
-      <label for="startDate">Start Date *</label>
+      <label for="startDate" class="required-label">Start Date</label>
     </p-floatlabel>
     <div *ngIf="hasError('startDate')" class="invalid">{{ getErrorMessage('startDate') }}</div>
   </div>
@@ -114,7 +114,7 @@
   <div class="sm:col-span-2">
     <p-floatlabel variant="in">
       <textarea pInputText inputId="responsibilities" formControlName="responsibilities" class="w-full" rows="3"></textarea>
-      <label for="responsibilities">Responsibilities *</label>
+      <label for="responsibilities" class="required-label">Responsibilities</label>
     </p-floatlabel>
     <div *ngIf="hasError('responsibilities')" class="invalid">{{ getErrorMessage('responsibilities') }}</div>
   </div>

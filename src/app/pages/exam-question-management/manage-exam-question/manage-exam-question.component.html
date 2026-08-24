@@ -14,7 +14,7 @@
             optionValue="questionGroupId"
             [appendTo]="'body'"
           ></p-select>
-          <label for="questionGroupId">Question Group</label>
+          <label for="questionGroupId" class="required-label">Question Group</label>
         </p-floatlabel>
         <small class="text-red-500" *ngIf="hasError('questionGroupId')">Question group is required.</small>
 
@@ -29,12 +29,12 @@
             [appendTo]="'body'"
             (onChange)="onQuestionTypeChange()"
           ></p-select>
-          <label for="questionType">Question Type</label>
+          <label for="questionType" class="required-label">Question Type</label>
         </p-floatlabel>
 
         <p-floatlabel variant="in" class="sm:col-span-2">
           <textarea pTextarea id="questionText" class="w-full" formControlName="questionText" rows="2"></textarea>
-          <label for="questionText">Question Text</label>
+          <label for="questionText" class="required-label">Question Text</label>
         </p-floatlabel>
         <small class="text-red-500 sm:col-span-2" *ngIf="hasError('questionText')">Question text is required.</small>
 
@@ -48,12 +48,12 @@
             optionValue="value"
             [appendTo]="'body'"
           ></p-select>
-          <label for="difficultyLevel">Difficulty Level</label>
+          <label for="difficultyLevel" class="required-label">Difficulty Level</label>
         </p-floatlabel>
 
         <p-floatlabel variant="in">
           <p-inputNumber inputId="marks" class="w-full" formControlName="marks" [minFractionDigits]="0" [maxFractionDigits]="2" [min]="0.01"></p-inputNumber>
-          <label for="marks">Marks</label>
+          <label for="marks" class="required-label">Marks</label>
         </p-floatlabel>
         <small class="text-red-500" *ngIf="hasError('marks')">Marks must be greater than 0.</small>
 

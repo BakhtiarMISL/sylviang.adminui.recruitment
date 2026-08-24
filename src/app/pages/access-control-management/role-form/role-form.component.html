@@ -14,7 +14,7 @@
         <div>
           <p-floatlabel variant="in">
             <input pInputText id="name" class="w-full" formControlName="name" />
-            <label for="name">Role Name</label>
+            <label for="name" class="required-label">Role Name</label>
           </p-floatlabel>
           <small class="text-red-500" *ngIf="hasError('name') && form.get('name')?.errors?.['required']">Role name is required.</small>
         </div>
