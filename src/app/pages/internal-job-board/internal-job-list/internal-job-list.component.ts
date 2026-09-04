@@ -4,6 +4,8 @@ import { InternalJobBoardService } from '@app/@core/services/recruitment/interna
 import { UI_CONFIG } from '@app/@core/constants';
 import { SortEvent } from 'primeng/api';
 import { EmploymentTypeOptions, ExperienceBucketOptions } from '../internal-job-board.constants';
+import { TableStateService } from '@app/@core/services/table-state.service';
+import { BreadcrumbService } from '@app/@core/services';
 import { InternalJobListColumns } from './internal-job-list.component.constants';
 
 @Component({
@@ -13,9 +15,13 @@ import { InternalJobListColumns } from './internal-job-list.component.constants'
   styleUrl: './internal-job-list.component.scss',
 })
 export class InternalJobListComponent implements OnInit, AfterViewInit {
+  private readonly STATE_KEY = 'internal-job-list';
+
   constructor(
     private internalJobBoardService: InternalJobBoardService,
     private cdr: ChangeDetectorRef,
+    private tableState: TableStateService,
+    private breadcrumbService: BreadcrumbService,
   ) {}
 
   jobPostings: IPublicJobPostingResponse[] = [];
@@ -24,7 +30,7 @@ export class InternalJobListComponent implements OnInit, AfterViewInit {
   totalRecords = 0;
   loading = false;
   UI_CONFIG = UI_CONFIG;
-  rows = UI_CONFIG.defaultPageSize;
+  rows: number = UI_CONFIG.defaultPageSize;
   currentPage = 1;
 
   sortBy: string = '';
@@ -48,8 +54,56 @@ export class InternalJobListComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
+    this.setBreadcrumbs();
+    this.restoreState();
     this.loadJobPostings();
     this.isLoading = false;
+  }
+
+  private setBreadcrumbs(): void {
+    this.breadcrumbService.setBreadcrumbs([{ title: 'Internal Job Board', icon: 'fa-solid fa-building', href: '/internal-jobs/job-list' }]);
+  }
+
+  private restoreState(): void {
+    const s = this.tableState.load<{
+      currentPage: number;
+      rows: number;
+      searchTerm: string;
+      location: string;
+      departmentId: number | null;
+      employmentType: string | null;
+      maxExperienceYears: number | null;
+      sortBy: string;
+      sortDirection: string;
+      sortedColumn: string;
+    }>(this.STATE_KEY);
+    if (s) {
+      this.currentPage = s.currentPage ?? this.currentPage;
+      this.rows = s.rows ?? this.rows;
+      this.searchTerm = s.searchTerm ?? this.searchTerm;
+      this.location = s.location ?? this.location;
+      this.departmentId = s.departmentId ?? this.departmentId;
+      this.employmentType = s.employmentType ?? this.employmentType;
+      this.maxExperienceYears = s.maxExperienceYears ?? this.maxExperienceYears;
+      this.sortBy = s.sortBy ?? this.sortBy;
+      this.sortDirection = s.sortDirection ?? this.sortDirection;
+      this.sortedColumn = s.sortedColumn ?? this.sortedColumn;
+    }
+  }
+
+  private saveState(): void {
+    this.tableState.save(this.STATE_KEY, {
+      currentPage: this.currentPage,
+      rows: this.rows,
+      searchTerm: this.searchTerm,
+      location: this.location,
+      departmentId: this.departmentId,
+      employmentType: this.employmentType,
+      maxExperienceYears: this.maxExperienceYears,
+      sortBy: this.sortBy,
+      sortDirection: this.sortDirection,
+      sortedColumn: this.sortedColumn,
+    });
   }
 
   ngAfterViewInit(): void {
@@ -70,11 +124,13 @@ export class InternalJobListComponent implements OnInit, AfterViewInit {
     this.maxExperienceYears = null;
     this.currentPage = 1;
     this.filtersCollapsed = false;
+    this.saveState();
     this.loadJobPostings();
   }
 
   loadJobPostings(): void {
     this.loading = true;
+    this.saveState();
 
     const params = {
       pageNumber: this.currentPage,

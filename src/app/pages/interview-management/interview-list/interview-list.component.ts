@@ -6,6 +6,7 @@ import { IInterviewResponse } from '@app/@core/interfaces/recruitment-management
 import { InterviewService } from '@app/@core/services/recruitment/interview/interview.service';
 import { BreadcrumbService } from '@app/@core/services';
 import { InterviewListColumns, InterviewStatusOptions } from './interview-list.component.constants';
+import { TableStateService } from '@app/@core/services/table-state.service';
 
 @Component({
   selector: 'app-interview-list',
@@ -14,12 +15,15 @@ import { InterviewListColumns, InterviewStatusOptions } from './interview-list.c
   styleUrl: './interview-list.component.scss',
 })
 export class InterviewListComponent implements OnInit {
+  private readonly STATE_KEY = 'interview-list';
+
   constructor(
     private interviewService: InterviewService,
     private breadcrumbService: BreadcrumbService,
     private router: Router,
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef,
+    private tableState: TableStateService,
   ) {}
 
   interviews: IInterviewResponse[] = [];
@@ -27,7 +31,7 @@ export class InterviewListComponent implements OnInit {
   loading = false;
   totalRecords = 0;
   UI_CONFIG = UI_CONFIG;
-  rows = UI_CONFIG.defaultPageSize;
+  rows: number = UI_CONFIG.defaultPageSize;
   currentPage = 1;
 
   columns = InterviewListColumns;
@@ -58,6 +62,8 @@ export class InterviewListComponent implements OnInit {
       { title: 'Interviews', icon: 'fa-solid fa-people-arrows', href: '/interviews/interview-list' },
     ]);
 
+    this.restoreState();
+
     // EP-14 US-105 AC3: deep-link from the "Upcoming Interviews" dashboard card.
     const statusParam = this.route.snapshot.queryParamMap.get('status') as InterviewStatusEnum | null;
     if (statusParam && Object.values(InterviewStatusEnum).includes(statusParam)) {
@@ -68,8 +74,34 @@ export class InterviewListComponent implements OnInit {
     this.loadInterviews();
   }
 
+  private restoreState(): void {
+    const s = this.tableState.load<{
+      currentPage: number;
+      rows: number;
+      filterStatus: InterviewStatusEnum | null;
+    }>(this.STATE_KEY);
+    if (s) {
+      this.currentPage = s.currentPage ?? this.currentPage;
+      this.rows = s.rows ?? this.rows;
+      // Only restore filterStatus if no deep-link query param overrides it
+      const statusParam = this.route.snapshot.queryParamMap.get('status') as InterviewStatusEnum | null;
+      if (!statusParam || !Object.values(InterviewStatusEnum).includes(statusParam)) {
+        this.filterStatus = s.filterStatus ?? this.filterStatus;
+      }
+    }
+  }
+
+  private saveState(): void {
+    this.tableState.save(this.STATE_KEY, {
+      currentPage: this.currentPage,
+      rows: this.rows,
+      filterStatus: this.filterStatus,
+    });
+  }
+
   loadInterviews(): void {
     this.loading = true;
+    this.saveState();
 
     const params = {
       page: this.currentPage,
@@ -108,6 +140,7 @@ export class InterviewListComponent implements OnInit {
     this.filterStatus = null;
     this.currentPage = 1;
     this.filtersCollapsed = false;
+    this.saveState();
     this.loadInterviews();
   }
 

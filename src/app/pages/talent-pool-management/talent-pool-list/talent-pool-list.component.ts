@@ -3,6 +3,7 @@ import { IJobVacancyResponse } from '@app/@core/interfaces/recruitment-managemen
 import { ITalentPoolResponse } from '@app/@core/interfaces/recruitment-management/talent-pool.interface';
 import { JobVacancyService } from '@app/@core/services/recruitment/job-vacancy/job-vacancy.service';
 import { TalentPoolService } from '@app/@core/services/recruitment/talent-pool/talent-pool.service';
+import { BreadcrumbService } from '@app/@core/services';
 import { ConfirmationService } from 'primeng/api';
 
 @Component({
@@ -17,6 +18,7 @@ export class TalentPoolListComponent implements OnInit {
     private jobVacancyService: JobVacancyService,
     private confirmationService: ConfirmationService,
     private cdr: ChangeDetectorRef,
+    private breadcrumbService: BreadcrumbService,
   ) {}
 
   pools: ITalentPoolResponse[] = [];
@@ -39,8 +41,13 @@ export class TalentPoolListComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.setBreadcrumbs();
     this.loadJobVacancies();
     this.loadPools();
+  }
+
+  private setBreadcrumbs(): void {
+    this.breadcrumbService.setBreadcrumbs([{ title: 'Talent Pools', icon: 'fa-solid fa-users', href: '/talent-pools/talent-pool-list' }]);
   }
 
   loadJobVacancies(): void {

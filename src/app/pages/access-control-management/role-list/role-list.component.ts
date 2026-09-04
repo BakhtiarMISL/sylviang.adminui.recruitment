@@ -1,6 +1,7 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { IRoleResponse } from '@core/interfaces/recruitment-management/access-control.interface';
 import { RoleService } from '@core/services/recruitment/access-control/access-control.service';
+import { BreadcrumbService } from '@app/@core/services';
 import { ConfirmationService } from 'primeng/api';
 
 @Component({
@@ -14,6 +15,7 @@ export class RoleListComponent implements OnInit {
     private roleService: RoleService,
     private confirmationService: ConfirmationService,
     private cdr: ChangeDetectorRef,
+    private breadcrumbService: BreadcrumbService,
   ) {}
 
   roles: IRoleResponse[] = [];
@@ -26,7 +28,15 @@ export class RoleListComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.setBreadcrumbs();
     this.loadRoles();
+  }
+
+  private setBreadcrumbs(): void {
+    this.breadcrumbService.setBreadcrumbs([
+      { title: 'System Administration', icon: 'fa-solid fa-gears', href: '/access-control/role-list' },
+      { title: 'Roles', icon: 'fa-solid fa-user-shield', href: '/access-control/role-list' },
+    ]);
   }
 
   loadRoles(): void {

@@ -22,6 +22,10 @@ export class CareerPortalService {
     return this.httpClient.get<ApiResponse<IPublicJobPostingResponse>>(`${this.API_URL}/job-postings/${id}`);
   }
 
+  getMatchScore(jobPostingId: number) {
+    return this.httpClient.get<ApiResponse<{ score: number | null }>>(`${this.API_URL}/job-postings/${jobPostingId}/match-score`);
+  }
+
   // resume is optional - omitting it tells the backend to reuse whatever resume the candidate
   // already has on file in their profile Documents (JobApplicationService.SubmitAsync), instead
   // of forcing a re-upload of the same file on every application.

@@ -6,6 +6,7 @@ import { IMyApplication } from '@app/@core/interfaces/recruitment-management/job
 import { CareerPortalService } from '@app/@core/services/recruitment/career-portal/career-portal.service';
 import { JobApplicationService } from '@app/@core/services/recruitment/job-application/job-application.service';
 import { AuthService } from '@core/services/auth/auth.service';
+import { BreadcrumbService } from '@app/@core/services';
 import { UserRoleEnum } from '@core/enums/user-role.enum';
 import { Base_URL } from '@env/environment';
 
@@ -23,6 +24,7 @@ export class JobDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private cdr: ChangeDetectorRef,
+    private breadcrumbService: BreadcrumbService,
   ) {}
 
   jobPosting: IPublicJobPostingResponse | null = null;
@@ -32,12 +34,20 @@ export class JobDetailComponent implements OnInit {
   existingApplication: IMyApplication | null = null;
 
   ngOnInit(): void {
+    this.setBreadcrumbs();
     this.route.paramMap.subscribe((params) => {
       const idParam = params.get('id');
       if (idParam) {
         this.loadJobPosting(+idParam);
       }
     });
+  }
+
+  private setBreadcrumbs(): void {
+    this.breadcrumbService.setBreadcrumbs([
+      { title: 'Careers', icon: 'fa-solid fa-magnifying-glass', href: '/careers' },
+      { title: this.jobPosting?.title || 'Job Details', icon: 'fa-solid fa-briefcase', href: this.router.url },
+    ]);
   }
 
   private loadJobPosting(id: number): void {
@@ -49,6 +59,7 @@ export class JobDetailComponent implements OnInit {
       next: (response) => {
         if (!response.hasError && response.content) {
           this.jobPosting = response.content;
+          this.setBreadcrumbs();
           this.checkEligibility(id);
           this.checkExistingApplication(id);
         } else {

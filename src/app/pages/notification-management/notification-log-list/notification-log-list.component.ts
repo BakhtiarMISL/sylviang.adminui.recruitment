@@ -5,6 +5,7 @@ import { INotificationLogFilterRequest, INotificationLogResponse } from '@app/@c
 import { NotificationLogService } from '@app/@core/services/recruitment/notification-log/notification-log.service';
 import { saveFileResponse } from '@app/@core/services/recruitment/cv-bank/cv-bank.service';
 import { BreadcrumbService } from '@app/@core/services';
+import { TableStateService } from '@app/@core/services/table-state.service';
 
 @Component({
   selector: 'app-notification-log-list',
@@ -13,10 +14,13 @@ import { BreadcrumbService } from '@app/@core/services';
   styleUrl: './notification-log-list.component.scss',
 })
 export class NotificationLogListComponent implements OnInit {
+  private readonly STATE_KEY = 'notification-log-list';
+
   constructor(
     private notificationLogService: NotificationLogService,
     private breadcrumbService: BreadcrumbService,
     private cdr: ChangeDetectorRef,
+    private tableState: TableStateService,
   ) {}
 
   items: INotificationLogResponse[] = [];
@@ -48,7 +52,41 @@ export class NotificationLogListComponent implements OnInit {
       { title: 'System Administration', icon: 'fa-solid fa-gears', href: '/notification-management/notification-log-list' },
       { title: 'Notification Log', icon: 'fa-solid fa-clock-rotate-left', href: '/notification-management/notification-log-list' },
     ]);
+    this.restoreState();
     this.loadItems();
+  }
+
+  private restoreState(): void {
+    const s = this.tableState.load<{
+      currentPage: number;
+      rows: number;
+      filterDateFrom: string | null;
+      filterDateTo: string | null;
+      filterChannel: NotificationChannelEnum | null;
+      filterEvent: RecruitmentEventEnum | null;
+      filterStatus: NotificationStatusEnum | null;
+    }>(this.STATE_KEY);
+    if (s) {
+      this.currentPage = s.currentPage ?? this.currentPage;
+      this.rows = s.rows ?? this.rows;
+      this.filterDateFrom = s.filterDateFrom ? new Date(s.filterDateFrom) : this.filterDateFrom;
+      this.filterDateTo = s.filterDateTo ? new Date(s.filterDateTo) : this.filterDateTo;
+      this.filterChannel = s.filterChannel ?? this.filterChannel;
+      this.filterEvent = s.filterEvent ?? this.filterEvent;
+      this.filterStatus = s.filterStatus ?? this.filterStatus;
+    }
+  }
+
+  private saveState(): void {
+    this.tableState.save(this.STATE_KEY, {
+      currentPage: this.currentPage,
+      rows: this.rows,
+      filterDateFrom: this.filterDateFrom ? this.filterDateFrom.toISOString() : null,
+      filterDateTo: this.filterDateTo ? this.filterDateTo.toISOString() : null,
+      filterChannel: this.filterChannel,
+      filterEvent: this.filterEvent,
+      filterStatus: this.filterStatus,
+    });
   }
 
   private buildFilter(): INotificationLogFilterRequest {
@@ -66,6 +104,7 @@ export class NotificationLogListComponent implements OnInit {
   loadItems(): void {
     this.loading = true;
     this.errorMessage = '';
+    this.saveState();
     this.notificationLogService.getAll(this.buildFilter()).subscribe({
       next: (response) => {
         this.items = !response.hasError && response.content ? response.content.data : [];
@@ -93,6 +132,7 @@ export class NotificationLogListComponent implements OnInit {
     this.filterEvent = null;
     this.filterStatus = null;
     this.currentPage = 1;
+    this.saveState();
     this.loadItems();
   }
 

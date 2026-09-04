@@ -7,6 +7,7 @@ import { ExamService } from '@app/@core/services/recruitment/exam/exam.service';
 import { BreadcrumbService } from '@app/@core/services';
 import { SortEvent } from 'primeng/api';
 import { ExamListColumns, ExamTypeOptions } from './exam-list.component.constants';
+import { TableStateService } from '@app/@core/services/table-state.service';
 
 @Component({
   selector: 'app-exam-list',
@@ -15,11 +16,14 @@ import { ExamListColumns, ExamTypeOptions } from './exam-list.component.constant
   styleUrl: './exam-list.component.scss',
 })
 export class ExamListComponent implements OnInit {
+  private readonly STATE_KEY = 'exam-list';
+
   constructor(
     private examService: ExamService,
     private breadcrumbService: BreadcrumbService,
     private router: Router,
     private cdr: ChangeDetectorRef,
+    private tableState: TableStateService,
   ) {}
 
   exams: IExamResponse[] = [];
@@ -27,7 +31,7 @@ export class ExamListComponent implements OnInit {
   loading = false;
   totalRecords = 0;
   UI_CONFIG = UI_CONFIG;
-  rows = UI_CONFIG.defaultPageSize;
+  rows: number = UI_CONFIG.defaultPageSize;
   currentPage = 1;
   sortedColumn = '';
   sortBy = '';
@@ -50,11 +54,46 @@ export class ExamListComponent implements OnInit {
       { title: 'Recruitment', icon: 'fa-solid fa-briefcase', href: '/exams/exam-list' },
       { title: 'Exams', icon: 'fa-solid fa-file-pen', href: '/exams/exam-list' },
     ]);
+    this.restoreState();
     this.loadExams();
+  }
+
+  private restoreState(): void {
+    const s = this.tableState.load<{
+      currentPage: number;
+      rows: number;
+      filterExamType: ExamTypeEnum | null;
+      filterIsActive: boolean | null;
+      sortBy: string;
+      sortDirection: string;
+      sortedColumn: string;
+    }>(this.STATE_KEY);
+    if (s) {
+      this.currentPage = s.currentPage ?? this.currentPage;
+      this.rows = s.rows ?? this.rows;
+      this.filterExamType = s.filterExamType ?? this.filterExamType;
+      this.filterIsActive = s.filterIsActive ?? this.filterIsActive;
+      this.sortBy = s.sortBy ?? this.sortBy;
+      this.sortDirection = s.sortDirection ?? this.sortDirection;
+      this.sortedColumn = s.sortedColumn ?? this.sortedColumn;
+    }
+  }
+
+  private saveState(): void {
+    this.tableState.save(this.STATE_KEY, {
+      currentPage: this.currentPage,
+      rows: this.rows,
+      filterExamType: this.filterExamType,
+      filterIsActive: this.filterIsActive,
+      sortBy: this.sortBy,
+      sortDirection: this.sortDirection,
+      sortedColumn: this.sortedColumn,
+    });
   }
 
   loadExams(): void {
     this.loading = true;
+    this.saveState();
 
     const params = {
       page: this.currentPage,
@@ -97,6 +136,7 @@ export class ExamListComponent implements OnInit {
     this.filterIsActive = null;
     this.currentPage = 1;
     this.filtersCollapsed = false;
+    this.saveState();
     this.loadExams();
   }
 

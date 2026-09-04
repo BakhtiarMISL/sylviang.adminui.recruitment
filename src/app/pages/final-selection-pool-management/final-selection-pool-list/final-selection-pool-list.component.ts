@@ -2,6 +2,7 @@ import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { IFinalSelectionPoolResponse } from '@core/interfaces/recruitment-management/final-selection-pool.interface';
 import { FinalSelectionPoolService } from '@core/services/recruitment/final-selection-pool/final-selection-pool.service';
 import { DateTimeUtility } from '@app/@core/utils/date-time.utility';
+import { BreadcrumbService } from '@app/@core/services';
 
 @Component({
   selector: 'app-final-selection-pool-list',
@@ -13,6 +14,7 @@ export class FinalSelectionPoolListComponent implements OnInit {
   constructor(
     private finalSelectionPoolService: FinalSelectionPoolService,
     private cdr: ChangeDetectorRef,
+    private breadcrumbService: BreadcrumbService,
   ) {}
 
   items: IFinalSelectionPoolResponse[] = [];
@@ -33,7 +35,12 @@ export class FinalSelectionPoolListComponent implements OnInit {
   saveError = '';
 
   ngOnInit(): void {
+    this.setBreadcrumbs();
     this.load();
+  }
+
+  private setBreadcrumbs(): void {
+    this.breadcrumbService.setBreadcrumbs([{ title: 'Final Selection Pool', icon: 'fa-solid fa-clipboard-check', href: '/final-selection-pool/final-selection-pool-list' }]);
   }
 
   load(): void {

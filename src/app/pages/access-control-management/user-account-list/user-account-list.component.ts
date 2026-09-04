@@ -7,6 +7,7 @@ import { CompanyService } from '@core/services/recruitment/company/company.servi
 import { AuthService } from '@core/services/auth/auth.service';
 import { ImpersonationService } from '@core/services/recruitment/impersonation/impersonation.service';
 import { UserRoleEnum } from '@core/enums/user-role.enum';
+import { BreadcrumbService } from '@app/@core/services';
 import { ConfirmationService } from 'primeng/api';
 
 @Component({
@@ -24,6 +25,7 @@ export class UserAccountListComponent implements OnInit {
     private authService: AuthService,
     private router: Router,
     private cdr: ChangeDetectorRef,
+    private breadcrumbService: BreadcrumbService,
   ) {}
 
   accounts: IUserAccountResponse[] = [];
@@ -80,8 +82,16 @@ export class UserAccountListComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.setBreadcrumbs();
     this.loadAccounts();
     if (this.isSuperAdmin) this.loadCompanyOptions();
+  }
+
+  private setBreadcrumbs(): void {
+    this.breadcrumbService.setBreadcrumbs([
+      { title: 'System Administration', icon: 'fa-solid fa-gears', href: '/access-control/user-account-list' },
+      { title: 'User Accounts', icon: 'fa-solid fa-users', href: '/access-control/user-account-list' },
+    ]);
   }
 
   private loadCompanyOptions(): void {

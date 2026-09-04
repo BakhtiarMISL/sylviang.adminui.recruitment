@@ -5,6 +5,7 @@ import { CandidateProfileService } from '@app/@core/services/recruitment/candida
 import { TalentPoolService } from '@app/@core/services/recruitment/talent-pool/talent-pool.service';
 import { UI_CONFIG } from '@app/@core/constants';
 import { Base_URL } from '@env/environment';
+import { TableStateService } from '@app/@core/services/table-state.service';
 
 @Component({
   selector: 'app-candidate-list',
@@ -13,10 +14,13 @@ import { Base_URL } from '@env/environment';
   styleUrl: './candidate-list.component.scss',
 })
 export class CandidateListComponent implements OnInit {
+  private readonly STATE_KEY = 'candidate-list';
+
   constructor(
     private candidateProfileService: CandidateProfileService,
     private talentPoolService: TalentPoolService,
     private cdr: ChangeDetectorRef,
+    private tableState: TableStateService,
   ) {}
 
   candidates: ICandidateProfileSummaryResponse[] = [];
@@ -24,7 +28,7 @@ export class CandidateListComponent implements OnInit {
   totalRecords = 0;
   loading = false;
   UI_CONFIG = UI_CONFIG;
-  rows = UI_CONFIG.defaultPageSize;
+  rows: number = UI_CONFIG.defaultPageSize;
   currentPage = 1;
   searchTerm = '';
   filtersCollapsed = true;
@@ -53,10 +57,38 @@ export class CandidateListComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.restoreState();
     this.loadCandidates();
     this.loadPools();
     this.loadTagSuggestions();
     this.isLoading = false;
+  }
+
+  private restoreState(): void {
+    const s = this.tableState.load<{
+      currentPage: number;
+      rows: number;
+      searchTerm: string;
+      selectedPoolIds: number[];
+      filterTags: string[];
+    }>(this.STATE_KEY);
+    if (s) {
+      this.currentPage = s.currentPage ?? this.currentPage;
+      this.rows = s.rows ?? this.rows;
+      this.searchTerm = s.searchTerm ?? this.searchTerm;
+      this.selectedPoolIds = s.selectedPoolIds ?? this.selectedPoolIds;
+      this.filterTags = s.filterTags ?? this.filterTags;
+    }
+  }
+
+  private saveState(): void {
+    this.tableState.save(this.STATE_KEY, {
+      currentPage: this.currentPage,
+      rows: this.rows,
+      searchTerm: this.searchTerm,
+      selectedPoolIds: this.selectedPoolIds,
+      filterTags: this.filterTags,
+    });
   }
 
   loadPools(): void {
@@ -148,11 +180,13 @@ export class CandidateListComponent implements OnInit {
     this.selectedPoolIds = [];
     this.currentPage = 1;
     this.filtersCollapsed = false;
+    this.saveState();
     this.loadCandidates();
   }
 
   loadCandidates(): void {
     this.loading = true;
+    this.saveState();
 
     const params = {
       page: this.currentPage,

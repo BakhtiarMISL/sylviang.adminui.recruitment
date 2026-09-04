@@ -4,6 +4,7 @@ import { Subscription } from 'rxjs';
 import { IPaymentStatusResponse } from '@app/@core/interfaces/recruitment-management/payment.interface';
 import { PaymentService } from '@app/@core/services/recruitment/payment/payment.service';
 import { AuthService } from '@core/services/auth/auth.service';
+import { BreadcrumbService } from '@app/@core/services';
 
 const POLL_INTERVAL_MS = 3000;
 const MAX_POLL_ATTEMPTS = 20; // ~1 minute - the IPN usually lands within a few seconds of the browser redirect.
@@ -29,6 +30,7 @@ export class InternalPaymentResultComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef,
     private authService: AuthService,
+    private breadcrumbService: BreadcrumbService,
   ) {}
 
   jobApplicationId: number | null = null;
@@ -50,6 +52,7 @@ export class InternalPaymentResultComponent implements OnInit, OnDestroy {
   private queryParamsSubscription: Subscription | null = null;
 
   ngOnInit(): void {
+    this.setBreadcrumbs();
     this.queryParamsSubscription = this.route.queryParamMap.subscribe((params) => {
       // Any later emission on this same route restarts the poll - without clearing the pending
       // timer first, the old chain kept running alongside the new one, both decrementing the
@@ -70,6 +73,13 @@ export class InternalPaymentResultComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.queryParamsSubscription?.unsubscribe();
     if (this.pollTimer) clearTimeout(this.pollTimer);
+  }
+
+  private setBreadcrumbs(): void {
+    this.breadcrumbService.setBreadcrumbs([
+      { title: 'Internal Job Board', icon: 'fa-solid fa-building', href: '/internal-jobs/job-list' },
+      { title: 'Payment Result', icon: 'fa-solid fa-money-check-dollar', href: '/internal-jobs/payment-result' },
+    ]);
   }
 
   private pollStatus(): void {

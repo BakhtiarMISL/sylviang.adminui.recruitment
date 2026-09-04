@@ -5,6 +5,7 @@ import { IExportRequestFilterRequest, IExportRequestResponse } from '@app/@core/
 import { ExportRequestService } from '@app/@core/services/recruitment/export-request/export-request.service';
 import { saveFileResponse } from '@app/@core/services/recruitment/cv-bank/cv-bank.service';
 import { BreadcrumbService } from '@app/@core/services';
+import { TableStateService } from '@app/@core/services/table-state.service';
 
 /** How often the list re-polls while any row is still Pending/Processing (EP-13 US-104) - same
  * interval-polling idiom the header notification bell already uses. */
@@ -17,10 +18,13 @@ const POLL_INTERVAL_MS = 15000;
   styleUrl: './export-request-list.component.scss',
 })
 export class ExportRequestListComponent implements OnInit, OnDestroy {
+  private readonly STATE_KEY = 'export-request-list';
+
   constructor(
     private exportRequestService: ExportRequestService,
     private breadcrumbService: BreadcrumbService,
     private cdr: ChangeDetectorRef,
+    private tableState: TableStateService,
   ) {}
 
   items: IExportRequestResponse[] = [];
@@ -48,8 +52,30 @@ export class ExportRequestListComponent implements OnInit, OnDestroy {
       { title: 'System Administration', icon: 'fa-solid fa-gears', href: '/export-requests/export-request-list' },
       { title: 'Export Requests', icon: 'fa-solid fa-file-export', href: '/export-requests/export-request-list' },
     ]);
+    this.restoreState();
     this.loadItems();
     this.pollTimer = setInterval(() => this.pollIfInFlight(), POLL_INTERVAL_MS);
+  }
+
+  private restoreState(): void {
+    const s = this.tableState.load<{
+      currentPage: number;
+      rows: number;
+      filterStatus: ExportRequestStatusEnum | null;
+    }>(this.STATE_KEY);
+    if (s) {
+      this.currentPage = s.currentPage ?? this.currentPage;
+      this.rows = s.rows ?? this.rows;
+      this.filterStatus = s.filterStatus ?? this.filterStatus;
+    }
+  }
+
+  private saveState(): void {
+    this.tableState.save(this.STATE_KEY, {
+      currentPage: this.currentPage,
+      rows: this.rows,
+      filterStatus: this.filterStatus,
+    });
   }
 
   ngOnDestroy(): void {
@@ -74,6 +100,7 @@ export class ExportRequestListComponent implements OnInit, OnDestroy {
   loadItems(): void {
     this.loading = true;
     this.errorMessage = '';
+    this.saveState();
     this.exportRequestService.getAll(this.buildFilter()).subscribe({
       next: (response) => {
         this.items = !response.hasError && response.content ? response.content.data : [];
@@ -97,6 +124,7 @@ export class ExportRequestListComponent implements OnInit, OnDestroy {
   resetFilters(): void {
     this.filterStatus = null;
     this.currentPage = 1;
+    this.saveState();
     this.loadItems();
   }
 

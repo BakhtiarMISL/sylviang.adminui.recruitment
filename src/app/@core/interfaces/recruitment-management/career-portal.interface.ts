@@ -4,6 +4,10 @@ import { IJobVacancyAttachmentResponse } from '@app/@core/interfaces/recruitment
 export interface IPublicJobPostingResponse {
   jobPostingId: number;
   jobPostingCode: string;
+  companyId?: number;
+  companyName?: string;
+  companyWebsite?: string;
+  companyAddress?: string;
   title: string;
   description?: string;
   requirements?: string;
@@ -22,6 +26,7 @@ export interface IPublicJobPostingResponse {
   applicationFeeAmount?: number;
   applicationFeeCurrency?: string;
   attachments?: IJobVacancyAttachmentResponse[];
+  matchScore?: number;
 }
 
 export interface IJobApplicationSubmitRequest {

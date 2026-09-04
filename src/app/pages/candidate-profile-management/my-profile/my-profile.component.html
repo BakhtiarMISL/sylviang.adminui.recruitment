@@ -46,28 +46,70 @@
 
 <section class="page-container" *ngIf="!loading && profile">
   <p-accordion [activeIndex]="0">
-    <p-accordion-tab header="Personal Info">
+    <p-accordion-tab>
+      <ng-template pTemplate="header">
+        <span class="section-header-title">Personal Info</span>
+        <span class="section-completeness-badge" *ngIf="sectionCompleteness('PersonalInfo') as sc" [class.section-completeness-badge-done]="sc.isComplete">
+          <i class="fas fa-check" *ngIf="sc.isComplete"></i>{{ sc.weightPercentage }}%
+        </span>
+      </ng-template>
       <app-personal-info-section [profile]="profile" (saved)="onSectionSaved()"></app-personal-info-section>
     </p-accordion-tab>
-    <p-accordion-tab header="Contact">
+    <p-accordion-tab>
+      <ng-template pTemplate="header">
+        <span class="section-header-title">Contact</span>
+        <span class="section-completeness-badge" *ngIf="sectionCompleteness('Contact') as sc" [class.section-completeness-badge-done]="sc.isComplete">
+          <i class="fas fa-check" *ngIf="sc.isComplete"></i>{{ sc.weightPercentage }}%
+        </span>
+      </ng-template>
       <app-contact-section [profile]="profile" (saved)="onSectionSaved()"></app-contact-section>
     </p-accordion-tab>
-    <p-accordion-tab header="Education">
+    <p-accordion-tab>
+      <ng-template pTemplate="header">
+        <span class="section-header-title">Education</span>
+        <span class="section-completeness-badge" *ngIf="sectionCompleteness('Education') as sc" [class.section-completeness-badge-done]="sc.isComplete">
+          <i class="fas fa-check" *ngIf="sc.isComplete"></i>{{ sc.weightPercentage }}%
+        </span>
+      </ng-template>
       <app-education-section (saved)="onSectionSaved()" (suggestionsChanged)="onEducationSuggestionsChanged($event)"></app-education-section>
     </p-accordion-tab>
-    <p-accordion-tab header="Work Experience">
+    <p-accordion-tab>
+      <ng-template pTemplate="header">
+        <span class="section-header-title">Work Experience</span>
+        <span class="section-completeness-badge" *ngIf="sectionCompleteness('WorkExperience') as sc" [class.section-completeness-badge-done]="sc.isComplete">
+          <i class="fas fa-check" *ngIf="sc.isComplete"></i>{{ sc.weightPercentage }}%
+        </span>
+      </ng-template>
       <app-work-experience-section (saved)="onSectionSaved()" (suggestionsChanged)="onWorkExperienceSuggestionsChanged($event)"></app-work-experience-section>
     </p-accordion-tab>
-    <p-accordion-tab header="Skills">
+    <p-accordion-tab>
+      <ng-template pTemplate="header">
+        <span class="section-header-title">Skills</span>
+        <span class="section-completeness-badge" *ngIf="sectionCompleteness('Skills') as sc" [class.section-completeness-badge-done]="sc.isComplete">
+          <i class="fas fa-check" *ngIf="sc.isComplete"></i>{{ sc.weightPercentage }}%
+        </span>
+      </ng-template>
       <app-skills-section (saved)="onSectionSaved()" (suggestionsChanged)="onSkillSuggestionsChanged($event)"></app-skills-section>
     </p-accordion-tab>
-    <p-accordion-tab header="Certifications">
+    <p-accordion-tab>
+      <ng-template pTemplate="header">
+        <span class="section-header-title">Certifications</span>
+        <span class="section-completeness-badge" *ngIf="sectionCompleteness('Certifications') as sc" [class.section-completeness-badge-done]="sc.isComplete">
+          <i class="fas fa-check" *ngIf="sc.isComplete"></i>{{ sc.weightPercentage }}%
+        </span>
+      </ng-template>
       <app-certifications-section (saved)="onSectionSaved()"></app-certifications-section>
     </p-accordion-tab>
     <p-accordion-tab header="Photo & Signature">
       <app-photo-signature-upload [profile]="profile" (saved)="onSectionSaved()"></app-photo-signature-upload>
     </p-accordion-tab>
-    <p-accordion-tab header="Documents">
+    <p-accordion-tab>
+      <ng-template pTemplate="header">
+        <span class="section-header-title">Documents</span>
+        <span class="section-completeness-badge" *ngIf="sectionCompleteness('Documents') as sc" [class.section-completeness-badge-done]="sc.isComplete">
+          <i class="fas fa-check" *ngIf="sc.isComplete"></i>{{ sc.weightPercentage }}%
+        </span>
+      </ng-template>
       <app-documents-section (saved)="onSectionSaved()"></app-documents-section>
     </p-accordion-tab>
   </p-accordion>

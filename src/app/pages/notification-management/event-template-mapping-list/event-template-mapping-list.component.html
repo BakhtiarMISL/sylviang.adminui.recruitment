@@ -26,7 +26,9 @@
     [value]="items"
     styleClass="p-datatable-sm"
     [paginator]="true"
-    [rows]="10"
+    [rows]="rows"
+    [first]="first"
+    (onPage)="onPage($event)"
     [rowsPerPageOptions]="[10, 25, 50]"
     [globalFilterFields]="['recruitmentEvent', 'channel', 'recipientType', 'notificationTemplateName']"
     [showCurrentPageReport]="true"
@@ -34,7 +36,7 @@
   >
     <ng-template pTemplate="caption">
       <div class="flex justify-end">
-        <input pInputText type="text" [(ngModel)]="searchTerm" (input)="dt.filterGlobal(searchTerm, 'contains')" placeholder="Search" class="w-64" />
+        <input pInputText type="text" [(ngModel)]="searchTerm" (input)="onSearch()" placeholder="Search" class="w-64" />
       </div>
     </ng-template>
     <ng-template pTemplate="header">

@@ -5,6 +5,8 @@ import { ToastService } from '@app/@core/services/misc/toast.service';
 import { ShiftListColumns } from '@app/pages/attendance-management/shift-list/shift-list.component.constants';
 import { ConfirmationService, SortEvent } from 'primeng/api';
 import { UI_CONFIG } from '@app/@core/constants';
+import { TableStateService } from '@app/@core/services/table-state.service';
+import { BreadcrumbService } from '@app/@core/services';
 
 @Component({
   selector: 'app-shift-list',
@@ -13,11 +15,15 @@ import { UI_CONFIG } from '@app/@core/constants';
   styleUrl: './shift-list.component.scss',
 })
 export class ShiftListComponent implements OnInit, AfterViewInit {
+  private readonly STATE_KEY = 'shift-list';
+
   constructor(
     private _shiftService: ShiftService,
     private cdr: ChangeDetectorRef,
     private confirmationService: ConfirmationService,
     private toast: ToastService,
+    private tableState: TableStateService,
+    private breadcrumbService: BreadcrumbService,
   ) {}
 
   shifts: IShiftResponse[] = [];
@@ -27,7 +33,7 @@ export class ShiftListComponent implements OnInit, AfterViewInit {
   totalRecords = 0;
   loading = false;
   UI_CONFIG = UI_CONFIG;
-  rows = UI_CONFIG.defaultPageSize;
+  rows: number = UI_CONFIG.defaultPageSize;
   currentPage = 1;
 
   sortBy: string = '';
@@ -44,8 +50,47 @@ export class ShiftListComponent implements OnInit, AfterViewInit {
   columns = ShiftListColumns;
 
   ngOnInit(): void {
+    this.setBreadcrumbs();
+    this.restoreState();
     this.loadShifts();
     this.isLoading = false;
+  }
+
+  private setBreadcrumbs(): void {
+    this.breadcrumbService.setBreadcrumbs([
+      { title: 'Attendance', icon: 'fa-solid fa-clock', href: '/attendance/shift-list' },
+      { title: 'Shift List', icon: 'fa-solid fa-random', href: '/attendance/shift-list' },
+    ]);
+  }
+
+  private restoreState(): void {
+    const s = this.tableState.load<{
+      currentPage: number;
+      rows: number;
+      searchTerm: string;
+      sortBy: string;
+      sortDirection: string;
+      sortedColumn: string;
+    }>(this.STATE_KEY);
+    if (s) {
+      this.currentPage = s.currentPage ?? this.currentPage;
+      this.rows = s.rows ?? this.rows;
+      this.searchTerm = s.searchTerm ?? this.searchTerm;
+      this.sortBy = s.sortBy ?? this.sortBy;
+      this.sortDirection = s.sortDirection ?? this.sortDirection;
+      this.sortedColumn = s.sortedColumn ?? this.sortedColumn;
+    }
+  }
+
+  private saveState(): void {
+    this.tableState.save(this.STATE_KEY, {
+      currentPage: this.currentPage,
+      rows: this.rows,
+      searchTerm: this.searchTerm,
+      sortBy: this.sortBy,
+      sortDirection: this.sortDirection,
+      sortedColumn: this.sortedColumn,
+    });
   }
 
   ngAfterViewInit(): void {
@@ -64,11 +109,14 @@ export class ShiftListComponent implements OnInit, AfterViewInit {
 
   resetSearch() {
     this.searchTerm = '';
+    this.currentPage = 1;
+    this.saveState();
     this.loadShifts();
   }
 
   loadShifts() {
     this.loading = true;
+    this.saveState();
 
     const params = {
       pageNumber: this.currentPage,

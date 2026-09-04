@@ -6,6 +6,7 @@ import { IQuestionGroupLookupResponse } from '@app/@core/interfaces/recruitment-
 import { BreadcrumbService } from '@app/@core/services';
 import { ExamQuestionService } from '@app/@core/services/recruitment/exam-question/exam-question.service';
 import { QuestionGroupService } from '@app/@core/services/recruitment/question-group/question-group.service';
+import { TableStateService } from '@app/@core/services/table-state.service';
 import { ConfirmationService, SortEvent } from 'primeng/api';
 import { ActiveStatusOptions, DifficultyLevelOptions, ExamQuestionListColumns, QuestionTypeOptions } from './exam-question-list.component.constants';
 
@@ -16,12 +17,15 @@ import { ActiveStatusOptions, DifficultyLevelOptions, ExamQuestionListColumns, Q
   styleUrl: './exam-question-list.component.scss',
 })
 export class ExamQuestionListComponent implements OnInit {
+  private readonly STATE_KEY = 'exam-question-list';
+
   constructor(
     private examQuestionService: ExamQuestionService,
     private questionGroupService: QuestionGroupService,
     private confirmationService: ConfirmationService,
     private breadcrumbService: BreadcrumbService,
     private cdr: ChangeDetectorRef,
+    private tableState: TableStateService,
   ) {}
 
   questions: IExamQuestionResponse[] = [];
@@ -30,7 +34,7 @@ export class ExamQuestionListComponent implements OnInit {
   loading = false;
   totalRecords = 0;
   UI_CONFIG = UI_CONFIG;
-  rows = UI_CONFIG.defaultPageSize;
+  rows: number = UI_CONFIG.defaultPageSize;
   currentPage = 1;
   sortedColumn = '';
   sortBy = '';
@@ -67,8 +71,51 @@ export class ExamQuestionListComponent implements OnInit {
       { title: 'Recruitment', icon: 'fa-solid fa-briefcase', href: '/exam-questions/exam-question-list' },
       { title: 'Exam Questions', icon: 'fa-solid fa-circle-question', href: '/exam-questions/exam-question-list' },
     ]);
+    this.restoreState();
     this.loadGroupLookup();
     this.loadQuestions();
+  }
+
+  private restoreState(): void {
+    const s = this.tableState.load<{
+      currentPage: number;
+      rows: number;
+      searchTerm: string;
+      filterQuestionGroupId: number | null;
+      filterQuestionType: QuestionTypeEnum | null;
+      filterDifficultyLevel: DifficultyLevelEnum | null;
+      filterIsActive: boolean | null;
+      sortBy: string;
+      sortDirection: string;
+      sortedColumn: string;
+    }>(this.STATE_KEY);
+    if (s) {
+      this.currentPage = s.currentPage ?? this.currentPage;
+      this.rows = s.rows ?? this.rows;
+      this.searchTerm = s.searchTerm ?? this.searchTerm;
+      this.filterQuestionGroupId = s.filterQuestionGroupId ?? this.filterQuestionGroupId;
+      this.filterQuestionType = s.filterQuestionType ?? this.filterQuestionType;
+      this.filterDifficultyLevel = s.filterDifficultyLevel ?? this.filterDifficultyLevel;
+      this.filterIsActive = s.filterIsActive ?? this.filterIsActive;
+      this.sortBy = s.sortBy ?? this.sortBy;
+      this.sortDirection = s.sortDirection ?? this.sortDirection;
+      this.sortedColumn = s.sortedColumn ?? this.sortedColumn;
+    }
+  }
+
+  private saveState(): void {
+    this.tableState.save(this.STATE_KEY, {
+      currentPage: this.currentPage,
+      rows: this.rows,
+      searchTerm: this.searchTerm,
+      filterQuestionGroupId: this.filterQuestionGroupId,
+      filterQuestionType: this.filterQuestionType,
+      filterDifficultyLevel: this.filterDifficultyLevel,
+      filterIsActive: this.filterIsActive,
+      sortBy: this.sortBy,
+      sortDirection: this.sortDirection,
+      sortedColumn: this.sortedColumn,
+    });
   }
 
   private loadGroupLookup(): void {
@@ -81,6 +128,7 @@ export class ExamQuestionListComponent implements OnInit {
 
   loadQuestions(): void {
     this.loading = true;
+    this.saveState();
 
     const params = {
       page: this.currentPage,
@@ -140,6 +188,7 @@ export class ExamQuestionListComponent implements OnInit {
     this.filterIsActive = null;
     this.currentPage = 1;
     this.filtersCollapsed = false;
+    this.saveState();
     this.loadQuestions();
   }
 

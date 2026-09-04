@@ -100,6 +100,12 @@ export class AuthService {
     return this.httpClient.post<ApiResponse<null>>(`${this.API_URL}/reset-password`, request);
   }
 
+  // Same request shape as reset-password (challengeId/otpCode/newPassword) - completes a
+  // staff-account invite sent by UserAccountController.Create.
+  acceptInvite(request: IResetPasswordRequest): Observable<ApiResponse<null>> {
+    return this.httpClient.post<ApiResponse<null>>(`${this.API_URL}/accept-invite`, request);
+  }
+
   logout(): void {
     this.clearScheduledRefresh();
     localStorage.removeItem(TOKEN_KEY);

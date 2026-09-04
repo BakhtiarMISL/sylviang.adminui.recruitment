@@ -15,6 +15,7 @@ import { JobVacancyService } from '@app/@core/services/recruitment/job-vacancy/j
 import { SavedSearchService } from '@app/@core/services/recruitment/saved-search/saved-search.service';
 import { ShortlistFilterService } from '@app/@core/services/recruitment/shortlist-filter/shortlist-filter.service';
 import { ToastService } from '@app/@core/services/misc/toast.service';
+import { BreadcrumbService } from '@app/@core/services';
 import { UI_CONFIG } from '@app/@core/constants';
 import { ConfirmationService, SortEvent } from 'primeng/api';
 import { Subject } from 'rxjs';
@@ -44,6 +45,7 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     private toast: ToastService,
     private router: Router,
     private route: ActivatedRoute,
+    private breadcrumbService: BreadcrumbService,
   ) {}
 
   applications: IJobApplicationListItem[] = [];
@@ -159,6 +161,7 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.setBreadcrumbs();
     this.restoreFiltersFromSession();
     this.applyDeepLinkQueryParams();
     this.filterChange$.pipe(debounceTime(400)).subscribe(() => {
@@ -183,6 +186,10 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.filterChange$.complete();
+  }
+
+  private setBreadcrumbs(): void {
+    this.breadcrumbService.setBreadcrumbs([{ title: 'ATS Dashboard', icon: 'fa-solid fa-list-check', href: '/applications' }]);
   }
 
   private loadSkillLibrary(): void {

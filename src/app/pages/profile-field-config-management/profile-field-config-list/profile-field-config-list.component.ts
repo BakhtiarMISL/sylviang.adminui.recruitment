@@ -6,6 +6,7 @@ import {
   ProfileFieldVisibilityEnum,
 } from '@core/interfaces/recruitment-management/profile-field-config.interface';
 import { ProfileFieldConfigService } from '@core/services/recruitment/profile-field-config/profile-field-config.service';
+import { BreadcrumbService } from '@app/@core/services';
 import { ConfirmationService } from 'primeng/api';
 
 @Component({
@@ -20,6 +21,7 @@ export class ProfileFieldConfigListComponent implements OnInit {
     private profileFieldConfigService: ProfileFieldConfigService,
     private confirmationService: ConfirmationService,
     private cdr: ChangeDetectorRef,
+    private breadcrumbService: BreadcrumbService,
   ) {}
 
   configs: IProfileFieldConfigResponse[] = [];
@@ -33,6 +35,7 @@ export class ProfileFieldConfigListComponent implements OnInit {
   form!: FormGroup;
 
   ngOnInit(): void {
+    this.setBreadcrumbs();
     this.form = this.fb.group({
       field: [null, [Validators.required]],
       jobPostingId: [null],
@@ -40,6 +43,13 @@ export class ProfileFieldConfigListComponent implements OnInit {
     });
 
     this.loadConfigs();
+  }
+
+  private setBreadcrumbs(): void {
+    this.breadcrumbService.setBreadcrumbs([
+      { title: 'System Administration', icon: 'fa-solid fa-gears', href: '/profile-field-config/profile-field-config-list' },
+      { title: 'Profile Field Config', icon: 'fa-solid fa-sliders', href: '/profile-field-config/profile-field-config-list' },
+    ]);
   }
 
   loadConfigs(): void {

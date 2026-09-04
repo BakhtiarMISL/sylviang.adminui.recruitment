@@ -46,12 +46,19 @@ export interface IThanaResponse {
   districtId: number;
 }
 
+export interface ICandidateProfileSectionCompleteness {
+  sectionKey: string;
+  isComplete: boolean;
+  weightPercentage: number;
+}
+
 export interface ICandidateProfileResponse extends ICandidateProfilePersonalInfoUpdateRequest, ICandidateProfileContactUpdateRequest {
   candidateProfileId: number;
   phoneDialCode?: string | null;
   profilePhotoPath?: string | null;
   signaturePath?: string | null;
   completenessPercentage: number;
+  sectionCompleteness: ICandidateProfileSectionCompleteness[];
   // US-003 AC4: true once the candidate has a submitted application - Email/Phone/NationalId
   // lock in that state, since JobApplication self-service lookups match by Email.
   hasSubmittedApplication: boolean;

@@ -1,0 +1,39 @@
+<app-public-navbar></app-public-navbar>
+
+<div class="login-page">
+  <div class="login-card" *ngIf="isMissingChallenge">
+    <h1 class="login-title">Invalid Invite Link</h1>
+    <p class="login-subtitle">This invite link is missing its code. Ask whoever invited you to send a new one.</p>
+    <p-button label="Go to Log In" (onClick)="goToLogin()" styleClass="w-full"></p-button>
+  </div>
+
+  <form class="login-card" *ngIf="!isMissingChallenge && !acceptSuccess" [formGroup]="form" (ngSubmit)="submit()">
+    <h1 class="login-title">Accept Invite</h1>
+    <p class="login-subtitle">Enter the 6-digit code we emailed you and choose your password.</p>
+
+    <div class="otp-field">
+      <p-inputotp formControlName="code" [length]="6" [integerOnly]="true"></p-inputotp>
+      <small class="login-error" *ngIf="code?.invalid && code?.touched">Enter the 6-digit code.</small>
+    </div>
+
+    <div class="login-field">
+      <label for="ai-new-password" class="required-label">Password</label>
+      <input id="ai-new-password" type="password" pInputText formControlName="newPassword" autocomplete="new-password" />
+      <small class="login-error" *ngIf="newPassword?.invalid && newPassword?.touched">Password must be at least 8 characters.</small>
+    </div>
+
+    <div class="login-field">
+      <label for="ai-confirm-password" class="required-label">Confirm Password</label>
+      <input id="ai-confirm-password" type="password" pInputText formControlName="confirmPassword" autocomplete="new-password" />
+      <small class="login-error" *ngIf="confirmPassword?.touched && form.errors?.['passwordMismatch']">Passwords do not match.</small>
+    </div>
+
+    <p-button type="submit" label="Activate Account" [loading]="isSubmitting" [disabled]="isSubmitting" styleClass="w-full"></p-button>
+  </form>
+
+  <div class="login-card" *ngIf="acceptSuccess">
+    <h1 class="login-title">Account Activated</h1>
+    <p class="login-subtitle">Your password has been set. You can now log in.</p>
+    <p-button label="Go to Log In" (onClick)="goToLogin()" styleClass="w-full"></p-button>
+  </div>
+</div>

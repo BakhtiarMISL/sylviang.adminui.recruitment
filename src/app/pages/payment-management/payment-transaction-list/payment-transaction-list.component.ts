@@ -9,6 +9,7 @@ import {
 import { IJobVacancyResponse } from '@core/interfaces/recruitment-management/job-vacancy.interface';
 import { JobVacancyService } from '@core/services/recruitment/job-vacancy/job-vacancy.service';
 import { PaymentReportService } from '@core/services/recruitment/payment-report/payment-report.service';
+import { TableStateService } from '@app/@core/services/table-state.service';
 
 @Component({
   selector: 'app-payment-transaction-list',
@@ -17,11 +18,14 @@ import { PaymentReportService } from '@core/services/recruitment/payment-report/
   styleUrl: './payment-transaction-list.component.scss',
 })
 export class PaymentTransactionListComponent implements OnInit {
+  private readonly STATE_KEY = 'payment-transaction-list';
+
   constructor(
     private paymentReportService: PaymentReportService,
     private jobVacancyService: JobVacancyService,
     private breadcrumbService: BreadcrumbService,
     private cdr: ChangeDetectorRef,
+    private tableState: TableStateService,
   ) {}
 
   items: IPaymentTransactionListItem[] = [];
@@ -55,6 +59,8 @@ export class PaymentTransactionListComponent implements OnInit {
       { title: 'Payment Transactions', icon: 'fa-solid fa-money-bill-transfer', href: '/payment-management/payment-transaction-list' },
     ]);
 
+    this.restoreState();
+
     this.jobVacancyService.getAllJobVacancies().subscribe({
       next: (response) => {
         this.vacancyOptions = !response.hasError && response.content ? response.content : [];
@@ -76,9 +82,43 @@ export class PaymentTransactionListComponent implements OnInit {
     };
   }
 
+  private restoreState(): void {
+    const s = this.tableState.load<{
+      currentPage: number;
+      rows: number;
+      filterJobPostingId: number | null;
+      filterStatus: PaymentTransactionStatusEnum | null;
+      filterCandidateName: string | null;
+      filterDateFrom: string | null;
+      filterDateTo: string | null;
+    }>(this.STATE_KEY);
+    if (s) {
+      this.currentPage = s.currentPage ?? this.currentPage;
+      this.rows = s.rows ?? this.rows;
+      this.filterJobPostingId = s.filterJobPostingId ?? this.filterJobPostingId;
+      this.filterStatus = s.filterStatus ?? this.filterStatus;
+      this.filterCandidateName = s.filterCandidateName ?? this.filterCandidateName;
+      this.filterDateFrom = s.filterDateFrom ? new Date(s.filterDateFrom) : this.filterDateFrom;
+      this.filterDateTo = s.filterDateTo ? new Date(s.filterDateTo) : this.filterDateTo;
+    }
+  }
+
+  private saveState(): void {
+    this.tableState.save(this.STATE_KEY, {
+      currentPage: this.currentPage,
+      rows: this.rows,
+      filterJobPostingId: this.filterJobPostingId,
+      filterStatus: this.filterStatus,
+      filterCandidateName: this.filterCandidateName,
+      filterDateFrom: this.filterDateFrom ? this.filterDateFrom.toISOString() : null,
+      filterDateTo: this.filterDateTo ? this.filterDateTo.toISOString() : null,
+    });
+  }
+
   loadItems(): void {
     this.loading = true;
     this.errorMessage = '';
+    this.saveState();
     this.paymentReportService.getTransactions(this.buildFilter()).subscribe({
       next: (response) => {
         this.items = !response.hasError && response.content ? response.content.data : [];
@@ -109,6 +149,7 @@ export class PaymentTransactionListComponent implements OnInit {
     this.filterDateTo = null;
     this.currentPage = 1;
     this.filtersCollapsed = false;
+    this.saveState();
     this.loadItems();
   }
 

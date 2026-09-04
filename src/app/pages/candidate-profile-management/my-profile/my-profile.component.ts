@@ -3,6 +3,7 @@ import { BreadcrumbService } from '@app/@core/services';
 import { CandidateProfileService } from '@app/@core/services/recruitment/candidate-profile/candidate-profile.service';
 import {
   ICandidateProfileResponse,
+  ICandidateProfileSectionCompleteness,
   ICandidateResumeParsedEducation,
   ICandidateResumeParsedWorkExperience,
   ICandidateResumeParseResponse,
@@ -62,6 +63,12 @@ export class MyProfileComponent implements OnInit {
   selectedResumeName = '';
 
   private resumePrefillState: IStoredResumePrefill | null = null;
+
+  // Looks up the backend-computed completeness for one accordion tab by its SectionKey
+  // (see CandidateProfileMapper.GetSectionCompleteness) - undefined until profile loads.
+  sectionCompleteness(sectionKey: string): ICandidateProfileSectionCompleteness | undefined {
+    return this.profile?.sectionCompleteness?.find((s) => s.sectionKey === sectionKey);
+  }
 
   ngOnInit(): void {
     this.breadcrumbService.setBreadcrumbs([

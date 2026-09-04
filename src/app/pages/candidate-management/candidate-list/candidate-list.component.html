@@ -80,8 +80,8 @@
             <th>Email</th>
             <th>Phone</th>
             <th style="width: 12rem">Profile Completeness</th>
-            <th style="width: 6rem">View</th>
-            <th style="width: 8rem">Talent Pool</th>
+            <th style="width: 8rem">View</th>
+            <th style="width: 10rem">Talent Pool</th>
           </tr>
         </ng-template>
 
@@ -107,13 +107,15 @@
               <td>{{ candidate.phone ? (candidate.phoneDialCode ? candidate.phoneDialCode + ' ' : '') + candidate.phone : '-' }}</td>
               <td>{{ candidate.completenessPercentage }}%</td>
               <td>
-                <button [routerLink]="[candidate.candidateProfileId]" class="text-primary">
+                <button pButton size="small" severity="secondary" [routerLink]="[candidate.candidateProfileId]">
                   <i class="fa fa-eye"></i>
+                  <span>View</span>
                 </button>
               </td>
               <td>
-                <button (click)="openAddToPoolDialog(candidate)" pTooltip="Add to Talent Pool" class="text-primary">
+                <button pButton size="small" severity="secondary" (click)="openAddToPoolDialog(candidate)" pTooltip="Add to Talent Pool">
                   <i class="fa fa-user-plus"></i>
+                  <span>Add to Pool</span>
                 </button>
               </td>
             </tr>

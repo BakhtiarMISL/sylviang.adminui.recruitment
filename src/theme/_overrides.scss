@@ -582,6 +582,23 @@
   @extend .fixed-columns-table;
 }
 
+// ---------------------------------------------Sticky Actions Column--------------------------------------------
+// Pins a table's trailing Actions column to the right edge of the horizontal scroll area, so row
+// actions stay reachable without scrolling all the way right - regardless of viewport width or
+// how many data columns the table has.
+.sticky-actions-column {
+  @apply sticky right-0 z-10 !important;
+}
+th.sticky-actions-column {
+  @apply bg-light dark:bg-dark !important;
+}
+.p-datatable-tbody > tr:nth-child(even) > td.sticky-actions-column {
+  @apply bg-light dark:bg-dark !important;
+}
+.p-datatable-tbody > tr:nth-child(odd) > td.sticky-actions-column {
+  @apply bg-borderLight dark:bg-borderDark !important;
+}
+
 // ---------------------------------------------Browser Autofill Styles Override---------------------------------------------
 .p-inputtext:-webkit-autofill,
 .p-inputtext:-webkit-autofill:hover,

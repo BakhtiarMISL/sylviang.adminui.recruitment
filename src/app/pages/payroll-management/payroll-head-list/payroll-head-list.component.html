@@ -77,7 +77,7 @@
                 </div>
               </th>
             }
-            <th style="width: 8rem">Actions</th>
+            <th style="width: 12rem">Actions</th>
           </tr>
         </ng-template>
 
@@ -103,12 +103,16 @@
                 <i class="fa text-sm" [class.fa-check]="head.isActive" [class.fa-times]="!head.isActive" [class.text-primary]="head.isActive" [class.text-neutral]="!head.isActive"></i>
               </td>
               <td>
-                <button [routerLink]="['/payroll/manage-payroll-head', head.payrollHeadId]" class="text-primary mr-2">
-                  <i class="fa fa-edit"></i>
-                </button>
-                <button class="text-danger" (click)="deletePayrollHead(head, $event)">
-                  <i class="fa fa-trash"></i>
-                </button>
+                <div class="flex gap-2">
+                  <button pButton size="small" severity="secondary" [routerLink]="['/payroll/manage-payroll-head', head.payrollHeadId]">
+                    <i class="fa fa-edit"></i>
+                    <span>Edit</span>
+                  </button>
+                  <button pButton size="small" severity="danger" (click)="deletePayrollHead(head, $event)">
+                    <i class="fa fa-trash"></i>
+                    <span>Delete</span>
+                  </button>
+                </div>
               </td>
             </tr>
           }

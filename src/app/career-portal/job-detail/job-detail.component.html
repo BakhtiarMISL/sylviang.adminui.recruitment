@@ -1,8 +1,8 @@
 <app-public-navbar *ngIf="!isLoggedIn"></app-public-navbar>
 
-<div class="min-h-[calc(100vh-4.5rem)] bg-gray-50 px-4 py-8 sm:px-8">
+<div class="min-h-[calc(100vh-4.5rem)] bg-gray-50 dark:bg-gray-900 px-4 py-8 sm:px-8">
   <div class="mx-auto max-w-3xl">
-    <a [routerLink]="['/careers']" class="mb-4 inline-flex items-center gap-2 text-sm text-blue-600 hover:underline">
+    <a [routerLink]="['/careers']" class="mb-4 inline-flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:underline">
       <i class="fa fa-arrow-left"></i>
       <span>Back to all openings</span>
     </a>
@@ -12,33 +12,51 @@
       <p-skeleton height="10rem"></p-skeleton>
     </div>
 
-    <div *ngIf="!loading && notFound" class="rounded-lg bg-white p-8 text-center text-gray-500 shadow-sm">This job posting is not available. It may have closed or been removed.</div>
+    <div *ngIf="!loading && notFound" class="rounded-lg bg-white dark:bg-gray-800 p-8 text-center text-gray-500 dark:text-gray-400 shadow-sm">This job posting is not available. It may have closed or been removed.</div>
 
     <div *ngIf="!loading && jobPosting" class="space-y-6">
-      <section class="rounded-lg bg-white p-6 shadow-sm">
-        <h1 class="text-2xl font-semibold text-gray-900">{{ jobPosting.title }}</h1>
-        <p class="mt-1 text-sm text-gray-600">{{ jobPosting.jobPostingCode }}</p>
+      <section class="rounded-lg bg-white dark:bg-gray-800 p-6 shadow-sm">
+        <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">{{ jobPosting.title }}</h1>
+        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">{{ jobPosting.jobPostingCode }}</p>
 
-        <div class="mt-4 flex flex-wrap gap-x-6 gap-y-1 text-sm text-gray-700">
+        <div *ngIf="jobPosting.companyName" class="mt-4 rounded-md border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800/60">
+          <p class="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-white">
+            <i class="fa-solid fa-building text-[#DC2626]"></i>{{ jobPosting.companyName }}
+          </p>
+          <p *ngIf="jobPosting.companyAddress" class="mt-1 flex items-start gap-2 text-sm text-gray-600 dark:text-gray-300">
+            <i class="fa-solid fa-map-location-dot mt-0.5 text-[#DC2626]"></i><span>{{ jobPosting.companyAddress }}</span>
+          </p>
+          <a
+            *ngIf="jobPosting.companyWebsite"
+            [href]="jobPosting.companyWebsite"
+            target="_blank"
+            rel="noopener"
+            class="mt-1 inline-flex items-center gap-2 text-sm text-blue-600 hover:underline dark:text-blue-400"
+          >
+            <i class="fa-solid fa-globe text-[#DC2626]"></i>{{ jobPosting.companyWebsite }}
+          </a>
+        </div>
+
+        <div class="mt-4 flex flex-wrap gap-x-6 gap-y-1 text-sm text-gray-700 dark:text-gray-300">
           <span *ngIf="jobPosting.location"><i class="fa fa-location-dot mr-1"></i>{{ jobPosting.location }}</span>
           <span><i class="fa fa-briefcase mr-1"></i>{{ formatEnumLabel(jobPosting.employmentType) }}</span>
           <span *ngIf="jobPosting.closingDate"><i class="fa fa-calendar mr-1"></i>Closes {{ jobPosting.closingDate | date: 'dd-MMM-yyyy' }}</span>
         </div>
 
         <div class="mt-6" *ngIf="jobPosting.description">
-          <h2 class="text-base font-medium text-gray-900">Description</h2>
-          <p class="mt-1 whitespace-pre-line text-sm text-gray-700">{{ jobPosting.description }}</p>
+          <h2 class="text-base font-medium text-gray-900 dark:text-white">Description</h2>
+          <p class="mt-1 whitespace-pre-line text-sm text-gray-700 dark:text-gray-300">{{ jobPosting.description }}</p>
         </div>
 
         <div class="mt-6" *ngIf="jobPosting.requirements">
-          <h2 class="text-base font-medium text-gray-900">Requirements</h2>
-          <p class="mt-1 whitespace-pre-line text-sm text-gray-700">{{ jobPosting.requirements }}</p>
+          <h2 class="text-base font-medium text-gray-900 dark:text-white">Requirements</h2>
+          <p class="mt-1 whitespace-pre-line text-sm text-gray-700 dark:text-gray-300">{{ jobPosting.requirements }}</p>
         </div>
 
         <!-- Eligibility Summary (US-024 AC1) -->
         <div class="mt-6">
-          <h2 class="text-base font-medium text-gray-900">Eligibility</h2>
-          <ul *ngIf="hasEligibilityInfo" class="mt-1 list-inside list-disc space-y-1 text-sm text-gray-700">
+          <h2 class="text-base font-medium text-gray-900 dark:text-white">Eligibility</h2>
+          <ul *ngIf="hasEligibilityInfo" class="mt-1 list-inside list-disc space-y-1 text-sm text-gray-700 dark:text-gray-300">
             <li *ngIf="jobPosting.minAge != null || jobPosting.maxAge != null">
               Age:
               <span *ngIf="jobPosting.minAge != null && jobPosting.maxAge != null">{{ jobPosting.minAge }} - {{ jobPosting.maxAge }} years</span>
@@ -49,7 +67,7 @@
             <li *ngIf="jobPosting.minExperienceYears != null">Minimum Experience: {{ jobPosting.minExperienceYears }} year{{ jobPosting.minExperienceYears === 1 ? '' : 's' }}</li>
             <li *ngIf="jobPosting.requiredDistrict">Required District: {{ jobPosting.requiredDistrict }}</li>
           </ul>
-          <p *ngIf="!hasEligibilityInfo" class="mt-1 text-sm text-gray-500">No specific eligibility requirements.</p>
+          <p *ngIf="!hasEligibilityInfo" class="mt-1 text-sm text-gray-500 dark:text-gray-400">No specific eligibility requirements.</p>
 
           <!-- Real-time eligibility check against the logged-in candidate's profile (US-024 AC2/AC3) -->
           <div *ngIf="eligibilityResult?.isEligible" class="mt-3 rounded-md bg-green-50 p-3 text-sm text-green-800">
@@ -78,8 +96,8 @@
         </div>
       </section>
 
-      <section class="rounded-lg bg-white p-6 shadow-sm">
-        <h2 class="mb-4 text-lg font-medium text-gray-900">Apply for this position</h2>
+      <section class="rounded-lg bg-white dark:bg-gray-800 p-6 shadow-sm">
+        <h2 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">Apply for this position</h2>
 
         <div *ngIf="isLoggedIn && existingApplication" class="rounded-md bg-green-50 p-4 text-sm text-green-800">
           <p><i class="fa fa-check-circle mr-1"></i>You already applied for this position on {{ existingApplication.appliedDate | date: 'dd-MMM-yyyy' }}.</p>
@@ -89,8 +107,8 @@
 
         <app-apply-form *ngIf="isLoggedIn && !existingApplication" [jobPostingId]="jobPosting.jobPostingId" [eligibilityResult]="eligibilityResult"></app-apply-form>
 
-        <div *ngIf="!isLoggedIn" class="rounded-md bg-gray-50 p-4 text-center">
-          <p class="mb-3 text-sm text-gray-700">You need a candidate account to apply for this position.</p>
+        <div *ngIf="!isLoggedIn" class="rounded-md bg-gray-50 dark:bg-gray-700 p-4 text-center">
+          <p class="mb-3 text-sm text-gray-700 dark:text-gray-300">You need a candidate account to apply for this position.</p>
           <div class="flex justify-center gap-2">
             <button pButton type="button" (click)="goToLogin()">
               <span>Login to Apply</span>

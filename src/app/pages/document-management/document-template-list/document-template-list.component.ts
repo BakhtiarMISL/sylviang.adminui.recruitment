@@ -1,8 +1,10 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { BreadcrumbService } from '@app/@core/services';
 import { DocumentTemplateService } from '@app/@core/services/recruitment/document-template/document-template.service';
+import { TableStateService } from '@app/@core/services/table-state.service';
 import { IDocumentTemplateResponse } from '@core/interfaces/recruitment-management/document-template.interface';
 import { ConfirmationService } from 'primeng/api';
+import { Table } from 'primeng/table';
 
 @Component({
   selector: 'app-document-template-list',
@@ -10,12 +12,18 @@ import { ConfirmationService } from 'primeng/api';
   templateUrl: './document-template-list.component.html',
   styleUrl: './document-template-list.component.scss',
 })
-export class DocumentTemplateListComponent implements OnInit {
+export class DocumentTemplateListComponent implements OnInit, AfterViewInit {
+  private readonly STATE_KEY = 'document-template-list';
+  @ViewChild('dt') dt!: Table;
+  first = 0;
+  rows = 10;
+
   constructor(
     private documentTemplateService: DocumentTemplateService,
     private confirmationService: ConfirmationService,
     private breadcrumbService: BreadcrumbService,
     private cdr: ChangeDetectorRef,
+    private tableState: TableStateService,
   ) {}
 
   items: IDocumentTemplateResponse[] = [];
@@ -34,7 +42,39 @@ export class DocumentTemplateListComponent implements OnInit {
       { title: 'System Administration', icon: 'fa-solid fa-gears', href: '/document-management/document-template-list' },
       { title: 'Document Templates', icon: 'fa-solid fa-file-lines', href: '/document-management/document-template-list' },
     ]);
+    this.restoreState();
     this.loadItems();
+  }
+
+  ngAfterViewInit(): void {
+    if (this.searchTerm && this.dt) {
+      setTimeout(() => this.dt.filterGlobal(this.searchTerm, 'contains'), 0);
+    }
+  }
+
+  private restoreState(): void {
+    const s = this.tableState.load<{ first: number; rows: number; searchTerm: string }>(this.STATE_KEY);
+    if (s) {
+      this.first = s.first ?? 0;
+      this.rows = s.rows ?? 10;
+      this.searchTerm = s.searchTerm ?? '';
+    }
+  }
+
+  private saveState(): void {
+    this.tableState.save(this.STATE_KEY, { first: this.first, rows: this.rows, searchTerm: this.searchTerm });
+  }
+
+  onPage(event: any): void {
+    this.first = event.first;
+    this.rows = event.rows;
+    this.saveState();
+  }
+
+  onSearch(): void {
+    this.first = 0;
+    this.saveState();
+    if (this.dt) this.dt.filterGlobal(this.searchTerm, 'contains');
   }
 
   loadItems(): void {

@@ -159,6 +159,7 @@ export enum RecruitmentEventEnum {
   ExamResultPublished = 'ExamResultPublished',
   AccountCreatedOtp = 'AccountCreatedOtp',
   PasswordResetRequested = 'PasswordResetRequested',
+  UserInvited = 'UserInvited',
   OfferLetterAvailable = 'OfferLetterAvailable',
   OfferAccepted = 'OfferAccepted',
   OfferDeclined = 'OfferDeclined',

@@ -1,11 +1,11 @@
 <app-public-navbar *ngIf="!isLoggedIn"></app-public-navbar>
 
 <!-- Card-grid marketing-site surface, for anonymous visitors and logged-in candidates alike. -->
-<div class="min-h-[calc(100vh-4.5rem)] bg-gray-50 px-4 py-8 sm:px-8">
+<div class="min-h-[calc(100vh-4.5rem)] bg-gray-50 dark:bg-gray-900 px-4 py-8 sm:px-8">
   <div class="mx-auto max-w-5xl">
     <header class="mb-6">
-      <h1 class="text-2xl font-semibold text-gray-900">Career Opportunities</h1>
-      <p class="text-sm text-gray-600">Browse our open positions and apply online.</p>
+      <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Career Opportunities</h1>
+      <p class="text-sm text-gray-600 dark:text-gray-400">Browse our open positions and apply online.</p>
     </header>
 
     <!-- Filters -->
@@ -95,36 +95,63 @@
 
       <div class="grid grid-cols-1 gap-6 transition-all duration-500 ease-in-out sm:grid-cols-2 lg:grid-cols-3">
         @if (loading) {
-          <div *ngFor="let job of skeletonItems" class="animate-pulse rounded-2xl border border-[#D1D5DB] bg-white p-6">
-            <div class="mb-3 h-5 w-1/3 rounded-full bg-gray-100"></div>
-            <div class="mb-3 h-5 w-3/4 rounded bg-gray-100"></div>
-            <div class="h-4 w-1/2 rounded bg-gray-100"></div>
+          <div *ngFor="let job of skeletonItems" class="animate-pulse rounded-2xl border border-[#D1D5DB] dark:border-gray-700 bg-white dark:bg-gray-800 p-6">
+            <div class="mb-3 h-5 w-1/3 rounded-full bg-gray-100 dark:bg-gray-700"></div>
+            <div class="mb-3 h-5 w-3/4 rounded bg-gray-100 dark:bg-gray-700"></div>
+            <div class="h-4 w-1/2 rounded bg-gray-100 dark:bg-gray-700"></div>
           </div>
         } @else {
           <a
             *ngFor="let job of jobPostings"
             [routerLink]="['/careers/jobs', job.jobPostingId]"
-            class="group relative flex flex-col rounded-2xl border border-[#D1D5DB] bg-white p-6 transition-all duration-300 hover:-translate-y-1 hover:border-[#DC2626]/30 hover:shadow-xl"
+            class="group relative flex flex-col rounded-2xl border border-[#D1D5DB] dark:border-gray-700 bg-white dark:bg-gray-800 p-6 transition-all duration-300 hover:-translate-y-1 hover:border-[#DC2626]/30 hover:shadow-xl"
             [class.opacity-60]="job.alreadyApplied"
           >
-            <div class="mb-3 flex items-center justify-between gap-2">
-              <span class="inline-flex w-fit items-center rounded-full bg-[#FEF2F2] px-2.5 py-1 text-xs font-medium text-[#DC2626]">
-                {{ formatEnumLabel(job.employmentType) }}
+            <div class="mb-4 flex items-start justify-between gap-2">
+              <div class="flex flex-wrap items-center gap-1.5 pt-1">
+                <span class="inline-flex w-fit items-center rounded-full bg-[#FEF2F2] px-2.5 py-1 text-xs font-medium text-[#DC2626]">
+                  {{ formatEnumLabel(job.employmentType) }}
+                </span>
+                <span *ngIf="job.alreadyApplied" class="inline-flex items-center rounded-full bg-success-100 px-2 py-0.5 text-xs font-medium text-success-700">
+                  <i class="fa fa-check mr-1"></i>Applied
+                </span>
+              </div>
+              <div *ngIf="isLoggedIn && matchScores.has(job.jobPostingId)" class="flex shrink-0 flex-col items-center" [pTooltip]="matchScores.get(job.jobPostingId) + '% match with your profile'" tooltipPosition="left">
+                <svg width="48" height="48" viewBox="0 0 52 52" class="block">
+                  <circle cx="26" cy="26" r="22" fill="none" stroke="#e5e7eb" stroke-width="4" class="dark:stroke-gray-600" />
+                  <circle cx="26" cy="26" r="22" fill="none" [attr.stroke]="getMatchColor(matchScores.get(job.jobPostingId)!)" stroke-width="4" stroke-linecap="round"
+                    [attr.stroke-dasharray]="138.23"
+                    [attr.stroke-dashoffset]="138.23 - (138.23 * matchScores.get(job.jobPostingId)! / 100)"
+                    transform="rotate(-90 26 26)" />
+                  <text x="26" y="26" text-anchor="middle" dominant-baseline="central" class="fill-gray-900 dark:fill-white" font-size="13" font-weight="600">
+                    {{ matchScores.get(job.jobPostingId) }}%
+                  </text>
+                </svg>
+                <span class="mt-0.5 text-[10px] font-medium leading-none text-gray-500 dark:text-gray-400">Match</span>
+              </div>
+            </div>
+            <h3 class="mb-1 text-lg font-semibold text-gray-900 dark:text-white transition-colors group-hover:text-[#DC2626]">{{ job.title }}</h3>
+            <div class="mb-3 flex flex-wrap items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
+              <span *ngIf="job.minAge || job.maxAge" class="inline-flex items-center gap-1 rounded bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5">
+                <i class="fa-solid fa-cake-candles text-[10px]"></i>
+                {{ job.minAge && job.maxAge ? job.minAge + '-' + job.maxAge + ' yrs' : job.minAge ? job.minAge + '+ yrs' : 'Up to ' + job.maxAge + ' yrs' }}
               </span>
-              <span *ngIf="job.alreadyApplied" class="inline-flex items-center rounded-full bg-success-100 px-2 py-0.5 text-xs font-medium text-success-700">
-                <i class="fa fa-check mr-1"></i>Applied
+              <span *ngIf="job.minEducationLevel" class="inline-flex items-center gap-1 rounded bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5">
+                <i class="fa-solid fa-graduation-cap text-[10px]"></i>
+                {{ job.minEducationLevel }}
+              </span>
+              <span *ngIf="job.minExperienceYears" class="inline-flex items-center gap-1 rounded bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5">
+                <i class="fa-solid fa-briefcase text-[10px]"></i>
+                {{ job.minExperienceYears }}+ yrs
               </span>
             </div>
-            <h3 class="mb-1 text-lg font-semibold text-gray-900 transition-colors group-hover:text-[#DC2626]">{{ job.title }}</h3>
-            <p class="mb-3 text-xs text-gray-400">{{ job.jobPostingCode }}</p>
-            <p class="mb-4 flex items-center text-sm text-gray-600">
+            <p *ngIf="job.companyName" class="mb-1 flex items-center text-sm font-medium text-gray-800 dark:text-gray-200">
+              <i class="fa-solid fa-building mr-1.5 text-[#DC2626]"></i>{{ job.companyName }}
+            </p>
+            <p class="mb-4 flex items-center text-sm text-gray-600 dark:text-gray-300">
               <i class="fa-solid fa-location-dot mr-1.5 text-[#DC2626]"></i>{{ job.location || 'Location not specified' }}
             </p>
-            <div class="mt-auto flex items-center justify-between text-xs text-gray-500">
-              <span>Posted {{ job.postingDate ? (job.postingDate | date: 'dd-MMM-yyyy') : '-' }}</span>
-              <span>Closes {{ job.closingDate ? (job.closingDate | date: 'dd-MMM-yyyy') : '-' }}</span>
-            </div>
-            <span class="mt-3 inline-flex items-center text-sm font-medium text-[#DC2626] opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+            <span class="mt-auto inline-flex items-center text-sm font-medium text-[#DC2626] opacity-0 transition-opacity duration-200 group-hover:opacity-100">
               View details
               <i class="fa-solid fa-arrow-right ml-1.5 transition-transform duration-200 group-hover:translate-x-1"></i>
             </span>

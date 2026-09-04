@@ -5,6 +5,8 @@ import { ToastService } from '@app/@core/services/misc/toast.service';
 import { JobVacancyListColumns } from './job-vacancy-list.component.constants';
 import { ConfirmationService, SortEvent } from 'primeng/api';
 import { UI_CONFIG } from '@app/@core/constants';
+import { TableStateService } from '@app/@core/services/table-state.service';
+import { BreadcrumbService } from '@app/@core/services';
 
 @Component({
   selector: 'app-job-vacancy-list',
@@ -13,21 +15,24 @@ import { UI_CONFIG } from '@app/@core/constants';
   styleUrl: './job-vacancy-list.component.scss',
 })
 export class JobVacancyListComponent implements OnInit, AfterViewInit {
+  private readonly STATE_KEY = 'job-vacancy-list';
+
   constructor(
     private jobVacancyService: JobVacancyService,
     private cdr: ChangeDetectorRef,
     private confirmationService: ConfirmationService,
     private toast: ToastService,
+    private tableState: TableStateService,
+    private breadcrumbService: BreadcrumbService,
   ) {}
 
   jobVacancies: IJobVacancyResponse[] = [];
-  selectedJobVacancies: IJobVacancyResponse[] = [];
   sortedColumn: string = '';
   isLoading = true;
   totalRecords = 0;
   loading = false;
   UI_CONFIG = UI_CONFIG;
-  rows = UI_CONFIG.defaultPageSize;
+  rows: number = UI_CONFIG.defaultPageSize;
   currentPage = 1;
 
   // Leave the initial sort unset so the vacancy endpoint applies its deterministic default:
@@ -53,16 +58,59 @@ export class JobVacancyListComponent implements OnInit, AfterViewInit {
   columns = JobVacancyListColumns;
 
   ngOnInit(): void {
+    this.setBreadcrumbs();
+    this.restoreState();
     this.loadJobVacancies();
     this.isLoading = false;
   }
 
-  ngAfterViewInit(): void {
-    this.cdr.detectChanges();
+  private setBreadcrumbs(): void {
+    this.breadcrumbService.setBreadcrumbs([
+      { title: 'Recruitment', icon: 'fa-solid fa-briefcase', href: '/job-vacancy/job-vacancy-list' },
+      { title: 'Job Vacancies', icon: 'fa-solid fa-list', href: '/job-vacancy/job-vacancy-list' },
+    ]);
   }
 
-  onSelectionChange(event: any) {
-    this.selectedJobVacancies = event;
+  private restoreState(): void {
+    const s = this.tableState.load<{
+      currentPage: number;
+      rows: number;
+      searchTerm: string;
+      postingDateTo: string | null;
+      closingDateTo: string | null;
+      myPostingsOnly: boolean;
+      sortBy: string;
+      sortDirection: string;
+      sortedColumn: string;
+    }>(this.STATE_KEY);
+    if (s) {
+      this.currentPage = s.currentPage ?? this.currentPage;
+      this.rows = s.rows ?? this.rows;
+      this.searchTerm = s.searchTerm ?? this.searchTerm;
+      this.postingDateTo = s.postingDateTo ? new Date(s.postingDateTo) : this.postingDateTo;
+      this.closingDateTo = s.closingDateTo ? new Date(s.closingDateTo) : this.closingDateTo;
+      this.myPostingsOnly = s.myPostingsOnly ?? this.myPostingsOnly;
+      this.sortBy = s.sortBy ?? this.sortBy;
+      this.sortDirection = s.sortDirection ?? this.sortDirection;
+      this.sortedColumn = s.sortedColumn ?? this.sortedColumn;
+    }
+  }
+
+  private saveState(): void {
+    this.tableState.save(this.STATE_KEY, {
+      currentPage: this.currentPage,
+      rows: this.rows,
+      searchTerm: this.searchTerm,
+      postingDateTo: this.postingDateTo ? this.postingDateTo.toISOString() : null,
+      closingDateTo: this.closingDateTo ? this.closingDateTo.toISOString() : null,
+      myPostingsOnly: this.myPostingsOnly,
+      sortBy: this.sortBy,
+      sortDirection: this.sortDirection,
+      sortedColumn: this.sortedColumn,
+    });
+  }
+
+  ngAfterViewInit(): void {
     this.cdr.detectChanges();
   }
 
@@ -79,10 +127,12 @@ export class JobVacancyListComponent implements OnInit, AfterViewInit {
     this.myPostingsOnly = false;
     this.currentPage = 1;
     this.filtersCollapsed = false;
+    this.saveState();
     this.loadJobVacancies();
   }
 
   loadJobVacancies() {
+    this.saveState();
     if (this.myPostingsOnly) {
       this.loadMyPostings();
       return;
@@ -105,7 +155,6 @@ export class JobVacancyListComponent implements OnInit, AfterViewInit {
         if (!response.hasError && response.content) {
           this.jobVacancies = response.content.data || [];
           this.totalRecords = response.content.totalCount || 0;
-          this.selectedJobVacancies = [];
         } else {
           this.jobVacancies = [];
           this.totalRecords = 0;
@@ -135,7 +184,6 @@ export class JobVacancyListComponent implements OnInit, AfterViewInit {
       next: (response) => {
         this.allMyPostings = !response.hasError && response.content ? response.content : [];
         this.applyMyPostingsPage();
-        this.selectedJobVacancies = [];
         this.loading = false;
         this.cdr.detectChanges();
       },
@@ -157,6 +205,7 @@ export class JobVacancyListComponent implements OnInit, AfterViewInit {
   onPageChange(event: any): void {
     this.currentPage = Math.floor(event.first / event.rows) + 1;
     this.rows = event.rows;
+    this.saveState();
 
     if (this.myPostingsOnly) {
       this.applyMyPostingsPage();

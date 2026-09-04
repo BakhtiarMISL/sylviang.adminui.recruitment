@@ -4,6 +4,7 @@ import { CareerPortalService } from '@app/@core/services/recruitment/career-port
 import { JobApplicationService } from '@app/@core/services/recruitment/job-application/job-application.service';
 import { UI_CONFIG } from '@app/@core/constants';
 import { AuthService } from '@core/services/auth/auth.service';
+import { BreadcrumbService } from '@app/@core/services';
 import { UserRoleEnum } from '@core/enums/user-role.enum';
 import { EmploymentTypeOptions, ExperienceBucketOptions } from '../career-portal.constants';
 import { JobBrowseColumns } from './job-browse.component.constants';
@@ -24,6 +25,7 @@ export class JobBrowseComponent implements OnInit, AfterViewInit {
     private jobApplicationService: JobApplicationService,
     private authService: AuthService,
     private cdr: ChangeDetectorRef,
+    private breadcrumbService: BreadcrumbService,
   ) {}
 
   // Reached both pre-login (top-level /careers, standalone public layout) and post-login
@@ -35,9 +37,7 @@ export class JobBrowseComponent implements OnInit, AfterViewInit {
 
   jobPostings: IJobPostingRow[] = [];
   loading = false;
-  // Job posting ids the current candidate has already applied to - fetched once (not
-  // per-page, "My Applications" isn't paginated either) so re-sorting/tagging works
-  // regardless of which page of results just loaded.
+  matchScores = new Map<number, number>();
   private appliedJobPostingIds = new Set<number>();
   totalRecords = 0;
   UI_CONFIG = UI_CONFIG;
@@ -65,6 +65,8 @@ export class JobBrowseComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
+    this.breadcrumbService.setBreadcrumbs([{ title: 'Careers', icon: 'fa-solid fa-magnifying-glass', href: '/careers' }]);
+
     if (this.isLoggedIn && this.authService.getRole() === UserRoleEnum.Candidate) {
       this.jobApplicationService.getMyApplications().subscribe({
         next: (response) => {
@@ -133,6 +135,7 @@ export class JobBrowseComponent implements OnInit, AfterViewInit {
           this.jobPostings = response.content.data || [];
           this.totalRecords = response.content.totalCount || 0;
           this.applyAppliedFlag();
+          this.fetchMatchScores();
         } else {
           this.jobPostings = [];
           this.totalRecords = 0;
@@ -169,5 +172,27 @@ export class JobBrowseComponent implements OnInit, AfterViewInit {
   formatEnumLabel(value: string | null | undefined): string {
     if (!value) return '';
     return value.replace(/([a-z])([A-Z])/g, '$1 $2');
+  }
+
+  private fetchMatchScores(): void {
+    if (!this.isLoggedIn || this.authService.getRole() !== UserRoleEnum.Candidate) return;
+
+    this.jobPostings.forEach((job) => {
+      this.careerPortalService.getMatchScore(job.jobPostingId).subscribe({
+        next: (response) => {
+          if (!response.hasError && response.content?.score != null) {
+            this.matchScores.set(job.jobPostingId, response.content.score);
+            this.cdr.detectChanges();
+          }
+        },
+        error: () => {},
+      });
+    });
+  }
+
+  getMatchColor(score: number): string {
+    if (score >= 70) return '#22c55e';
+    if (score >= 40) return '#f59e0b';
+    return '#ef4444';
   }
 }

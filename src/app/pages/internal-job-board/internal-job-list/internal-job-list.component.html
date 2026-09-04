@@ -113,7 +113,7 @@
                 </div>
               </th>
             }
-            <th style="width: 6rem">Actions</th>
+            <th style="width: 8rem">Actions</th>
           </tr>
         </ng-template>
 
@@ -137,8 +137,9 @@
               <td>{{ job.postingDate ? (job.postingDate | date: 'dd-MMM-yyyy') : '-' }}</td>
               <td>{{ job.closingDate ? (job.closingDate | date: 'dd-MMM-yyyy') : '-' }}</td>
               <td>
-                <button [routerLink]="['/internal-jobs/jobs', job.jobPostingId]" class="text-primary">
+                <button pButton size="small" severity="secondary" [routerLink]="['/internal-jobs/jobs', job.jobPostingId]">
                   <i class="fa fa-eye"></i>
+                  <span>View</span>
                 </button>
               </td>
             </tr>

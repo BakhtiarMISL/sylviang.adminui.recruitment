@@ -146,7 +146,7 @@
                 </div>
               </th>
             }
-            <th style="width: 8rem">Actions</th>
+            <th style="width: 14rem">Actions</th>
           </tr>
         </ng-template>
 
@@ -177,12 +177,16 @@
                 </span>
               </td>
               <td>
-                <button [routerLink]="['/exam-questions/manage-exam-question', question.examQuestionId]" class="text-primary mr-2">
-                  <i class="fa fa-edit"></i>
-                </button>
-                <button class="text-danger" (click)="toggleActiveStatus(question, $event)">
-                  <i class="fa" [ngClass]="question.isActive ? 'fa-ban' : 'fa-check'"></i>
-                </button>
+                <div class="flex gap-2">
+                  <button pButton size="small" severity="secondary" [routerLink]="['/exam-questions/manage-exam-question', question.examQuestionId]">
+                    <i class="fa fa-edit"></i>
+                    <span>Edit</span>
+                  </button>
+                  <button pButton size="small" [severity]="question.isActive ? 'danger' : 'success'" (click)="toggleActiveStatus(question, $event)">
+                    <i class="fa" [ngClass]="question.isActive ? 'fa-ban' : 'fa-check'"></i>
+                    <span>{{ question.isActive ? 'Deactivate' : 'Activate' }}</span>
+                  </button>
+                </div>
               </td>
             </tr>
           }

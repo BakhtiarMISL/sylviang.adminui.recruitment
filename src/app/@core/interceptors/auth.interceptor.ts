@@ -18,7 +18,7 @@ export class AuthInterceptor implements HttpInterceptor {
     // it must NOT be swept into this exclusion just because the URL also contains
     // "/career-portal". Was previously stripping the token from every career-portal request
     // including apply, causing a logged-in candidate's own application submission to 401.
-    const isPublicCareerPortalRequest = request.method === 'GET' && request.url.includes('/career-portal');
+    const isPublicCareerPortalRequest = request.method === 'GET' && request.url.includes('/career-portal') && !request.url.includes('/match-score');
     // Only attach the bearer token to this app's own backend. Without this, any future
     // HttpClient call to a third-party origin (analytics, maps, a presigned storage URL, etc.)
     // would silently carry the user's token to that origin too.

@@ -7,6 +7,7 @@ import { DocumentTrackingService } from '@app/@core/services/recruitment/documen
 import { IDocumentTrackingFilterRequest, IDocumentTrackingItemResponse } from '@core/interfaces/recruitment-management/document-tracking.interface';
 import { Base_URL } from '@env/environment';
 import { ConfirmationService } from 'primeng/api';
+import { TableStateService } from '@app/@core/services/table-state.service';
 
 // Every DocumentTypeEnum value that DocumentTrackingService actually aggregates (has a real
 // generated-document entity behind it). RejectionLetter/ExperienceCertificate/RelievingLetter
@@ -28,12 +29,15 @@ const TRACKED_DOCUMENT_TYPES = [
   styleUrl: './document-tracking-list.component.scss',
 })
 export class DocumentTrackingListComponent implements OnInit {
+  private readonly STATE_KEY = 'document-tracking-list';
+
   constructor(
     private documentTrackingService: DocumentTrackingService,
     private confirmationService: ConfirmationService,
     private breadcrumbService: BreadcrumbService,
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef,
+    private tableState: TableStateService,
   ) {}
 
   items: IDocumentTrackingItemResponse[] = [];
@@ -69,11 +73,44 @@ export class DocumentTrackingListComponent implements OnInit {
       { title: 'Document Tracking', icon: 'fa-solid fa-list-check', href: '/document-management/document-tracking-list' },
     ]);
 
+    this.restoreState();
     this.route.queryParamMap.subscribe((params) => {
       const idParam = params.get('jobApplicationId');
-      this.jobApplicationId = idParam ? +idParam : null;
-      this.currentPage = 1;
+      const incomingJobAppId = idParam ? +idParam : null;
+      // If deep-linked with a jobApplicationId, that takes precedence over saved state
+      if (incomingJobAppId != null) {
+        this.jobApplicationId = incomingJobAppId;
+        this.currentPage = 1;
+      }
       this.loadItems();
+    });
+  }
+
+  private restoreState(): void {
+    const s = this.tableState.load<{
+      currentPage: number;
+      rows: number;
+      filterDocumentType: DocumentTypeEnum | null;
+      filterAcceptanceStatus: DocumentAcceptanceStatusEnum | null;
+      jobApplicationId: number | null;
+    }>(this.STATE_KEY);
+    if (s) {
+      this.currentPage = s.currentPage ?? this.currentPage;
+      this.rows = s.rows ?? this.rows;
+      this.filterDocumentType = s.filterDocumentType ?? this.filterDocumentType;
+      this.filterAcceptanceStatus = s.filterAcceptanceStatus ?? this.filterAcceptanceStatus;
+      // Only restore jobApplicationId if no query param will override it; saved value is still useful when navigating back without query param
+      if (s.jobApplicationId !== undefined) this.jobApplicationId = s.jobApplicationId;
+    }
+  }
+
+  private saveState(): void {
+    this.tableState.save(this.STATE_KEY, {
+      currentPage: this.currentPage,
+      rows: this.rows,
+      filterDocumentType: this.filterDocumentType,
+      filterAcceptanceStatus: this.filterAcceptanceStatus,
+      jobApplicationId: this.jobApplicationId,
     });
   }
 
@@ -90,6 +127,7 @@ export class DocumentTrackingListComponent implements OnInit {
   loadItems(): void {
     this.loading = true;
     this.errorMessage = '';
+    this.saveState();
     this.documentTrackingService.getAll(this.buildFilter()).subscribe({
       next: (response) => {
         this.items = !response.hasError && response.content ? response.content.data : [];
@@ -116,6 +154,7 @@ export class DocumentTrackingListComponent implements OnInit {
     this.filterAcceptanceStatus = null;
     this.currentPage = 1;
     this.filtersCollapsed = false;
+    this.saveState();
     this.loadItems();
   }
 

@@ -112,7 +112,7 @@
       </div>
     </a>
 
-    <a routerLink="/internal-jobs/job-list" class="quick-link-card">
+    <a *ngIf="role === UserRoleEnum.Admin || role === UserRoleEnum.HR" routerLink="/internal-jobs/job-list" class="quick-link-card">
       <div class="quick-link-icon"><i class="fa-solid fa-building text-xl text-primary"></i></div>
       <div>
         <p class="font-semibold text-dark dark:text-white">Internal Job Board</p>

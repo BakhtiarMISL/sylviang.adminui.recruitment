@@ -1,6 +1,7 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { IHiringPipelineResponse } from '@app/@core/interfaces/recruitment-management/hiring-pipeline.interface';
 import { HiringPipelineService } from '@app/@core/services/recruitment/hiring-pipeline/hiring-pipeline.service';
+import { BreadcrumbService } from '@app/@core/services';
 import { ConfirmationService } from 'primeng/api';
 
 @Component({
@@ -14,6 +15,7 @@ export class HiringPipelineListComponent implements OnInit {
     private hiringPipelineService: HiringPipelineService,
     private confirmationService: ConfirmationService,
     private cdr: ChangeDetectorRef,
+    private breadcrumbService: BreadcrumbService,
   ) {}
 
   pipelines: IHiringPipelineResponse[] = [];
@@ -26,7 +28,15 @@ export class HiringPipelineListComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.setBreadcrumbs();
     this.loadPipelines();
+  }
+
+  private setBreadcrumbs(): void {
+    this.breadcrumbService.setBreadcrumbs([
+      { title: 'Recruitment', icon: 'fa-solid fa-briefcase', href: '/hiring-pipeline/hiring-pipeline-list' },
+      { title: 'Hiring Pipelines', icon: 'fa-solid fa-diagram-project', href: '/hiring-pipeline/hiring-pipeline-list' },
+    ]);
   }
 
   loadPipelines(): void {

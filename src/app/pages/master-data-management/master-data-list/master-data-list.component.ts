@@ -1,9 +1,11 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { BreadcrumbService } from '@app/@core/services';
 import { MasterDataService } from '@app/@core/services/recruitment/master-data/master-data.service';
+import { TableStateService } from '@app/@core/services/table-state.service';
 import { IMasterDataEntityConfig, IMasterDataItem } from '@core/interfaces/recruitment-management/master-data.interface';
 import { ConfirmationService } from 'primeng/api';
+import { Table } from 'primeng/table';
 
 @Component({
   selector: 'app-master-data-list',
@@ -11,13 +13,19 @@ import { ConfirmationService } from 'primeng/api';
   templateUrl: './master-data-list.component.html',
   styleUrl: './master-data-list.component.scss',
 })
-export class MasterDataListComponent implements OnInit {
+export class MasterDataListComponent implements OnInit, AfterViewInit {
+  private readonly STATE_KEY_PREFIX = 'master-data-list:';
+  @ViewChild('dt') dt!: Table;
+  first = 0;
+  rows = 10;
+
   constructor(
     private masterDataService: MasterDataService,
     private confirmationService: ConfirmationService,
     private breadcrumbService: BreadcrumbService,
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef,
+    private tableState: TableStateService,
   ) {}
 
   config!: IMasterDataEntityConfig;
@@ -40,8 +48,44 @@ export class MasterDataListComponent implements OnInit {
     this.route.data.subscribe((data) => {
       this.config = data['config'];
       this.setBreadcrumbs();
+      this.restoreState();
       this.loadItems();
     });
+  }
+
+  ngAfterViewInit(): void {
+    if (this.searchTerm && this.dt) {
+      setTimeout(() => this.dt.filterGlobal(this.searchTerm, 'contains'), 0);
+    }
+  }
+
+  private get stateKey(): string {
+    return this.STATE_KEY_PREFIX + (this.config?.routeKey ?? 'unknown');
+  }
+
+  private restoreState(): void {
+    const s = this.tableState.load<{ first: number; rows: number; searchTerm: string }>(this.stateKey);
+    if (s) {
+      this.first = s.first ?? 0;
+      this.rows = s.rows ?? 10;
+      this.searchTerm = s.searchTerm ?? '';
+    }
+  }
+
+  private saveState(): void {
+    this.tableState.save(this.stateKey, { first: this.first, rows: this.rows, searchTerm: this.searchTerm });
+  }
+
+  onPage(event: any): void {
+    this.first = event.first;
+    this.rows = event.rows;
+    this.saveState();
+  }
+
+  onSearch(): void {
+    this.first = 0;
+    this.saveState();
+    if (this.dt) this.dt.filterGlobal(this.searchTerm, 'contains');
   }
 
   private setBreadcrumbs(): void {

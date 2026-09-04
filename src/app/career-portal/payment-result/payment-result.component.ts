@@ -4,6 +4,7 @@ import { Subscription } from 'rxjs';
 import { IPaymentStatusResponse } from '@app/@core/interfaces/recruitment-management/payment.interface';
 import { PaymentService } from '@app/@core/services/recruitment/payment/payment.service';
 import { AuthService } from '@core/services/auth/auth.service';
+import { BreadcrumbService } from '@app/@core/services';
 
 const POLL_INTERVAL_MS = 3000;
 const MAX_POLL_ATTEMPTS = 20; // ~1 minute - the IPN usually lands within a few seconds of the browser redirect.
@@ -30,6 +31,7 @@ export class PaymentResultComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef,
+    private breadcrumbService: BreadcrumbService,
   ) {}
 
   get isLoggedIn(): boolean {
@@ -54,6 +56,10 @@ export class PaymentResultComponent implements OnInit, OnDestroy {
   private queryParamsSubscription: Subscription | null = null;
 
   ngOnInit(): void {
+    this.breadcrumbService.setBreadcrumbs([
+      { title: 'Careers', icon: 'fa-solid fa-magnifying-glass', href: '/careers' },
+      { title: 'Payment Result', icon: 'fa-solid fa-money-check-dollar', href: '/careers/payment-result' },
+    ]);
     this.queryParamsSubscription = this.route.queryParamMap.subscribe((params) => {
       // Any later emission on this same route restarts the poll - without clearing the pending
       // timer first, the old chain kept running alongside the new one, both decrementing the
