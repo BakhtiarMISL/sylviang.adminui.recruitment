@@ -1,0 +1,148 @@
+<section class="page-container">
+  <div class="table-container mb-4 p-4">
+    <h3 class="table-title mb-3">Generate Joining Booklet Batch</h3>
+
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <div>
+        <p-floatlabel variant="in">
+          <p-select
+            inputId="batchLabel"
+            class="w-full"
+            [options]="batchOptions"
+            [(ngModel)]="selectedBatch"
+            optionLabel="label"
+            [appendTo]="'body'"
+            placeholder="Select a batch"
+            (onChange)="onBatchChange()"
+          ></p-select>
+          <label for="batchLabel">Batch Label</label>
+        </p-floatlabel>
+        <small class="text-red-500" *ngIf="formSubmitted && !selectedBatch">Batch is required.</small>
+        <small class="text-neutral" *ngIf="!(formSubmitted && !selectedBatch)">Batches are managed in the Final Selection Pool.</small>
+      </div>
+
+      <div>
+        <p-floatlabel variant="in">
+          <p-datepicker inputId="joiningDate" [(ngModel)]="joiningDate" dateFormat="dd-M-yy" [showIcon]="false" [readonlyInput]="true" styleClass="w-full"></p-datepicker>
+          <label for="joiningDate">Joining Date</label>
+        </p-floatlabel>
+        <small class="text-red-500" *ngIf="formSubmitted && !joiningDate">Joining date is required.</small>
+      </div>
+
+      <div>
+        <p-floatlabel variant="in">
+          <p-select
+            inputId="documentTemplateId"
+            class="w-full"
+            [options]="templateOptions"
+            [(ngModel)]="documentTemplateId"
+            optionLabel="label"
+            optionValue="value"
+            [appendTo]="'body'"
+            placeholder="Select a Joining Booklet template"
+          ></p-select>
+          <label for="documentTemplateId">Joining Booklet Template</label>
+        </p-floatlabel>
+        <small class="text-red-500" *ngIf="formSubmitted && !documentTemplateId">Template is required.</small>
+        <small class="text-neutral" *ngIf="templateOptions.length === 0">
+          No active Joining Booklet templates found. <a [routerLink]="['/document-management/manage-document-template']">Create one first</a>.
+        </small>
+      </div>
+    </div>
+
+    <div *ngIf="statusMessage" class="mt-3" [class.text-red-600]="statusIsError" [class.text-green-600]="!statusIsError">
+      {{ statusMessage }}
+    </div>
+  </div>
+
+  <div class="table-container">
+    <div class="table-title-container flex justify-between items-center">
+      <h3 class="table-title">
+        Accepted-Offer Candidates
+        <span class="table-title-info" *ngIf="selectedBatch">({{ eligibleCandidates.length }} eligible)</span>
+      </h3>
+
+      <div class="flex gap-2">
+        <button pButton [disabled]="selectedCandidates.length === 0 || generating" (click)="generateBatch()">
+          <i class="fa" [class.fa-book]="!generating" [class.fa-spinner]="generating" [class.fa-spin]="generating"></i>
+          <span>Generate for Selected ({{ selectedCandidates.length }})</span>
+        </button>
+
+        <button
+          pButton
+          severity="secondary"
+          [disabled]="!lastGenerateResponse || lastGenerateResponse.successCount === 0 || downloading"
+          (click)="downloadZip()"
+        >
+          <i class="fa" [class.fa-file-zipper]="!downloading" [class.fa-spinner]="downloading" [class.fa-spin]="downloading"></i>
+          <span>Download ZIP</span>
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="!loading && selectedBatch && eligibleCandidates.length === 0" class="not-found">
+      <i class="fa fa-magnifying-glass-minus"></i>
+      <p>No candidates with an Accepted offer letter found.</p>
+    </div>
+
+    <p-table
+      *ngIf="(loading && selectedBatch) || (selectedBatch && eligibleCandidates.length > 0)"
+      [value]="loading ? skeletonItems : eligibleCandidates"
+      [(selection)]="selectedCandidates"
+      dataKey="offerLetterId"
+      styleClass="p-datatable-sm"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="width: 3rem"><p-tableHeaderCheckbox *ngIf="!loading"></p-tableHeaderCheckbox></th>
+          <th>Candidate</th>
+          <th>Designation</th>
+          <th>Offer Joining Date</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-candidate>
+        @if (loading) {
+          <tr>
+            <td></td>
+            <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+            <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+            <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
+          </tr>
+        } @else {
+          <tr>
+            <td><p-tableCheckbox [value]="candidate"></p-tableCheckbox></td>
+            <td>{{ candidate.candidateName }}</td>
+            <td>{{ candidate.designation }}</td>
+            <td>{{ candidate.offerJoiningDate | date: 'dd-MMM-yyyy' }}</td>
+          </tr>
+        }
+      </ng-template>
+    </p-table>
+  </div>
+
+  <div class="table-container mt-4" *ngIf="lastGenerateResponse">
+    <div class="table-title-container">
+      <h3 class="table-title">Batch Results</h3>
+    </div>
+    <p-table [value]="lastGenerateResponse.results" styleClass="p-datatable-sm">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Offer Letter ID</th>
+          <th>Status</th>
+          <th>Details</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-result>
+        <tr>
+          <td>{{ result.offerLetterId }}</td>
+          <td>
+            <span [class.text-green-600]="result.success" [class.text-red-600]="!result.success">
+              {{ result.success ? 'Success' : 'Failed' }}
+            </span>
+          </td>
+          <td>{{ result.errorMessage || '-' }}</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</section>

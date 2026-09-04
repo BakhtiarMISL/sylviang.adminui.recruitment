@@ -1,0 +1,169 @@
+<section class="page-container">
+  <div class="flex justify-between items-center gap-3 mb-4">
+    <h3 class="table-title">Pre-Boarding</h3>
+  </div>
+
+  <div *ngIf="loading" class="space-y-3">
+    <p-skeleton height="3rem" *ngFor="let i of [1, 2, 3]"></p-skeleton>
+  </div>
+
+  <small class="mb-3 block text-red-500" *ngIf="loadError">{{ loadError }}</small>
+
+  <form *ngIf="!loading && item" [formGroup]="form" class="space-y-6">
+    <div *ngIf="isLocked" class="table-container p-4 text-green-600">
+      <i class="fa fa-check-circle"></i>
+      Your pre-boarding submission has been received{{ item.submittedAt ? ' on ' + (item.submittedAt | date: 'dd-MMM-yyyy h:mm a') : '' }} and is now locked for editing.
+    </div>
+
+    <div *ngIf="needsCorrection" class="table-container p-4 text-orange-600">
+      <i class="fa fa-triangle-exclamation"></i>
+      HR has requested corrections{{ item.correctionComment ? ': ' + item.correctionComment : '.' }} Please update and resubmit.
+    </div>
+
+    <div class="table-container p-4">
+      <h4 class="mb-3 font-medium">Emergency Contact</h4>
+      <div class="form-container">
+        <p-floatlabel variant="in">
+          <input type="text" pInputText formControlName="emergencyContactName" id="emergencyContactName" class="w-full" />
+          <label for="emergencyContactName" class="required-label">Full Name</label>
+        </p-floatlabel>
+        <small class="invalid" *ngIf="hasError('emergencyContactName')">Emergency contact name is required</small>
+
+        <p-floatlabel variant="in">
+          <input type="text" pInputText formControlName="emergencyContactRelationship" id="emergencyContactRelationship" class="w-full" />
+          <label for="emergencyContactRelationship" class="required-label">Relationship</label>
+        </p-floatlabel>
+        <small class="invalid" *ngIf="hasError('emergencyContactRelationship')">Relationship is required</small>
+
+        <p-floatlabel variant="in">
+          <input type="text" pInputText formControlName="emergencyContactPhone" id="emergencyContactPhone" class="w-full" />
+          <label for="emergencyContactPhone" class="required-label">Phone</label>
+        </p-floatlabel>
+        <small class="invalid" *ngIf="hasError('emergencyContactPhone')">Phone is required</small>
+      </div>
+    </div>
+
+    <div class="table-container p-4">
+      <h4 class="mb-3 font-medium">Insurance</h4>
+      <div class="form-container">
+        <p-floatlabel variant="in">
+          <input type="text" pInputText formControlName="insuranceProvider" id="insuranceProvider" class="w-full" />
+          <label for="insuranceProvider">Provider</label>
+        </p-floatlabel>
+
+        <p-floatlabel variant="in">
+          <input type="text" pInputText formControlName="insurancePolicyNumber" id="insurancePolicyNumber" class="w-full" />
+          <label for="insurancePolicyNumber">Policy Number</label>
+        </p-floatlabel>
+
+        <p-floatlabel variant="in" class="sm:col-span-2">
+          <textarea pTextarea formControlName="insuranceNotes" id="insuranceNotes" class="w-full" rows="2"></textarea>
+          <label for="insuranceNotes">Notes</label>
+        </p-floatlabel>
+      </div>
+    </div>
+
+    <div class="table-container p-4">
+      <h4 class="mb-3 font-medium">Bank Details</h4>
+      <div class="form-container">
+        <p-floatlabel variant="in">
+          <input type="text" pInputText formControlName="bankName" id="bankName" class="w-full" />
+          <label for="bankName" class="required-label">Bank Name</label>
+        </p-floatlabel>
+        <small class="invalid" *ngIf="hasError('bankName')">Bank name is required</small>
+
+        <p-floatlabel variant="in">
+          <input type="text" pInputText formControlName="bankBranch" id="bankBranch" class="w-full" />
+          <label for="bankBranch">Branch</label>
+        </p-floatlabel>
+
+        <p-floatlabel variant="in">
+          <input type="text" pInputText formControlName="bankAccountName" id="bankAccountName" class="w-full" />
+          <label for="bankAccountName" class="required-label">Account Name</label>
+        </p-floatlabel>
+        <small class="invalid" *ngIf="hasError('bankAccountName')">Account name is required</small>
+
+        <p-floatlabel variant="in">
+          <input type="text" pInputText formControlName="bankAccountNumber" id="bankAccountNumber" class="w-full" />
+          <label for="bankAccountNumber" class="required-label">Account Number</label>
+        </p-floatlabel>
+        <small class="invalid" *ngIf="hasError('bankAccountNumber')">Account number is required</small>
+
+        <p-floatlabel variant="in">
+          <input type="text" pInputText formControlName="bankRoutingNumber" id="bankRoutingNumber" class="w-full" />
+          <label for="bankRoutingNumber">Routing Number</label>
+        </p-floatlabel>
+        <small class="text-neutral">The 9-digit bank routing number on your cheque/passbook, e.g. 090261234</small>
+      </div>
+    </div>
+
+    <div class="table-container p-4">
+      <div class="flex justify-between items-center mb-3">
+        <h4 class="font-medium">Nominees</h4>
+        <button pButton type="button" size="small" *ngIf="!isLocked" (click)="addNominee()">
+          <i class="fa fa-plus"></i>
+          <span>Add Nominee</span>
+        </button>
+      </div>
+
+      <p class="text-sm text-gray-500 mb-3">Total share: {{ nomineeShareTotal }}% (must sum to 100%)</p>
+
+      <div *ngIf="nominees.length === 0" class="not-found">
+        <p>No nominees added yet.</p>
+      </div>
+
+      <div formArrayName="nominees" class="space-y-4">
+        <div *ngFor="let group of nominees.controls; let i = index" [formGroupName]="i" class="rounded-lg border p-3">
+          <div class="flex justify-between items-center mb-2">
+            <span class="font-medium">Nominee {{ i + 1 }}</span>
+            <button pButton type="button" size="small" severity="danger" *ngIf="!isLocked" (click)="removeNominee(i)">
+              <i class="fa fa-trash"></i>
+            </button>
+          </div>
+          <div class="form-container">
+            <p-floatlabel variant="in">
+              <input type="text" pInputText formControlName="fullName" [id]="'nomineeFullName' + i" class="w-full" />
+              <label [for]="'nomineeFullName' + i" class="required-label">Full Name</label>
+            </p-floatlabel>
+            <small class="invalid" *ngIf="hasError('fullName', i)">Full name is required</small>
+
+            <p-floatlabel variant="in">
+              <input type="text" pInputText formControlName="relationship" [id]="'nomineeRelationship' + i" class="w-full" />
+              <label [for]="'nomineeRelationship' + i" class="required-label">Relationship</label>
+            </p-floatlabel>
+            <small class="invalid" *ngIf="hasError('relationship', i)">Relationship is required</small>
+
+            <p-floatlabel variant="in">
+              <p-inputnumber formControlName="sharePercentage" [id]="'nomineeShare' + i" class="w-full" suffix="%" [min]="0" [max]="100"></p-inputnumber>
+              <label [for]="'nomineeShare' + i" class="required-label">Share %</label>
+            </p-floatlabel>
+            <small class="invalid" *ngIf="hasError('sharePercentage', i)">Share must be between 0 and 100</small>
+
+            <p-floatlabel variant="in">
+              <input type="text" pInputText formControlName="contactPhone" [id]="'nomineePhone' + i" class="w-full" />
+              <label [for]="'nomineePhone' + i">Contact Phone</label>
+            </p-floatlabel>
+
+            <p-floatlabel variant="in" class="sm:col-span-2">
+              <input type="text" pInputText formControlName="address" [id]="'nomineeAddress' + i" class="w-full" />
+              <label [for]="'nomineeAddress' + i">Address</label>
+            </p-floatlabel>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="!isLocked" class="flex gap-3 items-center">
+      <button pButton type="button" severity="secondary" [disabled]="saving || submitting" (click)="saveDraft()">
+        {{ saving ? 'Saving...' : 'Save Draft' }}
+      </button>
+      <button pButton type="button" [disabled]="saving || submitting" (click)="submit()">
+        {{ submitting ? 'Submitting...' : 'Submit' }}
+      </button>
+      <span *ngIf="savedNotice" class="text-green-600 text-sm">Draft saved.</span>
+    </div>
+
+    <small class="block text-red-500" *ngIf="saveError">{{ saveError }}</small>
+    <small class="block text-red-500" *ngIf="submitError">{{ submitError }}</small>
+  </form>
+</section>

@@ -50,7 +50,6 @@ describe('JobVacancyService', () => {
 
   it('should create a job vacancy via POST', () => {
     const request: IJobVacancyCreateRequest = {
-      siteId: 1,
       title: 'Software Engineer',
       numberOfPositions: 1,
       employmentType: EmploymentTypeEnum.FullTime,
@@ -69,7 +68,6 @@ describe('JobVacancyService', () => {
   it('should update a job vacancy via PUT /{id}', () => {
     const request: IJobVacancyUpdateRequest = {
       jobPostingId: 5,
-      siteId: 1,
       title: 'Software Engineer',
       numberOfPositions: 1,
       employmentType: EmploymentTypeEnum.FullTime,

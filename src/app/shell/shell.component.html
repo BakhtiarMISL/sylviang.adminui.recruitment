@@ -18,6 +18,7 @@
 
   <!-- Main content area -->
   <main class="flex flex-col flex-1 overflow-hidden transition-[margin-left] duration-300 ease-in-out w-full" [ngStyle]="{ 'margin-left': sidebarMargin }">
+    <app-impersonation-banner></app-impersonation-banner>
     <header class="relative">
       <app-header [isSidebarExpanded]="isSidebarExpanded" (sidebarToggle)="onHeaderToggleSidebar()"></app-header>
     </header>

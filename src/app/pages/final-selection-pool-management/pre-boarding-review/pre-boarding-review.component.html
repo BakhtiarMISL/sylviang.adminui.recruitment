@@ -1,0 +1,96 @@
+<section class="page-container">
+  <div class="flex justify-between items-center gap-3 mb-4">
+    <h3 class="table-title">Pre-Boarding Review</h3>
+  </div>
+
+  <div *ngIf="loading" class="space-y-3">
+    <p-skeleton height="3rem" *ngFor="let i of [1, 2, 3]"></p-skeleton>
+  </div>
+
+  <small class="mb-3 block text-red-500" *ngIf="loadError">{{ loadError }}</small>
+
+  <div *ngIf="!loading && item" class="space-y-6">
+    <div class="table-container p-4" [ngClass]="{ 'text-orange-600': item.status === StatusEnum.NeedsCorrection, 'text-green-600': item.status === StatusEnum.Approved }">
+      <i class="fa fa-circle-info"></i>
+      Status: <strong>{{ item.status }}</strong>
+      <span *ngIf="item.submittedAt"> - submitted {{ item.submittedAt | date: 'dd-MMM-yyyy h:mm a' }}</span>
+      <div *ngIf="item.status === StatusEnum.NeedsCorrection && item.correctionComment" class="mt-2">
+        <strong>Correction requested:</strong> {{ item.correctionComment }}
+      </div>
+    </div>
+
+    <div class="table-container p-4">
+      <h4 class="mb-3 font-medium">Emergency Contact</h4>
+      <div class="form-container">
+        <div><span class="text-neutral">Name:</span> {{ item.emergencyContactName || '-' }}</div>
+        <div><span class="text-neutral">Relationship:</span> {{ item.emergencyContactRelationship || '-' }}</div>
+        <div><span class="text-neutral">Phone:</span> {{ item.emergencyContactPhone || '-' }}</div>
+      </div>
+    </div>
+
+    <div class="table-container p-4">
+      <h4 class="mb-3 font-medium">Insurance</h4>
+      <div class="form-container">
+        <div><span class="text-neutral">Provider:</span> {{ item.insuranceProvider || '-' }}</div>
+        <div><span class="text-neutral">Policy Number:</span> {{ item.insurancePolicyNumber || '-' }}</div>
+        <div class="sm:col-span-2"><span class="text-neutral">Notes:</span> {{ item.insuranceNotes || '-' }}</div>
+      </div>
+    </div>
+
+    <div class="table-container p-4">
+      <h4 class="mb-3 font-medium">Bank Details</h4>
+      <div class="form-container">
+        <div><span class="text-neutral">Bank Name:</span> {{ item.bankName || '-' }}</div>
+        <div><span class="text-neutral">Branch:</span> {{ item.bankBranch || '-' }}</div>
+        <div><span class="text-neutral">Account Name:</span> {{ item.bankAccountName || '-' }}</div>
+        <div><span class="text-neutral">Account Number:</span> {{ item.bankAccountNumber || '-' }}</div>
+        <div><span class="text-neutral">Routing Number:</span> {{ item.bankRoutingNumber || '-' }}</div>
+      </div>
+    </div>
+
+    <div class="table-container p-4">
+      <h4 class="mb-3 font-medium">Nominees</h4>
+      <div *ngIf="item.nominees.length === 0" class="not-found">
+        <p>No nominees on file.</p>
+      </div>
+      <div *ngFor="let nominee of item.nominees" class="rounded-lg border p-3 mb-3">
+        <div class="form-container">
+          <div><span class="text-neutral">Name:</span> {{ nominee.fullName }}</div>
+          <div><span class="text-neutral">Relationship:</span> {{ nominee.relationship }}</div>
+          <div><span class="text-neutral">Share:</span> {{ nominee.sharePercentage }}%</div>
+          <div><span class="text-neutral">Phone:</span> {{ nominee.contactPhone || '-' }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex gap-3 items-center">
+      <button pButton [disabled]="!canValidate || validating" (click)="validate()">
+        <i class="fa fa-check"></i>
+        <span>{{ validating ? 'Validating...' : 'Validate & Lock' }}</span>
+      </button>
+      <button pButton severity="secondary" [disabled]="!canRequestCorrection" (click)="openCorrectionDialog()">
+        <i class="fa fa-rotate-left"></i>
+        <span>Request Correction</span>
+      </button>
+    </div>
+
+    <small class="block text-red-500" *ngIf="actionError">{{ actionError }}</small>
+  </div>
+</section>
+
+<p-dialog header="Request Correction" [(visible)]="correctionDialogVisible" [modal]="true" [style]="{ width: '32rem' }">
+  <div class="form-container">
+    <p-floatlabel variant="in" class="sm:col-span-2">
+      <textarea pTextarea id="correctionComment" class="w-full" rows="4" [(ngModel)]="correctionComment" name="correctionComment"></textarea>
+      <label for="correctionComment">Comment</label>
+    </p-floatlabel>
+    <small class="invalid sm:col-span-2" *ngIf="!correctionComment.trim()">A comment is required.</small>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <button pButton severity="secondary" (click)="correctionDialogVisible = false">Cancel</button>
+    <button pButton [disabled]="requestingCorrection || !correctionComment.trim()" (click)="requestCorrection()">
+      {{ requestingCorrection ? 'Submitting...' : 'Request Correction' }}
+    </button>
+  </ng-template>
+</p-dialog>

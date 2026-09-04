@@ -6,17 +6,17 @@
       <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <p-floatlabel variant="in">
           <input pInputText id="name" class="w-full" formControlName="name" />
-          <label for="name">Filter Name</label>
+          <label for="name" class="required-label">Filter Name</label>
         </p-floatlabel>
         <small class="text-red-500" *ngIf="hasError('name')">Filter name is required.</small>
 
         <p-floatlabel variant="in">
           <p-select inputId="combineWith" class="w-full" [options]="combinatorOptions" formControlName="combineWith" optionLabel="label" optionValue="value" [appendTo]="'body'" [autoDisplayFirst]="false"></p-select>
-          <label for="combineWith">Criteria Logic</label>
+          <label for="combineWith" class="required-label">Criteria Logic</label>
         </p-floatlabel>
 
         <p-floatlabel variant="in" class="sm:col-span-2">
-          <textarea pTextarea id="description" class="w-full" formControlName="description" rows="1"></textarea>
+          <textarea pTextarea id="description" class="w-full" formControlName="description" rows="2"></textarea>
           <label for="description">Description</label>
         </p-floatlabel>
       </div>
@@ -63,19 +63,32 @@
               </p-floatlabel>
 
               <p-floatlabel variant="in" class="sm:col-span-2" *ngSwitchCase="CriterionTypeEnum.RequiredSkills">
-                <p-multiSelect
+                <p-autoComplete
                   [inputId]="'requiredSkills' + i"
                   class="w-full"
-                  [options]="skillLibrary"
+                  styleClass="w-full"
+                  inputStyleClass="w-full"
+                  [suggestions]="skillSuggestions"
+                  (completeMethod)="filterSkillSuggestions($event)"
                   [ngModel]="criterion.selectedSkills"
                   (ngModelChange)="onRequiredSkillsChange(criterion, $event)"
                   [ngModelOptions]="{ standalone: true }"
                   optionLabel="name"
-                  optionValue="name"
+                  field="name"
+                  [multiple]="true"
+                  [forceSelection]="false"
                   [appendTo]="'body'"
-                  display="chip"
-                ></p-multiSelect>
-                <label [for]="'requiredSkills' + i">Required Skills</label>
+                  (keydown.enter)="onSkillsInputCommit($event, criterion)"
+                  (onBlur)="onSkillsInputCommit($event, criterion)"
+                >
+                  <ng-template let-skill pTemplate="item">
+                    <span>{{ skill.name }}</span>
+                  </ng-template>
+                  <ng-template let-skill pTemplate="selecteditem">
+                    <p-chip [label]="skill?.name || skill" [removable]="true" (onRemove)="removeSkill(criterion, skill)" styleClass="p-autocomplete-chip"></p-chip>
+                  </ng-template>
+                </p-autoComplete>
+                <label [for]="'requiredSkills' + i">Required Skills (pick from list or type your own)</label>
               </p-floatlabel>
 
               <ng-container *ngSwitchCase="CriterionTypeEnum.AgeRange">
@@ -89,10 +102,13 @@
                 </p-floatlabel>
               </ng-container>
 
-              <p-floatlabel variant="in" *ngSwitchCase="CriterionTypeEnum.District">
-                <input pInputText [id]="'requiredDistrict' + i" class="w-full" [(ngModel)]="criterion.requiredDistrict" [ngModelOptions]="{ standalone: true }" />
-                <label [for]="'requiredDistrict' + i">Location / District</label>
-              </p-floatlabel>
+              <div *ngSwitchCase="CriterionTypeEnum.District">
+                <p-floatlabel variant="in">
+                  <input pInputText [id]="'requiredDistrict' + i" class="w-full" [(ngModel)]="criterion.requiredDistrict" [ngModelOptions]="{ standalone: true }" />
+                  <label [for]="'requiredDistrict' + i">Location / District</label>
+                </p-floatlabel>
+                <small class="text-neutral">e.g. Dhaka</small>
+              </div>
 
               <p-floatlabel variant="in" *ngSwitchCase="CriterionTypeEnum.MinScreeningScore">
                 <p-inputnumber [inputId]="'minScreeningScore' + i" class="w-full" [(ngModel)]="criterion.minScreeningScore" [ngModelOptions]="{ standalone: true }" [min]="0" [max]="100"></p-inputnumber>

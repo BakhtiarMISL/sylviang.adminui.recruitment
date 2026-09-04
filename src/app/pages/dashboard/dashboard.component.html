@@ -13,34 +13,71 @@
     </div>
   </div>
 
-  <!-- Admin / HR: recruitment stats -->
-  <div class="stat-grid" *ngIf="role === UserRoleEnum.Admin || role === UserRoleEnum.HR">
-    <div class="stat-card" *ngIf="loading">
-      <p-skeleton height="4rem"></p-skeleton>
+  <!-- Admin / HR: recruitment stats (US-105) -->
+  <div *ngIf="role === UserRoleEnum.Admin || role === UserRoleEnum.HR">
+    <div class="stat-grid-header">
+      <button pButton type="button" icon="fa-solid fa-rotate-right" label="Refresh" class="p-button-text p-button-sm" [disabled]="loading" (click)="reload()"></button>
     </div>
-    <ng-container *ngIf="!loading">
-      <div class="stat-card">
-        <div class="stat-icon bg-primary/10"><i class="fa-solid fa-briefcase text-primary"></i></div>
-        <div>
-          <p class="stat-value">{{ summary?.openJobPostingsCount ?? 0 }}</p>
-          <p class="stat-label">Open Job Postings</p>
-        </div>
+
+    <div class="stat-grid">
+      <div class="stat-card" *ngIf="loading">
+        <p-skeleton height="4rem"></p-skeleton>
       </div>
-      <div class="stat-card">
-        <div class="stat-icon bg-primary/10"><i class="fa-solid fa-users text-primary"></i></div>
-        <div>
-          <p class="stat-value">{{ summary?.totalApplicationsCount ?? 0 }}</p>
-          <p class="stat-label">Total Applications</p>
+      <ng-container *ngIf="!loading">
+        <div class="stat-card stat-card-clickable" *ngFor="let widget of visibleWidgets" (click)="openWidget(widget)">
+          <div class="stat-icon bg-primary/10"><i [class]="widget.icon + ' text-primary'"></i></div>
+          <div>
+            <p class="stat-value">
+              {{ summary ? widget.getValue(summary) : 0 }}
+              <span
+                *ngIf="widget.getTrendPercent && summary && widget.getTrendPercent(summary) != null"
+                class="stat-trend"
+                [ngClass]="widget.getTrendPercent(summary)! >= 0 ? 'stat-trend-up' : 'stat-trend-down'"
+              >
+                <i class="fa-solid" [ngClass]="widget.getTrendPercent(summary)! >= 0 ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
+                {{ widget.getTrendPercent(summary) }}%
+              </span>
+            </p>
+            <p class="stat-label">{{ widget.label }}</p>
+          </div>
         </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon bg-primary/10"><i class="fa-solid fa-diagram-project text-primary"></i></div>
-        <div>
-          <p class="stat-value">{{ summary?.activeHiringPipelinesCount ?? 0 }}</p>
-          <p class="stat-label">Active Hiring Pipelines</p>
-        </div>
-      </div>
-    </ng-container>
+      </ng-container>
+    </div>
+
+    <!-- Admin-only widget-visibility toggle (US-105 AC5, minimal build ahead of full EP-15 access control) -->
+    <div class="widget-config-card" *ngIf="role === UserRoleEnum.Admin && !widgetConfigLoading && widgetConfigs.length">
+      <p class="widget-config-title">Dashboard widget visibility</p>
+      <table class="widget-config-table">
+        <thead>
+          <tr>
+            <th>Widget</th>
+            <th>Visible to Admin</th>
+            <th>Visible to HR</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let config of widgetConfigs">
+            <td>{{ widgetLabel(config.widgetKey) }}</td>
+            <td>
+              <p-checkbox
+                [binary]="true"
+                [ngModel]="config.isVisibleForAdmin"
+                [disabled]="widgetConfigSaving === config.widgetKey"
+                (onChange)="toggleWidgetVisibility(config, 'isVisibleForAdmin')"
+              ></p-checkbox>
+            </td>
+            <td>
+              <p-checkbox
+                [binary]="true"
+                [ngModel]="config.isVisibleForHR"
+                [disabled]="widgetConfigSaving === config.widgetKey"
+                (onChange)="toggleWidgetVisibility(config, 'isVisibleForHR')"
+              ></p-checkbox>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <!-- Candidate: profile completeness -->
@@ -75,11 +112,27 @@
       </div>
     </a>
 
-    <a routerLink="/internal-jobs/job-list" class="quick-link-card">
+    <a *ngIf="role === UserRoleEnum.Admin || role === UserRoleEnum.HR" routerLink="/internal-jobs/job-list" class="quick-link-card">
       <div class="quick-link-icon"><i class="fa-solid fa-building text-xl text-primary"></i></div>
       <div>
         <p class="font-semibold text-dark dark:text-white">Internal Job Board</p>
         <p class="text-sm text-neutral dark:text-white/50">Manage internal job postings</p>
+      </div>
+    </a>
+
+    <a *ngIf="role === UserRoleEnum.SuperAdmin" routerLink="/access-control/user-account-list" class="quick-link-card">
+      <div class="quick-link-icon"><i class="fa-solid fa-users-gear text-xl text-primary"></i></div>
+      <div>
+        <p class="font-semibold text-dark dark:text-white">User Accounts</p>
+        <p class="text-sm text-neutral dark:text-white/50">Manage HR and administrator accounts</p>
+      </div>
+    </a>
+
+    <a *ngIf="role === UserRoleEnum.Admin || role === UserRoleEnum.HR" routerLink="/exam-questions/exam-question-list" class="quick-link-card">
+      <div class="quick-link-icon"><i class="fa-solid fa-circle-question text-xl text-primary"></i></div>
+      <div>
+        <p class="font-semibold text-dark dark:text-white">Exam Questions</p>
+        <p class="text-sm text-neutral dark:text-white/50">Manage question groups &amp; exam question bank</p>
       </div>
     </a>
 

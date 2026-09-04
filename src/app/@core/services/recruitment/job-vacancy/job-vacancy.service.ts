@@ -22,6 +22,11 @@ export class JobVacancyService {
     return this.httpClient.get<ApiResponse<IJobVacancyResponse[]>>(`${this.API_URL}`);
   }
 
+  /** EP-15/US-113: postings created by the current user - additive alongside the full list above. */
+  getMyPostings() {
+    return this.httpClient.get<ApiResponse<IJobVacancyResponse[]>>(`${this.API_URL}/my-postings`);
+  }
+
   getJobVacancyById(id: number) {
     return this.httpClient.get<ApiResponse<IJobVacancyResponse>>(`${this.API_URL}/${id}`);
   }

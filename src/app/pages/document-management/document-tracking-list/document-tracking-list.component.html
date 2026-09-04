@@ -1,0 +1,125 @@
+<section class="page-container">
+  <h3 class="table-title mb-4">
+    Document Tracking
+    <span class="table-title-info" *ngIf="totalRecords > 0">({{ totalRecords }} total)</span>
+  </h3>
+
+  <div class="mb-4 flex items-center gap-2" *ngIf="jobApplicationId">
+    <span class="status-badge">Showing documents for Application #{{ jobApplicationId }}</span>
+    <a [routerLink]="['/document-management/document-tracking-list']" class="text-sm">Clear (show all applications)</a>
+  </div>
+
+  <app-filter-panel [(collapsed)]="filtersCollapsed">
+    <div class="filter-bar">
+      <p-floatlabel variant="in">
+        <p-select
+          inputId="filterDocumentType"
+          class="w-full"
+          [options]="documentTypeOptions"
+          [(ngModel)]="filterDocumentType"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+          [appendTo]="'body'"
+        ></p-select>
+        <label for="filterDocumentType">Document Type</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="in">
+        <p-select
+          inputId="filterAcceptanceStatus"
+          class="w-full"
+          [options]="acceptanceStatusOptions"
+          [(ngModel)]="filterAcceptanceStatus"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+          [appendTo]="'body'"
+        ></p-select>
+        <label for="filterAcceptanceStatus">Acceptance Status</label>
+      </p-floatlabel>
+
+      <button pButton (click)="applyFilters()">
+        <i class="fa fa-filter"></i>
+        <span>Apply</span>
+      </button>
+      <button pButton severity="secondary" (click)="resetFilters()">
+        <i class="fa fa-rotate-left"></i>
+        <span>Reset</span>
+      </button>
+    </div>
+  </app-filter-panel>
+
+  <small class="mb-3 block text-red-500" *ngIf="errorMessage">{{ errorMessage }}</small>
+
+  <div *ngIf="loading" class="space-y-3">
+    <p-skeleton height="3rem" *ngFor="let i of skeletonItems"></p-skeleton>
+  </div>
+
+  <div *ngIf="!loading && items.length === 0" class="table-container">
+    <div class="not-found">
+      <i class="fa fa-magnifying-glass-minus"></i>
+      <p>No documents match these filters.</p>
+    </div>
+  </div>
+
+  <p-table
+    *ngIf="!loading && items.length > 0"
+    [value]="items"
+    styleClass="p-datatable-sm"
+    [paginator]="true"
+    [rows]="rows"
+    [first]="(currentPage - 1) * rows"
+    [rowsPerPageOptions]="UI_CONFIG.pageSizeOptions"
+    [totalRecords]="totalRecords"
+    (onPage)="onPageChange($event)"
+    [lazy]="true"
+    [showCurrentPageReport]="true"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} documents"
+  >
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Type</th>
+        <th>Recipient</th>
+        <th>Generated At</th>
+        <th>Acceptance Status</th>
+        <th style="width: 14rem">Actions</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-item>
+      <tr [ngClass]="{ 'bg-red-50': isDeclined(item) }">
+        <td>{{ item.documentType }}</td>
+        <td>
+          <div>{{ item.recipientName }}</div>
+          <div class="text-xs text-neutral">{{ item.recipientEmail }}</div>
+        </td>
+        <td>{{ item.generatedAt | date: 'dd-MMM-yyyy h:mm a' }}</td>
+        <td>
+          <span
+            [ngClass]="{
+              'text-green-600': item.acceptanceStatus === 'Accepted',
+              'text-red-500': item.acceptanceStatus === 'Declined',
+              'text-neutral': item.acceptanceStatus === 'Pending' || item.acceptanceStatus === 'NotApplicable',
+            }"
+          >
+            {{ item.acceptanceStatus }}
+          </span>
+        </td>
+        <td>
+          <div class="flex gap-2">
+            <a pButton size="small" severity="secondary" *ngIf="getPdfUrl(item)" [href]="getPdfUrl(item)" target="_blank" rel="noopener noreferrer">
+              <i class="fa fa-eye"></i>
+              <span>View</span>
+            </a>
+            <button pButton size="small" severity="secondary" *ngIf="isPending(item)" (click)="followUp(item, $event)">
+              <i class="fa fa-paper-plane"></i>
+              <span>Follow up</span>
+            </button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+
+  <p-confirmDialog></p-confirmDialog>
+</section>

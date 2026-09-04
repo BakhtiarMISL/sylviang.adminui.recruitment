@@ -3,7 +3,9 @@ import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { SharedModule } from '@app/shared/shared.module';
+import { AutoCompleteModule } from 'primeng/autocomplete';
 import { ButtonModule } from 'primeng/button';
+import { ChipModule } from 'primeng/chip';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputNumberModule } from 'primeng/inputnumber';
@@ -24,6 +26,8 @@ import { ManageShortlistFilterComponent } from './manage-shortlist-filter/manage
     SharedModule,
     ShortlistFilterManagementRoutingModule,
     ConfirmDialogModule,
+    AutoCompleteModule,
+    ChipModule,
     ButtonModule,
     InputTextModule,
     InputNumberModule,
@@ -33,3 +37,5 @@ import { ManageShortlistFilterComponent } from './manage-shortlist-filter/manage
   ],
 })
 export class ShortlistFilterManagementModule {}
+// force rebuild
+

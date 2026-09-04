@@ -16,9 +16,10 @@
           [class.ng-dirty]="hasError('headCode')"
           (blur)="f['headCode'].markAsTouched()"
         />
-        <label for="headCode">Head Code *</label>
+        <label for="headCode" class="required-label">Head Code</label>
       </p-floatlabel>
       <div *ngIf="hasError('headCode')" class="invalid">{{ getErrorMessage('headCode') }}</div>
+      <small class="text-neutral" *ngIf="!hasError('headCode')">e.g. BASIC, HRA, PF</small>
     </div>
 
     <!-- Head Name -->
@@ -34,7 +35,7 @@
           [class.ng-dirty]="hasError('headName')"
           (blur)="f['headName'].markAsTouched()"
         />
-        <label for="headName">Head Name *</label>
+        <label for="headName" class="required-label">Head Name</label>
       </p-floatlabel>
       <div *ngIf="hasError('headName')" class="invalid">{{ getErrorMessage('headName') }}</div>
     </div>
@@ -56,7 +57,7 @@
           (onBlur)="f['headType'].markAsTouched()"
           (onChange)="f['headType'].markAsTouched()"
         ></p-select>
-        <label for="headType">Head Type *</label>
+        <label for="headType" class="required-label">Head Type</label>
       </p-floatlabel>
       <div *ngIf="hasError('headType')" class="invalid">{{ getErrorMessage('headType') }}</div>
     </div>
@@ -78,7 +79,7 @@
           (onBlur)="f['calculationType'].markAsTouched()"
           (onChange)="f['calculationType'].markAsTouched()"
         ></p-select>
-        <label for="calculationType">Calculation Type *</label>
+        <label for="calculationType" class="required-label">Calculation Type</label>
       </p-floatlabel>
       <div *ngIf="hasError('calculationType')" class="invalid">{{ getErrorMessage('calculationType') }}</div>
     </div>

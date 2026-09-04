@@ -24,7 +24,7 @@
   </div>
 
   <div class="sm:col-span-2" *ngIf="!showForm">
-    <button pButton severity="secondary" type="button" (click)="startAdd()">
+    <button pButton type="button" (click)="startAdd()">
       <i class="fas fa-plus"></i>
       <span>Add Certification</span>
     </button>
@@ -44,7 +44,7 @@
         [class.ng-dirty]="hasError('certificationName')"
         (blur)="f['certificationName'].markAsTouched()"
       />
-      <label for="certificationName">Certification Name *</label>
+      <label for="certificationName" class="required-label">Certification Name</label>
     </p-floatlabel>
     <div *ngIf="hasError('certificationName')" class="invalid">{{ getErrorMessage('certificationName') }}</div>
   </div>
@@ -59,14 +59,14 @@
 
   <div>
     <p-floatlabel variant="in">
-      <p-datepicker inputId="issueDate" formControlName="issueDate" dateFormat="dd-M-yy" [showIcon]="true" styleClass="w-full"></p-datepicker>
+      <p-datepicker inputId="issueDate" formControlName="issueDate" dateFormat="dd-M-yy" [showIcon]="true" [appendTo]="'body'" styleClass="w-full"></p-datepicker>
       <label for="issueDate">Issue Date</label>
     </p-floatlabel>
   </div>
 
   <div>
     <p-floatlabel variant="in">
-      <p-datepicker inputId="expiryDate" formControlName="expiryDate" dateFormat="dd-M-yy" [showIcon]="true" styleClass="w-full"></p-datepicker>
+      <p-datepicker inputId="expiryDate" formControlName="expiryDate" dateFormat="dd-M-yy" [showIcon]="true" [appendTo]="'body'" styleClass="w-full"></p-datepicker>
       <label for="expiryDate">Expiry Date</label>
     </p-floatlabel>
   </div>
@@ -77,6 +77,7 @@
       <label for="credentialId">Credential ID</label>
     </p-floatlabel>
     <div *ngIf="hasError('credentialId')" class="invalid">{{ getErrorMessage('credentialId') }}</div>
+    <small class="text-neutral" *ngIf="!hasError('credentialId')">e.g. AWS-ASA-2024-00123</small>
   </div>
 
   <div class="sm:col-span-2">
@@ -87,7 +88,7 @@
         <small>PDF, DOC or DOCX</small>
       </span>
     </label>
-    <input id="certificationFile" type="file" (change)="onFileSelected($event)" accept=".pdf,.doc,.docx" class="sr-only" />
+    <input id="certificationFile" type="file" (change)="onFileSelected($event)" accept=".pdf,.doc,.docx" class="sr-only file-picker-input" />
   </div>
   <div *ngIf="fileError" class="invalid sm:col-span-2">{{ fileError }}</div>
 
@@ -95,7 +96,7 @@
   <div *ngIf="saveError" class="invalid sm:col-span-2">{{ saveError }}</div>
 
   <div class="sm:col-span-2 flex gap-3">
-    <button pButton type="submit" [disabled]="saving">
+    <button pButton type="submit" [disabled]="saving || form.pristine">
       <i class="fas fa-save"></i>
       <span>{{ saving ? 'Saving...' : 'Save' }}</span>
     </button>

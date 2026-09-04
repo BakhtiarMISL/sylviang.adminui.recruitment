@@ -1,0 +1,10 @@
+<div *ngIf="isImpersonating" class="impersonation-banner">
+  <i class="fa fa-user-secret"></i>
+  <span>
+    Impersonating <strong>{{ targetFullName }}</strong> - session ends in <strong>{{ remainingLabel }}</strong>
+  </span>
+  <button type="button" class="end-btn" [disabled]="ending" (click)="endImpersonation()">
+    <i class="fa fa-right-from-bracket"></i>
+    <span>End Impersonation</span>
+  </button>
+</div>

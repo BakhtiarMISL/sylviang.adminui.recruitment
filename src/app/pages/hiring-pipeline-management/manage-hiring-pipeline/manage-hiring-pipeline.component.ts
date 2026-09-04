@@ -5,7 +5,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { IHiringPipelineCreateRequest, IPipelineStage } from '@app/@core/interfaces/recruitment-management/hiring-pipeline.interface';
 import { HiringPipelineService } from '@app/@core/services/recruitment/hiring-pipeline/hiring-pipeline.service';
 import { BreadcrumbService } from '@app/@core/services';
-import { AutoCompleteCompleteEvent } from 'primeng/autocomplete';
 import { newStage, SuggestedStageTypes } from './manage-hiring-pipeline.component.constants';
 
 @Component({
@@ -33,12 +32,6 @@ export class ManageHiringPipelineComponent implements OnInit {
   errorMessage = '';
 
   suggestedStageTypes = SuggestedStageTypes;
-  filteredStageTypes: string[] = [];
-
-  filterStageType(event: AutoCompleteCompleteEvent): void {
-    const query = event.query.trim().toLowerCase();
-    this.filteredStageTypes = this.suggestedStageTypes.filter((t) => t.toLowerCase().includes(query));
-  }
 
   ngOnInit(): void {
     this.pipelineForm = this.fb.group({
@@ -114,18 +107,26 @@ export class ManageHiringPipelineComponent implements OnInit {
     this.stages.forEach((s, i) => (s.displayOrder = i));
   }
 
-  onInterviewerIdsBlur(stage: IPipelineStage, event: Event): void {
-    const value = (event.target as HTMLInputElement).value;
-    stage.interviewerEmployeeIds = value
-      .split(',')
-      .map((s) => s.trim())
-      .filter(Boolean)
-      .map(Number)
-      .filter((n) => !isNaN(n));
+  stageIsInvalid(stage: IPipelineStage): boolean {
+    return !stage.name?.trim() || !stage.stageType?.trim() || this.marksAreInvalid(stage);
   }
 
-  stageIsInvalid(stage: IPipelineStage): boolean {
-    return !stage.name?.trim() || !stage.stageType?.trim();
+  marksAreInvalid(stage: IPipelineStage): boolean {
+    const hasMaxMarks = stage.maxMarks != null;
+    const hasPassMarks = stage.passMarks != null;
+
+    return (
+      hasMaxMarks !== hasPassMarks ||
+      (hasMaxMarks && (stage.maxMarks! <= 0 || stage.passMarks! <= 0 || stage.passMarks! > stage.maxMarks!)) ||
+      (stage.autoProgressionTargetDisplayOrder != null && !hasPassMarks)
+    );
+  }
+
+  otherStageOptions(currentIndex: number): { label: string; value: number }[] {
+    return this.stages
+      .map((s, i) => ({ label: s.name?.trim() || `Stage ${i + 1}`, value: s.displayOrder, index: i }))
+      .filter((option) => option.index !== currentIndex)
+      .map(({ label, value }) => ({ label, value }));
   }
 
   get hasInvalidStages(): boolean {
@@ -142,7 +143,7 @@ export class ManageHiringPipelineComponent implements OnInit {
     }
 
     if (this.hasInvalidStages) {
-      this.errorMessage = 'Every stage needs a name and a stage type, and the pipeline needs at least one stage.';
+      this.errorMessage = 'Every stage needs a name and type. Assessment marks must be provided together, be greater than zero, and pass marks cannot exceed max marks. Automatic progression also requires assessment marks.';
       return;
     }
 

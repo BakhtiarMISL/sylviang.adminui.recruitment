@@ -1,4 +1,6 @@
 <div class="form-container">
+  <h3 class="form-section-header">Uploaded Documents</h3>
+
   <div class="sm:col-span-2" *ngIf="loading">Loading documents...</div>
 
   <div class="sm:col-span-2 text-sm text-neutral" *ngIf="!loading && items.length === 0">No documents uploaded yet.</div>
@@ -6,7 +8,7 @@
   <div class="sm:col-span-2" *ngIf="!loading">
     <div class="list-row" *ngFor="let item of items">
       <div>
-        <strong>{{ getDocumentTypeLabel(item.documentType) }}</strong> —
+        <strong>{{ getDocumentTypeLabel(item.documentType) }}</strong> <span>—</span>
         <a [href]="getDownloadUrl(item)" target="_blank" rel="noopener noreferrer" class="text-primary">{{ item.fileName }}</a>
         <span class="text-sm text-neutral ml-2">({{ formatFileSize(item.fileSizeBytes) }})</span>
       </div>
@@ -15,6 +17,10 @@
       </button>
     </div>
   </div>
+</div>
+
+<div class="form-container">
+  <h3 class="form-section-header">Upload New Document</h3>
 
   <div>
     <p-floatlabel variant="in">
@@ -31,7 +37,7 @@
         <small>PDF, JPG, PNG or DOCX</small>
       </span>
     </label>
-    <input id="documentFile" type="file" (change)="onFileSelected($event)" accept=".pdf,.jpg,.jpeg,.png,.docx" class="sr-only" />
+    <input #fileInput id="documentFile" type="file" (change)="onFileSelected($event)" accept=".pdf,.jpg,.jpeg,.png,.docx" class="sr-only file-picker-input" />
     <button pButton type="button" [disabled]="!selectedFile || uploading" (click)="upload()">
       <i class="fa fa-upload"></i>
       <span>{{ uploading ? 'Uploading...' : 'Upload' }}</span>

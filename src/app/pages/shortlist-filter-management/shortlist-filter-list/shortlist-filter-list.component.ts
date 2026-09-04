@@ -1,6 +1,7 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { IShortlistFilterResponse } from '@app/@core/interfaces/recruitment-management/shortlist-filter.interface';
 import { ShortlistFilterService } from '@app/@core/services/recruitment/shortlist-filter/shortlist-filter.service';
+import { BreadcrumbService } from '@app/@core/services';
 import { ConfirmationService } from 'primeng/api';
 
 @Component({
@@ -14,6 +15,7 @@ export class ShortlistFilterListComponent implements OnInit {
     private shortlistFilterService: ShortlistFilterService,
     private confirmationService: ConfirmationService,
     private cdr: ChangeDetectorRef,
+    private breadcrumbService: BreadcrumbService,
   ) {}
 
   filters: IShortlistFilterResponse[] = [];
@@ -26,7 +28,15 @@ export class ShortlistFilterListComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.setBreadcrumbs();
     this.loadFilters();
+  }
+
+  private setBreadcrumbs(): void {
+    this.breadcrumbService.setBreadcrumbs([
+      { title: 'Recruitment', icon: 'fa-solid fa-briefcase', href: '/shortlist-filters/shortlist-filter-list' },
+      { title: 'Shortlist Filters', icon: 'fa-solid fa-filter', href: '/shortlist-filters/shortlist-filter-list' },
+    ]);
   }
 
   loadFilters(): void {

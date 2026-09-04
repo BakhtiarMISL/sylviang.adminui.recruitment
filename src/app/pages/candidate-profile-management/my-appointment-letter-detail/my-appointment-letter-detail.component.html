@@ -1,0 +1,14 @@
+<section class="page-container" *ngIf="!loading">
+  <small class="mb-3 block text-red-500" *ngIf="errorMessage">{{ errorMessage }}</small>
+
+  <ng-container *ngIf="item">
+    <div class="table-container mb-4 p-4">
+      <h3 class="table-title mb-1">{{ item.documentTemplateName }}</h3>
+      <span class="text-neutral">Generated {{ item.generatedAt | date: 'dd-MMM-yyyy h:mm a' }}</span>
+    </div>
+
+    <div class="table-container p-2">
+      <iframe *ngIf="pdfUrl" [src]="pdfUrl" style="width: 100%; height: 75vh; border: none"></iframe>
+    </div>
+  </ng-container>
+</section>

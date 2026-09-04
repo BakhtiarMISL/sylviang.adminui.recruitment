@@ -1,8 +1,15 @@
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ICandidateProfileResponse } from '@app/@core/interfaces/recruitment-management/candidate-profile.interface';
+import {
+  IBloodGroupResponse,
+  ICandidateProfileResponse,
+  IGenderResponse,
+  IMaritalStatusResponse,
+  IReligionResponse,
+} from '@app/@core/interfaces/recruitment-management/candidate-profile.interface';
 import { CandidateProfileService } from '@app/@core/services/recruitment/candidate-profile/candidate-profile.service';
 import { DateTimeUtility } from '@app/@core/utils/date-time.utility';
+import { NationalityOptions } from './personal-info-section.component.constants';
 
 @Component({
   selector: 'app-personal-info-section',
@@ -10,7 +17,7 @@ import { DateTimeUtility } from '@app/@core/utils/date-time.utility';
   templateUrl: './personal-info-section.component.html',
   styleUrl: './personal-info-section.component.scss',
 })
-export class PersonalInfoSectionComponent implements OnChanges {
+export class PersonalInfoSectionComponent implements OnInit, OnChanges {
   @Input() profile!: ICandidateProfileResponse;
   @Output() saved = new EventEmitter<void>();
 
@@ -21,13 +28,35 @@ export class PersonalInfoSectionComponent implements OnChanges {
     this.form = this.fb.group({
       fullName: [null, [Validators.required, Validators.maxLength(200)]],
       dateOfBirth: [null],
-      gender: [null, [Validators.maxLength(20)]],
+      genderId: [null],
       nationalId: [null, [Validators.maxLength(50)]],
       fatherName: [null, [Validators.maxLength(200)]],
       motherName: [null, [Validators.maxLength(200)]],
-      maritalStatus: [null, [Validators.maxLength(20)]],
-      religion: [null, [Validators.maxLength(50)]],
+      maritalStatusId: [null],
+      religionId: [null],
       nationality: [null, [Validators.maxLength(100)]],
+      bloodGroupId: [null],
+    });
+  }
+
+  genderOptions: IGenderResponse[] = [];
+  maritalStatusOptions: IMaritalStatusResponse[] = [];
+  religionOptions: IReligionResponse[] = [];
+  bloodGroupOptions: IBloodGroupResponse[] = [];
+  nationalityOptions = NationalityOptions;
+
+  ngOnInit(): void {
+    this.candidateProfileService.getGenders().subscribe({
+      next: (response) => (this.genderOptions = !response.hasError && response.content ? response.content : []),
+    });
+    this.candidateProfileService.getMaritalStatuses().subscribe({
+      next: (response) => (this.maritalStatusOptions = !response.hasError && response.content ? response.content : []),
+    });
+    this.candidateProfileService.getReligions().subscribe({
+      next: (response) => (this.religionOptions = !response.hasError && response.content ? response.content : []),
+    });
+    this.candidateProfileService.getBloodGroups().subscribe({
+      next: (response) => (this.bloodGroupOptions = !response.hasError && response.content ? response.content : []),
     });
   }
 
@@ -40,10 +69,31 @@ export class PersonalInfoSectionComponent implements OnChanges {
   // Called explicitly from a resume upload action (MyProfileComponent), not from ngOnChanges -
   // an intentional "prefill from resume" action should override, even if the user has already
   // started editing here. Nothing is saved; the user still reviews and hits Save.
-  applyPrefill(fullName?: string | null): void {
+  //
+  // Resume parsing returns Gender/Religion/MaritalStatus as best-effort plain text (e.g. "Male"),
+  // not an id - these are dynamic admin-managed dropdowns now, so match the guessed text against
+  // whichever options have already loaded (case-insensitive) and only patch if found.
+  applyPrefill(fullName?: string | null, dateOfBirth?: string | null, gender?: string | null, religion?: string | null, maritalStatus?: string | null): void {
     if (fullName) {
       this.form.patchValue({ fullName });
     }
+    if (dateOfBirth) {
+      this.form.patchValue({ dateOfBirth: new Date(dateOfBirth) });
+    }
+    const genderId = this.findIdByName(this.genderOptions, 'genderId', gender);
+    if (genderId) this.form.patchValue({ genderId });
+
+    const religionId = this.findIdByName(this.religionOptions, 'religionId', religion);
+    if (religionId) this.form.patchValue({ religionId });
+
+    const maritalStatusId = this.findIdByName(this.maritalStatusOptions, 'maritalStatusId', maritalStatus);
+    if (maritalStatusId) this.form.patchValue({ maritalStatusId });
+  }
+
+  private findIdByName(options: { name: string }[], idField: string, name?: string | null): number | null {
+    if (!name) return null;
+    const match = options.find((o) => o.name?.toLowerCase() === name.toLowerCase());
+    return match ? ((match as unknown as Record<string, number>)[idField] ?? null) : null;
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -56,6 +106,17 @@ export class PersonalInfoSectionComponent implements OnChanges {
         dateOfBirth: this.profile.dateOfBirth ? new Date(this.profile.dateOfBirth) : null,
       });
     }
+
+    // US-003 AC4: National ID is part of the candidate's application-matching identity - once
+    // they have a submitted application it locks (independent of the pristine guard above, which
+    // only gates re-patch).
+    if (changes['profile'] && this.profile) {
+      this.form.get('nationalId')?.[this.profile.hasSubmittedApplication ? 'disable' : 'enable']({ emitEvent: false });
+    }
+  }
+
+  get identityFieldsLocked(): boolean {
+    return !!this.profile?.hasSubmittedApplication;
   }
 
   get f() {
@@ -80,13 +141,14 @@ export class PersonalInfoSectionComponent implements OnChanges {
     const displayNames: { [key: string]: string } = {
       fullName: 'Full Name',
       dateOfBirth: 'Date of Birth',
-      gender: 'Gender',
+      genderId: 'Gender',
       nationalId: 'National ID',
       fatherName: "Father's Name",
       motherName: "Mother's Name",
-      maritalStatus: 'Marital Status',
-      religion: 'Religion',
+      maritalStatusId: 'Marital Status',
+      religionId: 'Religion',
       nationality: 'Nationality',
+      bloodGroupId: 'Blood Group',
     };
     return displayNames[fieldName] || fieldName;
   }
@@ -113,6 +175,7 @@ export class PersonalInfoSectionComponent implements OnChanges {
         this.saving = false;
         if (response && !response.hasError) {
           this.saveSuccess = true;
+          this.form.markAsPristine();
           this.saved.emit();
         } else {
           this.saveError = response?.decentMessage || 'Failed to save personal info.';

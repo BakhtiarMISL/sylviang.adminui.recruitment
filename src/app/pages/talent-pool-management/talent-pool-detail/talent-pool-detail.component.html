@@ -1,0 +1,101 @@
+<section class="page-container">
+  <div class="sm:col-span-2" *ngIf="loading">Loading...</div>
+  <div class="sm:col-span-2 invalid" *ngIf="loadError">{{ loadError }}</div>
+</section>
+
+<ng-container *ngIf="!loading && pool">
+  <section class="page-container">
+    <div class="flex justify-between items-center gap-3 mb-4">
+      <div>
+        <h3 class="table-title">{{ pool.name }}</h3>
+        <p *ngIf="pool.jobPostingTitle" class="mt-1 text-sm text-primary">Linked to: {{ pool.jobPostingTitle }}</p>
+      </div>
+      <button pButton [disabled]="selectedCandidateIds.length === 0" (click)="openFastTrackDialog()">
+        <i class="fa fa-forward"></i>
+        <span>Fast-track to Vacancy ({{ selectedCandidateIds.length }})</span>
+      </button>
+    </div>
+
+    <div class="table-container">
+      <div *ngIf="pool.candidates.length === 0" class="not-found">
+        <i class="fa fa-users"></i>
+        <p>No candidates in this pool yet. Add candidates from the candidate list.</p>
+      </div>
+
+      <p-table *ngIf="pool.candidates.length > 0" [value]="pool.candidates" dataKey="candidateProfileId" [responsiveLayout]="'scroll'">
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="width: 3rem">
+              <input type="checkbox" [checked]="selectedCandidateIds.length === pool.candidates.length" (change)="toggleSelectAll(pool.candidates)" />
+            </th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th style="width: 12rem">Profile Completeness</th>
+            <th style="width: 6rem">View</th>
+            <th style="width: 6rem">Remove</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-candidate>
+          <tr>
+            <td><input type="checkbox" [checked]="isSelected(candidate.candidateProfileId)" (change)="toggleSelection(candidate.candidateProfileId)" /></td>
+            <td>{{ candidate.fullName }}</td>
+            <td>{{ candidate.email }}</td>
+            <td>{{ candidate.phone ? (candidate.phoneDialCode ? candidate.phoneDialCode + ' ' : '') + candidate.phone : '-' }}</td>
+            <td>{{ candidate.completenessPercentage }}%</td>
+            <td>
+              <button [routerLink]="['/candidates', candidate.candidateProfileId]" class="text-primary">
+                <i class="fa fa-eye"></i>
+              </button>
+            </td>
+            <td>
+              <button (click)="removeCandidate(candidate, $event)" class="text-danger">
+                <i class="fa fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </section>
+</ng-container>
+
+<p-dialog header="Fast-track to Vacancy" [(visible)]="showFastTrackDialog" [modal]="true" [style]="{ width: '32rem' }">
+  <div class="form-container" *ngIf="!fastTrackResult">
+    <p class="sm:col-span-2 text-sm text-neutral">
+      {{ selectedCandidateIds.length }} selected candidate(s) will be applied to the chosen vacancy and moved straight to Shortlisted.
+    </p>
+
+    <p-floatlabel variant="in" class="sm:col-span-2">
+      <p-select
+        id="vacancyPicker"
+        [options]="openVacancies"
+        optionLabel="title"
+        optionValue="jobPostingId"
+        [(ngModel)]="selectedJobPostingId"
+        styleClass="w-full"
+      ></p-select>
+      <label for="vacancyPicker">Open Vacancy</label>
+    </p-floatlabel>
+
+    <div *ngIf="fastTrackError" class="invalid sm:col-span-2">{{ fastTrackError }}</div>
+  </div>
+
+  <div class="form-container" *ngIf="fastTrackResult">
+    <p class="sm:col-span-2">
+      Fast-tracked {{ fastTrackResult.fastTrackedCount }}, already applied {{ fastTrackResult.alreadyAppliedCount }}, skipped
+      {{ fastTrackResult.skippedCount }}.
+    </p>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <ng-container *ngIf="!fastTrackResult">
+      <button pButton severity="secondary" (click)="showFastTrackDialog = false">Cancel</button>
+      <button pButton [disabled]="fastTracking || !selectedJobPostingId" (click)="fastTrack()">
+        {{ fastTracking ? 'Processing...' : 'Fast-track' }}
+      </button>
+    </ng-container>
+    <button pButton *ngIf="fastTrackResult" (click)="showFastTrackDialog = false; loadPool()">Done</button>
+  </ng-template>
+</p-dialog>

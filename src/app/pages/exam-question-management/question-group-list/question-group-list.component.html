@@ -1,0 +1,81 @@
+<section class="page-container">
+  <div class="flex justify-between items-center gap-3 mb-4">
+    <h3 class="table-title">Question Groups</h3>
+    <button pButton [routerLink]="['/exam-questions/manage-question-group']">
+      <i class="fa fa-plus"></i>
+      <span>Add Group</span>
+    </button>
+  </div>
+
+  <app-filter-panel [(collapsed)]="filtersCollapsed">
+    <div class="filter-bar">
+      <p-floatlabel variant="in">
+        <input pInputText inputId="filterSearch" class="w-full" [(ngModel)]="filterSearch" (keydown.enter)="applyFilters()" />
+        <label for="filterSearch">Search Groups</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="in">
+        <p-select
+          inputId="filterStatus"
+          class="w-40"
+          [options]="statusOptions"
+          [(ngModel)]="filterStatus"
+          optionLabel="label"
+          optionValue="value"
+          [appendTo]="'body'"
+        ></p-select>
+        <label for="filterStatus">Status</label>
+      </p-floatlabel>
+
+      <button pButton (click)="applyFilters()">
+        <i class="fa fa-filter"></i>
+        <span>Apply</span>
+      </button>
+      <button pButton severity="secondary" (click)="resetFilters()">
+        <i class="fa fa-rotate-left"></i>
+        <span>Reset</span>
+      </button>
+    </div>
+  </app-filter-panel>
+
+  <div *ngIf="loading" class="space-y-3">
+    <p-skeleton height="4rem" *ngFor="let i of skeletonItems"></p-skeleton>
+  </div>
+
+  <div *ngIf="!loading && filteredGroups.length === 0" class="table-container">
+    <div class="not-found">
+      <i class="fa fa-magnifying-glass-minus"></i>
+      <p>No question groups match these filters.</p>
+    </div>
+  </div>
+
+  <div *ngIf="!loading" class="grid grid-cols-1 gap-4">
+    <div *ngFor="let group of filteredGroups" class="rounded-lg bg-white p-4 shadow-sm dark:bg-dark">
+      <div class="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+        <div>
+          <div class="flex items-center gap-2">
+            <h4 class="text-lg font-medium text-gray-900 dark:text-white">{{ group.name }}</h4>
+            <span
+              class="rounded-full px-2 py-0.5 text-xs font-medium"
+              [ngClass]="group.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'"
+            >
+              {{ group.isActive ? 'Active' : 'Inactive' }}
+            </span>
+          </div>
+          <p class="text-sm text-gray-600 dark:text-gray-300" *ngIf="group.description">{{ group.description }}</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <button pButton severity="secondary" [routerLink]="['/exam-questions/manage-question-group', group.questionGroupId]">
+            <i class="fa fa-edit"></i>
+            <span>Edit</span>
+          </button>
+          <button pButton [severity]="group.isActive ? 'danger' : 'success'" (click)="toggleActiveStatus(group, $event)">
+            <i class="fa" [ngClass]="group.isActive ? 'fa-ban' : 'fa-check'"></i>
+            <span>{{ group.isActive ? 'Deactivate' : 'Activate' }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
