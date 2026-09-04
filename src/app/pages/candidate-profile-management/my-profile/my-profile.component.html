@@ -100,7 +100,13 @@
       </ng-template>
       <app-certifications-section (saved)="onSectionSaved()"></app-certifications-section>
     </p-accordion-tab>
-    <p-accordion-tab header="Photo & Signature">
+    <p-accordion-tab>
+      <ng-template pTemplate="header">
+        <span class="section-header-title">Photo & Signature</span>
+        <span class="section-completeness-badge" *ngIf="sectionCompleteness('PhotoSignature') as sc" [class.section-completeness-badge-done]="sc.isComplete">
+          <i class="fas fa-check" *ngIf="sc.isComplete"></i>{{ sc.weightPercentage }}%
+        </span>
+      </ng-template>
       <app-photo-signature-upload [profile]="profile" (saved)="onSectionSaved()"></app-photo-signature-upload>
     </p-accordion-tab>
     <p-accordion-tab>
