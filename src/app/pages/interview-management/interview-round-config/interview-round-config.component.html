@@ -1,0 +1,91 @@
+<section class="page-container">
+  <div class="flex justify-between items-center gap-3 mb-4">
+    <h3 class="table-title">Interview Rounds{{ jobPostingTitle ? ' - ' + jobPostingTitle : '' }}</h3>
+    <button pButton severity="secondary" [routerLink]="['/job-vacancy/job-vacancy-list']">
+      <i class="fa fa-arrow-left"></i>
+      <span>Back to Job Vacancies</span>
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="space-y-3">
+    <p-skeleton height="6rem"></p-skeleton>
+  </div>
+
+  <div *ngIf="!loading" class="table-container mb-4 p-4">
+    <div *ngIf="rounds.length === 0" class="not-found">
+      <i class="fa fa-magnifying-glass-minus"></i>
+      <p>No interview rounds configured for this job posting yet.</p>
+    </div>
+
+    <div class="space-y-3">
+      <div
+        *ngFor="let round of rounds; let i = index"
+        class="grid grid-cols-1 items-end gap-3 rounded-md border border-gray-200 p-3 dark:border-gray-700 sm:grid-cols-12"
+      >
+        <div class="sm:col-span-1 flex sm:flex-col items-center justify-center gap-1">
+          <span class="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700">{{ round.sequence }}</span>
+          <div class="flex sm:flex-col gap-1">
+            <button pButton type="button" text severity="secondary" [disabled]="i === 0" (click)="moveUp(i)">
+              <i class="fa fa-arrow-up"></i>
+            </button>
+            <button pButton type="button" text severity="secondary" [disabled]="i === rounds.length - 1" (click)="moveDown(i)">
+              <i class="fa fa-arrow-down"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="sm:col-span-4">
+          <p-floatlabel variant="in">
+            <input pInputText class="w-full" [(ngModel)]="round.name" [ngModelOptions]="{ standalone: true }" />
+            <label>Round Name</label>
+          </p-floatlabel>
+        </div>
+
+        <div class="sm:col-span-3">
+          <p-floatlabel variant="in">
+            <p-select
+              class="w-full"
+              [options]="scorecardOptions"
+              [(ngModel)]="round.scorecardId"
+              [ngModelOptions]="{ standalone: true }"
+              optionLabel="name"
+              optionValue="scorecardId"
+              [showClear]="true"
+              [appendTo]="'body'"
+              [autoDisplayFirst]="false"
+            ></p-select>
+            <label>Scorecard</label>
+          </p-floatlabel>
+        </div>
+
+        <div class="sm:col-span-3">
+          <p-floatlabel variant="in">
+            <input pInputText class="w-full" [(ngModel)]="round.panelistEmployeeIdsText" [ngModelOptions]="{ standalone: true }" />
+            <label>Panel Employee IDs (comma-separated)</label>
+          </p-floatlabel>
+          <small class="text-neutral">e.g. 101, 205, 310</small>
+        </div>
+
+        <div class="sm:col-span-1">
+          <button pButton type="button" severity="danger" (click)="removeRound(i)">
+            <i class="fa fa-trash"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <button pButton type="button" severity="secondary" class="mt-3" (click)="addRound()">
+      <i class="fa fa-plus"></i>
+      <span>Add Round</span>
+    </button>
+
+    <small class="mt-3 block text-red-500" *ngIf="errorMessage">{{ errorMessage }}</small>
+
+    <div class="mt-4 flex gap-2">
+      <button pButton [loading]="saving" (click)="save()">
+        <i class="fa fa-save"></i>
+        <span>Save Rounds</span>
+      </button>
+    </div>
+  </div>
+</section>

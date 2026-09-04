@@ -1,0 +1,85 @@
+<section class="page-container" *ngIf="form">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="table-container mb-4 p-4">
+      <h3 class="table-title mb-3">Configure Fitment Data</h3>
+
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div>
+          <p-floatlabel variant="in">
+            <p-select
+              inputId="jobApplicationId"
+              class="w-full"
+              formControlName="jobApplicationId"
+              [options]="applicationOptions"
+              optionLabel="label"
+              optionValue="jobApplicationId"
+              [filter]="true"
+              filterBy="candidateName,designation,label"
+              [showClear]="!jobApplicationIdLocked"
+              [disabled]="jobApplicationIdLocked"
+              [appendTo]="'body'"
+            ></p-select>
+            <label for="jobApplicationId" class="required-label">Candidate application</label>
+          </p-floatlabel>
+          <small class="text-red-500" *ngIf="hasError('jobApplicationId')">Select a candidate application.</small>
+          <small class="text-neutral" *ngIf="!hasError('jobApplicationId') && !jobApplicationIdLocked">Choose a candidate from the Final Selection Pool. Search by candidate name or designation.</small>
+        </div>
+
+        <div>
+          <p-floatlabel variant="in">
+            <input pInputText id="designation" class="w-full" formControlName="designation" />
+            <label for="designation" class="required-label">Designation</label>
+          </p-floatlabel>
+          <small class="text-red-500" *ngIf="hasError('designation')">Designation is required.</small>
+        </div>
+
+        <div>
+          <p-floatlabel variant="in">
+            <input pInputText id="grade" class="w-full" formControlName="grade" />
+            <label for="grade">Grade (optional)</label>
+          </p-floatlabel>
+          <small class="text-neutral">e.g. Grade 5 / Senior Executive</small>
+        </div>
+
+        <div>
+          <p-floatlabel variant="in">
+            <input pInputText id="location" class="w-full" formControlName="location" />
+            <label for="location">Location (optional)</label>
+          </p-floatlabel>
+        </div>
+
+        <div>
+          <p-floatlabel variant="in">
+            <p-inputnumber inputId="basicSalary" formControlName="basicSalary" class="w-full" [min]="0" mode="decimal" [minFractionDigits]="2" styleClass="w-full"></p-inputnumber>
+            <label for="basicSalary" class="required-label">Basic Salary</label>
+          </p-floatlabel>
+          <small class="text-red-500" *ngIf="hasError('basicSalary')">Basic salary is required.</small>
+        </div>
+
+        <div>
+          <p-floatlabel variant="in">
+            <p-inputnumber inputId="totalAllowances" formControlName="totalAllowances" class="w-full" [min]="0" mode="decimal" [minFractionDigits]="2" styleClass="w-full"></p-inputnumber>
+            <label for="totalAllowances">Total Allowances</label>
+          </p-floatlabel>
+        </div>
+
+        <div>
+          <p-floatlabel variant="in">
+            <p-inputnumber inputId="totalDeductions" formControlName="totalDeductions" class="w-full" [min]="0" mode="decimal" [minFractionDigits]="2" styleClass="w-full"></p-inputnumber>
+            <label for="totalDeductions">Total Deductions</label>
+          </p-floatlabel>
+        </div>
+      </div>
+
+      <small class="mt-3 block text-red-500" *ngIf="errorMessage">{{ errorMessage }}</small>
+      <small class="mt-3 block text-green-600" *ngIf="successMessage">{{ successMessage }}</small>
+
+      <div class="mt-4 flex gap-2">
+        <button pButton type="submit" [disabled]="submitting || loading || form.pristine">
+          <i class="fa fa-sack-dollar"></i>
+          <span>{{ submitting ? 'Saving...' : 'Save Fitment Data' }}</span>
+        </button>
+      </div>
+    </div>
+  </form>
+</section>

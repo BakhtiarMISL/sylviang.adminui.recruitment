@@ -77,7 +77,7 @@
                 </div>
               </th>
             }
-            <th style="width: 8rem">Actions</th>
+            <th style="width: 12rem">Actions</th>
           </tr>
         </ng-template>
 
@@ -105,12 +105,16 @@
               <td>{{ shift.logoutTime }}</td>
               <td>{{ shift.workingTimeInMinutes }} mins</td>
               <td>
-                <button [routerLink]="['/attendance/manage-shift', shift.shiftId]" class="text-primary mr-2">
-                  <i class="fa fa-edit"></i>
-                </button>
-                <button class="text-danger" (click)="deleteShift(shift, $event)">
-                  <i class="fa fa-trash"></i>
-                </button>
+                <div class="flex gap-2">
+                  <button pButton size="small" severity="secondary" [routerLink]="['/attendance/manage-shift', shift.shiftId]">
+                    <i class="fa fa-edit"></i>
+                    <span>Edit</span>
+                  </button>
+                  <button pButton size="small" severity="danger" (click)="deleteShift(shift, $event)">
+                    <i class="fa fa-trash"></i>
+                    <span>Delete</span>
+                  </button>
+                </div>
               </td>
             </tr>
           }

@@ -15,7 +15,86 @@
         <span class="stage-name">{{ stage.stageName }}</span>
         <span class="status-badge">{{ formatEnumLabel(stage.status) }}</span>
       </div>
-      <div class="stage-type">{{ formatEnumLabel(stage.stageType) }}</div>
+      <div class="stage-type-row">
+        <span class="stage-type">{{ formatEnumLabel(stage.stageType) }}</span>
+        <button pButton type="button" [outlined]="true" size="small" class="stage-details-toggle" (click)="toggleStageDetails(stage)">
+          <i class="fa-solid fa-chevron-right" [class.rotated]="isStageExpanded(stage)"></i>
+          <span>Details</span>
+        </button>
+      </div>
+
+      <div class="stage-details" *ngIf="isStageExpanded(stage)">
+        <div class="stage-field notes" *ngIf="stage.stageDescription">{{ stage.stageDescription }}</div>
+        <div class="stage-field text-sm text-neutral" *ngIf="stage.passingCriteria">Passing criteria: {{ stage.passingCriteria }}</div>
+        <div class="stage-field text-sm text-neutral" *ngIf="stage.requiredDocuments">Required documents: {{ stage.requiredDocuments }}</div>
+        <div class="stage-field text-sm text-neutral" *ngIf="stage.estimatedDurationMinutes">Est. duration: {{ stage.estimatedDurationMinutes }} min</div>
+      </div>
+
+      <div class="stage-field" *ngIf="stageNeedsResumeLink(stage)">
+        <i class="fa fa-download"></i>
+        <a [href]="getResumeFileUrl()" target="_blank" rel="noopener noreferrer">View Resume</a>
+      </div>
+
+      <!-- One blocked notice covers the whole card - no point repeating "complete X first" under
+           every individual action below when nothing in this card is actionable yet. -->
+      <div class="stage-blocked-banner" *ngIf="blockingPriorStage(stage) as blocker">
+        <i class="fa-solid fa-lock"></i>
+        <span>Blocked until '{{ blocker.stageName }}' is Completed.</span>
+      </div>
+
+      <!-- Interview-type stages: schedule + track through the real Interview entity, scoped to this stage. -->
+      <ng-container *ngIf="isInterviewStage(stage) && !blockingPriorStage(stage)">
+        <div class="stage-field flex items-center justify-between gap-3">
+          <button
+            pButton
+            type="button"
+            [outlined]="true"
+            size="small"
+            [disabled]="scheduleInterviewDisabled(stage)"
+            [routerLink]="['/interviews/schedule-interview']"
+            [queryParams]="{ jobApplicationId: jobApplicationId, pipelineStageId: stage.pipelineStageId }"
+          >
+            <i class="fa fa-plus"></i>
+            <span>Schedule Interview</span>
+          </button>
+        </div>
+        <span class="stage-field text-sm text-neutral" *ngIf="pendingInterviewForStage(stage) as pending">Round {{ pending.round }} hasn't been marked complete yet.</span>
+        <span class="stage-field text-sm text-neutral" *ngIf="!loadingInterviews && interviewsForStage(stage).length === 0">No interviews scheduled yet for this stage.</span>
+
+        <div *ngFor="let interview of interviewsForStage(stage)" class="stage-field interview-row">
+          <span>
+            Round {{ interview.round }}{{ interview.roundConfigName ? ' (' + interview.roundConfigName + ')' : '' }} &middot;
+            {{ interview.interviewType }} &middot; {{ interview.scheduledStartAt | date: 'dd-MMM-yyyy h:mm a' }} &middot; {{ interview.status }}
+            <ng-container *ngIf="interview.result !== 'Pending'"> &middot; Result: {{ interview.result }}</ng-container>
+          </span>
+          <a [routerLink]="['/interviews/interview', interview.interviewId]" class="interview-row-view">
+            <i class="fa fa-eye"></i>
+            <span>View</span>
+          </a>
+        </div>
+      </ng-container>
+
+      <!-- Exam-driven stages: enroll through the Exams module, pre-filled for this candidate. -->
+      <ng-container *ngIf="isExamDrivenStage(stage) && !blockingPriorStage(stage)">
+        <div class="stage-field flex items-center justify-between gap-3">
+          <button
+            pButton
+            type="button"
+            [outlined]="true"
+            size="small"
+            [disabled]="scheduleExamDisabled(stage)"
+            [routerLink]="['/exams/schedule-exam']"
+            [queryParams]="{ jobApplicationId: jobApplicationId }"
+          >
+            <i class="fa fa-plus"></i>
+            <span>Schedule Exam</span>
+          </button>
+        </div>
+        <div class="stage-field text-sm text-neutral">
+          <i class="fa-solid fa-circle-info"></i>
+          <span>Score auto-fills here once this candidate's exam is scored. See the <a [routerLink]="['/exams/exam-list']">Exams</a> module for enrolled exams.</span>
+        </div>
+      </ng-container>
 
       <ng-container *ngIf="editingStageId !== stage.pipelineStageId">
         <div class="stage-field" *ngIf="stage.scheduledDate">
@@ -27,12 +106,26 @@
           <a [href]="stage.meetingLink" target="_blank" rel="noopener">Join link</a>
         </div>
         <div class="stage-field notes" *ngIf="stage.notes">{{ stage.notes }}</div>
+        <div class="stage-field" *ngIf="stageNeedsScore(stage) && stage.score != null">
+          <i class="fa-solid fa-star"></i>
+          <span>Score: {{ stage.score }}</span>
+        </div>
         <div class="stage-field text-sm text-neutral" *ngIf="stage.lastUpdatedByUserName">Last updated by {{ stage.lastUpdatedByUserName }}</div>
 
-        <button pButton type="button" class="p-button-outlined p-button-sm edit-btn" (click)="startEdit(stage)">
+        <button
+          pButton
+          type="button"
+          class="edit-btn"
+          [outlined]="true"
+          size="small"
+          *ngIf="!blockingPriorStage(stage)"
+          [disabled]="isSystemManagedStage(stage)"
+          (click)="startEdit(stage)"
+        >
           <i class="fa fa-pen"></i>
           <span>Update</span>
         </button>
+        <span class="stage-field text-sm text-neutral" *ngIf="!blockingPriorStage(stage) && isSystemManagedStage(stage)">{{ systemManagedStageHint(stage) }}</span>
       </ng-container>
 
       <ng-container *ngIf="editingStageId === stage.pipelineStageId && editState">
@@ -52,17 +145,33 @@
           </p-floatlabel>
         </div>
 
-        <div class="edit-field">
-          <p-floatlabel variant="in">
-            <p-datepicker [inputId]="'date-' + stage.pipelineStageId" [(ngModel)]="editState.scheduledDate" [showTime]="true" hourFormat="12" dateFormat="dd-M-yy" [showIcon]="true" class="w-full"></p-datepicker>
-            <label [for]="'date-' + stage.pipelineStageId">Scheduled Date</label>
-          </p-floatlabel>
-        </div>
+        <ng-container *ngIf="stageNeedsScheduling(stage)">
+          <div class="edit-field">
+            <p-floatlabel variant="in">
+              <p-datepicker [inputId]="'date-' + stage.pipelineStageId" [(ngModel)]="editState.scheduledDate" [showTime]="true" hourFormat="12" dateFormat="dd-M-yy" [showIcon]="true" [appendTo]="'body'" class="w-full"></p-datepicker>
+              <label [for]="'date-' + stage.pipelineStageId">Scheduled Date</label>
+            </p-floatlabel>
+          </div>
 
-        <div class="edit-field">
+          <div class="edit-field">
+            <p-floatlabel variant="in">
+              <input type="text" pInputText [id]="'link-' + stage.pipelineStageId" [(ngModel)]="editState.meetingLink" class="w-full" />
+              <label [for]="'link-' + stage.pipelineStageId">Meeting Link</label>
+            </p-floatlabel>
+          </div>
+        </ng-container>
+
+        <div class="edit-field" *ngIf="stageNeedsScore(stage)">
           <p-floatlabel variant="in">
-            <input type="text" pInputText [id]="'link-' + stage.pipelineStageId" [(ngModel)]="editState.meetingLink" class="w-full" />
-            <label [for]="'link-' + stage.pipelineStageId">Meeting Link</label>
+            <p-inputnumber
+              [inputId]="'score-' + stage.pipelineStageId"
+              [(ngModel)]="editState.score"
+              [min]="0"
+              [max]="stage.maxMarks"
+              class="w-full"
+              styleClass="w-full"
+            ></p-inputnumber>
+            <label [for]="'score-' + stage.pipelineStageId">Score (0-{{ stage.maxMarks }})</label>
           </p-floatlabel>
         </div>
 

@@ -1,0 +1,53 @@
+<section class="page-container">
+  <div class="flex justify-between items-center gap-3 mb-4">
+    <h3 class="table-title">Scorecard Templates</h3>
+    <button pButton [routerLink]="['/scorecards/manage-scorecard']">
+      <i class="fa fa-plus"></i>
+      <span>Add Scorecard</span>
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="space-y-3">
+    <p-skeleton height="4rem" *ngFor="let i of skeletonItems"></p-skeleton>
+  </div>
+
+  <div *ngIf="!loading && scorecards.length === 0" class="table-container">
+    <div class="not-found">
+      <i class="fa fa-magnifying-glass-minus"></i>
+      <p>No scorecard templates configured yet.</p>
+    </div>
+  </div>
+
+  <div *ngIf="!loading" class="grid grid-cols-1 gap-4">
+    <div *ngFor="let scorecard of scorecards" class="rounded-lg bg-white p-4 shadow-sm dark:bg-dark">
+      <div class="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+        <div>
+          <div class="flex items-center gap-2">
+            <h4 class="text-lg font-medium text-gray-900 dark:text-white">{{ scorecard.name }}</h4>
+            <span
+              class="rounded-full px-2 py-0.5 text-xs font-medium"
+              [ngClass]="scorecard.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'"
+            >
+              {{ scorecard.isActive ? 'Active' : 'Inactive' }}
+            </span>
+          </div>
+          <p class="text-sm text-gray-600 dark:text-gray-300">{{ scorecard.description }}</p>
+          <p class="text-sm text-gray-600 dark:text-gray-300">
+            {{ scorecard.criteria.length }} criteria &middot; total weight {{ totalWeight(scorecard) }}
+          </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <button pButton severity="secondary" (click)="editScorecard(scorecard)">
+            <i class="fa fa-edit"></i>
+            <span>Edit</span>
+          </button>
+          <button pButton [severity]="scorecard.isActive ? 'danger' : 'success'" (click)="toggleActiveStatus(scorecard, $event)">
+            <i class="fa" [ngClass]="scorecard.isActive ? 'fa-ban' : 'fa-check'"></i>
+            <span>{{ scorecard.isActive ? 'Deactivate' : 'Activate' }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,6 +1,6 @@
-<app-public-sidebar></app-public-sidebar>
+<app-public-navbar></app-public-navbar>
 
-<div class="login-page pl-20 lg:pl-60">
+<div class="login-page">
   <div class="login-card" *ngIf="registered">
     <h1 class="login-title">Check your email</h1>
     <p class="login-subtitle" *ngIf="requiresEmailVerification">We've sent a verification link to your email. Verify it, then log in.</p>
@@ -13,20 +13,20 @@
     <p class="login-subtitle">Register to apply for jobs and track your applications</p>
 
     <div class="login-field">
-      <label for="fullName">Full Name</label>
+      <label for="fullName" class="required-label">Full Name</label>
       <input id="fullName" type="text" pInputText formControlName="fullName" autocomplete="name" />
       <small class="login-error" *ngIf="fullName?.invalid && fullName?.touched">Full name is required.</small>
     </div>
 
     <div class="login-field">
-      <label for="email">Email</label>
+      <label for="email" class="required-label">Email</label>
       <input id="email" type="email" pInputText formControlName="email" autocomplete="email" />
       <small class="login-error" *ngIf="email?.errors?.['required'] && email?.touched">Email is required.</small>
       <small class="login-error" *ngIf="email?.errors?.['email'] && email?.touched">Enter a valid email address.</small>
     </div>
 
     <div class="login-field">
-      <label for="password">Password</label>
+      <label for="password" class="required-label">Password</label>
       <input id="password" type="password" pInputText formControlName="password" autocomplete="new-password" />
       <small class="login-error" *ngIf="password?.errors?.['required'] && password?.touched">Password is required.</small>
       <small class="login-error" *ngIf="password?.errors?.['minlength'] && password?.touched">Password must be at least 8 characters.</small>

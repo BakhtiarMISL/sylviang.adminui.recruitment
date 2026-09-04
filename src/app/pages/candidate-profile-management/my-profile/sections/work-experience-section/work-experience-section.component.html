@@ -6,7 +6,7 @@
   <div class="sm:col-span-2" *ngIf="!loading">
     <div class="list-row" *ngFor="let item of items">
       <div>
-        <strong>{{ item.designation }}</strong> at {{ item.companyName }}
+        <strong>{{ item.designation }}</strong> <span>at {{ item.companyName }}</span>
         <span *ngIf="item.isCurrent"> (Current)</span>
       </div>
       <div class="list-row-actions">
@@ -20,19 +20,46 @@
     </div>
   </div>
 
-  <div class="sm:col-span-2" *ngIf="prefillSuggestions.length > 0">
-    <p class="text-sm text-neutral">Suggested from your resume — review before adding:</p>
-    <div class="list-row" *ngFor="let suggestion of prefillSuggestions; let i = index">
-      <div>{{ suggestion.designation }}</div>
-      <div class="list-row-actions">
-        <button pButton severity="secondary" type="button" (click)="useSuggestion(suggestion, i)">Use</button>
-        <button pButton severity="danger" type="button" (click)="dismissSuggestion(i)">Dismiss</button>
+  <div class="suggestion-panel" *ngIf="prefillSuggestions.length > 0">
+    <div class="suggestion-panel-header">
+      <div class="suggestion-panel-title">
+        <i class="fas fa-wand-magic-sparkles"></i>
+        <span>Suggested from your resume</span>
+        <span class="suggestion-count">{{ prefillSuggestions.length }}</span>
+      </div>
+      <button pButton size="small" type="button" [disabled]="!hasReadySuggestions() || savingAll" (click)="useAllSuggestions()">
+        <i class="fas fa-check-double"></i>
+        <span>{{ savingAll ? 'Adding...' : 'Use All' }}</span>
+      </button>
+    </div>
+    <p class="suggestion-panel-hint">Review each entry before adding it to your profile.</p>
+
+    <div class="suggestion-card" *ngFor="let suggestion of prefillSuggestions; let i = index">
+      <div>
+        <div class="suggestion-card-title">
+          <span>{{ suggestion.designation }}</span>
+          <span class="suggestion-badge" *ngIf="!isSuggestionReady(suggestion)">Needs review</span>
+        </div>
+        <div class="suggestion-card-meta" *ngIf="suggestion.companyName">{{ suggestion.companyName }}</div>
+        <div class="suggestion-card-meta" *ngIf="suggestion.startDate">
+          {{ suggestion.startDate }} - {{ suggestion.isCurrent ? 'Present' : (suggestion.endDate || '?') }}
+        </div>
+      </div>
+      <div class="suggestion-card-actions">
+        <button pButton severity="secondary" size="small" type="button" (click)="useSuggestion(suggestion, i)">
+          <i class="fas fa-check"></i>
+          <span>Use</span>
+        </button>
+        <button pButton severity="danger" size="small" type="button" (click)="dismissSuggestion(i)">
+          <i class="fas fa-xmark"></i>
+          <span>Dismiss</span>
+        </button>
       </div>
     </div>
   </div>
 
   <div class="sm:col-span-2" *ngIf="!showForm">
-    <button pButton severity="secondary" type="button" (click)="startAdd()">
+    <button pButton type="button" (click)="startAdd()">
       <i class="fas fa-plus"></i>
       <span>Add Work Experience</span>
     </button>
@@ -43,7 +70,7 @@
   <div>
     <p-floatlabel variant="in">
       <input pInputText inputId="companyName" formControlName="companyName" maxlength="200" class="w-full" [class.ng-invalid]="hasError('companyName')" [class.ng-dirty]="hasError('companyName')" (blur)="f['companyName'].markAsTouched()" />
-      <label for="companyName">Company Name *</label>
+      <label for="companyName" class="required-label">Company Name</label>
     </p-floatlabel>
     <div *ngIf="hasError('companyName')" class="invalid">{{ getErrorMessage('companyName') }}</div>
   </div>
@@ -51,22 +78,22 @@
   <div>
     <p-floatlabel variant="in">
       <input pInputText inputId="designation" formControlName="designation" maxlength="200" class="w-full" [class.ng-invalid]="hasError('designation')" [class.ng-dirty]="hasError('designation')" (blur)="f['designation'].markAsTouched()" />
-      <label for="designation">Designation *</label>
+      <label for="designation" class="required-label">Designation</label>
     </p-floatlabel>
     <div *ngIf="hasError('designation')" class="invalid">{{ getErrorMessage('designation') }}</div>
   </div>
 
   <div>
     <p-floatlabel variant="in">
-      <p-datepicker inputId="startDate" formControlName="startDate" dateFormat="dd-M-yy" [showIcon]="true" styleClass="w-full" [class.ng-invalid]="hasError('startDate')" [class.ng-dirty]="hasError('startDate')"></p-datepicker>
-      <label for="startDate">Start Date *</label>
+      <p-datepicker inputId="startDate" formControlName="startDate" dateFormat="dd-M-yy" [showIcon]="true" [appendTo]="'body'" styleClass="w-full" [class.ng-invalid]="hasError('startDate')" [class.ng-dirty]="hasError('startDate')"></p-datepicker>
+      <label for="startDate" class="required-label">Start Date</label>
     </p-floatlabel>
     <div *ngIf="hasError('startDate')" class="invalid">{{ getErrorMessage('startDate') }}</div>
   </div>
 
   <div>
     <p-floatlabel variant="in">
-      <p-datepicker inputId="endDate" formControlName="endDate" dateFormat="dd-M-yy" [showIcon]="true" styleClass="w-full" [disabled]="f['isCurrent'].value"></p-datepicker>
+      <p-datepicker inputId="endDate" formControlName="endDate" dateFormat="dd-M-yy" [showIcon]="true" [appendTo]="'body'" styleClass="w-full" [disabled]="f['isCurrent'].value"></p-datepicker>
       <label for="endDate">End Date</label>
     </p-floatlabel>
   </div>
@@ -87,7 +114,7 @@
   <div class="sm:col-span-2">
     <p-floatlabel variant="in">
       <textarea pInputText inputId="responsibilities" formControlName="responsibilities" class="w-full" rows="3"></textarea>
-      <label for="responsibilities">Responsibilities *</label>
+      <label for="responsibilities" class="required-label">Responsibilities</label>
     </p-floatlabel>
     <div *ngIf="hasError('responsibilities')" class="invalid">{{ getErrorMessage('responsibilities') }}</div>
   </div>
@@ -96,7 +123,7 @@
   <div *ngIf="saveError" class="invalid sm:col-span-2">{{ saveError }}</div>
 
   <div class="sm:col-span-2 flex gap-3">
-    <button pButton type="submit" [disabled]="saving">
+    <button pButton type="submit" [disabled]="saving || form.pristine">
       <i class="fas fa-save"></i>
       <span>{{ saving ? 'Saving...' : 'Save' }}</span>
     </button>

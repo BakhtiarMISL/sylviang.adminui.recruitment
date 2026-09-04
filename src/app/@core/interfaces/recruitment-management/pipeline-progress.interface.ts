@@ -5,10 +5,17 @@ export interface IPipelineStageProgress {
   stageName: string;
   stageType: string;
   displayOrder: number;
+  isMandatory: boolean;
+  stageDescription?: string;
+  passingCriteria?: string;
+  requiredDocuments?: string;
+  estimatedDurationMinutes?: number;
+  maxMarks?: number;
   status: StageProgressStatusEnum;
   scheduledDate?: string;
   meetingLink?: string;
   notes?: string;
+  score?: number;
   completedAt?: string;
   lastUpdatedByUserName?: string;
 }
@@ -25,4 +32,5 @@ export interface IPipelineStageProgressUpdateRequest {
   scheduledDate?: string;
   meetingLink?: string;
   notes?: string;
+  score?: number;
 }

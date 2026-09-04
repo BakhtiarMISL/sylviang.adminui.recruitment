@@ -5,6 +5,8 @@ import { ToastService } from '@app/@core/services/misc/toast.service';
 import { PayrollHeadListColumns } from './payroll-head-list.component.constants';
 import { ConfirmationService, SortEvent } from 'primeng/api';
 import { UI_CONFIG } from '@app/@core/constants';
+import { TableStateService } from '@app/@core/services/table-state.service';
+import { BreadcrumbService } from '@app/@core/services';
 
 @Component({
   selector: 'app-payroll-head-list',
@@ -13,11 +15,15 @@ import { UI_CONFIG } from '@app/@core/constants';
   styleUrl: './payroll-head-list.component.scss',
 })
 export class PayrollHeadListComponent implements OnInit, AfterViewInit {
+  private readonly STATE_KEY = 'payroll-head-list';
+
   constructor(
     private payrollHeadService: PayrollHeadService,
     private cdr: ChangeDetectorRef,
     private confirmationService: ConfirmationService,
     private toast: ToastService,
+    private tableState: TableStateService,
+    private breadcrumbService: BreadcrumbService,
   ) {}
 
   payrollHeads: IPayrollHeadResponse[] = [];
@@ -27,7 +33,7 @@ export class PayrollHeadListComponent implements OnInit, AfterViewInit {
   totalRecords = 0;
   loading = false;
   UI_CONFIG = UI_CONFIG;
-  rows = UI_CONFIG.defaultPageSize;
+  rows: number = UI_CONFIG.defaultPageSize;
   currentPage = 1;
 
   sortBy: string = '';
@@ -43,8 +49,47 @@ export class PayrollHeadListComponent implements OnInit, AfterViewInit {
   columns = PayrollHeadListColumns;
 
   ngOnInit(): void {
+    this.setBreadcrumbs();
+    this.restoreState();
     this.loadPayrollHeads();
     this.isLoading = false;
+  }
+
+  private setBreadcrumbs(): void {
+    this.breadcrumbService.setBreadcrumbs([
+      { title: 'Payroll', icon: 'fa-solid fa-money-bill-wave', href: '/payroll/payroll-head-list' },
+      { title: 'Payroll Head', icon: 'fa-solid fa-list', href: '/payroll/payroll-head-list' },
+    ]);
+  }
+
+  private restoreState(): void {
+    const s = this.tableState.load<{
+      currentPage: number;
+      rows: number;
+      searchTerm: string;
+      sortBy: string;
+      sortDirection: string;
+      sortedColumn: string;
+    }>(this.STATE_KEY);
+    if (s) {
+      this.currentPage = s.currentPage ?? this.currentPage;
+      this.rows = s.rows ?? this.rows;
+      this.searchTerm = s.searchTerm ?? this.searchTerm;
+      this.sortBy = s.sortBy ?? this.sortBy;
+      this.sortDirection = s.sortDirection ?? this.sortDirection;
+      this.sortedColumn = s.sortedColumn ?? this.sortedColumn;
+    }
+  }
+
+  private saveState(): void {
+    this.tableState.save(this.STATE_KEY, {
+      currentPage: this.currentPage,
+      rows: this.rows,
+      searchTerm: this.searchTerm,
+      sortBy: this.sortBy,
+      sortDirection: this.sortDirection,
+      sortedColumn: this.sortedColumn,
+    });
   }
 
   ngAfterViewInit(): void {
@@ -63,11 +108,14 @@ export class PayrollHeadListComponent implements OnInit, AfterViewInit {
 
   resetSearch() {
     this.searchTerm = '';
+    this.currentPage = 1;
+    this.saveState();
     this.loadPayrollHeads();
   }
 
   loadPayrollHeads() {
     this.loading = true;
+    this.saveState();
 
     const params = {
       pageNumber: this.currentPage,

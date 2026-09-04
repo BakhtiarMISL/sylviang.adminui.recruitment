@@ -96,6 +96,38 @@
   @apply text-black/80 dark:text-white/80 !important;
 }
 
+// The PrimeNG float-label positioning tokens are not available in this theme. A floating label
+// then remains on top of its value (especially in textareas, selects and input numbers). Render
+// every float label as a stable label above its control instead, which gives every field type the
+// same accessible, non-overlapping layout.
+.p-floatlabel {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.25rem;
+  width: 100%;
+}
+.p-floatlabel > label {
+  position: static !important;
+  order: -1;
+  transform: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: 0.75rem !important;
+  line-height: 1.25rem !important;
+  pointer-events: auto !important;
+}
+.p-floatlabel-in .p-textarea {
+  padding-top: 0.5rem !important;
+}
+.p-floatlabel-in .p-select {
+  min-height: 0 !important;
+}
+.p-floatlabel-in .p-select-label {
+  height: auto !important;
+  padding-top: 0.5rem !important;
+  padding-bottom: 0.5rem !important;
+}
+
 // --------------------------------------------Input Number Css Override--------------------------------------------
 .p-inputnumber .p-inputnumber-input {
   @apply w-full !important;
@@ -155,6 +187,15 @@
   }
   .p-datatable-tbody > tr > td {
     @apply p-[0.5rem_1rem] border-b text-sm border-b-borderLight dark:border-b-borderDark truncate text-black dark:text-white max-w-[150px] whitespace-nowrap overflow-hidden text-ellipsis hover:whitespace-normal hover:overflow-visible !important;
+  }
+
+  // Action cells (buttons/icons) are never meant to truncate like text content - the 150px
+  // ellipsis cap above was clipping any button whose label runs longer than that (e.g. "Review
+  // Pre-Boarding"), invisible until now only because most action-cell buttons happened to be
+  // shorter. :has(.p-button) targets exactly the cells that hold action buttons.
+  .p-datatable-tbody > tr > td:has(.p-button) {
+    @apply max-w-none whitespace-normal overflow-visible !important;
+    text-overflow: clip !important;
   }
   .p-datatable-thead > tr > th.p-datatable-column-sorted {
     @apply bg-transparent text-black dark:text-white !important;
@@ -231,7 +272,13 @@
   @apply h-[26px] flex items-center gap-2;
   i,
   span {
-    @apply text-white text-sm;
+    @apply text-sm;
+  }
+  &:not(.p-button-outlined):not(.p-button-text) {
+    i,
+    span {
+      @apply text-white;
+    }
   }
 }
 .p-button:disabled {
@@ -244,6 +291,29 @@
 .p-button-text.p-button-danger:not(:disabled):hover {
   @apply bg-danger-500 dark:bg-danger-700;
 }
+// Outlined buttons have a transparent/white fill - the global .p-button i,span rule above
+// forces white icon/text, which is invisible against that fill. Force the accent color back.
+.p-button-outlined {
+  @apply bg-transparent !important;
+  i,
+  span {
+    @apply text-current;
+  }
+}
+.p-button-outlined.p-button-danger {
+  @apply text-danger-500 border-danger-500 !important;
+  i,
+  span {
+    @apply text-danger-500 !important;
+  }
+}
+.p-button-outlined.p-button-danger:not(:disabled):hover {
+  @apply bg-danger-500 !important;
+  i,
+  span {
+    @apply text-white !important;
+  }
+}
 .p-button-secondary {
   @apply bg-neutral hover:bg-borderDark border-neutral text-white border-none !important;
 }
@@ -254,11 +324,12 @@
 // --------------------------------------------Dialog CSS Override--------------------------------------------
 .p-dialog {
   border: none !important;
+  @apply rounded-xl overflow-hidden;
   .p-dialog-header {
     @apply bg-light dark:bg-dark text-black dark:text-white rounded-t-xl px-5 pt-3 pb-0 z-20;
   }
   .p-dialog-content {
-    @apply bg-light dark:bg-dark text-black dark:text-white px-5 py-0;
+    @apply bg-light dark:bg-dark text-black dark:text-white px-5 py-0 rounded-b-xl;
     overflow: auto !important;
   }
   .p-dialog-footer {
@@ -359,6 +430,14 @@
 }
 
 // ---------------------------------------------Autocomplete CSS Override--------------------------------------------
+.p-autocomplete {
+  @apply border-b border-b-neutral hover:border-b-primary focus-within:border-b-primary border-x-0 border-t-0 rounded-none !important;
+  background: transparent !important;
+  box-shadow: none;
+}
+.p-autocomplete-dropdown {
+  @apply text-neutral hover:text-primary bg-transparent !important;
+}
 .p-autocomplete-overlay {
   @apply border-borderLight dark:border-borderDark rounded !important;
 }
@@ -501,6 +580,23 @@
 // Legacy support - keep the old class name working
 .fixed-checkbox-table {
   @extend .fixed-columns-table;
+}
+
+// ---------------------------------------------Sticky Actions Column--------------------------------------------
+// Pins a table's trailing Actions column to the right edge of the horizontal scroll area, so row
+// actions stay reachable without scrolling all the way right - regardless of viewport width or
+// how many data columns the table has.
+.sticky-actions-column {
+  @apply sticky right-0 z-10 !important;
+}
+th.sticky-actions-column {
+  @apply bg-light dark:bg-dark !important;
+}
+.p-datatable-tbody > tr:nth-child(even) > td.sticky-actions-column {
+  @apply bg-light dark:bg-dark !important;
+}
+.p-datatable-tbody > tr:nth-child(odd) > td.sticky-actions-column {
+  @apply bg-borderLight dark:bg-borderDark !important;
 }
 
 // ---------------------------------------------Browser Autofill Styles Override---------------------------------------------

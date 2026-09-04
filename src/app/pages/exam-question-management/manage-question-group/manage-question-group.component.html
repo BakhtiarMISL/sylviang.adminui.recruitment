@@ -1,0 +1,32 @@
+<section class="page-container">
+  <form [formGroup]="groupForm" (ngSubmit)="onSubmit()">
+    <div class="table-container mb-4 p-4">
+      <h3 class="table-title mb-3">{{ isEditMode ? 'Edit Question Group' : 'Add Question Group' }}</h3>
+
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <p-floatlabel variant="in">
+          <input pInputText id="name" class="w-full" formControlName="name" />
+          <label for="name" class="required-label">Group Name</label>
+        </p-floatlabel>
+        <small class="text-red-500" *ngIf="hasError('name')">Group name is required.</small>
+
+        <p-floatlabel variant="in" class="sm:col-span-2">
+          <textarea pTextarea id="description" class="w-full" formControlName="description" rows="2"></textarea>
+          <label for="description">Description</label>
+        </p-floatlabel>
+      </div>
+
+      <small class="mt-3 block text-red-500" *ngIf="errorMessage">{{ errorMessage }}</small>
+
+      <div class="mt-4 flex gap-2">
+        <button pButton type="submit">
+          <i class="fa fa-save"></i>
+          <span>{{ isEditMode ? 'Save Changes' : 'Create Group' }}</span>
+        </button>
+        <button pButton type="button" severity="secondary" [routerLink]="['/exam-questions/question-group-list']">
+          <span>Cancel</span>
+        </button>
+      </div>
+    </div>
+  </form>
+</section>

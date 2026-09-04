@@ -7,18 +7,14 @@ export interface IPipelineStage {
   passingCriteria?: string;
   isActive?: boolean;
   isMandatory: boolean;
-  departmentId?: number;
   estimatedDurationMinutes?: number;
   slaDays?: number;
-  colorBadge?: string;
-  emailTemplate?: string;
-  notifyCandidateOnEnter: boolean;
-  notifyInterviewersOnAssign: boolean;
+  maxMarks?: number;
+  passMarks?: number;
   requiredDocuments?: string;
-  allowCandidateReschedule: boolean;
   autoProgressionRule?: string;
+  autoProgressionTargetDisplayOrder?: number;
   manualApprovalRequired: boolean;
-  interviewerEmployeeIds: number[];
 }
 
 export interface IHiringPipelineCreateRequest {

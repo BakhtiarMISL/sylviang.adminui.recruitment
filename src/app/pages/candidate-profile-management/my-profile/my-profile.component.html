@@ -12,13 +12,21 @@
     <div class="sm:col-span-2 profile-header" *ngIf="!loading && profile">
       <app-completeness-ring [percentage]="profile.completenessPercentage"></app-completeness-ring>
       <div class="profile-header-text">
-        <span class="profile-header-title">Profile completeness</span>
+        <span class="profile-header-title">
+          Profile completeness
+        </span>
         <span class="profile-header-subtitle">Fill out every section below to reach 100%.</span>
+        <span class="profile-header-subtitle" *ngIf="profile.isInternal && (profile.departmentName || profile.designationName)">
+          {{ profile.designationName }}<span *ngIf="profile.designationName && profile.departmentName"> &middot; </span>{{ profile.departmentName }}
+        </span>
+        <span class="text-sm text-neutral mt-1" *ngIf="profile.hasPrepopulatedFieldEdits">
+          <i class="fas fa-flag"></i> You've edited a field pre-filled from Core HR — HR has been notified.
+        </span>
       </div>
     </div>
 
     <div class="sm:col-span-2" *ngIf="!loading && profile">
-      <p class="text-sm text-neutral mb-2">Upload your resume to prefill sections below (free, best-effort — review and Save each section yourself; nothing is saved automatically).</p>
+      <p class="text-sm text-neutral mb-2">Upload your resume to auto-fill the sections below — review the prefilled fields/suggestions and hit Save (or "Use All").</p>
 
       <label for="resumeFile" class="upload-dropzone" [class.disabled]="parsingResume">
         <i class="fas" [class.fa-spinner]="parsingResume" [class.fa-spin]="parsingResume" [class.fa-file-arrow-up]="!parsingResume"></i>
@@ -27,38 +35,87 @@
           <small>PDF or DOCX</small>
         </span>
       </label>
-      <input id="resumeFile" type="file" (change)="onResumeFileSelected($event)" accept=".pdf,.docx" [disabled]="parsingResume" class="sr-only" />
+      <input id="resumeFile" type="file" (change)="onResumeFileSelected($event)" accept=".pdf,.docx" [disabled]="parsingResume" class="sr-only file-picker-input" />
 
       <div *ngIf="resumeError" class="invalid mt-2">{{ resumeError }}</div>
       <div *ngIf="resumeParsed" class="text-sm text-neutral mt-2">Resume parsed — check each section below for prefilled fields/suggestions.</div>
+      <div *ngIf="resumeDegradedNotice" class="invalid mt-2">{{ resumeDegradedNotice }}</div>
     </div>
   </div>
 </section>
 
 <section class="page-container" *ngIf="!loading && profile">
-  <p-accordion [multiple]="true" [value]="['0', '1', '2', '3', '4', '5', '6', '7']">
-    <p-accordion-tab header="Personal Info" value="0">
+  <p-accordion [activeIndex]="0">
+    <p-accordion-tab>
+      <ng-template pTemplate="header">
+        <span class="section-header-title">Personal Info</span>
+        <span class="section-completeness-badge" *ngIf="sectionCompleteness('PersonalInfo') as sc" [class.section-completeness-badge-done]="sc.isComplete">
+          <i class="fas fa-check" *ngIf="sc.isComplete"></i>{{ sc.weightPercentage }}%
+        </span>
+      </ng-template>
       <app-personal-info-section [profile]="profile" (saved)="onSectionSaved()"></app-personal-info-section>
     </p-accordion-tab>
-    <p-accordion-tab header="Contact" value="1">
+    <p-accordion-tab>
+      <ng-template pTemplate="header">
+        <span class="section-header-title">Contact</span>
+        <span class="section-completeness-badge" *ngIf="sectionCompleteness('Contact') as sc" [class.section-completeness-badge-done]="sc.isComplete">
+          <i class="fas fa-check" *ngIf="sc.isComplete"></i>{{ sc.weightPercentage }}%
+        </span>
+      </ng-template>
       <app-contact-section [profile]="profile" (saved)="onSectionSaved()"></app-contact-section>
     </p-accordion-tab>
-    <p-accordion-tab header="Education" value="2">
-      <app-education-section (saved)="onSectionSaved()"></app-education-section>
+    <p-accordion-tab>
+      <ng-template pTemplate="header">
+        <span class="section-header-title">Education</span>
+        <span class="section-completeness-badge" *ngIf="sectionCompleteness('Education') as sc" [class.section-completeness-badge-done]="sc.isComplete">
+          <i class="fas fa-check" *ngIf="sc.isComplete"></i>{{ sc.weightPercentage }}%
+        </span>
+      </ng-template>
+      <app-education-section (saved)="onSectionSaved()" (suggestionsChanged)="onEducationSuggestionsChanged($event)"></app-education-section>
     </p-accordion-tab>
-    <p-accordion-tab header="Work Experience" value="3">
-      <app-work-experience-section (saved)="onSectionSaved()"></app-work-experience-section>
+    <p-accordion-tab>
+      <ng-template pTemplate="header">
+        <span class="section-header-title">Work Experience</span>
+        <span class="section-completeness-badge" *ngIf="sectionCompleteness('WorkExperience') as sc" [class.section-completeness-badge-done]="sc.isComplete">
+          <i class="fas fa-check" *ngIf="sc.isComplete"></i>{{ sc.weightPercentage }}%
+        </span>
+      </ng-template>
+      <app-work-experience-section (saved)="onSectionSaved()" (suggestionsChanged)="onWorkExperienceSuggestionsChanged($event)"></app-work-experience-section>
     </p-accordion-tab>
-    <p-accordion-tab header="Skills" value="4">
-      <app-skills-section (saved)="onSectionSaved()"></app-skills-section>
+    <p-accordion-tab>
+      <ng-template pTemplate="header">
+        <span class="section-header-title">Skills</span>
+        <span class="section-completeness-badge" *ngIf="sectionCompleteness('Skills') as sc" [class.section-completeness-badge-done]="sc.isComplete">
+          <i class="fas fa-check" *ngIf="sc.isComplete"></i>{{ sc.weightPercentage }}%
+        </span>
+      </ng-template>
+      <app-skills-section (saved)="onSectionSaved()" (suggestionsChanged)="onSkillSuggestionsChanged($event)"></app-skills-section>
     </p-accordion-tab>
-    <p-accordion-tab header="Certifications" value="5">
+    <p-accordion-tab>
+      <ng-template pTemplate="header">
+        <span class="section-header-title">Certifications</span>
+        <span class="section-completeness-badge" *ngIf="sectionCompleteness('Certifications') as sc" [class.section-completeness-badge-done]="sc.isComplete">
+          <i class="fas fa-check" *ngIf="sc.isComplete"></i>{{ sc.weightPercentage }}%
+        </span>
+      </ng-template>
       <app-certifications-section (saved)="onSectionSaved()"></app-certifications-section>
     </p-accordion-tab>
-    <p-accordion-tab header="Photo & Signature" value="6">
+    <p-accordion-tab>
+      <ng-template pTemplate="header">
+        <span class="section-header-title">Photo & Signature</span>
+        <span class="section-completeness-badge" *ngIf="sectionCompleteness('PhotoSignature') as sc" [class.section-completeness-badge-done]="sc.isComplete">
+          <i class="fas fa-check" *ngIf="sc.isComplete"></i>{{ sc.weightPercentage }}%
+        </span>
+      </ng-template>
       <app-photo-signature-upload [profile]="profile" (saved)="onSectionSaved()"></app-photo-signature-upload>
     </p-accordion-tab>
-    <p-accordion-tab header="Documents" value="7">
+    <p-accordion-tab>
+      <ng-template pTemplate="header">
+        <span class="section-header-title">Documents</span>
+        <span class="section-completeness-badge" *ngIf="sectionCompleteness('Documents') as sc" [class.section-completeness-badge-done]="sc.isComplete">
+          <i class="fas fa-check" *ngIf="sc.isComplete"></i>{{ sc.weightPercentage }}%
+        </span>
+      </ng-template>
       <app-documents-section (saved)="onSectionSaved()"></app-documents-section>
     </p-accordion-tab>
   </p-accordion>

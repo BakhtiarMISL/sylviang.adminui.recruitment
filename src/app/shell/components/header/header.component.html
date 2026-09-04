@@ -55,6 +55,7 @@
 
   <!-- Right side controls -->
   <div class="flex items-center space-x-4">
+    <app-notification-bell *ngIf="showNotificationBell"></app-notification-bell>
     <app-theme-toggle></app-theme-toggle>
 
     <span class="text-sm font-medium text-dark dark:text-borderLight hidden sm:inline">{{ displayName }}</span>
