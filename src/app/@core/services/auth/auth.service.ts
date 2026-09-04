@@ -113,6 +113,24 @@ export class AuthService {
     localStorage.removeItem(REFRESH_TOKEN_KEY);
     localStorage.removeItem(EXPIRES_AT_KEY);
     this.userSubject.next(null);
+    this.clearListState();
+  }
+
+  // Table filters/pagination/sort (TableStateService, plus the ATS dashboard's own
+  // sessionStorage key) are keyed per-list, not per-user - without this, logging out and
+  // logging back in as someone else resurrects the previous user's filters/selections.
+  // Same reasoning applies when swapping identity via impersonation.
+  private clearListState(): void {
+    try {
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < sessionStorage.length; i++) {
+        const key = sessionStorage.key(i);
+        if (key && (key.startsWith('table-state:') || key === 'ats-dashboard-filters')) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach((key) => sessionStorage.removeItem(key));
+    } catch {}
   }
 
   getToken(): string | null {
@@ -163,6 +181,7 @@ export class AuthService {
     );
 
     this.userSubject.next(impersonatedUser);
+    this.clearListState();
     // No scheduleRefresh call - the impersonation token has no refresh token by design
     // (30-minute hard cap, see ImpersonationService.StartAsync).
   }
@@ -194,6 +213,7 @@ export class AuthService {
 
     this.userSubject.next(JSON.parse(originalUser) as IAuthenticatedUser);
     this.scheduleRefresh(originalExpiresAt);
+    this.clearListState();
   }
 
   isImpersonating(): boolean {

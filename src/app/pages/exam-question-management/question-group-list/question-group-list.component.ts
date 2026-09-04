@@ -3,6 +3,7 @@ import { IQuestionGroupResponse } from '@app/@core/interfaces/recruitment-manage
 import { QuestionGroupService } from '@app/@core/services/recruitment/question-group/question-group.service';
 import { BreadcrumbService } from '@app/@core/services';
 import { ConfirmationService } from 'primeng/api';
+import { TableStateService } from '@app/@core/services/table-state.service';
 
 @Component({
   selector: 'app-question-group-list',
@@ -11,11 +12,14 @@ import { ConfirmationService } from 'primeng/api';
   styleUrl: './question-group-list.component.scss',
 })
 export class QuestionGroupListComponent implements OnInit {
+  private readonly STATE_KEY = 'question-group-list';
+
   constructor(
     private questionGroupService: QuestionGroupService,
     private confirmationService: ConfirmationService,
     private breadcrumbService: BreadcrumbService,
     private cdr: ChangeDetectorRef,
+    private tableState: TableStateService,
   ) {}
 
   groups: IQuestionGroupResponse[] = [];
@@ -38,11 +42,30 @@ export class QuestionGroupListComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.restoreState();
     this.breadcrumbService.setBreadcrumbs([
       { title: 'Recruitment', icon: 'fa-solid fa-briefcase', href: '/exam-questions/question-group-list' },
       { title: 'Question Groups', icon: 'fa-solid fa-layer-group', href: '/exam-questions/question-group-list' },
     ]);
     this.loadGroups();
+  }
+
+  private restoreState(): void {
+    const s = this.tableState.load<{
+      filterSearch: string;
+      filterStatus: boolean | null;
+    }>(this.STATE_KEY);
+    if (s) {
+      this.filterSearch = s.filterSearch ?? this.filterSearch;
+      this.filterStatus = s.filterStatus ?? this.filterStatus;
+    }
+  }
+
+  private saveState(): void {
+    this.tableState.save(this.STATE_KEY, {
+      filterSearch: this.filterSearch,
+      filterStatus: this.filterStatus,
+    });
   }
 
   loadGroups(): void {
@@ -67,6 +90,7 @@ export class QuestionGroupListComponent implements OnInit {
   // in memory over the already-loaded groups rather than round-tripping to the backend.
   applyFilters(): void {
     this.filtersCollapsed = true;
+    this.saveState();
     const search = this.filterSearch.trim().toLowerCase();
     this.filteredGroups = this.groups.filter((g) => {
       const matchesSearch = !search || g.name.toLowerCase().includes(search) || (g.description ?? '').toLowerCase().includes(search);

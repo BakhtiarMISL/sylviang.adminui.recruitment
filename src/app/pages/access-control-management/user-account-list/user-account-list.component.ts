@@ -9,6 +9,7 @@ import { ImpersonationService } from '@core/services/recruitment/impersonation/i
 import { UserRoleEnum } from '@core/enums/user-role.enum';
 import { BreadcrumbService } from '@app/@core/services';
 import { ConfirmationService } from 'primeng/api';
+import { TableStateService } from '@app/@core/services/table-state.service';
 
 @Component({
   selector: 'app-user-account-list',
@@ -17,6 +18,8 @@ import { ConfirmationService } from 'primeng/api';
   styleUrl: './user-account-list.component.scss',
 })
 export class UserAccountListComponent implements OnInit {
+  private readonly STATE_KEY = 'user-account-list';
+
   constructor(
     private userAccountService: UserAccountService,
     private companyService: CompanyService,
@@ -26,6 +29,7 @@ export class UserAccountListComponent implements OnInit {
     private router: Router,
     private cdr: ChangeDetectorRef,
     private breadcrumbService: BreadcrumbService,
+    private tableState: TableStateService,
   ) {}
 
   accounts: IUserAccountResponse[] = [];
@@ -52,12 +56,14 @@ export class UserAccountListComponent implements OnInit {
 
   applyFilters(): void {
     this.filtersCollapsed = true;
+    this.saveState();
   }
 
   resetFilters(): void {
     this.selectedCompanyId = null;
     this.selectedRole = null;
     this.filtersCollapsed = false;
+    this.saveState();
   }
 
   get isSuperAdmin(): boolean {
@@ -82,9 +88,28 @@ export class UserAccountListComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.restoreState();
     this.setBreadcrumbs();
     this.loadAccounts();
     if (this.isSuperAdmin) this.loadCompanyOptions();
+  }
+
+  private restoreState(): void {
+    const s = this.tableState.load<{
+      selectedCompanyId: number | null;
+      selectedRole: string | null;
+    }>(this.STATE_KEY);
+    if (s) {
+      this.selectedCompanyId = s.selectedCompanyId ?? this.selectedCompanyId;
+      this.selectedRole = s.selectedRole ?? this.selectedRole;
+    }
+  }
+
+  private saveState(): void {
+    this.tableState.save(this.STATE_KEY, {
+      selectedCompanyId: this.selectedCompanyId,
+      selectedRole: this.selectedRole,
+    });
   }
 
   private setBreadcrumbs(): void {
@@ -107,6 +132,7 @@ export class UserAccountListComponent implements OnInit {
 
   loadAccounts(): void {
     this.loading = true;
+    this.saveState();
     this.userAccountService.getAll().subscribe({
       next: (response) => {
         this.accounts = !response.hasError && response.content ? response.content : [];

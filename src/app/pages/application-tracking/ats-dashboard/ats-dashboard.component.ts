@@ -443,6 +443,10 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
       filterMaxAge: this.filterMaxAge,
       filterTags: this.filterTags,
       filterStaleOnly: this.filterStaleOnly,
+      currentPage: this.currentPage,
+      rows: this.rows,
+      sortBy: this.sortBy,
+      sortDirection: this.sortDirection,
     };
     sessionStorage.setItem(FILTER_SESSION_KEY, JSON.stringify(state));
   }
@@ -467,6 +471,11 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
       this.filterMaxAge = state.filterMaxAge ?? null;
       this.filterTags = state.filterTags ?? [];
       this.filterStaleOnly = state.filterStaleOnly ?? false;
+      this.currentPage = state.currentPage ?? this.currentPage;
+      this.rows = state.rows ?? this.rows;
+      this.sortBy = state.sortBy ?? this.sortBy;
+      this.sortDirection = state.sortDirection ?? this.sortDirection;
+      this.sortedColumn = this.sortBy;
     } catch {
       sessionStorage.removeItem(FILTER_SESSION_KEY);
     }
@@ -521,6 +530,7 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   onPageChange(event: any): void {
     this.currentPage = Math.floor(event.first / event.rows) + 1;
     this.rows = event.rows;
+    this.saveFiltersToSession();
     this.loadApplications();
   }
 
@@ -529,6 +539,7 @@ export class AtsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     this.sortBy = event.field || '';
     this.sortDirection = event.order === 1 ? 'asc' : 'desc';
     this.currentPage = 1;
+    this.saveFiltersToSession();
     this.loadApplications();
   }
 

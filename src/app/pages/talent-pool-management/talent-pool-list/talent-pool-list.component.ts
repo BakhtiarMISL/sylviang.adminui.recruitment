@@ -5,6 +5,7 @@ import { JobVacancyService } from '@app/@core/services/recruitment/job-vacancy/j
 import { TalentPoolService } from '@app/@core/services/recruitment/talent-pool/talent-pool.service';
 import { BreadcrumbService } from '@app/@core/services';
 import { ConfirmationService } from 'primeng/api';
+import { TableStateService } from '@app/@core/services/table-state.service';
 
 @Component({
   selector: 'app-talent-pool-list',
@@ -13,12 +14,15 @@ import { ConfirmationService } from 'primeng/api';
   styleUrl: './talent-pool-list.component.scss',
 })
 export class TalentPoolListComponent implements OnInit {
+  private readonly STATE_KEY = 'talent-pool-list';
+
   constructor(
     private talentPoolService: TalentPoolService,
     private jobVacancyService: JobVacancyService,
     private confirmationService: ConfirmationService,
     private cdr: ChangeDetectorRef,
     private breadcrumbService: BreadcrumbService,
+    private tableState: TableStateService,
   ) {}
 
   pools: ITalentPoolResponse[] = [];
@@ -41,6 +45,7 @@ export class TalentPoolListComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.restoreState();
     this.setBreadcrumbs();
     this.loadJobVacancies();
     this.loadPools();
@@ -48,6 +53,21 @@ export class TalentPoolListComponent implements OnInit {
 
   private setBreadcrumbs(): void {
     this.breadcrumbService.setBreadcrumbs([{ title: 'Talent Pools', icon: 'fa-solid fa-users', href: '/talent-pools/talent-pool-list' }]);
+  }
+
+  private restoreState(): void {
+    const s = this.tableState.load<{
+      selectedJobPostingFilter: number | null;
+    }>(this.STATE_KEY);
+    if (s) {
+      this.selectedJobPostingFilter = s.selectedJobPostingFilter ?? this.selectedJobPostingFilter;
+    }
+  }
+
+  private saveState(): void {
+    this.tableState.save(this.STATE_KEY, {
+      selectedJobPostingFilter: this.selectedJobPostingFilter,
+    });
   }
 
   loadJobVacancies(): void {
@@ -65,6 +85,7 @@ export class TalentPoolListComponent implements OnInit {
 
   loadPools(): void {
     this.loading = true;
+    this.saveState();
     this.talentPoolService.getAll(this.selectedJobPostingFilter ?? undefined).subscribe({
       next: (response) => {
         this.pools = !response.hasError && response.content ? response.content : [];

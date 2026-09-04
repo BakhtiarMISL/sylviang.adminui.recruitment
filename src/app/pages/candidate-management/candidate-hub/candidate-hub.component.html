@@ -1,5 +1,5 @@
 <section class="page-container">
-  <p-tabs [(value)]="activeTab">
+  <p-tabs [value]="activeTab" (valueChange)="onTabChange($event)">
     <p-tablist>
       <p-tab value="0"><i class="fa fa-users mr-2"></i>Browse</p-tab>
       <p-tab value="1"><i class="fa fa-magnifying-glass mr-2"></i>Search</p-tab>

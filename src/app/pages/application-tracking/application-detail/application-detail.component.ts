@@ -100,6 +100,9 @@ export class ApplicationDetailComponent implements OnInit, AfterViewInit, OnDest
 
   setActiveTab(tab: DetailTab): void {
     this.activeTab = tab;
+    // Kept in the URL so refresh/back-navigation lands back on the tab HR was looking at,
+    // instead of always resetting to Pipeline Stages.
+    this.router.navigate([], { relativeTo: this.route, queryParams: { tab }, queryParamsHandling: 'merge', replaceUrl: true });
   }
 
   get activeTabIndex(): number {
@@ -148,6 +151,8 @@ export class ApplicationDetailComponent implements OnInit, AfterViewInit, OnDest
     // application's data on that navigation.
     this.routeSub = this.route.paramMap.subscribe((params) => {
       this.jobApplicationId = Number(params.get('id'));
+      const tabParam = this.route.snapshot.queryParamMap.get('tab') as DetailTab | null;
+      this.activeTab = tabParam && this.tabs.some((t) => t.key === tabParam) ? tabParam : 'pipeline';
       this.breadcrumbService.setBreadcrumbs([
         { title: 'ATS Dashboard', icon: 'fa-solid fa-list-check', href: '/applications' },
         { title: 'Application Detail', icon: 'fa-solid fa-file-lines', href: `/applications/${this.jobApplicationId}` },
