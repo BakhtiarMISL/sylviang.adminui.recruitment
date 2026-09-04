@@ -23,17 +23,67 @@
 
       <div class="interviews" *ngIf="application.interviews.length > 0">
         <h5>Interviews</h5>
-        <div class="interview-row" *ngFor="let interview of application.interviews">
-          <i class="fa-solid fa-calendar-days"></i>
-          <span>{{ interview.round || 'Interview' }}</span>
-          <span>{{ interview.scheduledDate ? (interview.scheduledDate | date: 'dd-MMM-yyyy, h:mm a') : 'Date TBD' }}</span>
-          <span *ngIf="interview.location">{{ interview.location }}</span>
-          <a *ngIf="interview.meetingLink" [href]="interview.meetingLink" target="_blank" rel="noopener">Join link</a>
+        <div class="stage-row" *ngFor="let interview of application.interviews; let i = index" [class.stage-row-next]="i === 0 && application.interviews.length > 1">
+          <div class="stage-details">
+            <i class="fa-solid fa-calendar-days stage-icon"></i>
+            <span *ngIf="i === 0 && application.interviews.length > 1" class="next-badge">Next</span>
+            <div class="stage-primary">
+              <span class="stage-title">{{ interview.round || 'Interview' }}</span>
+              <span class="stage-meta">{{ interview.scheduledDate ? (interview.scheduledDate | date: 'dd-MMM-yyyy, h:mm a') : 'Date TBD' }}</span>
+              <span *ngIf="interview.location" class="stage-meta">{{ interview.location }}</span>
+            </div>
+          </div>
+          <div class="stage-actions" *ngIf="interview.meetingLink">
+            <a *ngIf="canJoin(interview)" class="stage-action stage-action-primary" [href]="interview.meetingLink" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-up-right-from-square"></i> Join meeting</a>
+            <span *ngIf="!canJoin(interview)" class="stage-status" title="Link opens 5 minutes before the scheduled time"><i class="fa-regular fa-clock"></i> Opens soon</span>
+          </div>
         </div>
       </div>
 
-      <div class="application-card-actions" *ngIf="application.canWithdraw">
-        <button pButton type="button" class="p-button-outlined p-button-danger p-button-sm" [disabled]="withdrawingId === application.jobApplicationId" (click)="confirmWithdraw($event, application)">
+      <div class="interviews" *ngIf="examsFor(application.jobApplicationId).length > 0">
+        <h5>Exams</h5>
+        <div class="stage-row" *ngFor="let exam of examsFor(application.jobApplicationId)">
+          <div class="stage-details">
+            <i class="fa-solid fa-file-pen stage-icon"></i>
+            <div class="stage-primary">
+              <span class="stage-title">{{ exam.examTitle }}</span>
+              <span class="stage-meta">{{ exam.scheduledStartAt | date: 'dd-MMM-yyyy, h:mm a' }}</span>
+              <span class="stage-meta">{{ exam.examType === ExamTypeEnum.Online ? 'Online exam' : 'In-person exam' }}</span>
+            </div>
+          </div>
+          <div class="stage-actions">
+            <ng-container *ngIf="exam.examType === ExamTypeEnum.Online">
+              <a *ngIf="exam.attemptStatus === ExamAttemptStatusEnum.NotStarted" [routerLink]="['/exam-attempt', exam.examEnrollmentId]" class="stage-action stage-action-primary"><i class="fa-solid fa-play"></i> Start exam</a>
+              <a *ngIf="exam.attemptStatus === ExamAttemptStatusEnum.InProgress" [routerLink]="['/exam-attempt', exam.examEnrollmentId]" class="stage-action stage-action-primary"><i class="fa-solid fa-arrow-right"></i> Resume exam</a>
+              <a *ngIf="exam.attemptStatus === ExamAttemptStatusEnum.Submitted" [routerLink]="['/exam-attempt', exam.examEnrollmentId]" class="stage-action stage-action-secondary"><i class="fa-solid fa-circle-check"></i> View status</a>
+            </ng-container>
+            <span *ngIf="exam.examType === ExamTypeEnum.InPerson" class="stage-status"><i class="fa-regular fa-calendar-check"></i> Scheduled</span>
+            <button
+            type="button"
+            class="stage-action stage-action-secondary"
+            [disabled]="downloadingAdmitCardId === exam.examEnrollmentId"
+            (click)="downloadAdmitCard(exam)"
+          >
+            <i class="fa" [class.fa-download]="downloadingAdmitCardId !== exam.examEnrollmentId" [class.fa-spinner]="downloadingAdmitCardId === exam.examEnrollmentId" [class.fa-spin]="downloadingAdmitCardId === exam.examEnrollmentId"></i>
+              Download admit card
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="application-card-actions" *ngIf="application.canWithdraw || application.applicationStatus === 'AwaitingPayment'">
+        <button
+          *ngIf="application.applicationStatus === 'AwaitingPayment'"
+          pButton
+          type="button"
+          class="p-button-sm"
+          [disabled]="retryingPaymentId === application.jobApplicationId"
+          (click)="retryPayment(application)"
+        >
+          <i class="fa fa-credit-card"></i>
+          <span>{{ retryingPaymentId === application.jobApplicationId ? 'Starting payment...' : 'Retry Payment' }}</span>
+        </button>
+        <button pButton type="button" class="p-button-outlined p-button-danger p-button-sm" *ngIf="application.canWithdraw" [disabled]="withdrawingId === application.jobApplicationId" (click)="confirmWithdraw($event, application)">
           <i class="fa fa-ban"></i>
           <span>Withdraw Application</span>
         </button>

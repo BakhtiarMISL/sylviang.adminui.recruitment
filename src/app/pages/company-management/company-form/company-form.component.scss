@@ -1,0 +1,9 @@
+.media-preview {
+  max-width: 160px;
+  max-height: 160px;
+  object-fit: contain;
+  border: 1px solid var(--p-content-border-color, #e5e7eb);
+  border-radius: 4px;
+  display: block;
+  margin-bottom: 0.5rem;
+}

@@ -11,6 +11,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
+import { SelectModule } from 'primeng/select';
 import { SkeletonModule } from 'primeng/skeleton';
 import { TextareaModule } from 'primeng/textarea';
 import { TooltipModule } from 'primeng/tooltip';
@@ -32,6 +33,7 @@ import { ManageHiringPipelineComponent } from './manage-hiring-pipeline/manage-h
     ButtonModule,
     InputTextModule,
     InputNumberModule,
+    SelectModule,
     FloatLabelModule,
     SkeletonModule,
     TextareaModule,

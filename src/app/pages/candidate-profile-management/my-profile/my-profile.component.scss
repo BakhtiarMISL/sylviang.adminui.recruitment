@@ -20,3 +20,31 @@
   font-size: 0.8rem;
   color: var(--p-text-muted-color, #6b7280);
 }
+
+.section-header-title {
+  flex: 1;
+}
+
+.section-completeness-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-left: auto;
+  margin-right: 0.5rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--p-text-muted-color, #6b7280);
+  background: var(--p-surface-100, #f3f4f6);
+
+  i {
+    font-size: 0.7rem;
+  }
+}
+
+.section-completeness-badge-done {
+  color: var(--p-green-600, #16a34a);
+  background: var(--p-green-50, #f0fdf4);
+}
+

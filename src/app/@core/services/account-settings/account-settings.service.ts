@@ -1,7 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ApiResponse } from '@core/interfaces/ApiResponse';
-import { IAccountEmailUpdateRequest, IAccountPasswordChangeRequest, IAccountSettingsResponse } from '@core/interfaces/account-settings.interface';
+import {
+  IAccountEmailChangeChallengeResponse,
+  IAccountEmailChangeConfirmRequest,
+  IAccountEmailChangeRequest,
+  IAccountPasswordChangeRequest,
+  IAccountSettingsResponse,
+} from '@core/interfaces/account-settings.interface';
 import { BASE_URL_Recruitment } from '@env/environment';
 
 @Injectable({
@@ -16,8 +22,12 @@ export class AccountSettingsService {
     return this.httpClient.get<ApiResponse<IAccountSettingsResponse>>(`${this.API_URL}/me`);
   }
 
-  updateEmail(request: IAccountEmailUpdateRequest) {
-    return this.httpClient.put<ApiResponse<void>>(`${this.API_URL}/me/email`, request);
+  requestEmailChange(request: IAccountEmailChangeRequest) {
+    return this.httpClient.post<ApiResponse<IAccountEmailChangeChallengeResponse>>(`${this.API_URL}/me/email/request-change`, request);
+  }
+
+  confirmEmailChange(request: IAccountEmailChangeConfirmRequest) {
+    return this.httpClient.post<ApiResponse<string>>(`${this.API_URL}/me/email/confirm-change`, request);
   }
 
   changePassword(request: IAccountPasswordChangeRequest) {

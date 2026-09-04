@@ -4,14 +4,18 @@ import { ApiResponse } from '@core/interfaces/ApiResponse';
 import { PaginatedResponse } from '@core/interfaces/PaginatedResponse';
 import {
   IApplicationStatusReason,
+  IJobApplicationBulkNotifyRequest,
+  IJobApplicationBulkNotifyResponse,
   IJobApplicationBulkStatusUpdateRequest,
   IJobApplicationBulkStatusUpdateResponse,
   IJobApplicationDetail,
+  IJobApplicationDuplicateGroup,
+  IJobApplicationDuplicateResolveRequest,
   IJobApplicationListItem,
   IJobApplicationStatusUpdateRequest,
   IMyApplication,
 } from '@core/interfaces/recruitment-management/job-application.interface';
-import { IJobApplicationSubmitResponse } from '@core/interfaces/recruitment-management/career-portal.interface';
+import { IJobApplicationSubmitResponse, IJobEligibilityResponse } from '@core/interfaces/recruitment-management/career-portal.interface';
 import { IJobApplicationPipelineProgress, IPipelineStageProgressUpdateRequest } from '@core/interfaces/recruitment-management/pipeline-progress.interface';
 import { BASE_URL_Recruitment } from '@env/environment';
 
@@ -48,12 +52,24 @@ export class JobApplicationService {
     return this.httpClient.patch<ApiResponse<IJobApplicationBulkStatusUpdateResponse>>(`${this.API_URL}/bulk-status`, request);
   }
 
+  /** EP-09 US-076: re-dispatch a chosen event's notification across a batch of applications. */
+  bulkNotify(request: IJobApplicationBulkNotifyRequest) {
+    return this.httpClient.post<ApiResponse<IJobApplicationBulkNotifyResponse>>(`${this.API_URL}/bulk-notify`, request);
+  }
+
+  /** US-101: synchronous ZIP of selected applications' CVs - capped server-side at
+   * BULK_DOWNLOAD_CVS_SYNC_MAX_COUNT; larger batches should use ExportRequestService.requestBulkCvZipExport instead. */
+  bulkDownloadCvs(jobApplicationIds: number[]) {
+    return this.httpClient.post(`${this.API_URL}/bulk-download-cvs`, { jobApplicationIds }, { responseType: 'blob', observe: 'response' });
+  }
+
   /** HR applies on a candidate's behalf (US-034) - multipart, same shape as the career-portal apply flow. */
   applyOnBehalf(request: {
     jobPostingId: number;
     candidateName: string;
     candidateEmail: string;
     candidatePhone?: string;
+    candidateNationalId?: string;
     coverLetter?: string;
     resume: File;
   }) {
@@ -62,6 +78,7 @@ export class JobApplicationService {
     formData.append('candidateName', request.candidateName);
     formData.append('candidateEmail', request.candidateEmail);
     if (request.candidatePhone) formData.append('candidatePhone', request.candidatePhone);
+    if (request.candidateNationalId) formData.append('candidateNationalId', request.candidateNationalId);
     if (request.coverLetter) formData.append('coverLetter', request.coverLetter);
     formData.append('resume', request.resume, request.resume.name);
     return this.httpClient.post<ApiResponse<IJobApplicationSubmitResponse>>(`${this.API_URL}/apply-on-behalf`, formData);
@@ -77,6 +94,11 @@ export class JobApplicationService {
     return this.httpClient.patch<ApiResponse<void>>(`${this.API_URL}/my-applications/${jobApplicationId}/withdraw`, {});
   }
 
+  /** Real-time eligibility check for the current candidate against a job posting (US-024 AC2/AC3). */
+  checkEligibility(jobPostingId: number) {
+    return this.httpClient.get<ApiResponse<IJobEligibilityResponse>>(`${this.API_URL}/job-posting/${jobPostingId}/eligibility`);
+  }
+
   // ── Pipeline Progress Tracker (US-042) ──────────────────────────
 
   getPipelineProgress(jobApplicationId: number) {
@@ -85,5 +107,15 @@ export class JobApplicationService {
 
   updateStageProgress(jobApplicationId: number, pipelineStageId: number, request: IPipelineStageProgressUpdateRequest) {
     return this.httpClient.patch<ApiResponse<void>>(`${this.API_URL}/${jobApplicationId}/pipeline-progress/${pipelineStageId}`, request);
+  }
+
+  // ── Duplicate Detection (US-038) ─────────────────────────────────
+
+  getDuplicates(jobPostingId: number) {
+    return this.httpClient.get<ApiResponse<IJobApplicationDuplicateGroup[]>>(`${this.API_URL}/job-posting/${jobPostingId}/duplicates`);
+  }
+
+  resolveDuplicates(request: IJobApplicationDuplicateResolveRequest) {
+    return this.httpClient.patch<ApiResponse<void>>(`${this.API_URL}/duplicates/resolve`, request);
   }
 }

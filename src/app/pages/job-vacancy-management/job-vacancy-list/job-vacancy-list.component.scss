@@ -1,3 +1,17 @@
 :host {
   display: block;
 }
+
+.filter-checkbox {
+  align-items: center;
+  display: flex;
+  flex: 0 0 auto;
+  gap: 0.65rem;
+  min-height: 2.75rem;
+  white-space: nowrap;
+
+  label {
+    margin: 0;
+    white-space: nowrap;
+  }
+}

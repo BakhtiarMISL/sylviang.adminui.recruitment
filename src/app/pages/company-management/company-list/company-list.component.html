@@ -1,0 +1,71 @@
+<section class="page-container">
+  <div class="flex justify-between items-center gap-3 mb-4">
+    <h3 class="table-title">Companies</h3>
+    <button pButton [routerLink]="['/company-management', 'manage-company']">
+      <i class="fa fa-plus"></i>
+      <span>Create Company</span>
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="space-y-3">
+    <p-skeleton height="3rem" *ngFor="let i of skeletonItems"></p-skeleton>
+  </div>
+
+  <div *ngIf="!loading && companies.length === 0" class="table-container">
+    <div class="not-found">
+      <i class="fa fa-magnifying-glass-minus"></i>
+      <p>No companies yet.</p>
+    </div>
+  </div>
+
+  <p-table *ngIf="!loading && companies.length > 0" [value]="companies" styleClass="p-datatable-sm">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Company</th>
+        <th>Contact</th>
+        <th>Users</th>
+        <th>Job Postings</th>
+        <th>Status</th>
+        <th style="width: 16rem">Actions</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-company>
+      <tr>
+        <td>
+          <div class="flex items-center gap-2">
+            <img *ngIf="company.logoUrl" [src]="getLogoUrl(company.logoUrl)" alt="" class="h-8 w-8 rounded object-cover" />
+            <div>
+              <div class="font-medium">{{ company.name }}</div>
+              <div class="text-xs text-gray-500" *ngIf="company.industry">{{ company.industry }}</div>
+            </div>
+          </div>
+        </td>
+        <td>
+          <div class="text-sm">{{ company.email || '-' }}</div>
+          <div class="text-xs text-gray-500">{{ company.phone || '' }}</div>
+        </td>
+        <td>{{ company.userAccountCount }}</td>
+        <td>{{ company.jobPostingCount }}</td>
+        <td>
+          <span class="rounded-full px-2 py-0.5 text-xs font-medium" [ngClass]="isActive(company) ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'">
+            {{ isActive(company) ? 'Active' : 'Inactive' }}
+          </span>
+        </td>
+        <td>
+          <div class="flex gap-2">
+            <button pButton size="small" severity="secondary" [routerLink]="['/company-management', 'manage-company', company.companyId]">
+              <i class="fa fa-edit"></i>
+              <span>Edit</span>
+            </button>
+            <button pButton size="small" [severity]="isActive(company) ? 'danger' : 'success'" (click)="toggleActive(company, $event)">
+              <i class="fa" [ngClass]="isActive(company) ? 'fa-ban' : 'fa-check'"></i>
+              <span>{{ isActive(company) ? 'Deactivate' : 'Activate' }}</span>
+            </button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+
+  <p-confirmDialog></p-confirmDialog>
+</section>

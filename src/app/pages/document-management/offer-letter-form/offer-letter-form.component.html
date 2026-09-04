@@ -1,0 +1,110 @@
+<section class="page-container" *ngIf="form">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="table-container mb-4 p-4">
+      <h3 class="table-title mb-3">Generate Offer Letter</h3>
+
+      <div class="mb-3 rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800" *ngIf="hireConflicts.length > 0">
+        <i class="fa fa-triangle-exclamation mr-1"></i>
+        This candidate is already <strong>Hired</strong> for:
+        <strong>{{ hireConflictTitles }}</strong>.
+        Confirm the candidate is actually joining this role before proceeding - the system does not block hiring one person into multiple postings.
+      </div>
+
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div>
+          <p-floatlabel variant="in">
+            <input
+              pInputText
+              id="jobApplicationId"
+              type="number"
+              class="w-full"
+              formControlName="jobApplicationId"
+              [readOnly]="jobApplicationIdLocked"
+            />
+            <label for="jobApplicationId" class="required-label">Job Application ID</label>
+          </p-floatlabel>
+          <small class="text-red-500" *ngIf="hasError('jobApplicationId')">Job Application ID is required.</small>
+          <small class="text-neutral" *ngIf="!hasError('jobApplicationId') && !jobApplicationIdLocked">The numeric ID shown on the ATS Dashboard / application detail page, e.g. 3</small>
+        </div>
+
+        <div>
+          <p-floatlabel variant="in">
+            <p-select
+              inputId="documentTemplateId"
+              class="w-full"
+              [options]="templateOptions"
+              formControlName="documentTemplateId"
+              optionLabel="label"
+              optionValue="value"
+              [appendTo]="'body'"
+              placeholder="Select an Offer Letter template"
+            ></p-select>
+            <label for="documentTemplateId" class="required-label">Offer Letter Template</label>
+          </p-floatlabel>
+          <small class="text-red-500" *ngIf="hasError('documentTemplateId')">Template is required.</small>
+          <small class="text-neutral" *ngIf="templateOptions.length === 0">
+            No active Offer Letter templates found. <a [routerLink]="['/document-management/manage-document-template']">Create one first</a>.
+          </small>
+        </div>
+
+        <div>
+          <p-floatlabel variant="in">
+            <input pInputText id="designation" class="w-full" formControlName="designation" />
+            <label for="designation" class="required-label">Designation</label>
+          </p-floatlabel>
+          <small class="text-red-500" *ngIf="hasError('designation')">Designation is required.</small>
+        </div>
+
+        <div>
+          <p-floatlabel variant="in">
+            <p-inputnumber
+              inputId="offeredSalary"
+              formControlName="offeredSalary"
+              class="w-full"
+              [min]="0"
+              mode="decimal"
+              [minFractionDigits]="2"
+              styleClass="w-full"
+            ></p-inputnumber>
+            <label for="offeredSalary" class="required-label">Offered Salary</label>
+          </p-floatlabel>
+          <small class="text-red-500" *ngIf="hasError('offeredSalary')">Offered salary is required.</small>
+        </div>
+
+        <div>
+          <p-floatlabel variant="in">
+            <p-datepicker inputId="joiningDate" formControlName="joiningDate" dateFormat="dd-M-yy" [showIcon]="true" styleClass="w-full"></p-datepicker>
+            <label for="joiningDate" class="required-label">Joining Date</label>
+          </p-floatlabel>
+          <small class="text-red-500" *ngIf="hasError('joiningDate')">Joining date is required.</small>
+        </div>
+
+        <div>
+          <p-floatlabel variant="in">
+            <p-datepicker inputId="offerValidityDate" formControlName="offerValidityDate" dateFormat="dd-M-yy" [showIcon]="true" styleClass="w-full"></p-datepicker>
+            <label for="offerValidityDate">Offer Validity Date (optional)</label>
+          </p-floatlabel>
+        </div>
+
+        <div class="sm:col-span-2">
+          <p-floatlabel variant="in">
+            <input pInputText id="reportingManager" class="w-full" formControlName="reportingManager" />
+            <label for="reportingManager">Reporting Manager (optional)</label>
+          </p-floatlabel>
+        </div>
+      </div>
+
+      <small class="mt-3 block text-red-500" *ngIf="errorMessage">{{ errorMessage }}</small>
+
+      <div class="mt-4 flex gap-2">
+        <button pButton type="submit" [disabled]="submitting">
+          <i class="fa fa-file-signature"></i>
+          <span>Generate Offer Letter</span>
+        </button>
+        <button pButton type="button" severity="secondary" [routerLink]="['/document-management/offer-letter-list']">
+          <span>Cancel</span>
+        </button>
+      </div>
+    </div>
+  </form>
+</section>

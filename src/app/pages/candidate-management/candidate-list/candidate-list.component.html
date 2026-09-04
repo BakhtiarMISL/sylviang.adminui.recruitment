@@ -1,9 +1,38 @@
-<section class="page-container">
+<div>
+  <app-filter-panel [(collapsed)]="filtersCollapsed">
   <div class="flex justify-between items-center gap-3">
-    <div class="flex items-end gap-3 mb-4">
+    <div class="filter-bar">
       <p-floatlabel variant="in">
         <input type="text" pInputText id="searchInput" class="w-full" [(ngModel)]="searchTerm" name="searchInput" (keyup.enter)="applySearch()" />
         <label for="searchInput">Search by name or email</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="in">
+        <p-multiSelect
+          inputId="filterTags"
+          [options]="tagSuggestions"
+          [(ngModel)]="filterTags"
+          (ngModelChange)="onTagFilterChange()"
+          [filter]="true"
+          [appendTo]="'body'"
+          display="chip"
+          class="w-full"
+        ></p-multiSelect>
+        <label for="filterTags">Tags (any of)</label>
+      </p-floatlabel>
+
+      <p-floatlabel variant="in">
+        <p-multiSelect
+          id="poolFilter"
+          [options]="pools"
+          optionLabel="name"
+          optionValue="talentPoolId"
+          [(ngModel)]="selectedPoolIds"
+          (onChange)="applyPoolFilter()"
+          class="w-full"
+          [appendTo]="'body'"
+        ></p-multiSelect>
+        <label for="poolFilter">Talent Pools</label>
       </p-floatlabel>
 
       <button pButton (click)="applySearch()">
@@ -11,12 +40,13 @@
         <span>Search</span>
       </button>
 
-      <button *ngIf="searchTerm" severity="secondary" pButton (click)="resetSearch()">
+      <button *ngIf="searchTerm || filterTags.length > 0 || selectedPoolIds.length > 0" severity="secondary" pButton (click)="resetSearch()">
         <i class="fa fa-times"></i>
         <span>Reset</span>
       </button>
     </div>
   </div>
+  </app-filter-panel>
 
   <div class="table-container">
     <div class="table-title-container">
@@ -50,7 +80,8 @@
             <th>Email</th>
             <th>Phone</th>
             <th style="width: 12rem">Profile Completeness</th>
-            <th style="width: 6rem">View</th>
+            <th style="width: 8rem">View</th>
+            <th style="width: 10rem">Talent Pool</th>
           </tr>
         </ng-template>
 
@@ -63,6 +94,7 @@
               <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
               <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
               <td><p-skeleton width="2rem" height="1rem"></p-skeleton></td>
+              <td><p-skeleton width="100%" height="1rem"></p-skeleton></td>
             </tr>
           } @else {
             <tr>
@@ -72,11 +104,18 @@
               </td>
               <td>{{ candidate.fullName }}</td>
               <td>{{ candidate.email }}</td>
-              <td>{{ candidate.phone || '-' }}</td>
+              <td>{{ candidate.phone ? (candidate.phoneDialCode ? candidate.phoneDialCode + ' ' : '') + candidate.phone : '-' }}</td>
               <td>{{ candidate.completenessPercentage }}%</td>
               <td>
-                <button [routerLink]="[candidate.candidateProfileId]" class="text-primary">
+                <button pButton size="small" severity="secondary" [routerLink]="[candidate.candidateProfileId]">
                   <i class="fa fa-eye"></i>
+                  <span>View</span>
+                </button>
+              </td>
+              <td>
+                <button pButton size="small" severity="secondary" (click)="openAddToPoolDialog(candidate)" pTooltip="Add to Talent Pool">
+                  <i class="fa fa-user-plus"></i>
+                  <span>Add to Pool</span>
                 </button>
               </td>
             </tr>
@@ -85,7 +124,7 @@
 
         <ng-template pTemplate="emptymessage">
           <tr>
-            <td colspan="6" class="not-found">
+            <td colspan="7" class="not-found">
               <div>
                 <i class="fa fa-magnifying-glass-minus"></i>
                 <p>No candidates found</p>
@@ -96,4 +135,43 @@
       </p-table>
     </div>
   </div>
-</section>
+</div>
+
+<p-dialog header="Add to Talent Pool" [(visible)]="showAddToPoolDialog" [modal]="true" [style]="{ width: '28rem' }">
+  <div class="form-container" *ngIf="!addToPoolSuccess">
+    <p class="sm:col-span-2 text-sm text-neutral">Add {{ addToPoolCandidate?.fullName }} to a pool:</p>
+
+    <p-floatlabel variant="in" class="sm:col-span-2">
+      <p-select
+        id="addToPoolPicker"
+        [options]="pools"
+        optionLabel="name"
+        optionValue="talentPoolId"
+        [(ngModel)]="addToPoolSelectedId"
+        styleClass="w-full"
+        [appendTo]="'body'"
+      ></p-select>
+      <label for="addToPoolPicker">Talent Pool</label>
+    </p-floatlabel>
+
+    <p class="sm:col-span-2 text-sm text-neutral" *ngIf="pools.length === 0">
+      No pools yet. <a [routerLink]="['/talent-pools/talent-pool-list']">Create one first.</a>
+    </p>
+
+    <div *ngIf="addToPoolError" class="invalid sm:col-span-2">{{ addToPoolError }}</div>
+  </div>
+
+  <div class="form-container" *ngIf="addToPoolSuccess">
+    <p class="sm:col-span-2">{{ addToPoolAlreadyInPool ? 'Candidate is already in this pool.' : 'Added to pool.' }}</p>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <ng-container *ngIf="!addToPoolSuccess">
+      <button pButton severity="secondary" (click)="showAddToPoolDialog = false">Cancel</button>
+      <button pButton [disabled]="addingToPool || !addToPoolSelectedId" (click)="addToPool()">
+        {{ addingToPool ? 'Adding...' : 'Add' }}
+      </button>
+    </ng-container>
+    <button pButton *ngIf="addToPoolSuccess" (click)="showAddToPoolDialog = false">Done</button>
+  </ng-template>
+</p-dialog>
